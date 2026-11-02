@@ -1,0 +1,26 @@
+{
+  "source": "docs/design/brand/z8-symbol-source.png",
+  "sharpVersion": "0.35.5",
+  "sourceSha256": "b9503e647a99950b72f2bbfa4f52e093782f4e1adae11d1e28694ff1c11c6f64",
+  "crop": {
+    "left": 133,
+    "top": 143,
+    "width": 988,
+    "height": 982
+  },
+  "adaptiveViewportDp": 108,
+  "visibleViewportDp": 72,
+  "symbolWidthDp": 46,
+  "safeCircleRadiusDp": 33,
+  "actualRadiusDp": 32.173844190584376,
+  "foregroundPixels": 432,
+  "legacyDensities": {
+    "mdpi": 48,
+    "hdpi": 72,
+    "xhdpi": 96,
+    "xxhdpi": 144,
+    "xxxhdpi": 192
+  },
+  "background": "#ffffff",
+  "monochrome": "Same transparent foreground alpha; launcher supplies tint"
+}

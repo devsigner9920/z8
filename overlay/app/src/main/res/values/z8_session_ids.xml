@@ -1,0 +1,11 @@
+<resources>
+    <item name="z8_session_chrome" type="id" />
+    <item name="z8_session_sidebar" type="id" />
+    <item name="z8_session_drawer" type="id" />
+    <item name="z8_session_tabs" type="id" />
+    <item name="z8_session_tab" type="id" />
+    <item name="z8_session_row" type="id" />
+    <item name="z8_sessions_toggle" type="id" />
+    <item name="z8_new_session" type="id" />
+    <item name="z8_current_project" type="id" />
+</resources>

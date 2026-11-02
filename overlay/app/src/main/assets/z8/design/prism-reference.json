@@ -1,0 +1,12 @@
+{
+  "source": "User-provided color reference",
+  "fileName": "ChatGPT Image Oct 4, 2026, 01_06_08 PM.png",
+  "sha256": "71d88d57678d7261f66844756c09185e37fc2cf6130e773aad469273964b4e10",
+  "originalSizePixels": [
+    1800,
+    2774
+  ],
+  "usage": "Static native decoration in Prism theme; terminal output remains on an opaque single-color surface. Original image file packaged unchanged; shared sampled decode for rendering.",
+  "ownership": "Supplied by the maintainer, who confirmed rights to modify and redistribute under GPL-3.0-only on 2026-11-02.",
+  "license": "GPL-3.0-only"
+}

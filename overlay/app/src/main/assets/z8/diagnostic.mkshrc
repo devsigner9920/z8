@@ -1,0 +1,63 @@
+# Managed by the z8 APK. User .profile/.mkshrc files are not overwritten or loaded.
+# ENV is read by interactive mksh; non-interactive commands keep their behavior.
+[ ! -r /system/etc/mkshrc ] || . /system/etc/mkshrc
+
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias cls='clear'
+
+mkcd() {
+    if [ "$#" -ne 1 ]; then
+        printf '%s\n' 'Usage: mkcd DIRECTORY' >&2
+        return 2
+    fi
+    mkdir -p -- "$1" || return $?
+    case "$1" in
+        /*) cd -- "$1" ;;
+        *) cd -- "./$1" ;;
+    esac
+}
+
+z8help() {
+    printf '%s\n' \
+        'z8 Android diagnostic shell' \
+        'll       list all files with details' \
+        'la / l   list hidden files / compact listing' \
+        '.. / ... move up one / two directories' \
+        'mkcd DIR create a directory and enter it' \
+        'cls      clear the terminal' \
+        "HOME: $HOME" \
+        'Linux /z8/home and extra packages require the future PRoot runtime.'
+}
+
+# A fresh app-owned session supplies this flag. Consume it before printing so a
+# nested shell, profile reload, or terminal reattachment cannot repeat the banner.
+if [ "${Z8_SHOW_WELCOME:-}" = 1 ]; then
+    unset Z8_SHOW_WELCOME
+    case "$-" in
+        *i*)
+            if [ -t 1 ]; then
+                case "${TERM:-dumb}" in
+                    dumb|'')
+                        printf '\n%s\n' \
+                            '  [ Z8 ]  LOCAL' \
+                            '  Welcome to Z8 Terminal' \
+                            '  Android diagnostic shell' \
+                            '  ll  |  mkcd <dir>  |  z8help'
+                        ;;
+                    *)
+                        # Use the terminal palette, so every chosen theme applies.
+                        printf '\n\033[1;36m  [ Z8 ]\033[0m  \033[36mLOCAL\033[0m\n'
+                        printf '\033[1m  Welcome to Z8 Terminal\033[0m\n'
+                        printf '  Android diagnostic shell\n'
+                        printf '\033[36m  ll  |  mkcd <dir>  |  z8help\033[0m\n'
+                        ;;
+                esac
+                printf '\n'
+            fi
+            ;;
+    esac
+fi

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "kind": "z8-release-qa",
+  "status": "NOT_TESTED",
+  "aabSha256": "",
+  "checks": {
+    "freshInstall": {"status": "NOT_TESTED", "evidence": ""},
+    "updatePreservesProjects": {"status": "NOT_TESTED", "evidence": ""},
+    "projectDeletion": {"status": "NOT_TESTED", "evidence": ""},
+    "runtimeAndChildProcesses": {"status": "NOT_TESTED", "evidence": ""},
+    "codexAuthenticatedTask": {"status": "NOT_TESTED", "evidence": ""},
+    "claudeAuthenticatedTask": {"status": "NOT_TESTED", "evidence": ""},
+    "physicalDevice": {"status": "NOT_TESTED", "evidence": ""},
+    "pageSize16KiB": {"status": "NOT_TESTED", "evidence": ""},
+    "previewDataDeletion": {"status": "NOT_TESTED", "evidence": ""},
+    "backAndKeyboard": {"status": "NOT_TESTED", "evidence": ""},
+    "foregroundStopAndNotifications": {"status": "NOT_TESTED", "evidence": ""}
+  },
+  "unresolved": ["Replace with actual findings and evidence for the exact final candidate; never infer PASS from a successful build."]
+}

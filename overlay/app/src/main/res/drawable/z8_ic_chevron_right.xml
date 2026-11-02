@@ -1,0 +1,16 @@
+<!--
+    Material Icons Outlined by Google; Apache-2.0.
+    Source: https://github.com/google/material-design-icons/blob/737e3324305806514d7909874fa1818ae1808232/android/navigation/chevron_right/materialiconsoutlined/black/res/drawable/outline_chevron_right_24.xml
+    z8 modifications: removed theme tint and set a solid black fill for runtime tinting.
+    All source path geometry and 24 x 24 viewport values are unchanged.
+    Full upstream license: docs/design/ICON_SOURCES.md
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:fillColor="#FF000000"
+      android:pathData="M10,6L8.59,7.41 13.17,12l-4.58,4.59L10,18l6,-6 -6,-6z"/>
+</vector>

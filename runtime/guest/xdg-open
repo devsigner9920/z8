@@ -1,0 +1,3 @@
+#!/bin/sh
+# Managed browser shim. Arguments remain a vector; URL text is never evaluated.
+exec /usr/bin/python3 /usr/local/lib/z8/browser-open.py "$@"

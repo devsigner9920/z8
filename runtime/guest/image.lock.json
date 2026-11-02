@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "distribution": "ubuntu",
+  "release": "24.04.5",
+  "architecture": "aarch64",
+  "source": {
+    "url": "https://cdimage.ubuntu.com/ubuntu-base/releases/24.04/release/ubuntu-base-24.04.5-base-arm64.tar.gz",
+    "sha256": "a91d5a93010193712d346d761372b7c9db6dfcf093893161c64ca107f05914f2",
+    "sha256SumsUrl": "https://cdimage.ubuntu.com/ubuntu-base/releases/24.04/release/SHA256SUMS",
+    "sha256SumsSha256": "30f23cec3a46679bcf21dbe0c0a0ab51440e9b2f5ac69b3ae1d4a7a71c0ffc69"
+  }
+}

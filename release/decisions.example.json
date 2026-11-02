@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "aabSha256": "",
+  "reviewedBy": "",
+  "reviewedAt": "",
+  "dataSafetyReviewed": false,
+  "externalCodePolicyReviewed": false,
+  "claudeDistributionTermsReviewed": false,
+  "guestDistributionTermsReviewed": false,
+  "storeListingReviewed": false,
+  "foregroundServiceDeclarationPrepared": false,
+  "evidence": {},
+  "note": "Record actual operator reviews with evidence. These booleans do not constitute Google Play or third-party provider approval."
+}

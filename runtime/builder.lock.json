@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "image": "ghcr.io/termux/package-builder@sha256:44999857244619e25bc8e3427904a16d36cc0c0e087704af039e5bdf94814ac9",
+  "platform": "linux/amd64",
+  "configDigest": "sha256:fe542e2a8b4515c9b5888a03189f13ae2e6a4445bfc4fad4d496be5147c1fc5e",
+  "registryVerifiedAt": "2026-10-03T19:54:00Z",
+  "compressedImageBytes": 2602179767,
+  "ndkVersion": "30",
+  "ndkArchiveSha256": "753611f410d002cfcd3f3dc2ef49aad532089d3180b436c060a90bf0fcb64df2",
+  "profiles": {
+    "core": ["bash", "dash", "termux-exec", "tmux", "proot", "tar", "gzip"],
+    "workspace": ["tmux", "proot", "proot-distro"]
+  }
+}

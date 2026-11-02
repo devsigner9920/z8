@@ -1,0 +1,34 @@
+# Convenience tools for each Debian/Ubuntu guest, not the Android host runtime.
+# Standard project profile. One apt package name per line.
+bash
+bash-completion
+coreutils
+findutils
+grep
+sed
+gawk
+tar
+gzip
+xz-utils
+unzip
+zip
+ca-certificates
+curl
+wget
+git
+gh
+python3
+python3-pip
+python3-venv
+build-essential
+openssh-client
+ripgrep
+fd-find
+fzf
+jq
+less
+nano
+tree
+procps
+file
+tmux

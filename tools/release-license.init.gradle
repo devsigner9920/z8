@@ -1,0 +1,42 @@
+import groovy.json.JsonOutput
+import java.security.MessageDigest
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
+
+// Explicit invocation only. Never scans all Gradle caches as if they were shipped.
+gradle.projectsEvaluated {
+    def app = gradle.rootProject.findProject(':app')
+    if (app == null) throw new GradleException('Expected :app project')
+    app.tasks.register('z8ReleaseArtifacts') {
+        doLast {
+            def destination = app.findProperty('z8ComplianceOutput')
+            if (!destination) throw new GradleException('Provide -Pz8ComplianceOutput=/absolute/output.json')
+            def configName = app.findProperty('z8ComplianceConfiguration') ?: 'releaseRuntimeClasspath'
+            def config = app.configurations.findByName(configName)
+            if (config == null) throw new GradleException('Missing runtime configuration: ' + configName)
+            // Android project components expose multiple secondary variants. They are
+            // already covered by the modified app source; collect only external modules
+            // while retaining all their transitive runtime dependencies.
+            def external = config.incoming.artifactView {
+                componentFilter { identifier -> identifier instanceof ModuleComponentIdentifier }
+            }.artifacts.artifacts
+            def rows = external.collect { artifact ->
+                def id = artifact.id.componentIdentifier
+                def digest = MessageDigest.getInstance('SHA-256')
+                artifact.file.withInputStream { input ->
+                    byte[] buffer = new byte[262144]
+                    int count
+                    while ((count = input.read(buffer)) > 0) digest.update(buffer, 0, count)
+                }
+                [group: id.group, name: id.module, version: id.version,
+                 type: artifact.file.name.tokenize('.').last(), file: artifact.file.absolutePath,
+                 sha256: digest.digest().encodeHex().toString()]
+            }.sort { a, b -> "${a.group}:${a.name}:${a.version}:${a.file}" <=> "${b.group}:${b.name}:${b.version}:${b.file}" }
+            def result = [schemaVersion: 1, kind: 'z8-gradle-runtime-artifacts',
+                          configuration: configName, components: rows]
+            def output = new File(destination.toString())
+            output.parentFile.mkdirs()
+            output.setText(JsonOutput.prettyPrint(JsonOutput.toJson(result)) + '\n', 'UTF-8')
+            println 'Z8 runtime dependency evidence: ' + output.absolutePath
+        }
+    }
+}

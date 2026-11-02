@@ -1,0 +1,1965 @@
+z8-bootstrap-upgrade-v1	360af8dad27815efa7bc8a461eed55e7431f2ecb5918f6b5c8029e74d931dfe6
+D			bin
+F	8720	8db17a9ed75adb59b4ab7709da5d88ff2f9090d8423ed44f6f112f33b946f745	bin/attr
+F	880296	5f35b1210121d59f0649b0f767f76987fd8a3a9ffc2f2ef621b032ba97fd6aa6	bin/bash
+L		tic	bin/captoinfo
+F	11616	ed6b26f33307655850c3ddf35cfc9f015f43c3ccd0c9bfb2314d30c49b6a67a0	bin/chacl
+F	8056	238459f6ffd8b14bc1a30561d95cb4e4ae493621bdaa43e6707236f6167b6308	bin/clear
+F	107832	e24da993dbffc39ff5727bd69d0a8ac284cacdafbb05c4108a5ade3861e2bdd9	bin/dash
+F	20152	e4d0183dbbae891eed06a0c6d4789e0fa48a1bd1cb353221a44ba4c23754806a	bin/getfacl
+F	19200	88578aa624b6165a4252500e989369fe007da3a7bf62c98218940e3bd797ebd9	bin/getfattr
+F	2305	b49639ee22997022ec82acfdc7a446754de31c86143fe355a728626d753bccc3	bin/gunzip
+F	6613	eb13d3b76de445fe43efdd7560df012fd5a1efc16546e93cb0be611c75155483	bin/gzexe
+F	87616	eda82fafea00e1d938d74ed8d75e3b3a0195f86b9ed8abc92542b882490a98c1	bin/gzip
+F	28888	0d61ac9f8bebead1566e5fe62c413d3e04d8930086ac17b3cdeee264bff8dbb3	bin/iconv
+F	52168	6379b050f44da87fafbf5d52368ab571c13270db01875c6a7d439f6bac0233fb	bin/infocmp
+L		tic	bin/infotocap
+F	9928	4e2e4820d56d718cdc2e3a3697d9c6ed92b1c3aff98e2a55389b3200a2cd5f4b	bin/ncursesw6-config
+F	2711	e459d15028cd7df6eb5fa621c554cfd0c04bfaeaf1f1b523dfd67f1fccd529e7	bin/pcre2-config
+F	45680	83534e64e7776fcbc549611a01425fbcf91daf340db418fe431e65a29aa13d42	bin/pcre2grep
+F	247504	329a05e414a851b93781021ca04a7bae6173a5240ca670cba22f68edc45c9509	bin/proot
+L		tset	bin/reset
+F	32560	53ce28733a0bc6f2b9a6b0e1ec6d39564687d4c23eb006ed954c0d0689733cab	bin/setfacl
+F	18496	5be1bb5c254ebad48f252826531e268742df46cfc6ac2260ea2c63da57a9c28e	bin/setfattr
+L		dash	bin/sh
+F	12792	07b36359bbcea0c5ea2dea8f7e6bb154e107f6f2ef3d55037b71a7a2b6499a4f	bin/tabs
+F	467152	47aa04e2e1efc9a9afc3cb0fe72c2ff1bcc22367d02437fc8569fe49767d98c1	bin/tar
+F	48112	1b7a2414dbcf8c4eb61c66f6558c12f5edb50159ae0a27bae79e2a677dcc249b	bin/termux-apps-info-app-version-name
+F	48112	1b7a2414dbcf8c4eb61c66f6558c12f5edb50159ae0a27bae79e2a677dcc249b	bin/termux-apps-info-app-version-name.bash
+F	42699	2aecdcd2ff62c513efa350e5ccdea021398e498af80bed8a085f3b9aedc781fd	bin/termux-apps-info-app-version-name.sh
+F	38262	daf794f1a50e6c52f272aecdded82cdbde40e4ce09fae05346ea4482b24d304d	bin/termux-apps-info-env-variable
+F	38262	daf794f1a50e6c52f272aecdded82cdbde40e4ce09fae05346ea4482b24d304d	bin/termux-apps-info-env-variable.bash
+F	33220	00c1f26343fb93fcc9effc945f47e675e6023e6a3d1030d9e19bc2369cee15b3	bin/termux-apps-info-env-variable.sh
+F	3165	827cfec4fca2f1979475f5a72c7c43a4006df35d1836cb5bb8c53974511852fe	bin/termux-chroot
+F	6164	5d0afd32eba856d8cf177bd33bf4a9e2b7b4dfcf124308ad3c329f55fe782561	bin/termux-exec-ld-preload-lib
+F	8544	1b0d2d3a52678b0fa15978ce6f7175233597c58c1797bf56f468d57e7c8e55d1	bin/termux-exec-system-linker-exec
+F	35856	c892ff042210c73a2c931672085d75322c02847555dda4f8dbb447098fd1f192	bin/termux-scoped-env-variable
+F	35856	c892ff042210c73a2c931672085d75322c02847555dda4f8dbb447098fd1f192	bin/termux-scoped-env-variable.bash
+F	31290	5d6de9d23de06f2e02bd0fbc484244a5ec0520e4ad204c48c012bcccd040e2a3	bin/termux-scoped-env-variable.sh
+F	73008	2f5b2c2d1987bd98e5e44c80c063a67b7cb8c80f123c3da2c244421916613819	bin/tic
+F	1072808	1ca8d39c1f0843cb504462ebe021f01caad11f116a2dd62e0599a55a9e462b80	bin/tmux
+F	13272	33c7d29c221c4e07b194560c4befc00499c5f1a4d511fc6ca3fae260b59a1826	bin/toe
+F	18552	16971288ca3ef7f72972d178fdcabff84817fce905e56a4febca9736e16c8ba4	bin/tput
+F	17928	ef161a5aba4c631b899ead36cf7d67c7a28feba596646ad8b8cac6fad8797fdb	bin/tset
+F	2305	b49639ee22997022ec82acfdc7a446754de31c86143fe355a728626d753bccc3	bin/uncompress
+F	1943	d97b4635f72bcf6f39a0a32b1d2c134540b8134555a830a3d5b15d0ebb72bfbb	bin/zcat
+F	1648	f2d86505116205da969bf17e5889ef376c29fe65f3bdbe6063f8f84c8bb1dd6c	bin/zcmp
+F	6477	68e4b030b4db2583669e7b0b012986aeb30843774b3ca19c5908d9a910eb8aff	bin/zdiff
+F	68	66bb9b8b5d19bd94b0786f39642419e3735ba03f44c17637e9dbd5ac9aca0901	bin/zegrep
+F	68	610a7d08f1c4fcb19bac6d669fef12229b7cff7fbf6708318e5641feddf80707	bin/zfgrep
+F	2043	a7a62d04187a6b8efca9a2bd03234e067128aa8944447fa334238f73dab6f705	bin/zforce
+F	8197	68a105955a999dc092224606febb6faf767c6b0fe611f66abb77264a154e7c9c	bin/zgrep
+F	1807	5456dc3ba9a2fada3b642c7be4b39f4e39449ee7038ae4abbf53879da4ce95b8	bin/zmore
+F	4322	1d2241aea5c75894434c354aeb2af9d4fd26f77ae45ad2bf6030013f85e367a9	bin/znew
+D			etc
+D			etc/apt
+D			etc/apt/apt.conf.d
+D			etc/apt/preferences.d
+F	1368	eedec886ed287be8df0b9af5596283356ae5b7c629940548f45c543bd71cba74	etc/bash.bashrc
+F	489	b0a4858741eea53f525b76d1e70fd4f1aaa722b4517fefcedf74849d3629160e	etc/inputrc
+F	1875	a4ea8823e65b5207a52da4164f5a2116943d6a464034d5b9225b9df610f2239e	etc/profile
+D			etc/profile.d
+F	65	1e27b06fc3e19827466c5dfea0050ad866401b66a45bfa97be66182364075600	etc/profile.d/tmux.sh
+F	16	dcfed912737ee63406f98565ad6b635f385d4c2f9a0aa110b76b9bbf11d06e27	etc/tmux.conf
+F	652	756d8374248b53c70a43249d0406a586743594114db3f2958e38b18964628f3a	etc/xattr.conf
+D			include
+D			include/acl
+F	2703	324dc3c9f6c6668d09b48f755aab7f00cc5d5d9e46780b18591e336875975962	include/acl/libacl.h
+D			include/attr
+F	8004	328ce9601d8669e0ae5299a82d3867a3115b18199976968ce3896000132822a4	include/attr/attributes.h
+F	1569	0e698be1f3635b6edb0eeb6206255dac43280d6c173dcd94cae53e4fb6407a59	include/attr/error_context.h
+F	1411	b5b1ae8d0ea51c85a51ab7da9d28f0e0078272f7d1d5ade1ee8400ca75c5cddc	include/attr/libattr.h
+D			include/bash
+F	2211	d153a6a66012bde58676c3104d2abf31428d1f0a7fc75eef9ad3f87e26cf7a2b	include/bash/alias.h
+F	5625	9cb9af1ad5165cce13780a331d68dfadb6c6e5342815fd225793fc7036bfa53d	include/bash/array.h
+F	6428	35b7f91c82a807119b0dfa7a71ecdd204b7ced891581ba560e416fffc4c2baf8	include/bash/arrayfunc.h
+F	2372	8f0a58babbac4f9414059a24a662e735c31bdfbcd25c188cadd3eb8a66a9cf2c	include/bash/assoc.h
+F	1735	4fa0b82d20a8cd87dd49ff793b38ce6f7bbe47105ff4bccde70a5ebfb1600970	include/bash/bashansi.h
+F	1462	3cb31529865eb8ccf63215d3aaf44684bee30bf698f6b1d0e7b9f93ee7b43331	include/bash/bashintl.h
+F	1702	1bbaa794c2cdd21466fd392ee3c6d4e03721da187ae0cf08c48710b4e3fd478b	include/bash/bashjmp.h
+F	1301	67e1259cae980dc67a9432716ed6aa846fca737f42c5ce7e34e982f6965512e2	include/bash/bashtypes.h
+D			include/bash/builtins
+F	2458	cdaf2732769e11c85e61bfa75b4a2d1bc0700edb0f7df7e1b0ce3f96e6383119	include/bash/builtins.h
+F	1284	ca2f6fbd0eacefe138d1b814df0cbbab897c255e404847702ca93e254a750706	include/bash/builtins/bashgetopt.h
+F	6432	8e60c7826df28b7a560dede0c38f2f2b5b26b38b90d232add458932a5543f1da	include/bash/builtins/builtext.h
+F	9782	9a269a14937e7c4de487af5d2ebf991d00fefe3e8a2c801251cfd605533a98f0	include/bash/builtins/common.h
+F	2522	bda29e85c81dab70fc0469d2fc936adece74375d15a155275439a6ab99eefb27	include/bash/builtins/getopt.h
+F	15962	664ec6c559c6b139b7efbef30d795387ee8a5fe074efc1802a3f2cb8c0fddd28	include/bash/command.h
+F	6321	b57ae6e38bbfc3fcb2a8c559671b46c32f3282b366605da64272eb2cb2b44171	include/bash/config-bot.h
+F	8271	b2f9be946ec904031cb83ab63a2350262cab433652a00e9075303ae3f783f36d	include/bash/config-top.h
+F	36594	233d35cbd1ed122af147dae762c5094bbd7d0f7f823798fa6f10420768c7b24a	include/bash/config.h
+F	1709	f92b0b3533b7a56190d5c31403a675ccb17d89cfd7710dca3966fc08c4ef7dac	include/bash/conftypes.h
+F	1433	ed49dcc2e7de7232f60472caf23c757edbc1995b968c1fbec890bf3867461393	include/bash/dispose_cmd.h
+F	3249	3724eb2121eea35155f48e52832a7ec18e9021ff2d713aad175b36a149539981	include/bash/error.h
+F	4262	62d0cb7bcc63f78dd3cf8e5ddbe12f9bff4f627ff7541185d5296fda32acd976	include/bash/execute_cmd.h
+F	20357	97cf8851450f6755f590b639b515b5ac23ab486d281e76a684595f7010e55762	include/bash/externs.h
+F	11656	b06fec218fdcafca774b3aff0c3c0fa94ea5d1cba58a158d0546b8a0d6cbe7f2	include/bash/general.h
+F	2763	588dc97af2efa294279819bd7fce780c294d3ab03b1db89caf8acf8419fcb13d	include/bash/hashlib.h
+D			include/bash/include
+F	1381	d71ec4c8dbca7ec5f0adedd3ae9c527beacdae29e49fa9086ef7325e2aaf68ad	include/bash/include/ansi_stdlib.h
+F	3654	be8f90e477389434df67a053811d98795b2717e7c92545631e71533f29dc2f16	include/bash/include/chartypes.h
+F	1581	0fec9b4d255ba190b5d213ea7dc8e6e4084238fc99b9da7e720c4de3e63291b4	include/bash/include/filecntl.h
+F	2992	75f6e21e0e5d8ec4130ed8a19a6418b0c0cb7a221efd9aa21d2e22d49eeb1f0c	include/bash/include/gettext.h
+F	2113	d4ad4091127abfb0b931fe07b1c3e33fb1092223094100f7e8a55ceaf82af24a	include/bash/include/maxpath.h
+F	1744	93953eeb2cca0cc479d721395f14e7a4f9c6ad559dfabfa35355efbac712c60d	include/bash/include/memalloc.h
+F	3613	db53428385d35b476087a9a31de4422c09524cde39c33f6638dc1d26ab4e53bb	include/bash/include/ocache.h
+F	2316	c4c12d8adb56129c3151976619f1a91eda1d47eed446deb1b728f251e85eec10	include/bash/include/posixdir.h
+F	1407	4a79e5d83b9e87153cd057d76a5b2614922c04a5b58a9f5ae9ed23634dc70261	include/bash/include/posixjmp.h
+F	1386	5330e1aaf639e393b2463a29d35d298e7a054ddb34727743e24d9a72c8fa3ad9	include/bash/include/posixselect.h
+F	5060	29de8968be3337d40918adbf6a943d2bda903ff4eace81c12d626da9234bf544	include/bash/include/posixstat.h
+F	2788	d28362696dddb64847b9642c437377b484bac0d2dc405137b0129fee749bb5ba	include/bash/include/posixtime.h
+F	3160	70539b19039ab4e0c0152d078ab79ad9918854ef8aaee7eafbb80cb30a5e85e2	include/bash/include/posixwait.h
+F	5456	f330ce6b038ee88c4fb3280130799298063f6c5b3a45668fa138a38ffc24316d	include/bash/include/shmbchar.h
+F	14953	df45c27172b612e006fcefcc5c11ebe9710ef914cb8840e95d4e951aafe75061	include/bash/include/shmbutil.h
+F	3546	850fa663b352542c4e90adf7b95051c412945307ef1460cf771b6b7b05364fa9	include/bash/include/shtty.h
+F	6088	b6b3bb0f986a7c542048d1a81c9b3ca383d9c6be361f9079d1e558164b1882a1	include/bash/include/stat-time.h
+F	2359	169345595cffcc7d56861c3ac22e419b9cc4bc58852482dca711e63e715fe783	include/bash/include/stdc.h
+F	1760	bba76478f54c72212ddf149fde8bc325da8397a08c46d0b95fa977517ad311d0	include/bash/include/systimes.h
+F	1804	aaaacacf60008dd3a15a392db20d56eb180cc2ce0d71ff00b16d723e8a5fa3b8	include/bash/include/timer.h
+F	3809	8e5d7aecc1a107ba7a339da22eda581337a90529f43a403e9d908f34129cabb7	include/bash/include/typemax.h
+F	2973	5a5c8024ce1a640bc3b9db746cd0d3e48e207f43c13cfd21dfb6a00c841e4d88	include/bash/include/unionwait.h
+F	3933	76e919132cfaa1fbc5350a23ad51128cea29a06217081d5f939f89a51bd39e92	include/bash/include/unlocked-io.h
+F	11774	9d7fe9e1d7b45ca51870e6f171ca6e4a58fb74c9c07626117537ac5575dc8ce2	include/bash/jobs.h
+F	2825	e77d1268c92ea390b6684f40048c32c26680a217c5a87244e47fa462736c886d	include/bash/make_cmd.h
+F	1320	dbd1f42ee88af95fbf6d830bc2fbd1a8a7af3aea86e6b2a919360e6dca92759e	include/bash/pathnames.h
+F	2734	30d93da08af5a5bba698265dd57b1d584f0ca27bc0e318b71c5d9d04fef1f341	include/bash/quit.h
+F	6674	231edc00d19a7ad30aa38154e6c9855577b0177bda407c1c95821628781715cb	include/bash/shell.h
+F	4525	4319b8bf36fe526fff17d9359fd8d2a7ea44c5bcf2ddcfa9e70a609941b0f039	include/bash/sig.h
+F	1539	50b8c6383287a8e1f1bb0b9a1d72a0990649195692f5f41b9136826086e3351c	include/bash/siglist.h
+F	242	f568b6eed8d121962f5b3183e9065231e0ea9f36f0103160486848c3be45837d	include/bash/signames.h
+F	16572	4c3284b23a1977c632c890836a2cd8049c74db65c74a32a565efa4c551026047	include/bash/subst.h
+F	3685	f5f03955f9a8339337d94b9b5ca8357fedd0f3a21c418a472db1aa6698c77680	include/bash/syntax.h
+F	2307	e1a4fe78d9519c26cbbb9c313ae1dbd8afe550d39251a9d4a08309fb9db8214a	include/bash/unwind_prot.h
+F	18602	0f1f23f5e3968cc7427388a13c547940cc8690626cc91ae288c55283542cda26	include/bash/variables.h
+F	579	4962a35e9192f5a816b6766d5fbc4a2ea72c120ab4375aefa8fc94845471e69e	include/bash/version.h
+F	2022	8822321642dee6cf152575ca047b12542fbcf9888a17469d19d99ae6f40a6776	include/bash/xmalloc.h
+F	6376	5732e888d67e969601f4a1fe6f8c418d2754490936eeeaa4fbe7be44a598993b	include/bash/y.tab.h
+F	105293	ce913e3d9222982f1201669459c4b025b9e14fd18620f9bc66703731b2e32fdf	include/curses.h
+F	2969	43ad9607033a45272cfdf3dd864889661720b88f0f59f91f9a6f5a1261d0ec72	include/eti.h
+F	2019	23a401ad32cfca6653e1529bb392c99f9eae5471d1d8126798b6a876da6f7c3c	include/evdns.h
+F	2744	6b6109226e90afb12183e08529b4e7feceb84b29643eb20519eb32411a3344e7	include/event.h
+D			include/event2
+F	39189	ca0e01cd9996615a5a1f755e23371941703be4fb4439b25f8408184a06b08e4f	include/event2/buffer.h
+F	4741	37f5a043b9c032f6917f7e1889bed07185eca6b3a3cb51e08caab99f9b30860a	include/event2/buffer_compat.h
+F	34683	8f2094670cc294b29b947339741ed65787118359fae4aeb00ad38108836f64e6	include/event2/bufferevent.h
+F	4538	87b760fbb0404ac0b6547827b14291725f3c77c8cb69b7d908395eaceb6eec06	include/event2/bufferevent_compat.h
+F	4135	593efa39fd986b9fb1926764b0d51107a334777b8b82743d6e7c7c8bdf021d9f	include/event2/bufferevent_struct.h
+F	28018	bc40ab5ec25934e3a4ee8182f375f6c71f24b165e66ac8532f0079ed2c4c1133	include/event2/dns.h
+F	12588	c97eb16f1821df8bfd23ca645e025cf71ed5d9f77a9ac854806ba1a2b80e3a74	include/event2/dns_compat.h
+F	2596	70bfb11dd140f26cb96ee7fc3bbc62c56f2e6d0a261f0bf7c1b389733d170e02	include/event2/dns_struct.h
+F	15740	a7450d8b9204848a1c984b43b42bb8f558ea78dfe7ebe0cfd37c51a22cb4d51a	include/event2/event-config.h
+F	62337	a93b3346f3f653236a45799c2f67dabe0f5fe71612130d3e512efe53bfc2e2e6	include/event2/event.h
+F	7639	ca01dc1e74024f619cdf603dbc224113146243176dd05123c900b402623496eb	include/event2/event_compat.h
+F	5024	7b52b49ccf92b2a93d330907a8834b6b7d7082ce7a6c21a923d68d712d4d1f0e	include/event2/event_struct.h
+F	42809	8eae9570fe42f81d8821b827c79b450fa41b8f6490c59187854ba6ef074c8be7	include/event2/http.h
+F	3265	7268edcd165578ae3af6dbf726824b90ec62e4bcd245241c289525ad2a58d968	include/event2/http_compat.h
+F	4809	06037f7be8eab59daed8207df0bc3388c80922c8589d5700915f0285d9f27f76	include/event2/http_struct.h
+F	2603	353f7341da0baf99451947a814ca97c76f409871bbe2db02fbccdbae0533348a	include/event2/keyvalq_struct.h
+F	7991	71e54b24e55967a21cbb0bc96a1ee59c09d78fee004f61ab9b5e273c28a39459	include/event2/listener.h
+F	21764	477d073a8d7f0fdf202dd820fea62d0f9cf4be44decbca58f32e82e9d4a7e24c	include/event2/rpc.h
+F	2351	95eb790804950275eb12b1d4f60831fa77031ce3d08f853609cd562ed283b25d	include/event2/rpc_compat.h
+F	3598	d1041c44af37449a32d7c41c4d51e895fc872682fb1ab444a2240de743ad94fa	include/event2/rpc_struct.h
+F	4975	8715ebbe2047e547cf0c30617825c82d0bb03514810c61b7df5598f0e2772fdb	include/event2/tag.h
+F	2141	478ca6534915377b6895cf82181f772365b2ff097e68fe9c432b77d731110caa	include/event2/tag_compat.h
+F	9952	9bbc4767426833fb71f3324fcd550c135d8fdd554e56d5876717f81ef732be1e	include/event2/thread.h
+F	29420	c438dbc2b6085084366e70ef9bad6b02936ca34d2b6944f7b6dc7645edec66e8	include/event2/util.h
+F	2871	7a8a2ae1c0cbdc01282b994caa72bc33cc4e66cca399a791864dbec4ac8a674d	include/event2/visibility.h
+F	2035	c51a557d4fca95be83691a9dad87711f0bf2fdb921832d0eafab47a2d62bcaa0	include/evhttp.h
+F	2015	941b0c0be213217c788ae542038d5415a97cb80ccfacf81a989c834aeb8ac3f2	include/evrpc.h
+F	1782	1ff1e5990aaa53eb2fb160523f5f8bd58196317436d5c48d402304d8a32f261a	include/evutil.h
+F	18899	12a738ff09366f4551b30088a79f7ae23ed67c4c016223552403cc20d36fa9d8	include/form.h
+F	4050	ff4512c530aea288693f5be17e98c77faf7f449ea439df46164ad34aab197122	include/glob.h
+F	9663	6cc86f6331d7f87c832dee56885e0098ced022b8cdc11936fe44afecb77ea273	include/iconv.h
+F	1510	180d05ba6adb348e150c6973ab795fe422da0b05e09f8ba7c369746ed1901702	include/libcharset.h
+F	6338	67f01a81a41eab468313b34fb153aa11fe273b829c529e3a820a3877438d20e4	include/localcharset.h
+F	11875	3198d49fa46f59a451f41cc6aeefbd57c0516a83a7f07fac8f6cb551c473f4aa	include/menu.h
+D			include/ncurses
+L		curses.h	include/ncurses.h
+L		../curses.h	include/ncurses/curses.h
+L		../eti.h	include/ncurses/eti.h
+L		../form.h	include/ncurses/form.h
+L		../menu.h	include/ncurses/menu.h
+L		../ncurses.h	include/ncurses/ncurses.h
+L		../ncurses_dll.h	include/ncurses/ncurses_dll.h
+L		../panel.h	include/ncurses/panel.h
+L		../term.h	include/ncurses/term.h
+L		../term_entry.h	include/ncurses/term_entry.h
+L		../termcap.h	include/ncurses/termcap.h
+L		../unctrl.h	include/ncurses/unctrl.h
+F	4183	8ce112a66482f18fa5e0378b46a4f028b21a80f8e6c43815c562ad0d6b7ed727	include/ncurses_dll.h
+D			include/ncursesw
+L		../curses.h	include/ncursesw/curses.h
+L		../eti.h	include/ncursesw/eti.h
+L		../form.h	include/ncursesw/form.h
+L		../menu.h	include/ncursesw/menu.h
+L		../ncurses.h	include/ncursesw/ncurses.h
+L		../ncurses_dll.h	include/ncursesw/ncurses_dll.h
+L		../panel.h	include/ncursesw/panel.h
+L		../term.h	include/ncursesw/term.h
+L		../term_entry.h	include/ncursesw/term_entry.h
+L		../termcap.h	include/ncursesw/termcap.h
+L		../unctrl.h	include/ncursesw/unctrl.h
+F	4512	3a7006d91c9dafdd6cb367058bd182f1a7fca6e9a0ff7e28b98396ae3ab26c5d	include/panel.h
+F	51962	19756397bb6c402d43f74ba827c55acd26c21d078eead9ed5d49f582e4c506d8	include/pcre2.h
+F	7276	4e3f99d21b10f3168fa562c6345e2b387a1a83f8bd2a35784b2832f4dc4d9444	include/pcre2posix.h
+D			include/readline
+F	4724	9ba24bdf97311a56b49494aa17072965cae628390d648e207622f4068da960ff	include/readline/chardefs.h
+F	10678	5b8762c1086f62ed54567e258a72183b384534f57453d07f57085a03187a270a	include/readline/history.h
+F	3201	4c42c3c5d2bb3aba10c7e7f27dd79841f30857fde61c6c85bf67f4f2ac1befc4	include/readline/keymaps.h
+F	39616	1934a225c54300308cbda341851b693ecdbba66623e5f84527d90be9de34f572	include/readline/readline.h
+F	3081	4aa84472d2d56a6538389d2d66fd3b0ce7e6a469ac28e9efd649286c7e42e030	include/readline/rlconf.h
+F	1551	5a66bb179f4a7ad32b9a0a04b0a60c20c0b3f5ee63b1b2eed41fc64fbd590e64	include/readline/rlstdc.h
+F	3064	9c756ee45536c3999c3d9b50c75343fe0338d7634ca96c3b375d13e30e9c582e	include/readline/rltypedefs.h
+F	2652	76ea2566b9045468f1ae1a0a97e62d765edcd642a2d1f12a62a6af1b4dfe9729	include/readline/tilde.h
+D			include/selinux
+F	3759	d71a708a73cfd72479a3404c6b6418bc60361b1059c598fe1354b2fdf10fec73	include/selinux/android.h
+F	16880	de30ea40b8f5540b28c7f584dd4d0a08eb2d915a102eea635b3e6d035a63cfe6	include/selinux/avc.h
+F	1275	41a9422b9993bc45ed7c859c8280e6e9650e75850fb9ea3cbc33bedd86ab945e	include/selinux/context.h
+F	3000	fc7d0ab71438a54fddb8ad2776cfb60fa0b5bbcaa2758f19849c8986c5aec96d	include/selinux/get_context_list.h
+F	643	a7b60bbd650d9eec1e799fc67c46421307588e414a6909659af2e8fcc9921904	include/selinux/get_default_type.h
+F	6471	64e135b584421f70f188f01af89ec54b991e096f15245450a029e451bf8ffa6f	include/selinux/label.h
+F	7448	cce1790e7e59ca49118e5a833b0ee4ac070d51ed3c523eef734bd24a7798ee3a	include/selinux/restorecon.h
+F	29155	42f7313a4072edcb453c3045904516adf8cc0546c47067b0b37760843954010d	include/selinux/selinux.h
+D			include/sys
+F	3915	01efa41d8ee0061085ee590908ccdd65d57c64d3f84f96a473620658cadb581c	include/sys/acl.h
+F	855	0f803f4f853449da257c5e634dfda6ffc81a32f866be8d82acc4eefa7f0095f1	include/sys/shm.h
+F	67322	b6918a96dd37b9c3ea341fe2580d17784aa538a6fb2a5511a6d9d51058c7dc9f	include/talloc.h
+F	42283	68a604cc9a5924ea2a8b87aa443d5b2a4d31c61cf9d191eb07b5d25e26964cd6	include/term.h
+F	8685	21e0319263f943a3d90f33d13d9567afdde2b6c8e57ee900e8b08602ed957c9c	include/term_entry.h
+F	3468	6ab2d763ee6ba86cd4ee15ee2a2e93a60e1856e96c4230d9680c282d530a0ae6	include/termcap.h
+D			include/termux-core
+D			include/termux-core/termux
+D			include/termux-core/termux/termux_core__nos__c
+D			include/termux-core/termux/termux_core__nos__c/v1
+F	468	b2bb68b06ebf673e6d68192c402208fcc426153907f41fdf0cb88a23170b4e18	include/termux-core/termux/termux_core__nos__c/v1/TermuxCoreLibraryConfig.h
+D			include/termux-core/termux/termux_core__nos__c/v1/android
+D			include/termux-core/termux/termux_core__nos__c/v1/android/shell
+D			include/termux-core/termux/termux_core__nos__c/v1/android/shell/command
+D			include/termux-core/termux/termux_core__nos__c/v1/android/shell/command/environment
+F	2569	1aa112a87f55171865132059255dcf750e0196433b88c0b38d5f0a020f4bd5e7	include/termux-core/termux/termux_core__nos__c/v1/android/shell/command/environment/AndroidShellEnvironment.h
+D			include/termux-core/termux/termux_core__nos__c/v1/data
+F	2798	a647cfa12507253d8bd8a09035b942a3a05968f33ba0d423a3a4fccfbc9affe0	include/termux-core/termux/termux_core__nos__c/v1/data/AssertUtils.h
+F	1047	75a3a308f97c7ab2da771b99cddd75dbe664462a2a3b3f99276e7f40d3f8c4d0	include/termux-core/termux/termux_core__nos__c/v1/data/DataUtils.h
+D			include/termux-core/termux/termux_core__nos__c/v1/logger
+F	548	8b3fc72dee876dd1a9962b0c64bb696ac82183f0ab205ff3e7e06ad3bb6ce14e	include/termux-core/termux/termux_core__nos__c/v1/logger/FileLoggerImpl.h
+F	10018	908f8a5d4211ce11c0e2d9fb5894e6b46418a452ba8b6aeab915b5f2765540c8	include/termux-core/termux/termux_core__nos__c/v1/logger/Logger.h
+F	447	a2b30c646e422a7c26ade18825abc87fcca4ee5e02134aa2ecfde1877774cef9	include/termux-core/termux/termux_core__nos__c/v1/logger/StandardLoggerImpl.h
+D			include/termux-core/termux/termux_core__nos__c/v1/security
+F	620	d53ffaf739f9ddb9b6e4c24a1fab77a0a2f5dc85d5ffa050833d85713ce1e2f3	include/termux-core/termux/termux_core__nos__c/v1/security/SecurityUtils.h
+D			include/termux-core/termux/termux_core__nos__c/v1/termux
+D			include/termux-core/termux/termux_core__nos__c/v1/termux/file
+F	13554	d0af1e90277b23c353aed079be85d29905e324e576f54ad7c2c683a728051bd1	include/termux-core/termux/termux_core__nos__c/v1/termux/file/TermuxFile.h
+D			include/termux-core/termux/termux_core__nos__c/v1/termux/shell
+D			include/termux-core/termux/termux_core__nos__c/v1/termux/shell/command
+D			include/termux-core/termux/termux_core__nos__c/v1/termux/shell/command/environment
+F	2383	4fdf5b0cef99e0bb182ec75b08d109381b7126bc204d338ebfff2aab762ce767	include/termux-core/termux/termux_core__nos__c/v1/termux/shell/command/environment/TermuxShellEnvironment.h
+D			include/termux-core/termux/termux_core__nos__c/v1/termux/shell/command/environment/termux_core
+F	1334	46530dcf1ced8e309b11036b35eb6a043e0e2cc46b63f6764f652ca87afca5a4	include/termux-core/termux/termux_core__nos__c/v1/termux/shell/command/environment/termux_core/TermuxCoreShellEnvironment.h
+D			include/termux-core/termux/termux_core__nos__c/v1/unix
+D			include/termux-core/termux/termux_core__nos__c/v1/unix/file
+F	12635	f6d63d35a80825d5a62122c5568e0871f1cdd6adf313373e8926697555d6aaae	include/termux-core/termux/termux_core__nos__c/v1/unix/file/UnixFileUtils.h
+D			include/termux-core/termux/termux_core__nos__c/v1/unix/os
+D			include/termux-core/termux/termux_core__nos__c/v1/unix/os/process
+F	1295	dbd31306497182b2deb7a229f05fb441f4c807f7f81eaf44678a72ebf8693499	include/termux-core/termux/termux_core__nos__c/v1/unix/os/process/UnixForkUtils.h
+F	1948	f30e0a96fceb4a59bf41906b93191b4a4f14091e052edce24ca7bf6c565b7b91	include/termux-core/termux/termux_core__nos__c/v1/unix/os/process/UnixSafeStrerror.h
+F	581	04fa12b35c4cc320e448d0254e15a4685754846f7cdd7aa6b2df2c5e74b92c43	include/termux-core/termux/termux_core__nos__c/v1/unix/os/process/UnixSignalUtils.h
+D			include/termux-core/termux/termux_core__nos__c/v1/unix/os/selinux
+F	7196	699317a81b35bbd46230f8561b851048b55d7174cc9da3cf67b6568387460e84	include/termux-core/termux/termux_core__nos__c/v1/unix/os/selinux/UnixSeLinuxUtils.h
+D			include/termux-core/termux/termux_core__nos__c/v1/unix/shell
+D			include/termux-core/termux/termux_core__nos__c/v1/unix/shell/command
+D			include/termux-core/termux/termux_core__nos__c/v1/unix/shell/command/environment
+F	4755	0eab5d5c309dad33cd4d8a6093ae369091236be68826a3a7b2f9da31fe098c15	include/termux-core/termux/termux_core__nos__c/v1/unix/shell/command/environment/UnixShellEnvironment.h
+D			include/termux-core/termux/termux_core__nos__cxx
+D			include/termux-core/termux/termux_core__nos__cxx/v1
+F	478	beca17ab506b8e98ab9d2791aa6343dd4b6533f9e798c3119f75e36e4415cb7b	include/termux-core/termux/termux_core__nos__cxx/v1/TermuxCoreLibraryConfig.h
+D			include/termux-exec
+D			include/termux-exec/termux
+D			include/termux-exec/termux/termux_exec__nos__c
+D			include/termux-exec/termux/termux_exec__nos__c/v1
+F	468	8fb7b0a7382a3497eb69b29c4b50ace08e1928c056505dc00af25dd82e11fcb4	include/termux-exec/termux/termux_exec__nos__c/v1/TermuxExecLibraryConfig.h
+D			include/termux-exec/termux/termux_exec__nos__c/v1/termux
+D			include/termux-exec/termux/termux_exec__nos__c/v1/termux/api
+D			include/termux-exec/termux/termux_exec__nos__c/v1/termux/api/termux_exec
+D			include/termux-exec/termux/termux_exec__nos__c/v1/termux/api/termux_exec/service
+D			include/termux-exec/termux/termux_exec__nos__c/v1/termux/api/termux_exec/service/ld_preload
+F	3556	f60f346b051183c50ff39caa1ea94a0cca07e8088bf28b5c7f176c55fc103ce8	include/termux-exec/termux/termux_exec__nos__c/v1/termux/api/termux_exec/service/ld_preload/TermuxExecLDPreload.h
+D			include/termux-exec/termux/termux_exec__nos__c/v1/termux/api/termux_exec/service/ld_preload/direct
+D			include/termux-exec/termux/termux_exec__nos__c/v1/termux/api/termux_exec/service/ld_preload/direct/exec
+F	16182	d0bda7ea76940cd48fcf08cfb25d33ca895cc36db0682882089b07eff0788914	include/termux-exec/termux/termux_exec__nos__c/v1/termux/api/termux_exec/service/ld_preload/direct/exec/ExecIntercept.h
+F	2849	3261a3add5815d0891d7d82bd38bad6ae9414d9cde047a06db409ed685a57bc4	include/termux-exec/termux/termux_exec__nos__c/v1/termux/api/termux_exec/service/ld_preload/direct/exec/ExecVariantsIntercept.h
+D			include/termux-exec/termux/termux_exec__nos__c/v1/termux/os
+D			include/termux-exec/termux/termux_exec__nos__c/v1/termux/os/process
+D			include/termux-exec/termux/termux_exec__nos__c/v1/termux/os/process/termux_exec
+F	529	9a31d9fd7eccb5dcb16f35e199879523525613da6cf214888b68ec19731e2392	include/termux-exec/termux/termux_exec__nos__c/v1/termux/os/process/termux_exec/TermuxExecProcess.h
+D			include/termux-exec/termux/termux_exec__nos__c/v1/termux/shell
+D			include/termux-exec/termux/termux_exec__nos__c/v1/termux/shell/command
+D			include/termux-exec/termux/termux_exec__nos__c/v1/termux/shell/command/environment
+D			include/termux-exec/termux/termux_exec__nos__c/v1/termux/shell/command/environment/termux_exec
+F	5432	c4d507a0e80616297ebe85dce25a1ae4ab6de9f2634180c68c4e8df914be0cd7	include/termux-exec/termux/termux_exec__nos__c/v1/termux/shell/command/environment/termux_exec/TermuxExecShellEnvironment.h
+F	3214	5352979aef0fa4fdf5f86204b62182c4cf6b75e460eb78b2b2183b8b8624fcf9	include/unctrl.h
+F	34834	08da85e820efaa3613500946c26b2dc427a07f76001ed7c16bc90f298b814c35	include/utf8proc.h
+D			lib
+D			lib/bash
+F	3008	613185216377e5c3c2488e3e27a0a2eb69ad652fea9ec4837c2a0ddd60b27dd4	lib/bash/Makefile.inc
+F	1475	3b8cf947a43c15387112e4f108d684a8b2c617eaf8f751a15c0e10420c519798	lib/bash/Makefile.sample
+F	9872	5b40c05c2cce2e27ce63d1ceb610c288921af2efc6fe05368802dfb172efa7c5	lib/bash/accept
+F	5920	8601ae23b43f150efb4523cb40f140dd8ff57d997e08ceffd46b38bd70f727d6	lib/bash/basename
+F	6976	4dfcf01f8ab5cf5ab1803c5feeb746b26f3d6b2f50914b94722884e2050e3e4e	lib/bash/chmod
+F	7272	2b49ef9abc2a5c5c03c1365c657500f1704bb6c5e343401922f55af519ed0de3	lib/bash/csv
+F	13456	5b92f53d65a8b0af5cd1b27ad4cd495df12b451b9f5b2400801e022b5713bf22	lib/bash/cut
+F	5744	d568e1860fe80706709c531bfbb5ee716adcc330786ef1d1c601465dcc096a18	lib/bash/dirname
+F	9528	6e3e09067d092f7fb26c94551ba98c3e9285c28df20aa92a29286ba17dd19173	lib/bash/dsv
+F	9352	f0a692aa8e1e1605a30044e47d52e04d60e9150638912084deb39739362797f7	lib/bash/fdflags
+F	12056	826185603c37a68cde70b5e1fa3111d9ecd006377879eaed2ee29b2895eacd19	lib/bash/finfo
+F	27904	41dc14bd6fc2013d544b7d90d06ce4ec36e51c3c16d28f7bae475a10b7c1788d	lib/bash/fltexpr
+F	21080	6c5fb006ef0695f0198b37852c076969730e6e9a7c9a658405fbf6cf5484acd2	lib/bash/getconf
+F	7712	9bf124be2883268ad8b9d2b5c15598ba6b79764aeed7bc756d9c0cce79cfdcae	lib/bash/head
+F	8104	a24a0f43cf1b85eccbbb56020403217877215306080747061c19a139767d21f1	lib/bash/id
+F	9584	b42d239b6a87bf74690cc50134caa7b92bde36b6a272cb18584f05da50fc559a	lib/bash/kv
+F	8000	121d4d47a9b8d8a6222fb4c8bcc74832e99cf5774346869f10e8e856c805c61b	lib/bash/ln
+F	993	6d6454465c603205106fb0c29766de51f31cdf989c93f2cbe68114fe9d990ba6	lib/bash/loadables.h
+F	5464	9d177e46804719b98a9310b2ac10b69aac1a01ec8c34acc29f0f3c1eec5ae86f	lib/bash/logname
+F	8808	47997ec110d3301e214353813f0ea6905bfa8201b1a15db14b3431c7e8a6ca27	lib/bash/mkdir
+F	7136	37735dde77a14d80dc7039fe35fcd8a04219b913a3c49a5ab18aa773f923c14e	lib/bash/mkfifo
+F	8704	2f63d8be66d59171ffaa8fcf5e3c00a3bbf7f6c8b40c93d81708c06933790bdb	lib/bash/mktemp
+F	5512	e587a9f1f30568c37cd710db78713692648e5a56f90033e5414680dc9be0c96e	lib/bash/mypid
+F	7704	68f18da2964e6325e0ac6667a0bd8c0fc2bdf766ab85039c8648772f57aacde2	lib/bash/pathchk
+F	7800	d91d4781402e9a6b5cff401f498f3b8e1b566bd4ec670a8c52c9b6b9a0f99699	lib/bash/print
+F	5984	bf2f677a8145b92e749b201a29a334548fb0e46070159c9084710201177ac69f	lib/bash/printenv
+F	7368	dcab0b74b3d01ab75dc687f039256b9762192ff8d520075825ae3dcae8a34917	lib/bash/push
+F	8712	09d7f1f72135b873a5f0037d0577d79f61af9674520a8b6cccaf4a72d212069f	lib/bash/realpath
+F	7760	87182413a7d68c89c86e94c589b32343954705d903983100a0c4176c81c3be05	lib/bash/rm
+F	5320	9a07d175d76fab0f3537248c20f695f2927542f1935038c78d4ac3cc681b9f9b	lib/bash/rmdir
+F	15728	d41f9a88f9e6614d4d43e64d3f5cf220e1148fab5856484a4712d59a50b3cd07	lib/bash/seq
+F	5960	311c6761d9725292bd9aae80148e62e5dc787edec6ed145ae654a73e4f82ab2b	lib/bash/setpgid
+F	6392	9d7d8e62d1c0c13e00e19b171c408b0b5cfa6624fad9e4087fbd5c6de4adff76	lib/bash/sleep
+F	10408	10874b5927321fd21ffeff49e2ebafb8bc2ead38f1c46890a49b13f8aaf53d7a	lib/bash/stat
+F	6768	449705c68a087da5b25ef438a128a039efac9f6e1d5fba43694b04371dd003de	lib/bash/strftime
+F	11728	d149f8d933840956c5a1f1bac67dbb9f220b93e5d92a5d1dc8c28372dad74f81	lib/bash/strptime
+F	6096	2493fa1bf27e1d9709e58ea5dbf0367cf62698b6fd442e570b620981a9871fd6	lib/bash/sync
+F	7640	7ccd4282d67e81b288595d9dba3292b58e940b95a19831e6e07fdd6496578bc8	lib/bash/tee
+F	5032	a98c1622d0b0c95e2ce6e012a9b40173f3c461a3e0f7fbaefb12ab17a329b31f	lib/bash/truefalse
+F	6088	63147c559ea2adf09e6436dc5a298f2b8c21e441d28994fe68f32d3f564f4bd9	lib/bash/tty
+F	6320	ed52b76d5ee1ed90c793d5d006548369ad9856a9c0b55608dd6217c7e13a3567	lib/bash/uname
+F	5232	bb314737aaf4683694776d870f24e54330d1db5d9a86715aeca30579af0615e0	lib/bash/unlink
+F	5520	956c0883c795621e94f1d1f835bf144020e274f53aa9bed53224d1980548abc8	lib/bash/whoami
+D			lib/cmake
+D			lib/cmake/libevent
+F	7147	d854c83b17befb24d02efc3c6d76789f1af964ae27e4385a607e2110bd2ddbe0	lib/cmake/libevent/LibeventConfig.cmake
+F	369	1c37c0f4f7d2f65f81fd334f68095511d809d48d01efe502282ac5b5056de6ef	lib/cmake/libevent/LibeventConfigVersion.cmake
+F	1864	3c9291b9b7ddd54ee38901cd1b36606aaea376fab13f32cfdac2c3a126f7b7ae	lib/cmake/libevent/LibeventTargets-shared-release.cmake
+F	4385	d153e073578dadc91c74dcb710545e97d5b31baf4c1435725f97f99734eef014	lib/cmake/libevent/LibeventTargets-shared.cmake
+F	35688	6ff5f155494ecf53f30d217a9f3a2978f6d26f273f21c57a04cb12be5b57c114	lib/libacl.so
+F	10800	056b58d84d5ce4a3f176b7dbe11c1c980b62244eae9919de72f756e43ce1293f	lib/libandroid-glob.so
+F	178696	660ffa49a79b8a921cafcad992233536186f027267cf2a800719a7d473de2705	lib/libandroid-selinux.so
+F	14632	a5fec4720747cce48d462ea8e12db495b1547d368663f87e057c1e1b2f4232e4	lib/libandroid-shmem.so
+F	21016	ad21f81a50174727fc6a3680adea47bdcde59673f0b97c07ecc7659736c4a638	lib/libandroid-support.so
+F	17512	8935ef7eaf46017ed906c80cd1dc73ed7171777247748f73a8bb15c573a40a51	lib/libattr.so
+F	4216	c717681c62cf33363219257f85214303a18eed58226b558580b8f371501a9b1d	lib/libcharset.so
+L		libncursesw.so.6.5	lib/libcurses.so
+L		libncursesw.so.6.5	lib/libcurses.so.6
+L		libncursesw.so.6.5	lib/libcurses.so.6.5
+F	313960	5ac733b37f1ed176c9abe2ac60ef5a724c0fbddfb3ae27587c05dcd7693300ba	lib/libevent-2.1.so
+L		libevent-2.1.so	lib/libevent.so
+F	191432	7e2fa2c3fbccdd2e874b7eba84c1f04efa1ca5334d4ae6435c31652ea4139df6	lib/libevent_core-2.1.so
+L		libevent_core-2.1.so	lib/libevent_core.so
+F	135064	2b1cf7081d765eb0b044ac2bb2f3b113c7a0953787711562c35628e9cdaf2150	lib/libevent_extra-2.1.so
+L		libevent_extra-2.1.so	lib/libevent_extra.so
+F	7672	d31f9f27e4f55d628f121c6185ff946eacc894126dd03cc6aae21ca2dbb58553	lib/libevent_pthreads-2.1.so
+L		libevent_pthreads-2.1.so	lib/libevent_pthreads.so
+L		libformw.so.6.5	lib/libform.so
+L		libformw.so.6.5	lib/libform.so.6
+L		libformw.so.6.5	lib/libform.so.6.5
+L		libformw.so.6	lib/libformw.so
+L		libformw.so.6.5	lib/libformw.so.6
+F	64272	172d7cff2c67a351b6927ac08b3ff3fbd9f3dec5681cde13aa82fb13a029af20	lib/libformw.so.6.5
+L		libhistory.so.8	lib/libhistory.so
+L		libhistory.so.8.3	lib/libhistory.so.8
+F	38600	042c498142948d4f103002b28347dada04ffad30e899b70ec4da2e427853e034	lib/libhistory.so.8.3
+F	1083488	fe54882767c602cb863ddaa84c9dbcaa5a35b50f18a11631015c5f8997c5ef89	lib/libiconv.so
+L		libmenuw.so.6.5	lib/libmenu.so
+L		libmenuw.so.6.5	lib/libmenu.so.6
+L		libmenuw.so.6.5	lib/libmenu.so.6.5
+L		libmenuw.so.6	lib/libmenuw.so
+L		libmenuw.so.6.5	lib/libmenuw.so.6
+F	27384	ad5632a13a24a9bb8b25d83663b8fd829e4cc0a6c62dad416a2b07ad5b33e25f	lib/libmenuw.so.6.5
+L		libncursesw.so.6.5	lib/libncurses.so
+L		libncursesw.so.6.5	lib/libncurses.so.6
+L		libncursesw.so.6.5	lib/libncurses.so.6.5
+L		libncursesw.so.6	lib/libncursesw.so
+L		libncursesw.so.6.5	lib/libncursesw.so.6
+F	384584	218a1ae65bd5eee1d0d96a64324aac8116d7941806d2ac9e427230d760a08d21	lib/libncursesw.so.6.5
+L		libpanelw.so.6.5	lib/libpanel.so
+L		libpanelw.so.6.5	lib/libpanel.so.6
+L		libpanelw.so.6.5	lib/libpanel.so.6.5
+L		libpanelw.so.6	lib/libpanelw.so
+L		libpanelw.so.6.5	lib/libpanelw.so.6
+F	11240	6dcb4610a6e4a983ef12b22d7617b26a55ddae9bcdec5498c213a61bdde5a9b3	lib/libpanelw.so.6.5
+F	452144	0b259c1aec1f779cb8f7a5275188d8c794d45dda644fcaf41d6ca7f17e43c6e1	lib/libpcre2-16.so
+F	436744	2b78aea38957fc5c68f472aa1063826532f46599d32589e4e6241c6ca10fefa6	lib/libpcre2-32.so
+F	479984	96ab21cc60a770916ff6e5472ff9c1b5ac7ecd15f58499d19f455c4c49e4ce8b	lib/libpcre2-8.so
+F	7344	639a268fed43a3a445edf4ec5266616cd8c9c470ca44e28dc833e511b3158578	lib/libpcre2-posix.so
+L		libreadline.so.8	lib/libreadline.so
+L		libreadline.so.8.3	lib/libreadline.so.8
+F	322224	e416ff1905d1d040f7077daeb920751db91ccd82fac4bbeb4d9a64203d4c88a7	lib/libreadline.so.8.3
+L		libtalloc.so.2.5.0	lib/libtalloc.so
+L		libtalloc.so.2.5.0	lib/libtalloc.so.2
+F	33608	e2b3c42e738a7596219401d0868bb5938ab851a926835d9dec4cd8c37af96c99	lib/libtalloc.so.2.5.0
+L		libncursesw.so.6.5	lib/libtermcap.so
+L		libncursesw.so.6.5	lib/libtermcap.so.6
+L		libncursesw.so.6.5	lib/libtermcap.so.6.5
+F	52464	497c8eaa9aef49aec8f4816ca93ce8b22ff4aad03ffb1134447ede0747ed4e50	lib/libtermux-core_nos_c_tre.so
+F	4272	6349c2be24c400ad826a44f7a1039923c2e738e39a1a06ba6aaf9180fae205f6	lib/libtermux-core_nos_cxx_tre.so
+F	53880	4bc4e5c76d53d6c3e651dc0f3f1301558da511f39d1f9dc5c8910e32bac01b3a	lib/libtermux-exec-direct-ld-preload.so
+F	53880	4bc4e5c76d53d6c3e651dc0f3f1301558da511f39d1f9dc5c8910e32bac01b3a	lib/libtermux-exec-ld-preload.so
+F	53880	f835ce843ee668c6b1fbbb001c59f31dbb3886ed6b181b34dc7881e7543ce299	lib/libtermux-exec-linker-ld-preload.so
+L		libtermux-exec-ld-preload.so	lib/libtermux-exec.so
+F	54216	31ff31b6a291127018cc7512199e8fe8702711905b70744df92347f4145fa1dc	lib/libtermux-exec_nos_c_tre.so
+L		libncursesw.so.6.5	lib/libtic.so
+L		libncursesw.so.6.5	lib/libtic.so.6
+L		libncursesw.so.6.5	lib/libtic.so.6.5
+L		libncursesw.so.6.5	lib/libtinfo.so
+L		libncursesw.so.6.5	lib/libtinfo.so.6
+L		libncursesw.so.6.5	lib/libtinfo.so.6.5
+L		libutf8proc.so.3.3.0	lib/libutf8proc.so
+L		libutf8proc.so.3.3.0	lib/libutf8proc.so.3
+F	356816	26d931c8b440b6bd92d400d115527693bd21c5aa9a31a964dbcc158b067f75d6	lib/libutf8proc.so.3.3.0
+D			lib/pkgconfig
+F	749	6c2896f31fd15ef016a672c289a51fb96845a24ead99fcd7ff76c7cc04d04c35	lib/pkgconfig/bash.pc
+L		ncursesw.pc	lib/pkgconfig/curses.pc
+L		formw.pc	lib/pkgconfig/form.pc
+F	623	589b7872bac5f80d99a0c898a4a218d8e5a31aded8b9c208ecdf215ff07b3c18	lib/pkgconfig/formw.pc
+F	381	fba91e956e631a78c5e57bfc57b9d6641e0a409b37465b3c3b813c23c576950f	lib/pkgconfig/history.pc
+F	334	2d63c30b3be2d32c60d38c3ce6019b46ed0db174f12a9361476203dc28362281	lib/pkgconfig/libacl.pc
+F	347	276bf08a275fc53cd4ff127f5b844f892cade87c3f6d898993f99cfd2acb32d5	lib/pkgconfig/libattr.pc
+F	427	d9d25206a3df237d029d6ecf76630303a59620b05ff65f0e6ccf2c28358a6663	lib/pkgconfig/libevent.pc
+F	391	600e862df1996d2a1295eff6826dda6499278a89e23d886d32fd93c4215d60d9	lib/pkgconfig/libevent_core.pc
+F	394	7a270afea23f7f7479da9033617c46c6c63980049f1cf11834a7ea3a4c262e7b	lib/pkgconfig/libevent_extra.pc
+F	464	9da6b3686df9366f74daf5f463f6e9eb5c3ac45b46ff148743a64d8e8357bb08	lib/pkgconfig/libevent_pthreads.pc
+F	482	af991120a3340ee613d413520fa9b7585e5b983058287d6feadb3ef574068c7e	lib/pkgconfig/libpcre2-16.pc
+F	482	13364ba129bddd97a0148c29510cef0ce08a6c8b6af1ed4e8ad2e7da6fa6c240	lib/pkgconfig/libpcre2-32.pc
+F	479	28529c723aabb0b2d0a6f288076fee41df7f9ac1779b741feb13263efe659abc	lib/pkgconfig/libpcre2-8.pc
+F	450	beffb90f893fcdc8bfd4b49f89bee44cf047c2d63cecf093364325d76dccdd88	lib/pkgconfig/libpcre2-posix.pc
+F	252	3aa742f288e4a4f1c246eafefb2bf37be16fbb788816bb3944f881fe1fecb2c3	lib/pkgconfig/libutf8proc.pc
+L		menuw.pc	lib/pkgconfig/menu.pc
+F	623	91a3a08eb28a9b97adcbcc7498fc8f3d929365eb6478d80db3f83128413d2d75	lib/pkgconfig/menuw.pc
+L		ncursesw.pc	lib/pkgconfig/ncurses.pc
+F	614	3bb45bbed76bd3a3cd270e4636f4927716b015a077d393aabb74d51751c6a669	lib/pkgconfig/ncursesw.pc
+L		panelw.pc	lib/pkgconfig/panel.pc
+F	625	f65296a7f4e36daf61f9ce90858ad2aa475dac53634f89e59ec9ee42aaf72faf	lib/pkgconfig/panelw.pc
+F	397	05ae78865c040733120731356bff78f3c575c28d36ee9493430113b41e7f533d	lib/pkgconfig/readline.pc
+F	300	658404397b9fda459e7b5156cf64650adafd3aa9a0b1471cf9e440fdc44c1dbf	lib/pkgconfig/talloc.pc
+L		ncursesw.pc	lib/pkgconfig/termcap.pc
+L		ncursesw.pc	lib/pkgconfig/tic.pc
+L		ncursesw.pc	lib/pkgconfig/tinfo.pc
+L		../share/terminfo	lib/terminfo
+D			libexec
+D			libexec/installed-tests
+D			libexec/installed-tests/termux-core
+D			libexec/installed-tests/termux-core/app
+D			libexec/installed-tests/termux-core/app/main
+D			libexec/installed-tests/termux-core/app/main/scripts
+D			libexec/installed-tests/termux-core/app/main/scripts/termux
+F	1231	362de08bc4dc83ba56ee059ef80998cb7e221ca07dcd00c68875cd9d76d36f32	libexec/installed-tests/termux-core/app/main/scripts/termux-core-main-app_runtime-script-tests
+D			libexec/installed-tests/termux-core/app/main/scripts/termux/shell
+D			libexec/installed-tests/termux-core/app/main/scripts/termux/shell/command
+D			libexec/installed-tests/termux-core/app/main/scripts/termux/shell/command/environment
+F	44708	3f1ad82a227df1fab5c9748cf1f528f5789d57cd683e4ec95d1ff194f64fdba9	libexec/installed-tests/termux-core/app/main/scripts/termux/shell/command/environment/termux-apps-info-app-version-name_runtime-script-tests
+F	63558	4518308edfe81818efeb543a3d6e725b5b4db7a78c7e1729d820990230ffc409	libexec/installed-tests/termux-core/app/main/scripts/termux/shell/command/environment/termux-apps-info-env-variable_runtime-script-tests
+F	91943	96cfe0bfd7f71fe9e0f659b01abb314c2e570e40076e78fdedcea29cb3ea846d	libexec/installed-tests/termux-core/app/main/scripts/termux/shell/command/environment/termux-scoped-env-variable_runtime-script-tests
+F	3616	0e21687f303f734dba6351ada698728f068319c72cbd0248a6a430fe54dd22ef	libexec/installed-tests/termux-core/app/main/scripts/termux/shell/command/environment/termux-shell-command-environment_runtime-script-tests
+F	2098	b94e21550d573395d2d2dd7af697e89e0648bfff068939586d7bb05fb49a3973	libexec/installed-tests/termux-core/app/main/termux-core-main-app_tests
+F	37417	1bc9713339ea760d505d7c51b7537bbfbfed7b8877893dcbccb086a7640677e6	libexec/installed-tests/termux-core/app/main/termux-core-tests
+F	16510	522d74a4d45d515ca3dc79697a72fa09a8e76ac32dd6294de1c82740fa00a546	libexec/installed-tests/termux-core/app/main/termux-external-packages_tests
+D			libexec/installed-tests/termux-core/lib
+D			libexec/installed-tests/termux-core/lib/termux-core_nos_c
+D			libexec/installed-tests/termux-core/lib/termux-core_nos_c/tre
+D			libexec/installed-tests/termux-core/lib/termux-core_nos_c/tre/bin
+F	398432	10e89aebcfd064bafbe7f77cd0fe805ad7e46912b50c95762e8105ced8912c5d	libexec/installed-tests/termux-core/lib/termux-core_nos_c/tre/bin/libtermux-core_nos_c_tre_unit-binary-tests-nofsanitize
+F	3224	f3f580679ee71cecc18825d69b1da146339834a41359cd9e9be4d88ba97a123c	libexec/installed-tests/termux-core/lib/termux-core_nos_c/tre/libtermux-core_nos_c_tre_tests
+D			libexec/installed-tests/termux-exec
+D			libexec/installed-tests/termux-exec/app
+D			libexec/installed-tests/termux-exec/app/main
+F	27893	f1edd8d290bb0b0ce5ffe2530e513820b52392494a4029e00d2b043a536039a1	libexec/installed-tests/termux-exec/app/main/termux-exec-tests
+D			libexec/installed-tests/termux-exec/lib
+D			libexec/installed-tests/termux-exec/lib/termux-exec_nos_c
+D			libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre
+D			libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/bin
+F	266712	ae7891ff8a014b151d48e4ee71cdb7f711b5b1b42c1d0b33a5a6620f4619bc2a	libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/bin/libtermux-exec_nos_c_tre_runtime-binary-tests-nofsanitize
+F	296384	f3292e19ee212d69aba331197a37c9172023a7ef09ce5150f555d9ea59dbb251	libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/bin/libtermux-exec_nos_c_tre_runtime-binary-tests-nofsanitize28
+F	80016	6c6f2514a1a6ead55874cb91adf93d5b1bd84d454355e38384fbb91b0f73cf43	libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/bin/libtermux-exec_nos_c_tre_unit-binary-tests-nofsanitize
+F	6999	d746d8b2e1b18379663b06a9b88fb0c9cff84e7607c815a3edb22de3a98b9d71	libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/libtermux-exec_nos_c_tre_tests
+D			libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/scripts
+F	1246	7861ad97d3bea00b1805d6e66387371724ebbc9d494217f0e284003121828187	libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/scripts/libtermux-exec_nos_c_tre_runtime-script-tests
+D			libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/scripts/termux
+D			libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/scripts/termux/api
+D			libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/scripts/termux/api/termux_exec
+D			libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/scripts/termux/api/termux_exec/service
+D			libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/scripts/termux/api/termux_exec/service/ld_preload
+D			libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/scripts/termux/api/termux_exec/service/ld_preload/direct
+D			libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/scripts/termux/api/termux_exec/service/ld_preload/direct/exec
+F	15446	75d1dc4aa727f188368cfa6c5b14a5372bf516a3c826e225d5c4b4b691075bb5	libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/scripts/termux/api/termux_exec/service/ld_preload/direct/exec/exec-intercept_runtime-script-tests
+D			libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/scripts/termux/api/termux_exec/service/ld_preload/direct/exec/files
+F	8048	e14138b2dd2393fa3d3d481491b8620b345d1b88b8a7951b3c00c36f186f9516	libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/scripts/termux/api/termux_exec/service/ld_preload/direct/exec/files/print-args-binary
+L		./print-args-binary	libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/scripts/termux/api/termux_exec/service/ld_preload/direct/exec/files/print-args-binary.sym
+F	58	2afc8e9d89e2135d1d2f02dbb3a94e4b5d719dad0957d48ac8d32b6072271f35	libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/scripts/termux/api/termux_exec/service/ld_preload/direct/exec/files/print-args-linux-script.sh
+L		./print-args-linux-script.sh	libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/scripts/termux/api/termux_exec/service/ld_preload/direct/exec/files/print-args-linux-script.sh.sym
+F	58	2afc8e9d89e2135d1d2f02dbb3a94e4b5d719dad0957d48ac8d32b6072271f35	libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/scripts/termux/api/termux_exec/service/ld_preload/direct/exec/files/print-args-termux-script.sh
+L		./print-args-termux-script.sh	libexec/installed-tests/termux-exec/lib/termux-exec_nos_c/tre/scripts/termux/api/termux_exec/service/ld_preload/direct/exec/files/print-args-termux-script.sh.sym
+D			libexec/proot
+F	18136	cbdef0e652c2b78af25d867e1719fdebbb0915e25aae2dd35b3b5c1835f6b551	libexec/proot/loader
+F	46880	93db181cfa13def61a53464490aef30e9fb0cf20066ec61569fd578eca0a5266	libexec/rmt
+D			share
+D			share/bash-completion
+D			share/bash-completion/completions
+F	820	1c83e6f8c96910cf6275af88b515477e4b400c0d934263803713715d1d8d7aab	share/bash-completion/completions/tmux
+D			share/doc
+D			share/doc/acl
+F	25637	8bfabf1ab12194279fd08d95777665fc9f8e9b05c9e6ee2f91d82b136c418cf5	share/doc/acl/CHANGES
+F	18311	a45a845012742796534f7e91fe623262ccfb99460a2bd04015bd28d66fba95b8	share/doc/acl/COPYING
+F	26762	01b1f9f2c8ee648a7a596a1abe8aa4ed7899b1c9e5551bda06da6e422b04aa55	share/doc/acl/COPYING.LGPL
+F	2257	57eeb90da1a4b9a62351b77605681f65b990e14da942c2cc2c8cb1a678b3cbde	share/doc/acl/extensions.txt
+F	2961	270f395d9177cbb0d60278413099b9e7a7b02bab2b8be453a68b5cb20e33738e	share/doc/acl/libacl.txt
+D			share/doc/attr
+F	16279	4889e51bd1ca759e19da8e1fa45f4d4071b758c0f8464ccffc26600c2749bb3f	share/doc/attr/CHANGES
+F	18312	98f318493be6b08bff3cd295791cde06c54e17882a3c74a1ed245eaa02533d52	share/doc/attr/COPYING
+F	26763	5decad7e58d90d44335bf2f45ce27563bd911065c6a1a02dfa7647c4efee75c8	share/doc/attr/COPYING.LGPL
+L		../../LICENSES/GPL-2.0.txt	share/doc/attr/copyright
+D			share/doc/bash
+F	473382	270856b93e0ed9bf088377165ca4db25fc1e6a68d6bd8ff2a4382ca15ab457fe	share/doc/bash/CHANGES
+F	28581	e7bca221b50ce8413d775abda668ad79aa58c0b8fb2b09d855da1c694ea82bb1	share/doc/bash/COMPAT
+F	99634	1a8838790362d6cefc1b4b0a230710769ea47f4eb96c8dcd24b846dd7d445db3	share/doc/bash/FAQ
+F	7072	88d4f438af6af108d5970aed3a88208a295b6dafc2d55b549169bb0a372ec1fb	share/doc/bash/INTRO
+F	118334	ae22dc293dc2c42dbe1098f4204ae467ec54badaa137f2ede47df5e76d11f637	share/doc/bash/NEWS
+F	18794	6f5fbc2204533ebae00c99f20954cbcae70c4efcf04fff1ad4014fc8b0cba10d	share/doc/bash/POSIX
+F	2747	0fd1c24613e7d8c698c3f743dcbbae8d75563cbd65f597f37eb93751d91acc29	share/doc/bash/RBASH
+F	4848	0dda3f5817ac4d88c4cc17ecbe42f05223db368fb353d88e01fcb7259a50fe07	share/doc/bash/README
+F	426217	79394ccb66e4d572f47d8b01634d3b08a87f705a230605006e25aecd5e033475	share/doc/bash/bash.html
+F	1040870	b91026acffb159bd1e842e3116a95539bf858e2b57cbfa74df9e3a53379177a4	share/doc/bash/bashref.html
+L		../../LICENSES/GPL-3.0.txt	share/doc/bash/copyright
+D			share/doc/dash
+F	2689	254a7894923ff62e69184a991dcbccae97edee58a1105e8efbe78caf10595d72	share/doc/dash/copyright
+D			share/doc/gzip
+L		../../LICENSES/GPL-3.0.txt	share/doc/gzip/copyright
+F	6800	bbe8d31e26454288644d236417bdcb5af1df9fe43860d1d54b690617b2619c00	share/doc/iconv.1.html
+F	9658	c8671e4f01fd13e2165bb1c9a205a0b3da8f97cc048a03626a8581abde1aa77f	share/doc/iconv.3.html
+F	2054	2a6cdf9175900a2d177998fae5b9ce82c7f362dbbf61860ab67dfd807c1892fc	share/doc/iconv_close.3.html
+F	9377	1b4ef1b49f935bf15cbe633805ffd658b0967b29a77b8f356b20f7a95d6bf334	share/doc/iconv_open.3.html
+F	3406	8e88aee5f85b2ea44e3884c7b20d081de7c561b9b3eb607cd7a9a5c4046d174d	share/doc/iconv_open_into.3.html
+F	7058	d3b61f2647cdaa107dc6e8b4bd6f0c52cd6690d71f84ff8026f8b0fb3a70adbf	share/doc/iconvctl.3.html
+D			share/doc/libacl
+L		../../LICENSES/LGPL-2.1.txt	share/doc/libacl/copyright
+L		../../LICENSES/GPL-2.0.txt	share/doc/libacl/copyright.1
+D			share/doc/libandroid-glob
+F	1593	5bc2d38d50f282548a27f7dd8b3ac8f3ac696ba501aaacd2bba821b15b018dac	share/doc/libandroid-glob/copyright
+D			share/doc/libandroid-selinux
+L		../../LICENSES/Public Domain.txt	share/doc/libandroid-selinux/copyright
+D			share/doc/libandroid-shmem
+F	1529	0dd43abe17196b0224cb0b159819af798cd508a82a21e5870126fff4e899a7eb	share/doc/libandroid-shmem/copyright
+D			share/doc/libandroid-support
+F	6126	76fc4416b6b20b4223bee8cc5b1ab41e1066a55ee23454f857c74bfbd9c3c2d5	share/doc/libandroid-support/LICENSE.txt
+F	2589	80786a6b45d7dc1a4e604c85f779af6b1069bf900eda37684045463d81627314	share/doc/libandroid-support/LICENSE.txt.1
+D			share/doc/libevent
+F	4528	ff02effc9b331edcdac387d198691bfa3e575e7d244ad10cb826aa51ef085670	share/doc/libevent/copyright
+D			share/doc/libiconv
+L		../../LICENSES/LGPL-2.1.txt	share/doc/libiconv/copyright
+L		../../LICENSES/GPL-3.0.txt	share/doc/libiconv/copyright.1
+D			share/doc/libtalloc
+L		../../LICENSES/GPL-3.0.txt	share/doc/libtalloc/copyright
+D			share/doc/ncurses
+F	1447	708999f95527e1ffa670c6fce288c6c600cb477dd04afcc1171422b3dd4ee226	share/doc/ncurses/copyright
+D			share/doc/pcre2
+F	4232	412ace3355a4d6a4d835c350a7df172903811eafda7b13500dacf58429ee757e	share/doc/pcre2/AUTHORS.md
+F	97	99272c55f3dcfa07a8a7e15a5c1a33096e4727de74241d65fa049fccfdd59507	share/doc/pcre2/COPYING
+F	163598	4ca09b66c6b833ac391ff4d496a2d43018b25ffa93c24b48cfe0a3289ecfa5d8	share/doc/pcre2/ChangeLog
+F	4011	197d8a73ffee0d6b09adba2f9c677b5f5aede24edf89258a68e48248d010d811	share/doc/pcre2/LICENCE.md
+F	28573	a39589d548775d5ade1f6ef1ab9dc32811480881b89a4f25160efda9eeac0053	share/doc/pcre2/NEWS
+F	47878	47319985a9919d7d6030373a33233ce0449b6459a9bce23537afadb2305e2fc2	share/doc/pcre2/README
+F	3712	6a5ec6991d8338d79c267e9ed00e98bae3e3f3d00299f927c88fc662164476bd	share/doc/pcre2/SECURITY.md
+F	20266	64a3e10be90d7b3c218d05f21c53aa2511b9100e01f98c77c199c473b33f1856	share/doc/pcre2/SUPPORT-LIFECYCLE.md
+F	97	99272c55f3dcfa07a8a7e15a5c1a33096e4727de74241d65fa049fccfdd59507	share/doc/pcre2/copyright
+F	4011	197d8a73ffee0d6b09adba2f9c677b5f5aede24edf89258a68e48248d010d811	share/doc/pcre2/copyright.1
+D			share/doc/pcre2/html
+F	21903	8a6058617d31141df3339cd85b8451ea0dfb4d5551f64be276ee1e6e0e3cff36	share/doc/pcre2/html/NON-AUTOTOOLS-BUILD.txt
+F	47878	47319985a9919d7d6030373a33233ce0449b6459a9bce23537afadb2305e2fc2	share/doc/pcre2/html/README.txt
+F	14009	5a9d7a801a5a00457e80a60d39387f58f14a0d097c253aa48e4109d5bfe9da71	share/doc/pcre2/html/index.html
+F	3500	e5aca9f38583c8548300607c928d1ff1f5da68f546bef8f61c6663ffe6c264fa	share/doc/pcre2/html/pcre2-config.html
+F	10101	116216368189bc8e73495fa98294f5f119932b6a6d97d82555d0c8aacac7720e	share/doc/pcre2/html/pcre2.html
+F	2419	933a72cff142d80d2198365024cef38584655d3fc08970afc8a94468828c7be0	share/doc/pcre2/html/pcre2_callout_enumerate.html
+F	1358	d06702072a27f72ca932dd4c83770d782dc539a48c1fd29e2fc1214f842d7aa7	share/doc/pcre2/html/pcre2_code_copy.html
+F	1479	16a3b32da40a716ac3e67855ffe881bb6bc2837543c3d61c11470c314ad7a1f6	share/doc/pcre2/html/pcre2_code_copy_with_tables.html
+F	1231	5097417e98676664b79b3e6c17035bc1ae44bbe890a570e152a7278ec2aaecbf	share/doc/pcre2/html/pcre2_code_free.html
+F	5293	aa9e5d5cc1f961e101de271e1414a526974570349725198e7a2894bd21370b61	share/doc/pcre2/html/pcre2_compile.html
+F	1164	ef7766f9116639a0846529bb7fb1c12280d027056945fbdd7273a90562f10e1d	share/doc/pcre2/html/pcre2_compile_context_copy.html
+F	1259	4dfac77833b6268441de188ddbf1f65b13f8c01244a789225d5588a12eb8c88c	share/doc/pcre2/html/pcre2_compile_context_create.html
+F	1221	45b725f057901ef510bb13c02a7a2766313dadf35fa4b4c937f44be26dd6db90	share/doc/pcre2/html/pcre2_compile_context_free.html
+F	3704	7f051d71b35ee9ffc120408cec90e62aadacf50ff067cef6d12d8e80e8198d9d	share/doc/pcre2/html/pcre2_config.html
+F	1145	2197eac4385736cdac322b705a96d9fb77b1de4950b4c06404a86fccb5ef6063	share/doc/pcre2/html/pcre2_convert_context_copy.html
+F	1239	566d034112a3708398f38a5164fab3c2ce31af3299fb21160bc181be1720d0d7	share/doc/pcre2/html/pcre2_convert_context_create.html
+F	1202	a4f0feb49d8528043e243b716f61e66049bbc31db604fdb95a3cc91e892b6731	share/doc/pcre2/html/pcre2_convert_context_free.html
+F	1237	409396f873fae9c066d0a8b97a0789a51142617cc7b207d078375bf0d704866e	share/doc/pcre2/html/pcre2_converted_pattern_free.html
+F	3853	dec1c5279c3ad117deeb724dbbea3f0622d14f17289befdf9dd69fdaa367bb1c	share/doc/pcre2/html/pcre2_dfa_match.html
+F	1213	814abb880a1c94eb688f941dd7e8539ca8453c19621db28cf2a8068350655c4f	share/doc/pcre2/html/pcre2_general_context_copy.html
+F	1470	875776c8174f8f4f2765c8012e878f34f5d681b2271fcfde2f1b697453fdaba1	share/doc/pcre2/html/pcre2_general_context_create.html
+F	1160	97451752493c45010135b94cd7f41ef2253d1dcfc362eda45063c6a097af395e	share/doc/pcre2/html/pcre2_general_context_free.html
+F	1733	f0d43f7c059ad91419e84e6a61ef6f454a0204f713c04ed6b6ceb071aed7b031	share/doc/pcre2/html/pcre2_get_error_message.html
+F	1493	a20d35dd3c88ad1f2de07689fcd673609d442b7af8c22c240548799fe4f2ed83	share/doc/pcre2/html/pcre2_get_mark.html
+F	1098	0d7b77a8aebaa0e226d84003c0d94b400852650920b6aa5c1c9ade4c160e8cf9	share/doc/pcre2/html/pcre2_get_match_data_heapframes_size.html
+F	1041	8980a907168b3177e064771e92525922dffec869d581ef1a4cec4972127d51d4	share/doc/pcre2/html/pcre2_get_match_data_size.html
+F	1060	2f13f669f4e113c7079e32ea6b938515038f4a236a4e3495300ad9632a5a6552	share/doc/pcre2/html/pcre2_get_ovector_count.html
+F	1136	8b207291ed375bc0c560682b4be8e5dffd2bf07aea266a4485b4d3280dd2eca6	share/doc/pcre2/html/pcre2_get_ovector_pointer.html
+F	1418	2d47faa5fa3fa4a31a5a5ef32b30803b7d505a5439788494eb8ada827b77ea25	share/doc/pcre2/html/pcre2_get_startchar.html
+F	2823	f9f4f0574246cb3014c55e0c918b27d5e4bf113f3ce20bfc7191e588af1ecbb4	share/doc/pcre2/html/pcre2_jit_compile.html
+F	1316	9f803709fe1d402f12966893bccc44c91c95e7be55a967fb91133cda53ca71d2	share/doc/pcre2/html/pcre2_jit_free_unused_memory.html
+F	2515	0389c2c6ad28a023bcd7582e6fbc0a87bacfc25694a7bc247b674e7790e3d532	share/doc/pcre2/html/pcre2_jit_match.html
+F	2550	4f368308f6b48b0bb5ff85ac531073cfe3e5c9c2978d7caac924bc152beeb14a	share/doc/pcre2/html/pcre2_jit_stack_assign.html
+F	1805	750094a9e67a5ffd5346531561803e3c30151ca6dd96a6d6e21e1b7a5a9c1f5c	share/doc/pcre2/html/pcre2_jit_stack_create.html
+F	1211	a3b3b230269a45d8f2211bc0d788d6fc1488dc1678b596024167f0bc7c722b49	share/doc/pcre2/html/pcre2_jit_stack_free.html
+F	1635	7e3a652eee0d5c27e35e539edc0342c9f2bab80d9b150cd41a07bc2311c7a254	share/doc/pcre2/html/pcre2_maketables.html
+F	1211	dd3b14d2a29b3780155e2b5f70d8328fe33c7c765a920bc016eb41bc3be46922	share/doc/pcre2/html/pcre2_maketables_free.html
+F	3762	11e0d824841cd921ce1c1aaddaeb712394a306b65f7a937b3b22832bedc1eaa8	share/doc/pcre2/html/pcre2_match.html
+F	1152	2c327807f2c3c4b94b9ee49fbf893392d5c046545bd1dee926720d06045f0318	share/doc/pcre2/html/pcre2_match_context_copy.html
+F	1249	6841884231d7dc19872554023ebc78a376f03dfb6f87e77ee3b3e76e919029c6	share/doc/pcre2/html/pcre2_match_context_create.html
+F	1211	63c08b4dffc4690b29f7568e48d5f364a886452d36b0e9d88341ee8615bee79b	share/doc/pcre2/html/pcre2_match_context_free.html
+F	1743	569e774ec99e6b175a7079113d11fedab9b3dd6cbed0160188a030e66d439fa3	share/doc/pcre2/html/pcre2_match_data_create.html
+F	2036	716944db2e739fcdadab1e2aecdabeb5e0b2acc69796d6f843411b4cc467c9d8	share/doc/pcre2/html/pcre2_match_data_create_from_pattern.html
+F	1541	c58fb6afe8981bb3c9f77a2c32433cb9274e36b98b4aeb5bedbb6d46040ef54b	share/doc/pcre2/html/pcre2_match_data_free.html
+F	1937	00dbd0bfb0f32ad8b958594afa6cdebd41234f391225f57ba706e0a794bd0676	share/doc/pcre2/html/pcre2_next_match.html
+F	2651	63321fea2b7e3053aa8febde35e3b60fed71a26c6aa1a074ddce2174585aa650	share/doc/pcre2/html/pcre2_pattern_convert.html
+F	4804	8861f67f30b49730556a63a185376bf13344d0887ed207b5347827552857b958	share/doc/pcre2/html/pcre2_pattern_info.html
+F	2535	04bbf432c13f6582746aa985f5e9761cb2e60a2669c9961255b9746ba7ffaa8f	share/doc/pcre2/html/pcre2_serialize_decode.html
+F	2709	a19f8d5ac1c37682daf099f339d323410e7d3acef07db493f2645876a18e1a22	share/doc/pcre2/html/pcre2_serialize_encode.html
+F	1175	2148b416d1e28a36a79dac0ed7db65d0329726c4a4d3b79a9f9f136302ad0bad	share/doc/pcre2/html/pcre2_serialize_free.html
+F	1622	e6b1d9d03f16bd8057776d3adf9ea8a58d820421d83a7c2722ac7fa5b885234c	share/doc/pcre2/html/pcre2_serialize_get_number_of_codes.html
+F	1187	7ab995a70b3e25b82de3540508beef8287e8688e754f88cfd6dca7f00952fc88	share/doc/pcre2/html/pcre2_set_bsr.html
+F	1264	6f1c9a2f6293a88fc77a2225ac06993e251700aa2b89ed4b4339d1bcefa9c46a	share/doc/pcre2/html/pcre2_set_callout.html
+F	1425	5f625f09cfe60494d77de709670ff33b1bd2cb66f7c120a42ac86f2d2f649a74	share/doc/pcre2/html/pcre2_set_character_tables.html
+F	2441	9d53c90cf98cd88fc03968b37c19bdb5a1745a79889aa63497db34522b70314f	share/doc/pcre2/html/pcre2_set_compile_extra_options.html
+F	1652	a7d06fa9914b8cddd6f4193309ef4fa5689f21886ecb49753b12ad87462458da	share/doc/pcre2/html/pcre2_set_compile_recursion_guard.html
+F	1068	9adb5f0e102c5f51146abf69b45ee2b1fa61d586ee4096862a68b68b68b6b012	share/doc/pcre2/html/pcre2_set_depth_limit.html
+F	1353	29ddfbe7e9161b30e6d8c45a9823c6ec3af0013525a183733aaade9d58eaeafe	share/doc/pcre2/html/pcre2_set_glob_escape.html
+F	1324	96df9bcdc676507ca651fb08c058b3a1f6abed81b428caa73d0ee8f1d33c5560	share/doc/pcre2/html/pcre2_set_glob_separator.html
+F	1064	815391c2048137416ed6283b40d7771c806988dbb7bea1ac695ba723a0339b18	share/doc/pcre2/html/pcre2_set_heap_limit.html
+F	1055	a1f6f4f15cbee1716e609b0f627b29db4d0ace456174892d7ff2b2219ddf9aa3	share/doc/pcre2/html/pcre2_set_match_limit.html
+F	1433	4a52c2f02bea581b58fdb388e45b7acef17570d925cf998d70ca61a9a01ab23f	share/doc/pcre2/html/pcre2_set_max_pattern_compiled_length.html
+F	1324	65aa52061a724d503fa27013076be8983876f81f34161455e625db159289eb7c	share/doc/pcre2/html/pcre2_set_max_pattern_length.html
+F	1283	c053c45f9f45271700d1401a8cde5744b57b44c9d1ca4ec6df8fbc207e254062	share/doc/pcre2/html/pcre2_set_max_varlookbehind.html
+F	1554	a96821645e0fa4b86bdf7a42d5b7088345b4e454bf0874b9606d8b33b792dadb	share/doc/pcre2/html/pcre2_set_newline.html
+F	1061	657fb085f15404a095c3cbabe777ea593be19bdada21e97c60202c50e63a15f6	share/doc/pcre2/html/pcre2_set_offset_limit.html
+F	1997	f141edaada045afaf9f54b692d91cf2c81399c75c1998babe4082a4bdab58a2b	share/doc/pcre2/html/pcre2_set_optimize.html
+F	1110	99def16f1f189d6ca67dcaed338b09e475b912017d2822ee706b9342855fb02a	share/doc/pcre2/html/pcre2_set_parens_nest_limit.html
+F	1085	b896daf2cd88a8f04e766d5b9c8e44698740d7f5c9999bb11b4fc11c9d3ff1c6	share/doc/pcre2/html/pcre2_set_recursion_limit.html
+F	1229	92d71ce8b44411afbf4f5fe74c3e1d2447cf8b1c5c4f443938bdd5b67957a01b	share/doc/pcre2/html/pcre2_set_recursion_memory_management.html
+F	1327	af5924febd63c32120e65ce339bc6a7381b2f9c77c29536e7ca54d15e9463e64	share/doc/pcre2/html/pcre2_set_substitute_callout.html
+F	1456	372d6eb901e8e14b71addd18f29438bd42b5e9cb10b2fabf45c16029f0cdb36f	share/doc/pcre2/html/pcre2_set_substitute_case_callout.html
+F	5035	7e2786682efadc706352b09a1c9a3b7c09e37257f41bae2660104ffbffd3290f	share/doc/pcre2/html/pcre2_substitute.html
+F	2047	c74839601fc902b433eca6efc93943612573b2a945c21b122c33fdbe9b8c86aa	share/doc/pcre2/html/pcre2_substring_copy_byname.html
+F	1848	60d4c6929afbf7ac320432251e4db01ece2f4e82a9ca6b7de498808e9d4e86ac	share/doc/pcre2/html/pcre2_substring_copy_bynumber.html
+F	1184	4b8d2a0d00b9b585618971cb4012dcc877d625a31d9d2f12fe5a8ba6e1ee52fd	share/doc/pcre2/html/pcre2_substring_free.html
+F	2175	1db998288decc91edfb79aa683d62d55d6b03871cb1750e1831aecd155201127	share/doc/pcre2/html/pcre2_substring_get_byname.html
+F	2011	2ad593e6483c935f1de8c4e95dedf9f320c5fc37cbe047fb6de35b3b84a772cc	share/doc/pcre2/html/pcre2_substring_get_bynumber.html
+F	1442	3e9932471bda6e7a8e44df395757ea32eb9f5f622fa78a5c7a001c3e9958f429	share/doc/pcre2/html/pcre2_substring_length_byname.html
+F	1506	9586ff2b5d28a370f37a1cec9240114d6afaa6eeca1db825aa3bb6a874714eef	share/doc/pcre2/html/pcre2_substring_length_bynumber.html
+F	1201	a84e48533b013e15770a35a1b3f2b56cce225c3315b2a0898005f6a15fd2ca84	share/doc/pcre2/html/pcre2_substring_list_free.html
+F	2124	6ee930d80d4d989abb07da24bc754885221a521e8b776c309343cecbd5296f74	share/doc/pcre2/html/pcre2_substring_list_get.html
+F	1825	6918ae2d5282a6e3c9dc703625f744eacb04a44ac718d01efa79bc3ee069fbaa	share/doc/pcre2/html/pcre2_substring_nametable_scan.html
+F	1633	82817105ca3ad597e0e28c4298881aeff7449c09032f8db748a5762679a68ffd	share/doc/pcre2/html/pcre2_substring_number_from_name.html
+F	217277	2cc0b829a8f41d07607f637ab16bf99fda175a3d671ca4adfee4da0744aac345	share/doc/pcre2/html/pcre2api.html
+F	29385	b9a311467c97a923443be66e058f8a8d63411f1cee5cd47b332ee5a95f39874d	share/doc/pcre2/html/pcre2build.html
+F	20361	c969712360e50e7b1a7e67243a5f3129de604c5226c091e670072f5ca20a50cd	share/doc/pcre2/html/pcre2callout.html
+F	13435	d77386eef8d8138972e92f55c4f0313ca316a9895edcd936957bbc94dde8fa46	share/doc/pcre2/html/pcre2compat.html
+F	7916	a2f09f1dfccd5441dea6bbd55e6860f84de24df90be97ed48f554cd6f110b978	share/doc/pcre2/html/pcre2convert.html
+F	17580	671b39dc761f1f7b43b58d9a203a4e0073f3e2514d9bfd0e3350bf885591d3d1	share/doc/pcre2/html/pcre2demo.html
+F	56397	a7ea84098d27e2660c4fba5a85376be947874302948bbc7502ee96396f79dd0d	share/doc/pcre2/html/pcre2grep.html
+F	23485	e338486e12cd5d733ceb95803b99db0bf64525fce3bf562ed49fcccf86ecce4b	share/doc/pcre2/html/pcre2jit.html
+F	3919	e615311702c41fdfa9cd12d9c39b57216940c7b6aa9398625674a8315c290727	share/doc/pcre2/html/pcre2limits.html
+F	11223	9b36270d8f6bfacccb3a4c2d9e7564c55100e6842f453686af1f016b998c8ae5	share/doc/pcre2/html/pcre2matching.html
+F	19479	cccad082fdd17ba3750d9517b4d248fd825dcbfdc17328d3e245b61bfae12dd9	share/doc/pcre2/html/pcre2partial.html
+F	187425	e1ae7a7a415031293d774f2b9ee94075f258c2eba1695b40d412dbff957e6681	share/doc/pcre2/html/pcre2pattern.html
+F	12806	28e44ca26a81829a130bf6d72f0fce360e11935d0299a4a8506ef1c307402ca3	share/doc/pcre2/html/pcre2perform.html
+F	17082	7fbee6668f74de8a280abb961751ce314bf6b991639c28f183880ac3cd649d5b	share/doc/pcre2/html/pcre2posix.html
+F	3947	5b1464069396c39f69542bd5e9780f4422589b75e8ac3e84107d1055cf812590	share/doc/pcre2/html/pcre2sample.html
+F	10079	05ec5660b0b2c35c64bdb4a3146b644accad9ec9984a5659738c3cd66a392db7	share/doc/pcre2/html/pcre2serialize.html
+F	30991	6117eeef84db483b47bb8b6e41a287ec9de9a057a0c5be03389fa4d0a9c044cf	share/doc/pcre2/html/pcre2syntax.html
+F	101761	d837aa60cc226b4dba283d447bc708ca34317ef2e53cda09e2c285b1f654d9dd	share/doc/pcre2/html/pcre2test.html
+F	23543	deabb929843991e75e8ee7326cadc5cd1e0c976f18c846ccaba8fffa173d8c0c	share/doc/pcre2/html/pcre2unicode.html
+F	3006	39a5f9bcc4f218ea3ae13145572b1b1648825653cd8efdfa9f2e8f69ef99c40f	share/doc/pcre2/pcre2-config.txt
+F	652064	aa6903b2c63eae84ace4c797f17a95ffcd3d90039cedec1cd0307137f51dc89d	share/doc/pcre2/pcre2.txt
+F	63436	fbaa266cfad71639d27c210d87bea6b1bf60c4b2abaf48223fb6e995876a6f91	share/doc/pcre2/pcre2grep.txt
+F	106637	7585e56b6d6a28d932838754787eb1392b022fc30f029865ef23fbc1738b3939	share/doc/pcre2/pcre2test.txt
+D			share/doc/proot
+L		../../LICENSES/GPL-2.0.txt	share/doc/proot/copyright
+D			share/doc/readline
+F	88142	f74dff0f05bb20311c53287b02866f343e69cd8bf9d4e58230e3f8d31e2dd7d9	share/doc/readline/CHANGES
+F	14330	c0b93d8533fbf743e24f93b7f6bc26ba1a4e5e292117289a891e728454af2fb5	share/doc/readline/INSTALL
+F	8146	c66390595e51c1ab99aeac37ee9cd5f7cd652e1ee5da86dea7682f769205e57c	share/doc/readline/README
+L		../../LICENSES/GPL-3.0.txt	share/doc/readline/copyright
+F	116091	2eec7a7084f73aec15e6e1ad103e6c3ca36ab384bb6cb55123a3c08e858aa08c	share/doc/readline/history.html
+F	481447	44f209944f7f1166589f2d417bb0904034ecac69db05eeeffc5f4b79a908af31	share/doc/readline/readline.html
+F	151722	11bace2423451564da95cb4e0d2ef1be5f1759f6d6d8e7737bfdaceb6f11c26b	share/doc/readline/rluserman.html
+D			share/doc/tar
+L		../../LICENSES/GPL-3.0.txt	share/doc/tar/copyright
+D			share/doc/termux-core
+F	328	7f9cda92a6799e88ce9af9d90da63e66c15c6af0032a4ab67ef66ae88e21178a	share/doc/termux-core/copyright
+D			share/doc/termux-core/licenses
+F	1102	c6997a2c37650faa288a28b6e197c20ab36baefbe5b5f7cc0e40df83cd0b178f	share/doc/termux-core/licenses/termux__termux-core-package__MIT.md
+D			share/doc/termux-exec
+F	425	f9ff25952e646931f84527fd9ecd166590c902ba16d83cf387b56aeb87734258	share/doc/termux-exec/copyright
+D			share/doc/termux-exec/licenses
+F	11336	427d58e4a192087e1c38450d4fe696dfccc24363e4252337a0189d142779d3a9	share/doc/termux-exec/licenses/termux__termux-exec-package__Apache-2.0.md
+F	1102	b93c76156ee9f6d7085bb2645360b10db46f6e624be2a28d2c39957f8b724766	share/doc/termux-exec/licenses/termux__termux-exec-package__MIT.md
+D			share/doc/tmux
+F	731	2116115d46eeb1e736acfa562eed14fe6c34760794bc5b484642fe694adde0fd	share/doc/tmux/copyright
+D			share/doc/utf8proc
+F	5125	3b510150d34f248a221bb88e1d811238d6c6c18b51231822c42974c39bb07256	share/doc/utf8proc/copyright
+D			share/info
+F	639890	e64164b06027fad39355387b7c51c96a15610333b10c86c6d4ffe3e2f0f53670	share/info/bash.info
+F	48295	0491b4270f3e022f38dd6e0fee6c28382d1bdfb89bd7b437bcdf1e95a6d1a148	share/info/gzip.info
+F	66323	f547b3c8547ee4092941f088ccbb1301eb40a509bca39708f8dca87627563b69	share/info/history.info
+F	258713	500c11a34c367045aa1a37f3f1add3efe00d72386cf1ae911a781e5472a3a0fb	share/info/readline.info
+F	100612	aff0a840a4a1e52912abf0890e063259f69a4550cbfc800b605f4a5bc4bf637b	share/info/rluserman.info
+F	13479	1a8d4e65b7f4f8fa690683ce4b892c71e832418b2cb1e44bba83241d9a9f9a98	share/info/tar.info
+F	304308	105c7e08d600fce1baef73d150bb9af0f569e63997b5a21c174034603ddc6a6f	share/info/tar.info-1
+F	317618	78e524b8ac40df83361f5821acb5e07617476ed04a4fe5a20d3124689ce5517a	share/info/tar.info-2
+F	49627	a973a42efcc5bb8c8079cf16a2833b98fe83091b2699d28c74234bdb2b93b717	share/info/tar.info-3
+D			share/man
+D			share/man/man1
+F	2569	99e4eab0ec5691095c507c879e9e672dfc05f66a919a1659737a12c16c8e05d7	share/man/man1/attr.1.gz
+F	107370	b68beb3e385f7d8aead26bf7887c12f93ca769dcd528fd7282d70938b09bdffe	share/man/man1/bash.1.gz
+F	984	b874207b8ff076fadc4e26ddc066f019b71e90ed38ca5e22d3515ce55de10310	share/man/man1/bashbug.1.gz
+F	3093	b413fc2577b50929f91dffea5f53349b7eabe975daae75e89c0ae21fb21612b3	share/man/man1/captoinfo.1.gz
+F	2141	24011bffdcabf5ca66b8c4d01f8fbcdc334064de5ff694b7fa9bb3df9556afb9	share/man/man1/chacl.1.gz
+F	2800	d4e81fa36d4732f2c03ad8f7a2f0292eedc34b900d10a2a0d17d4402bfb8356f	share/man/man1/clear.1.gz
+F	21114	ccbfc680e7c8ef60036327b98030d115989d61c051fc0d4d01af2a7bf02105eb	share/man/man1/dash.1.gz
+F	2730	d159f03800f011121bf259ea0a42aa37e5a7601801e8f470aae136990a774e62	share/man/man1/getfacl.1.gz
+F	2044	9ea0edc182af17d7abc2cd4d858fffb5c0f12f64cef4d5e77d93fa95f50f414c	share/man/man1/getfattr.1.gz
+F	36	9c3920e404b8d046ba0e76986f1a8041d71cd064ec7010949b23e17fc4c5b90e	share/man/man1/gunzip.1.gz
+F	760	bbf348e30c6776041a8d284be12b6ed8d4298a09e9f0ecd63cca644a4658c9eb	share/man/man1/gzexe.1.gz
+F	6456	f27bcbcfef6fca980813b68693fbd26fd2a602b6d88927320d76992e05edc555	share/man/man1/gzip.1.gz
+F	1670	cb682d82a44e5691c0845a4c3ccb052b7bec896d008bd0909cf7e105aa68e79d	share/man/man1/iconv.1.gz
+F	8567	6a5812050469e624cc1a69fc546facc03e4fe7e590745be4a4522f8ff58dc629	share/man/man1/infocmp.1.gz
+F	1698	1e2cb0195096bc129830798480245af5d015fd10da6e6837aef58fd6f5215236	share/man/man1/infotocap.1.gz
+F	1614	a5ca2338b89f22a02eb34c92bdc1fd5f412db16d6477e1ca4d1c903ef86c532b	share/man/man1/ncursesw6-config.1.gz
+F	898	45e87de7177ae22aceb2d22160509ea188e7da94eb0c5a304e68d3967059114c	share/man/man1/pcre2-config.1.gz
+F	16142	451f33894384ad07f88036b65bed85b83e30f5491778ef2f64261127a36264b4	share/man/man1/pcre2grep.1.gz
+F	28899	4489a1f0a66173000c87a3f20f4b2d44dcbcaac3fbc9bf046085f5b8730785f9	share/man/man1/pcre2test.1.gz
+F	7797	71121a5293af30bcea8875e0984120daaeebb95b74f0a8c65b492af6923867d5	share/man/man1/proot.1.gz
+L		tset.1.gz	share/man/man1/reset.1.gz
+F	4073	28f78d7e8149410e14593ac89e6c60e602fd80a632f83d5bdedb78364f162f27	share/man/man1/setfacl.1.gz
+F	1851	4befb7964e360f30dacb263f7c0a72233ec1786ed2b925fb2e64f052d02463db	share/man/man1/setfattr.1.gz
+L		dash.1.gz	share/man/man1/sh.1.gz
+F	4304	093e2381f875534a96c463afdca0f671caf28f916e64ff617c77e8343d23c98b	share/man/man1/tabs.1.gz
+F	13546	dfeee239e4bbed1d271c0902c0fce79e5844c4d4778deae3e8d9c9995341c726	share/man/man1/tar.1.gz
+F	8364	62e6ca64ea4ff0886aeb5f88782d88b273070ea3dae4a2c2a7b7e81e3528f323	share/man/man1/tic.1.gz
+F	55665	f41faf0de01caa7fd69b1ef55d7eee106f683c10a4eb53d8bf9c23b10ebdf02c	share/man/man1/tmux.1.gz
+F	2884	5bdc4c78177cf21c19f14470c359bfd767d5e79d64160a713f99b5e3dd438da3	share/man/man1/toe.1.gz
+F	8708	2aa9be56b5472fb00ed5b072e4ae4386a95bc122c1d42227969b60e25d172e55	share/man/man1/tput.1.gz
+F	6760	35dee2c32750710b78277aacc55793117e6daa1950418e32ab58bb43f4409e5e	share/man/man1/tset.1.gz
+F	36	9c3920e404b8d046ba0e76986f1a8041d71cd064ec7010949b23e17fc4c5b90e	share/man/man1/zcat.1.gz
+F	37	9a1cd67ffba6bb5a980519473fea923f852ee8a4e53c887588b4f16f0682334f	share/man/man1/zcmp.1.gz
+F	460	f99b44d77e65bd51f8f89474cf397ef254c7e97fa7cc5fd24efe7a3477c493ca	share/man/man1/zdiff.1.gz
+F	388	db5fa26dee791b142452c49febd2dbad5b694c3a4790c8ca3a37299ef591fe24	share/man/man1/zforce.1.gz
+F	605	1c8634e6b8a57893689d60ec14196451b719ac7f986e66a6a9b054507daae635	share/man/man1/zgrep.1.gz
+F	1663	92a26e05223a030b35faf853f2ea30492c72a609de9097c60e166b577ed25670	share/man/man1/zmore.1.gz
+F	460	abfe17cdfad6fb558f05aecb4dd13acdb2e82e28ec9ae81dedea75bcf8644f9d	share/man/man1/znew.1.gz
+D			share/man/man3
+L		color.3ncurses.gz	share/man/man3/A_COLOR.3ncurses.gz
+L		termcap.3ncurses.gz	share/man/man3/BC.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/CCHARW_MAX.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/COLORS.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/COLOR_BLACK.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/COLOR_BLUE.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/COLOR_CYAN.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/COLOR_GREEN.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/COLOR_MAGENTA.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/COLOR_PAIR.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/COLOR_PAIRS.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/COLOR_RED.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/COLOR_WHITE.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/COLOR_YELLOW.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/COLS.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/ERR.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/ESCDELAY.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/FALSE.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/LINES.3ncurses.gz
+L		mouse.3ncurses.gz	share/man/man3/MEVENT.3ncurses.gz
+L		threads.3ncurses.gz	share/man/man3/NCURSES_SCREEN_CB.3ncurses.gz
+L		threads.3ncurses.gz	share/man/man3/NCURSES_WINDOW_CB.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/OK.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/PAIR_NUMBER.3ncurses.gz
+L		termcap.3ncurses.gz	share/man/man3/PC.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/SCREEN.3ncurses.gz
+L		terminfo_variables.3ncurses.gz	share/man/man3/SP.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/TABSIZE.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/TRUE.3ncurses.gz
+L		form_variables.3form.gz	share/man/man3/TYPE_ALNUM.3form.gz
+L		form_variables.3form.gz	share/man/man3/TYPE_ALPHA.3form.gz
+L		form_variables.3form.gz	share/man/man3/TYPE_ENUM.3form.gz
+L		form_variables.3form.gz	share/man/man3/TYPE_INTEGER.3form.gz
+L		form_variables.3form.gz	share/man/man3/TYPE_IPV4.3form.gz
+L		form_variables.3form.gz	share/man/man3/TYPE_NUMERIC.3form.gz
+L		form_variables.3form.gz	share/man/man3/TYPE_REGEXP.3form.gz
+L		termcap.3ncurses.gz	share/man/man3/UP.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/WINDOW.3ncurses.gz
+L		memleaks.3ncurses.gz	share/man/man3/_nc_free_and_exit.3ncurses.gz
+L		memleaks.3ncurses.gz	share/man/man3/_nc_free_tinfo.3ncurses.gz
+L		memleaks.3ncurses.gz	share/man/man3/_nc_freeall.3ncurses.gz
+L		trace.3ncurses.gz	share/man/man3/_nc_tracebits.3ncurses.gz
+L		trace.3ncurses.gz	share/man/man3/_traceattr.3ncurses.gz
+L		trace.3ncurses.gz	share/man/man3/_traceattr2.3ncurses.gz
+L		trace.3ncurses.gz	share/man/man3/_tracecchar_t.3ncurses.gz
+L		trace.3ncurses.gz	share/man/man3/_tracecchar_t2.3ncurses.gz
+L		trace.3ncurses.gz	share/man/man3/_tracechar.3ncurses.gz
+L		trace.3ncurses.gz	share/man/man3/_tracechtype.3ncurses.gz
+L		trace.3ncurses.gz	share/man/man3/_tracechtype2.3ncurses.gz
+L		trace.3ncurses.gz	share/man/man3/_tracedump.3ncurses.gz
+L		trace.3ncurses.gz	share/man/man3/_tracef.3ncurses.gz
+L		trace.3ncurses.gz	share/man/man3/_tracemouse.3ncurses.gz
+F	1318	a21e45833a9ad16407473a13b85bd3df1235d9686b5facdb0648d8a0c9bf22f8	share/man/man3/acl_add_perm.3.gz
+F	1549	1445504a74791c8f68d09d052e64cde1dde38ba5342b0e81cadb9b6c6cea0726	share/man/man3/acl_calc_mask.3.gz
+F	1667	a45f895721f259534dafb9a6494df9235e95444384c5de5cbe7cfb55d477e432	share/man/man3/acl_check.3.gz
+F	1161	8540753d1f25058d832566b327ba04fca3087ccc73ce180f49ac20fc4c041a22	share/man/man3/acl_clear_perms.3.gz
+F	1226	b0c494a96fe0fe80f27fb56e431afe92b85f3b00ae5213cd177025d7aaebf14e	share/man/man3/acl_cmp.3.gz
+F	1158	9a38e0e3e2923ecbcd06f388d91d49ac8795f842d240f7f07d38ceb175e45763	share/man/man3/acl_copy_entry.3.gz
+F	1568	54d4e1877aa65fd7b282dd2080475759adc14f0948b906eddff5a3b12350dad6	share/man/man3/acl_copy_ext.3.gz
+F	1383	333511c537d43983c83378ed83815a7f4acac59517d5c06ef582d730ef9f9116	share/man/man3/acl_copy_int.3.gz
+F	1622	efbdaf0add74377fc0f10096fc6655aa7c67ca719ed39994256fb100e202232a	share/man/man3/acl_create_entry.3.gz
+F	2078	d758e749132cd6df8f44a0c0e0efda12ec5751d89ab4196f6f56cfff5b02eac2	share/man/man3/acl_delete_def_file.3.gz
+F	49	1ce22017084dbf4da27af48620bbb41bc0f5dee5fe8540a53a05db2ef95cc56f	share/man/man3/acl_delete_def_file_at.3.gz
+F	1242	bf7f4b652c4e420537c150ced078ef6cd7bc2d91f1bc90df11fecf89701c1a48	share/man/man3/acl_delete_entry.3.gz
+F	1321	81ba45fe03bb0a6293edd0d84d01642c0ad7c8e3273a6e10637070946bd878dd	share/man/man3/acl_delete_perm.3.gz
+F	1283	5a4ac6d20da007aa8dbc6a04aa9dacdec8feac532ff810ab95499dc6439d765a	share/man/man3/acl_dup.3.gz
+F	1128	35df1660fbeb0ec43dad9897327d464b3efc3f7b1746b11fb3ca7c90915712aa	share/man/man3/acl_entries.3.gz
+F	1372	03da7ef588a43ffa2dfc1095a59b5ce3090134a069fa1f5a1aeca8c7a276a171	share/man/man3/acl_equiv_mode.3.gz
+F	1156	81a405e69002f05e309679217cc75b5428baea70ce5f8d6a0d6c613e8d42f2c9	share/man/man3/acl_error.3.gz
+F	1506	d87695fec65b5b91640a0b99048d1e4a17e325c59786037478fddf4e31ddbe61	share/man/man3/acl_extended_fd.3.gz
+F	2333	cd4b577241e4a5ba6c0c7f29e686a3b1e9744db791f8e7c99b3e4224c103cf20	share/man/man3/acl_extended_file.3.gz
+F	48	4ec07ff7203616e25897e199b6b06eb10a60ab422ee700083a17945d305baefa	share/man/man3/acl_extended_file_at.3.gz
+F	49	0a323da2f89ac5f63f607312e8538c912d1b9622b57cf62ad53a34b66b149068	share/man/man3/acl_extended_file_nofollow.3.gz
+F	1255	3d55e89f2d8a8123d03e2415f8e4b94bb735391037cf23eeaca1d56c6a1bb141	share/man/man3/acl_free.3.gz
+F	1266	f477133346ff9528bba371faddbc4a13303d87399fa2f7e46572fe2b149f1cc9	share/man/man3/acl_from_mode.3.gz
+F	1409	b0ee57517fe499636ec81c9c8cd22b890e88980c5cd9ef0c7c6f2dfb1fa44436	share/man/man3/acl_from_text.3.gz
+F	1653	b74cf99f35e1d64482deacf6f61ab86616ec805be037b6d3ffb0b16b46353df9	share/man/man3/acl_get_entry.3.gz
+F	1453	212d561200bdabb0c722478b878a24c4c330ed60035b9ff32b7df0b72c25167b	share/man/man3/acl_get_fd.3.gz
+F	2495	caa0e2da3f89266382263e12497ac61ac193adc3aa23f4fc14094546b1e9f082	share/man/man3/acl_get_file.3.gz
+F	44	0be6d9ad4221a6347254deb14ffcc35446d96ada2c4860a2ed107b02d24274ff	share/man/man3/acl_get_file_at.3.gz
+F	1297	598bebd93e2b3cef290b40e3ac235965cc63c6fb4c63201e181c55d5654de81e	share/man/man3/acl_get_perm.3.gz
+F	1245	7afc9ea143f3f394d75eb5781cfab4b68ffda0e8aed68a17d2896b88c9950a4c	share/man/man3/acl_get_permset.3.gz
+F	1670	c94f11622ee5c1ac2990c3192b4889fbd9d0fc356f448fd2d43887a7093e91cd	share/man/man3/acl_get_qualifier.3.gz
+F	1237	13d770c6782db7bece834a2eb1036a261883dfe03f5aa62a5fdd9bb34ff88bb4	share/man/man3/acl_get_tag_type.3.gz
+F	1343	14c09f7703f49cfcce6101e4146904411ea701005d10ca1f2882b948a5059ebb	share/man/man3/acl_init.3.gz
+F	1440	fd0f4661f04a9fc2cbce685ba63e009f47ea394516e9a3453e19566b4eff311b	share/man/man3/acl_set_fd.3.gz
+F	2675	46e583ae9a94ae97aec7f9b8be9ad11e06caa0511de68520ab9b9ab2c7dab311	share/man/man3/acl_set_file.3.gz
+F	44	0c8b21aedb9a47025abf5db0c9c7c9f87f2d3f17e11b0faf79a861ad6afb2aad	share/man/man3/acl_set_file_at.3.gz
+F	1302	3c6a244c218006709a292e56ddcd910ee7853777a39b0580bf72c1e869b2da56	share/man/man3/acl_set_permset.3.gz
+F	1455	20103f7aea2c46703718d7d79061d4f475c36e3073c699ef9d980d58e77878a4	share/man/man3/acl_set_qualifier.3.gz
+F	1194	25e0e5861d68579eb6c3a1b79cb757aa24f9b77e5938d686082e48a415d37595	share/man/man3/acl_set_tag_type.3.gz
+F	1290	7f5e38e6fb82ae5cd0a0f42d53e229403c58dd16923624863a0bb656e94c1e19	share/man/man3/acl_size.3.gz
+F	2167	b572bbfaf585dd59b364500c3a4b1ed1ba5dd9580c299f28e788c38a84c8e86e	share/man/man3/acl_to_any_text.3.gz
+F	1531	455e81787cb6bd0e75cc552a64aae4fbae56b79ebf6aa6d24cf6f0cf7ae24151	share/man/man3/acl_to_text.3.gz
+F	1299	617dd298bc0b05e06b50f4a77df86abb8c4f36e44831d7fa5f76e4c3ddf89669	share/man/man3/acl_valid.3.gz
+L		terminfo_variables.3ncurses.gz	share/man/man3/acs_map.3ncurses.gz
+F	7455	ff81a82515b79760d4b4798c655851c74eb7adf279ffd949ee0dfde0e9027de3	share/man/man3/add_wch.3ncurses.gz
+L		add_wchstr.3ncurses.gz	share/man/man3/add_wchnstr.3ncurses.gz
+F	2319	38f552ad01d9f70efe543f3366538aec98e4194577d6cd2204677248b0a2e34a	share/man/man3/add_wchstr.3ncurses.gz
+F	7108	c81602c880e481946642009511285e8b45e8d991f1e1ea7f662d6f25552dad35	share/man/man3/addch.3ncurses.gz
+L		addchstr.3ncurses.gz	share/man/man3/addchnstr.3ncurses.gz
+F	2124	9c281fee608f0a2e7fafa440e8915194342b96539cb94c725645cfc8a2e0bd14	share/man/man3/addchstr.3ncurses.gz
+L		addstr.3ncurses.gz	share/man/man3/addnstr.3ncurses.gz
+L		addwstr.3ncurses.gz	share/man/man3/addnwstr.3ncurses.gz
+F	2013	0469f07ebb034a7e9a092afd276bfa1e479a337635a9d6c75a6dc136a160b8fd	share/man/man3/addstr.3ncurses.gz
+F	2120	f775d61ed0e17a0106963722af4f2ff99d8402ac4f7e3c338895fbbad89b64c1	share/man/man3/addwstr.3ncurses.gz
+L		new_pair.3ncurses.gz	share/man/man3/alloc_pair.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/alloc_pair_sp.3ncurses.gz
+L		default_colors.3ncurses.gz	share/man/man3/assume_default_colors.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/assume_default_colors_sp.3ncurses.gz
+F	7943	68283b9a6eacb3a5e63f7384baf06ae0885e7d577bce557ced859eb89969f9c0	share/man/man3/attr.3ncurses.gz
+F	1862	1aa23b464077d157e5069f886d55c15854e25a8647213aba1c45ae8340f67035	share/man/man3/attr_get.3.gz
+L		attr.3ncurses.gz	share/man/man3/attr_get.3ncurses.gz
+L		attr_get.3.gz	share/man/man3/attr_getf.3.gz
+F	2625	c8116f4fc38f255581b38e626e7d9d997b7a534be3f27bd8b61de4eb329d818b	share/man/man3/attr_list.3.gz
+L		attr_list.3.gz	share/man/man3/attr_listf.3.gz
+F	2736	504c8927f7c3a60e70aa5f096df14148b513d136de91d21e7f60bb05792c25dc	share/man/man3/attr_multi.3.gz
+L		attr_multi.3.gz	share/man/man3/attr_multif.3.gz
+L		attr.3ncurses.gz	share/man/man3/attr_off.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/attr_on.3ncurses.gz
+F	1643	82a8565b42e2c5384617b7d3c03297cb0d5f29368a59e0632522a27f70d680a3	share/man/man3/attr_remove.3.gz
+L		attr_remove.3.gz	share/man/man3/attr_removef.3.gz
+F	2064	78f232602954a4cd9402758c755a34dfa9380e2ddda57d7315c7e1e94c71b146	share/man/man3/attr_set.3.gz
+L		attr.3ncurses.gz	share/man/man3/attr_set.3ncurses.gz
+L		attr_set.3.gz	share/man/man3/attr_setf.3.gz
+L		curses_variables.3ncurses.gz	share/man/man3/attr_t.3ncurses.gz
+F	1832	6ab2eafef2fc2201a73c6e91be3accce4faf1a7cd5604d3774b402f855d4aad9	share/man/man3/attributes.3menu.gz
+L		attr.3ncurses.gz	share/man/man3/attroff.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/attron.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/attrset.3ncurses.gz
+L		termattrs.3ncurses.gz	share/man/man3/baudrate.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/baudrate_sp.3ncurses.gz
+F	1704	d4c9527db88b31f617c3503de165a46c698cc91f985b0fe64cde9d09527acadc	share/man/man3/beep.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/beep_sp.3ncurses.gz
+F	3219	e2a4495251e628552531bbdf608eaff038caced7034d3ce704d8611828fcea73	share/man/man3/bkgd.3ncurses.gz
+L		bkgd.3ncurses.gz	share/man/man3/bkgdset.3ncurses.gz
+F	2832	3636ed867c2282551d422ef0c12a5ab4a7b418896e6dc645d1ce8a8605b56bf2	share/man/man3/bkgrnd.3ncurses.gz
+L		bkgrnd.3ncurses.gz	share/man/man3/bkgrndset.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/bool.3ncurses.gz
+L		terminfo_variables.3ncurses.gz	share/man/man3/boolcodes.3ncurses.gz
+L		terminfo_variables.3ncurses.gz	share/man/man3/boolfnames.3ncurses.gz
+L		terminfo_variables.3ncurses.gz	share/man/man3/boolnames.3ncurses.gz
+F	2810	3fbf51142bd1e15ce8d1f17c0081334a86ccf82487a1118525f034f8742f88c9	share/man/man3/border.3ncurses.gz
+F	2198	d187f009972b7b11117401f5c49322d0f7e2154133ee219422a2a67b085b45f1	share/man/man3/border_set.3ncurses.gz
+L		panel.3ncurses.gz	share/man/man3/bottom_panel.3ncurses.gz
+L		border.3ncurses.gz	share/man/man3/box.3ncurses.gz
+L		border_set.3ncurses.gz	share/man/man3/box_set.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/can_change_color.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/can_change_color_sp.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/cbreak.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/cbreak_sp.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/cchar_t.3ncurses.gz
+L		panel.3ncurses.gz	share/man/man3/ceiling_panel.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/chgat.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/chtype.3ncurses.gz
+F	2359	9f4e3c4c8078c61f2c4f66f945f483c00c2f283d5278069f4ece7a4e4e374ede	share/man/man3/clear.3ncurses.gz
+L		outopts.3ncurses.gz	share/man/man3/clearok.3ncurses.gz
+L		clear.3ncurses.gz	share/man/man3/clrtobot.3ncurses.gz
+L		clear.3ncurses.gz	share/man/man3/clrtoeol.3ncurses.gz
+F	7992	21d855b03c23a4fc8cf5b61486fe04f26e024af9363d486443e81ad876b4e625	share/man/man3/color.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/color_content.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/color_content_sp.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/color_set.3ncurses.gz
+L		overlay.3ncurses.gz	share/man/man3/copywin.3ncurses.gz
+L		terminfo_variables.3ncurses.gz	share/man/man3/cur_term.3ncurses.gz
+L		page.3form.gz	share/man/man3/current_field.3form.gz
+L		menu_current.3menu.gz	share/man/man3/current_item.3menu.gz
+L		kernel.3ncurses.gz	share/man/man3/curs_set.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/curs_set_sp.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/curs_sp_funcs.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/curscr.3ncurses.gz
+L		ncurses.3ncurses.gz	share/man/man3/curses.3ncurses.gz
+L		trace.3ncurses.gz	share/man/man3/curses_trace.3ncurses.gz
+F	4975	ff3e20ccb4aae635892ce6f626d04023e01d5ca57cf16247147117a02e4da5a0	share/man/man3/curses_variables.3ncurses.gz
+L		extensions.3ncurses.gz	share/man/man3/curses_version.3ncurses.gz
+F	1485	df75d0512b0a8948c45c4a2e3f99cd4ff84eafd8c3d3ffd3e0d575326e8bed80	share/man/man3/cursor.3form.gz
+F	1468	890683873cd373d733325e884aa61f24e377b6b5cc9e1c66fc1ea3b895ef8242	share/man/man3/cursor.3menu.gz
+F	1314	c3bcc4a5f6926fd0b40c40ec826d47888247d0dec5a4ebcef786b04a142d1838	share/man/man3/data.3form.gz
+L		data.3form.gz	share/man/man3/data_ahead.3form.gz
+L		data.3form.gz	share/man/man3/data_behind.3form.gz
+L		kernel.3ncurses.gz	share/man/man3/def_prog_mode.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/def_prog_mode_sp.3ncurses.gz
+L		kernel.3ncurses.gz	share/man/man3/def_shell_mode.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/def_shell_mode_sp.3ncurses.gz
+F	2819	7e317e787b1b4c0b0412bec7ba79bba100f2a33dcfc08c2144f06696334513f2	share/man/man3/default_colors.3ncurses.gz
+F	1669	c6dca3d960c1597e79ab1ffc9ec7b5d250a6fc7c31570786dd5165a7f84b9c1a	share/man/man3/define_key.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/define_key_sp.3ncurses.gz
+L		terminfo.3ncurses.gz	share/man/man3/del_curterm.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/del_curterm_sp.3ncurses.gz
+L		panel.3ncurses.gz	share/man/man3/del_panel.3ncurses.gz
+L		util.3ncurses.gz	share/man/man3/delay_output.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/delay_output_sp.3ncurses.gz
+F	1888	88a13e8ae182389632d15bfb81f7e5ebad771962a38b5ae7846d67041e6eb37e	share/man/man3/delch.3ncurses.gz
+F	1977	09d07160f4e383be3477c44a336d679aa567bff4d8f733be726fefc6b9e8ed08	share/man/man3/deleteln.3ncurses.gz
+L		initscr.3ncurses.gz	share/man/man3/delscreen.3ncurses.gz
+L		window.3ncurses.gz	share/man/man3/delwin.3ncurses.gz
+L		window.3ncurses.gz	share/man/man3/derwin.3ncurses.gz
+L		refresh.3ncurses.gz	share/man/man3/doupdate.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/doupdate_sp.3ncurses.gz
+F	3624	2e0268af1a33e2dc2f6e77c8973e45958a8ade5960eb1251edb9baa1ba0a7225	share/man/man3/driver.3form.gz
+F	2747	459324b6825040e58d84aa8d453d91b3b4e683ccb28cb147b4a842b7ff3915d8	share/man/man3/driver.3menu.gz
+L		field_new.3form.gz	share/man/man3/dup_field.3form.gz
+L		window.3ncurses.gz	share/man/man3/dupwin.3ncurses.gz
+L		field_info.3form.gz	share/man/man3/dynamic_field_info.3form.gz
+L		inopts.3ncurses.gz	share/man/man3/echo.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/echo_sp.3ncurses.gz
+L		add_wch.3ncurses.gz	share/man/man3/echo_wchar.3ncurses.gz
+L		addch.3ncurses.gz	share/man/man3/echochar.3ncurses.gz
+L		initscr.3ncurses.gz	share/man/man3/endwin.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/endwin_sp.3ncurses.gz
+L		clear.3ncurses.gz	share/man/man3/erase.3ncurses.gz
+L		termattrs.3ncurses.gz	share/man/man3/erasechar.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/erasechar_sp.3ncurses.gz
+L		termattrs.3ncurses.gz	share/man/man3/erasewchar.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/erasewchar_sp.3ncurses.gz
+L		memleaks.3ncurses.gz	share/man/man3/exit_curses.3ncurses.gz
+L		memleaks.3ncurses.gz	share/man/man3/exit_terminfo.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/extended_color_content.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/extended_color_content_sp.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/extended_pair_content.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/extended_pair_content_sp.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/extended_slk_color.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/extended_slk_color_sp.3ncurses.gz
+F	2004	2596ab61ee6625f4fc9b9d9d8592b206b41c0295a7545324a1f311d006dcca0b	share/man/man3/extensions.3ncurses.gz
+F	1716	d67bd0ec87e8dfcb2efde1beee567c75292706222854961383e637e7c73903ca	share/man/man3/field.3form.gz
+L		field_validation.3form.gz	share/man/man3/field_arg.3form.gz
+F	1721	a76b3f938284c967f05a738fa264032bd3bd9c476daec5d004abe4722e24c8dd	share/man/man3/field_attributes.3form.gz
+L		field_attributes.3form.gz	share/man/man3/field_back.3form.gz
+F	2450	49121d408591f46ce0801c6a75da6c97e5ecb86accedb8aeee527842db783d88	share/man/man3/field_buffer.3form.gz
+L		field.3form.gz	share/man/man3/field_count.3form.gz
+L		field_attributes.3form.gz	share/man/man3/field_fore.3form.gz
+L		page.3form.gz	share/man/man3/field_index.3form.gz
+F	1875	af99c3087b5b4bd7585c53fc591d3466d3fac549096ffcefc3c50e38428f3b67	share/man/man3/field_info.3form.gz
+L		hook.3form.gz	share/man/man3/field_init.3form.gz
+F	1590	42bfa9769795acd1ea2583b3aaeae2f6ba10f08a3fc190a925916601b2880da6	share/man/man3/field_just.3form.gz
+F	1932	8dc73772c2b465d8c4fde4ce66378eb934488e1f6fb91a1780ff28a9f2af7262	share/man/man3/field_new.3form.gz
+F	2380	ed707626ad342e96f2a4f4e2956f61e9635660b0b1a0fd8da18214f885d6f8a2	share/man/man3/field_opts.3form.gz
+L		field_opts.3form.gz	share/man/man3/field_opts_off.3form.gz
+L		field_opts.3form.gz	share/man/man3/field_opts_on.3form.gz
+L		field_attributes.3form.gz	share/man/man3/field_pad.3form.gz
+L		field_buffer.3form.gz	share/man/man3/field_status.3form.gz
+L		hook.3form.gz	share/man/man3/field_term.3form.gz
+L		field_validation.3form.gz	share/man/man3/field_type.3form.gz
+F	1471	e8438e948cc8476783f1896f8832002c2032f2c66870dc5b42f03b3028962bd1	share/man/man3/field_userptr.3form.gz
+F	3026	3cd10df05426c5a264d609bcefabb94d4274285b1932b15489792ddbaa4fefa6	share/man/man3/field_validation.3form.gz
+F	2575	cca5c0780e5b50e710aef1ca99065b0b08018efbe0f5970968763b4ab64b64c8	share/man/man3/fieldtype.3form.gz
+L		util.3ncurses.gz	share/man/man3/filter.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/filter_sp.3ncurses.gz
+L		new_pair.3ncurses.gz	share/man/man3/find_pair.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/find_pair_sp.3ncurses.gz
+L		beep.3ncurses.gz	share/man/man3/flash.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/flash_sp.3ncurses.gz
+L		util.3ncurses.gz	share/man/man3/flushinp.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/flushinp_sp.3ncurses.gz
+F	3083	f78bfd0c9c1863cbcf67c3fad80384431adfe2840d75d409b256059096dcce9a	share/man/man3/form.3form.gz
+L		driver.3form.gz	share/man/man3/form_driver.3form.gz
+L		driver.3form.gz	share/man/man3/form_driver_w.3form.gz
+L		field.3form.gz	share/man/man3/form_field.3form.gz
+L		field_attributes.3form.gz	share/man/man3/form_field_attributes.3form.gz
+L		field_buffer.3form.gz	share/man/man3/form_field_buffer.3form.gz
+L		field_validation.3form.gz	share/man/man3/form_field_validation.3form.gz
+L		field.3form.gz	share/man/man3/form_fields.3form.gz
+L		fieldtype.3form.gz	share/man/man3/form_fieldtype.3form.gz
+L		hook.3form.gz	share/man/man3/form_hook.3form.gz
+L		hook.3form.gz	share/man/man3/form_init.3form.gz
+L		opts.3form.gz	share/man/man3/form_opts.3form.gz
+L		opts.3form.gz	share/man/man3/form_opts_off.3form.gz
+L		opts.3form.gz	share/man/man3/form_opts_on.3form.gz
+L		page.3form.gz	share/man/man3/form_page.3form.gz
+L		requestname.3form.gz	share/man/man3/form_request_by_name.3form.gz
+L		requestname.3form.gz	share/man/man3/form_request_name.3form.gz
+L		win.3form.gz	share/man/man3/form_sub.3form.gz
+L		hook.3form.gz	share/man/man3/form_term.3form.gz
+L		userptr.3form.gz	share/man/man3/form_userptr.3form.gz
+F	1442	25a196063453b43f4dee769631836bfcb63343f8a478f099b79b16660729c33d	share/man/man3/form_variables.3form.gz
+L		win.3form.gz	share/man/man3/form_win.3form.gz
+F	1704	815ad5db10130855f055e26ab7a2caeee4a8a79c8ced5c6d80ef6b2c37ed2721	share/man/man3/format.3menu.gz
+L		field_new.3form.gz	share/man/man3/free_field.3form.gz
+L		fieldtype.3form.gz	share/man/man3/free_fieldtype.3form.gz
+L		new.3form.gz	share/man/man3/free_form.3form.gz
+L		menu_new.3menu.gz	share/man/man3/free_item.3menu.gz
+L		new.3menu.gz	share/man/man3/free_menu.3menu.gz
+L		new_pair.3ncurses.gz	share/man/man3/free_pair.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/free_pair_sp.3ncurses.gz
+L		threads.3ncurses.gz	share/man/man3/get_escdelay.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/get_escdelay_sp.3ncurses.gz
+F	3385	bc4805ae807347ea0844433616b41f8ffc93ba144d9ee67241dea60beec1c1da	share/man/man3/get_wch.3ncurses.gz
+F	4138	122aa7f49dcd321554ad8dcb7f03cd0058522f3fed7421b4a70ce686dc9cc5e0	share/man/man3/get_wstr.3ncurses.gz
+L		legacy.3ncurses.gz	share/man/man3/getattrs.3ncurses.gz
+L		legacy.3ncurses.gz	share/man/man3/getbegx.3ncurses.gz
+L		legacy.3ncurses.gz	share/man/man3/getbegy.3ncurses.gz
+L		getyx.3ncurses.gz	share/man/man3/getbegyx.3ncurses.gz
+L		bkgd.3ncurses.gz	share/man/man3/getbkgd.3ncurses.gz
+L		bkgrnd.3ncurses.gz	share/man/man3/getbkgrnd.3ncurses.gz
+F	3298	72d36a64c43cea04700480c62cdc1a172874486c566cc617a074b2bfb3c68e49	share/man/man3/getcchar.3ncurses.gz
+F	7818	66e22272f00050d5cefab26700cc37cdab70ef5e6aa083b057f2b19365d5e108	share/man/man3/getch.3ncurses.gz
+L		legacy.3ncurses.gz	share/man/man3/getcurx.3ncurses.gz
+L		legacy.3ncurses.gz	share/man/man3/getcury.3ncurses.gz
+L		legacy.3ncurses.gz	share/man/man3/getmaxx.3ncurses.gz
+L		legacy.3ncurses.gz	share/man/man3/getmaxy.3ncurses.gz
+L		getyx.3ncurses.gz	share/man/man3/getmaxyx.3ncurses.gz
+L		mouse.3ncurses.gz	share/man/man3/getmouse.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/getmouse_sp.3ncurses.gz
+L		get_wstr.3ncurses.gz	share/man/man3/getn_wstr.3ncurses.gz
+L		getstr.3ncurses.gz	share/man/man3/getnstr.3ncurses.gz
+L		legacy.3ncurses.gz	share/man/man3/getparx.3ncurses.gz
+L		legacy.3ncurses.gz	share/man/man3/getpary.3ncurses.gz
+L		getyx.3ncurses.gz	share/man/man3/getparyx.3ncurses.gz
+F	5086	900bb033a8f93e826b6d6e0e6ff01a701224b4bc2bd5a4133ba06f90bb061750	share/man/man3/getstr.3ncurses.gz
+L		kernel.3ncurses.gz	share/man/man3/getsyx.3ncurses.gz
+L		util.3ncurses.gz	share/man/man3/getwin.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/getwin_sp.3ncurses.gz
+F	2160	ee5c0c4fbddacde6d603d5e028227767bd8768ba978497692a9ccaeae6a47537	share/man/man3/getyx.3ncurses.gz
+L		panel.3ncurses.gz	share/man/man3/ground_panel.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/halfdelay.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/halfdelay_sp.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/has_colors.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/has_colors_sp.3ncurses.gz
+L		termattrs.3ncurses.gz	share/man/man3/has_ic.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/has_ic_sp.3ncurses.gz
+L		termattrs.3ncurses.gz	share/man/man3/has_il.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/has_il_sp.3ncurses.gz
+L		getch.3ncurses.gz	share/man/man3/has_key.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/has_key_sp.3ncurses.gz
+L		mouse.3ncurses.gz	share/man/man3/has_mouse.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/has_mouse_sp.3ncurses.gz
+L		panel.3ncurses.gz	share/man/man3/hide_panel.3ncurses.gz
+F	8802	07d16c974ee4ee8584c5803e0c12ca41bcd422b76a54f5bdc487678c6810b262	share/man/man3/history.3.gz
+L		border.3ncurses.gz	share/man/man3/hline.3ncurses.gz
+L		border_set.3ncurses.gz	share/man/man3/hline_set.3ncurses.gz
+F	1665	90271108b569535d1ba9ce9e43eacc223f5daa7a833daab6e834a4feb77f80bb	share/man/man3/hook.3form.gz
+F	1680	c574a490c79d1af4a381d7763d1de1fcae8bbce1c5940fa3b0b08112d9bc3107	share/man/man3/hook.3menu.gz
+F	2546	f7292f53e9425b2c91bb1d0f86effa49a9a3c1bdf1ddc2990f171f501ccef9f9	share/man/man3/iconv.3.gz
+F	623	ae6763f6b260520274f87ef6a4aa6310f9e9e69aab7ceaf8f0c9ed4cbaf9da4f	share/man/man3/iconv_close.3.gz
+F	2473	c9d9470906579d7aa9727ebf3a816f20010b6e39c07719752494d6af55a9930a	share/man/man3/iconv_open.3.gz
+F	905	5de020a98072a4bd08d736110d1e36a7a638aca9849ba08dc2f987cf7648ce72	share/man/man3/iconv_open_into.3.gz
+F	1423	005c6b783572184e5acfea1b254298a41776f2bf1fe1d49563f515d6f22be51e	share/man/man3/iconvctl.3.gz
+L		outopts.3ncurses.gz	share/man/man3/idcok.3ncurses.gz
+L		outopts.3ncurses.gz	share/man/man3/idlok.3ncurses.gz
+L		outopts.3ncurses.gz	share/man/man3/immedok.3ncurses.gz
+F	1904	fee4399614a836e062d086632f376a30d90170d6c436b4ee167acf3405743388	share/man/man3/in_wch.3ncurses.gz
+L		in_wchstr.3ncurses.gz	share/man/man3/in_wchnstr.3ncurses.gz
+F	2171	f8a783d0388deb7db1a3c62b916bc0f79314104cc8997823ae42201689d06ee9	share/man/man3/in_wchstr.3ncurses.gz
+F	2514	ee4fadb386e1e3742957760882f86976956fb101aca54573e932e32cee952775	share/man/man3/inch.3ncurses.gz
+L		inchstr.3ncurses.gz	share/man/man3/inchnstr.3ncurses.gz
+F	2363	25b3610af506326b43b89bf27efea2a03e9ba1ea2467dc7e5b11bd5a818ad3e1	share/man/man3/inchstr.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/init_color.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/init_color_sp.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/init_extended_color.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/init_extended_color_sp.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/init_extended_pair.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/init_extended_pair_sp.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/init_pair.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/init_pair_sp.3ncurses.gz
+F	5608	866dbded4e71cfed7161138a1ec9885cccff874889c2bcc69845e82a2e48acb9	share/man/man3/initscr.3ncurses.gz
+L		instr.3ncurses.gz	share/man/man3/innstr.3ncurses.gz
+L		inwstr.3ncurses.gz	share/man/man3/innwstr.3ncurses.gz
+F	7796	a879aff79fee8d52f484ed01952bc0921a0018be41ec5eec8d9b23108d8934a9	share/man/man3/inopts.3ncurses.gz
+L		ins_wstr.3ncurses.gz	share/man/man3/ins_nwstr.3ncurses.gz
+F	2034	a9feae01329ae524bfd2e7d7610d7442c850d8fd992692a6cd45cecd8c5f10af	share/man/man3/ins_wch.3ncurses.gz
+F	2576	2fee9c5328a7f1aa447e4e0fc545294ff910217290101dccdc5a9d048e350f4c	share/man/man3/ins_wstr.3ncurses.gz
+F	1915	4b026903aa25c67d41e34a9dc6dc28e485adeda1cceb3b2b1f80ed232ca11036	share/man/man3/insch.3ncurses.gz
+L		deleteln.3ncurses.gz	share/man/man3/insdelln.3ncurses.gz
+L		deleteln.3ncurses.gz	share/man/man3/insertln.3ncurses.gz
+L		insstr.3ncurses.gz	share/man/man3/insnstr.3ncurses.gz
+F	2466	4373ead7fe5151281df5aba3069b13c9984013d56cc84e75edfbc57f7e965338	share/man/man3/insstr.3ncurses.gz
+F	2527	e1aab17fc009397c1ab61766c78a2c6fcc607303f60e6f7dba4d5f40205e0d40	share/man/man3/instr.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/intrflush.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/intrflush_sp.3ncurses.gz
+F	2768	b08035deec7b992c3b6fc460d38c3f86790bce47586db668953574a085c89302	share/man/man3/inwstr.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/is_cbreak.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/is_cbreak_sp.3ncurses.gz
+L		opaque.3ncurses.gz	share/man/man3/is_cleared.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/is_echo.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/is_echo_sp.3ncurses.gz
+L		opaque.3ncurses.gz	share/man/man3/is_idcok.3ncurses.gz
+L		opaque.3ncurses.gz	share/man/man3/is_idlok.3ncurses.gz
+L		opaque.3ncurses.gz	share/man/man3/is_immedok.3ncurses.gz
+L		opaque.3ncurses.gz	share/man/man3/is_keypad.3ncurses.gz
+L		opaque.3ncurses.gz	share/man/man3/is_leaveok.3ncurses.gz
+L		touch.3ncurses.gz	share/man/man3/is_linetouched.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/is_nl.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/is_nl_sp.3ncurses.gz
+L		opaque.3ncurses.gz	share/man/man3/is_nodelay.3ncurses.gz
+L		opaque.3ncurses.gz	share/man/man3/is_notimeout.3ncurses.gz
+L		opaque.3ncurses.gz	share/man/man3/is_pad.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/is_raw.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/is_raw_sp.3ncurses.gz
+L		opaque.3ncurses.gz	share/man/man3/is_scrollok.3ncurses.gz
+L		opaque.3ncurses.gz	share/man/man3/is_subwin.3ncurses.gz
+L		opaque.3ncurses.gz	share/man/man3/is_syncok.3ncurses.gz
+L		resizeterm.3ncurses.gz	share/man/man3/is_term_resized.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/is_term_resized_sp.3ncurses.gz
+L		touch.3ncurses.gz	share/man/man3/is_wintouched.3ncurses.gz
+L		initscr.3ncurses.gz	share/man/man3/isendwin.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/isendwin_sp.3ncurses.gz
+L		items.3menu.gz	share/man/man3/item_count.3menu.gz
+L		menu_name.3menu.gz	share/man/man3/item_description.3menu.gz
+L		menu_current.3menu.gz	share/man/man3/item_index.3menu.gz
+L		hook.3menu.gz	share/man/man3/item_init.3menu.gz
+L		menu_name.3menu.gz	share/man/man3/item_name.3menu.gz
+L		menu_opts.3menu.gz	share/man/man3/item_opts.3menu.gz
+L		menu_opts.3menu.gz	share/man/man3/item_opts_off.3menu.gz
+L		menu_opts.3menu.gz	share/man/man3/item_opts_on.3menu.gz
+L		hook.3menu.gz	share/man/man3/item_term.3menu.gz
+L		menu_userptr.3menu.gz	share/man/man3/item_userptr.3menu.gz
+L		menu_value.3menu.gz	share/man/man3/item_value.3menu.gz
+L		menu_visible.3menu.gz	share/man/man3/item_visible.3menu.gz
+F	1666	e663c2baf7040d305c17449d36f9f30519737eadb83066eae108f086e341bd72	share/man/man3/items.3menu.gz
+F	4728	504b7f28ac7b6dd2ee3183eaf54cb949d8b59965276562a413e89de2946f32c4	share/man/man3/kernel.3ncurses.gz
+F	1380	d34adc47d8859a8fd81c2159874fd42d5f44028baa805218889059ae27c90bc2	share/man/man3/key_defined.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/key_defined_sp.3ncurses.gz
+L		util.3ncurses.gz	share/man/man3/key_name.3ncurses.gz
+F	1668	bb847505f4f2de673daada173100c457704bb6d3c8099d7a5bb995243b5948f7	share/man/man3/keybound.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/keybound_sp.3ncurses.gz
+L		util.3ncurses.gz	share/man/man3/keyname.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/keyname_sp.3ncurses.gz
+F	1582	ad1a4f1d1044b124b35821a87d8818b274710274ff59ecc0c2fb52c7eae86af5	share/man/man3/keyok.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/keyok_sp.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/keypad.3ncurses.gz
+L		termattrs.3ncurses.gz	share/man/man3/killchar.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/killchar_sp.3ncurses.gz
+L		termattrs.3ncurses.gz	share/man/man3/killwchar.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/killwchar_sp.3ncurses.gz
+L		outopts.3ncurses.gz	share/man/man3/leaveok.3ncurses.gz
+F	1816	2e0890832f3f91f22b850bcd526d857a5ef806e7f715b062c07b79047c69fec4	share/man/man3/legacy.3ncurses.gz
+F	1677	ee4171ecc05637c809ff404293347e56487feab806dfc81aef284adffd0a6df4	share/man/man3/legacy_coding.3ncurses.gz
+L		field_new.3form.gz	share/man/man3/link_field.3form.gz
+L		fieldtype.3form.gz	share/man/man3/link_fieldtype.3form.gz
+L		termattrs.3ncurses.gz	share/man/man3/longname.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/longname_sp.3ncurses.gz
+F	1680	c56149bfa2e2c3447eeb6fa1abcf2197790ad8d17d9b74ce03aee2e6d9624035	share/man/man3/mark.3menu.gz
+L		print.3ncurses.gz	share/man/man3/mcprint.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/mcprint_sp.3ncurses.gz
+F	2274	7eaff341c7c3e6e7a3ecb4540d9d6c19cf5de7797ed4fd6ecb2702f7027c89c4	share/man/man3/memleaks.3ncurses.gz
+F	2815	cd6f6cc096b27317f1ad6f2b54503a63d80ccc8136c8e0e1bb3fe021e127dd99	share/man/man3/menu.3menu.gz
+L		attributes.3menu.gz	share/man/man3/menu_back.3menu.gz
+F	1854	33c84db78a88dac1f1444234ddfa1c4cde61803bf12085baffa69ca2c519b4ec	share/man/man3/menu_current.3menu.gz
+L		driver.3menu.gz	share/man/man3/menu_driver.3menu.gz
+L		attributes.3menu.gz	share/man/man3/menu_fore.3menu.gz
+L		format.3menu.gz	share/man/man3/menu_format.3menu.gz
+L		attributes.3menu.gz	share/man/man3/menu_grey.3menu.gz
+L		hook.3menu.gz	share/man/man3/menu_hook.3menu.gz
+L		hook.3menu.gz	share/man/man3/menu_init.3menu.gz
+L		items.3menu.gz	share/man/man3/menu_items.3menu.gz
+L		mark.3menu.gz	share/man/man3/menu_mark.3menu.gz
+F	1344	98c0af6f34428fac1a7768411d7ec9ac7fbc38549aa40429ea2f8a9a0cef5b4d	share/man/man3/menu_name.3menu.gz
+F	1691	cc69d99735690e8ea07d51b58c6cce06eea276c770e518be2279b534f506ce31	share/man/man3/menu_new.3menu.gz
+F	1629	ff40c9d7275af67157b6c1fbedf6eacc06ce2cc43d35ab5fbe0717b3c156d5b6	share/man/man3/menu_opts.3menu.gz
+L		opts.3menu.gz	share/man/man3/menu_opts_off.3menu.gz
+L		opts.3menu.gz	share/man/man3/menu_opts_on.3menu.gz
+L		attributes.3menu.gz	share/man/man3/menu_pad.3menu.gz
+L		pattern.3menu.gz	share/man/man3/menu_pattern.3menu.gz
+L		requestname.3menu.gz	share/man/man3/menu_request_by_name.3menu.gz
+L		requestname.3menu.gz	share/man/man3/menu_request_name.3menu.gz
+L		spacing.3menu.gz	share/man/man3/menu_spacing.3menu.gz
+L		win.3menu.gz	share/man/man3/menu_sub.3menu.gz
+L		hook.3menu.gz	share/man/man3/menu_term.3menu.gz
+F	1470	bd9a4f2973fb5bccfc9e946365cdd6881bc986749e3045fa5af3976b8bbe482f	share/man/man3/menu_userptr.3menu.gz
+F	1546	3cd8cd0cea05cc8cf69661b01941f4dd6c0aa9df7da308f58d25078cc3bb207c	share/man/man3/menu_value.3menu.gz
+F	1309	94a092181f40b331a734d297555d65b6cd098709a87a55ff2333f53697c32707	share/man/man3/menu_visible.3menu.gz
+L		win.3menu.gz	share/man/man3/menu_win.3menu.gz
+L		inopts.3ncurses.gz	share/man/man3/meta.3ncurses.gz
+L		menu_current.3menu.gz	share/man/man3/mitem_current.3menu.gz
+L		mouse.3ncurses.gz	share/man/man3/mmask_t.3ncurses.gz
+F	6560	48b96ea67e55d8e6b9df58c6faa0e7373559337d7b25ca4dc153a8bdc8f79061	share/man/man3/mouse.3ncurses.gz
+L		mouse.3ncurses.gz	share/man/man3/mouse_trafo.3ncurses.gz
+L		mouse.3ncurses.gz	share/man/man3/mouseinterval.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/mouseinterval_sp.3ncurses.gz
+L		mouse.3ncurses.gz	share/man/man3/mousemask.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/mousemask_sp.3ncurses.gz
+F	1718	d744814b6c1c17c238264d8aa8da555be3900c7e83f8d23e848b209fdf15d6a1	share/man/man3/move.3ncurses.gz
+L		field.3form.gz	share/man/man3/move_field.3form.gz
+L		panel.3ncurses.gz	share/man/man3/move_panel.3ncurses.gz
+L		add_wch.3ncurses.gz	share/man/man3/mvadd_wch.3ncurses.gz
+L		add_wchstr.3ncurses.gz	share/man/man3/mvadd_wchnstr.3ncurses.gz
+L		add_wchstr.3ncurses.gz	share/man/man3/mvadd_wchstr.3ncurses.gz
+L		addch.3ncurses.gz	share/man/man3/mvaddch.3ncurses.gz
+L		addchstr.3ncurses.gz	share/man/man3/mvaddchnstr.3ncurses.gz
+L		addchstr.3ncurses.gz	share/man/man3/mvaddchstr.3ncurses.gz
+L		addstr.3ncurses.gz	share/man/man3/mvaddnstr.3ncurses.gz
+L		addwstr.3ncurses.gz	share/man/man3/mvaddnwstr.3ncurses.gz
+L		addstr.3ncurses.gz	share/man/man3/mvaddstr.3ncurses.gz
+L		addwstr.3ncurses.gz	share/man/man3/mvaddwstr.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/mvchgat.3ncurses.gz
+L		kernel.3ncurses.gz	share/man/man3/mvcur.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/mvcur_sp.3ncurses.gz
+L		delch.3ncurses.gz	share/man/man3/mvdelch.3ncurses.gz
+L		window.3ncurses.gz	share/man/man3/mvderwin.3ncurses.gz
+L		get_wch.3ncurses.gz	share/man/man3/mvget_wch.3ncurses.gz
+L		get_wstr.3ncurses.gz	share/man/man3/mvget_wstr.3ncurses.gz
+L		getch.3ncurses.gz	share/man/man3/mvgetch.3ncurses.gz
+L		get_wstr.3ncurses.gz	share/man/man3/mvgetn_wstr.3ncurses.gz
+L		getstr.3ncurses.gz	share/man/man3/mvgetnstr.3ncurses.gz
+L		getstr.3ncurses.gz	share/man/man3/mvgetstr.3ncurses.gz
+L		border.3ncurses.gz	share/man/man3/mvhline.3ncurses.gz
+L		border_set.3ncurses.gz	share/man/man3/mvhline_set.3ncurses.gz
+L		in_wch.3ncurses.gz	share/man/man3/mvin_wch.3ncurses.gz
+L		in_wchstr.3ncurses.gz	share/man/man3/mvin_wchnstr.3ncurses.gz
+L		in_wchstr.3ncurses.gz	share/man/man3/mvin_wchstr.3ncurses.gz
+L		inch.3ncurses.gz	share/man/man3/mvinch.3ncurses.gz
+L		inchstr.3ncurses.gz	share/man/man3/mvinchnstr.3ncurses.gz
+L		inchstr.3ncurses.gz	share/man/man3/mvinchstr.3ncurses.gz
+L		instr.3ncurses.gz	share/man/man3/mvinnstr.3ncurses.gz
+L		inwstr.3ncurses.gz	share/man/man3/mvinnwstr.3ncurses.gz
+L		ins_wstr.3ncurses.gz	share/man/man3/mvins_nwstr.3ncurses.gz
+L		ins_wch.3ncurses.gz	share/man/man3/mvins_wch.3ncurses.gz
+L		ins_wstr.3ncurses.gz	share/man/man3/mvins_wstr.3ncurses.gz
+L		insch.3ncurses.gz	share/man/man3/mvinsch.3ncurses.gz
+L		insstr.3ncurses.gz	share/man/man3/mvinsnstr.3ncurses.gz
+L		insstr.3ncurses.gz	share/man/man3/mvinsstr.3ncurses.gz
+L		instr.3ncurses.gz	share/man/man3/mvinstr.3ncurses.gz
+L		inwstr.3ncurses.gz	share/man/man3/mvinwstr.3ncurses.gz
+L		printw.3ncurses.gz	share/man/man3/mvprintw.3ncurses.gz
+L		scanw.3ncurses.gz	share/man/man3/mvscanw.3ncurses.gz
+L		border.3ncurses.gz	share/man/man3/mvvline.3ncurses.gz
+L		border_set.3ncurses.gz	share/man/man3/mvvline_set.3ncurses.gz
+L		add_wch.3ncurses.gz	share/man/man3/mvwadd_wch.3ncurses.gz
+L		add_wchstr.3ncurses.gz	share/man/man3/mvwadd_wchnstr.3ncurses.gz
+L		add_wchstr.3ncurses.gz	share/man/man3/mvwadd_wchstr.3ncurses.gz
+L		addch.3ncurses.gz	share/man/man3/mvwaddch.3ncurses.gz
+L		addchstr.3ncurses.gz	share/man/man3/mvwaddchnstr.3ncurses.gz
+L		addchstr.3ncurses.gz	share/man/man3/mvwaddchstr.3ncurses.gz
+L		addstr.3ncurses.gz	share/man/man3/mvwaddnstr.3ncurses.gz
+L		addwstr.3ncurses.gz	share/man/man3/mvwaddnwstr.3ncurses.gz
+L		addstr.3ncurses.gz	share/man/man3/mvwaddstr.3ncurses.gz
+L		addwstr.3ncurses.gz	share/man/man3/mvwaddwstr.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/mvwchgat.3ncurses.gz
+L		delch.3ncurses.gz	share/man/man3/mvwdelch.3ncurses.gz
+L		get_wch.3ncurses.gz	share/man/man3/mvwget_wch.3ncurses.gz
+L		get_wstr.3ncurses.gz	share/man/man3/mvwget_wstr.3ncurses.gz
+L		getch.3ncurses.gz	share/man/man3/mvwgetch.3ncurses.gz
+L		get_wstr.3ncurses.gz	share/man/man3/mvwgetn_wstr.3ncurses.gz
+L		getstr.3ncurses.gz	share/man/man3/mvwgetnstr.3ncurses.gz
+L		getstr.3ncurses.gz	share/man/man3/mvwgetstr.3ncurses.gz
+L		border.3ncurses.gz	share/man/man3/mvwhline.3ncurses.gz
+L		border_set.3ncurses.gz	share/man/man3/mvwhline_set.3ncurses.gz
+L		window.3ncurses.gz	share/man/man3/mvwin.3ncurses.gz
+L		in_wch.3ncurses.gz	share/man/man3/mvwin_wch.3ncurses.gz
+L		in_wchstr.3ncurses.gz	share/man/man3/mvwin_wchnstr.3ncurses.gz
+L		in_wchstr.3ncurses.gz	share/man/man3/mvwin_wchstr.3ncurses.gz
+L		inch.3ncurses.gz	share/man/man3/mvwinch.3ncurses.gz
+L		inchstr.3ncurses.gz	share/man/man3/mvwinchnstr.3ncurses.gz
+L		inchstr.3ncurses.gz	share/man/man3/mvwinchstr.3ncurses.gz
+L		instr.3ncurses.gz	share/man/man3/mvwinnstr.3ncurses.gz
+L		inwstr.3ncurses.gz	share/man/man3/mvwinnwstr.3ncurses.gz
+L		ins_wstr.3ncurses.gz	share/man/man3/mvwins_nwstr.3ncurses.gz
+L		ins_wch.3ncurses.gz	share/man/man3/mvwins_wch.3ncurses.gz
+L		ins_wstr.3ncurses.gz	share/man/man3/mvwins_wstr.3ncurses.gz
+L		insch.3ncurses.gz	share/man/man3/mvwinsch.3ncurses.gz
+L		insstr.3ncurses.gz	share/man/man3/mvwinsnstr.3ncurses.gz
+L		insstr.3ncurses.gz	share/man/man3/mvwinsstr.3ncurses.gz
+L		instr.3ncurses.gz	share/man/man3/mvwinstr.3ncurses.gz
+L		inwstr.3ncurses.gz	share/man/man3/mvwinwstr.3ncurses.gz
+L		printw.3ncurses.gz	share/man/man3/mvwprintw.3ncurses.gz
+L		scanw.3ncurses.gz	share/man/man3/mvwscanw.3ncurses.gz
+L		border.3ncurses.gz	share/man/man3/mvwvline.3ncurses.gz
+L		border_set.3ncurses.gz	share/man/man3/mvwvline_set.3ncurses.gz
+L		kernel.3ncurses.gz	share/man/man3/napms.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/napms_sp.3ncurses.gz
+F	20753	ed53e36b4cbcbeb6ada12e56be3a95ff6a07de336f5d6ac6cb71d41a2eae9e19	share/man/man3/ncurses.3ncurses.gz
+F	1570	8508065eecda6f6f0508f6e5a2b511e5f90faec6a4b0649deed193db18e3892e	share/man/man3/new.3form.gz
+F	1576	fbfd2dde00815972a0dc7ce7feef7699c83387cbf7329a04d9245f6e5dd8b228	share/man/man3/new.3menu.gz
+L		field_new.3form.gz	share/man/man3/new_field.3form.gz
+L		fieldtype.3form.gz	share/man/man3/new_fieldtype.3form.gz
+L		new.3form.gz	share/man/man3/new_form.3form.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/new_form_sp.3ncurses.gz
+L		menu_new.3menu.gz	share/man/man3/new_item.3menu.gz
+L		new.3menu.gz	share/man/man3/new_menu.3menu.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/new_menu_sp.3ncurses.gz
+F	1540	0bb4078682f8cd7550f0d46c7b08ade8843cffdad4033993559a51a7833094b6	share/man/man3/new_page.3form.gz
+F	2627	f58bf4f11b67872adfc8489ed7deb8a414a8263351f1c5553a076f13bd105297	share/man/man3/new_pair.3ncurses.gz
+L		panel.3ncurses.gz	share/man/man3/new_panel.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/new_prescr.3ncurses.gz
+L		pad.3ncurses.gz	share/man/man3/newpad.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/newpad_sp.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/newscr.3ncurses.gz
+L		initscr.3ncurses.gz	share/man/man3/newterm.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/newterm_sp.3ncurses.gz
+L		window.3ncurses.gz	share/man/man3/newwin.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/newwin_sp.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/nl.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/nl_sp.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/nocbreak.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/nocbreak_sp.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/nodelay.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/noecho.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/noecho_sp.3ncurses.gz
+L		util.3ncurses.gz	share/man/man3/nofilter.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/nofilter_sp.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/nonl.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/nonl_sp.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/noqiflush.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/noqiflush_sp.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/noraw.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/noraw_sp.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/notimeout.3ncurses.gz
+L		terminfo_variables.3ncurses.gz	share/man/man3/numcodes.3ncurses.gz
+L		terminfo_variables.3ncurses.gz	share/man/man3/numfnames.3ncurses.gz
+L		terminfo_variables.3ncurses.gz	share/man/man3/numnames.3ncurses.gz
+F	2225	d29a6ec9d1db29b22241ed5cabb9bd7c4786fb5e7d16939abcf482cb16e96d06	share/man/man3/opaque.3ncurses.gz
+F	1685	517655917abaa0879fe6c8466bf30a5bddaf0df469234eed6904775728478945	share/man/man3/opts.3form.gz
+F	1910	b2ea4df048add310bf47864f27066a2ed4c06f7e4e821634b0af3f12f8007cb7	share/man/man3/opts.3menu.gz
+L		termcap.3ncurses.gz	share/man/man3/ospeed.3ncurses.gz
+F	3890	de1702021cec60ce5b23eea54143286262a1a15d2c4095ec4516f8e437b5c549	share/man/man3/outopts.3ncurses.gz
+F	2039	0205ba2c8a9241b48520de0721e5b1528a6c87ec26597b93bc34594d832a1f91	share/man/man3/overlay.3ncurses.gz
+L		overlay.3ncurses.gz	share/man/man3/overwrite.3ncurses.gz
+F	3823	0e40f3168a467ece64008a622e9904d789a77510effa7d9e03af1c6c59de2d8c	share/man/man3/pad.3ncurses.gz
+F	1764	241dd5269645a299f1f98f0177a303b30e897e5860f6f3e072b8e0f2d43bc2e6	share/man/man3/page.3form.gz
+L		color.3ncurses.gz	share/man/man3/pair_content.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/pair_content_sp.3ncurses.gz
+F	3755	527961c4d617af970edb3bf815bf4b3297f035dd8ad7b5c6cd0ff38258098cbd	share/man/man3/panel.3ncurses.gz
+L		panel.3ncurses.gz	share/man/man3/panel_above.3ncurses.gz
+L		panel.3ncurses.gz	share/man/man3/panel_below.3ncurses.gz
+L		panel.3ncurses.gz	share/man/man3/panel_hidden.3ncurses.gz
+L		panel.3ncurses.gz	share/man/man3/panel_userptr.3ncurses.gz
+L		panel.3ncurses.gz	share/man/man3/panel_window.3ncurses.gz
+F	1751	3ddf2fe92a29f3b54bdd9d9c77c4332bef2bad9122a498a693d84baffa3fc07a	share/man/man3/pattern.3menu.gz
+F	3754	04662b9483413dc13f29e6d47e928a381242a759725aacbfa5a6f0eef527cbbf	share/man/man3/pcre2.3.gz
+F	821	c9c1e2f00c0f21f9f35e409b059cf94b1f8597ec3c9849c4dd801a938b408e42	share/man/man3/pcre2_callout_enumerate.3.gz
+F	521	d01dec07a91fa9cb19a30995bd835255bbbb2037830dde700d84826bb5db5f5d	share/man/man3/pcre2_code_copy.3.gz
+F	565	ff8eb009cc0f420c5633df649ebf8806c83eccd724606812a7b2edc9a572bdb7	share/man/man3/pcre2_code_copy_with_tables.3.gz
+F	458	b6643fc4c50522d2f783d3e7b5d1c1a6a586a5cddebebb49cded514ddd531514	share/man/man3/pcre2_code_free.3.gz
+F	2046	441cafba90615eb63db031eb6a75e5103bab6678960e48bdc2693532c0e3ec84	share/man/man3/pcre2_compile.3.gz
+F	416	f382e08693caccfec0ae749eb8fa2fef9b54f56992f307a2575147ad24f6755b	share/man/man3/pcre2_compile_context_copy.3.gz
+F	465	fc9d70890e73783295d742d639f5885db913a74aba7a0ce7ca35c0a9dea0cf47	share/man/man3/pcre2_compile_context_create.3.gz
+F	454	2f124cf3b92a4e110a046ec32f670a5e27ac9d160b3844a0c7a94360c2854946	share/man/man3/pcre2_compile_context_free.3.gz
+F	1345	f5ffb429a42e7e79e779ed7f389a52b4c99372871f8676111366661c67695677	share/man/man3/pcre2_config.3.gz
+F	418	729b0bc991c08083681e81ab2ee8beb4ff697e0d5433d554bf4d341c4804c2da	share/man/man3/pcre2_convert_context_copy.3.gz
+F	467	f03c25da3698a165a618826d5be5946990610e8fe6e75619713620d12e766bde	share/man/man3/pcre2_convert_context_create.3.gz
+F	461	9d59de3d83753c2801772679f5d23434ad3abe7dd4bdfd76096d5aea4ee53c0e	share/man/man3/pcre2_convert_context_free.3.gz
+F	471	00ce1dd474e72879a1cdaed61e03f8f34b8e5b0b03bd788fc9035f11f2df46fd	share/man/man3/pcre2_converted_pattern_free.3.gz
+F	1385	03623e3c3f5750a9ac15aa9a55e4de8bf9ce82deb541bb09d7f5cddaa00c7ab6	share/man/man3/pcre2_dfa_match.3.gz
+F	443	5a753d5a849c3ca1b242978598d5f49e990b8214294506e60ace295556e8d4d3	share/man/man3/pcre2_general_context_copy.3.gz
+F	552	17f4274ccb579827cba61c9704b568ef79d011a7a0a24d98b64882b9eb91a3f6	share/man/man3/pcre2_general_context_create.3.gz
+F	423	836b82a0c9bf91bcbc0003875bc04fcd742a1e967d39ebe315fbb901a0d21d9b	share/man/man3/pcre2_general_context_free.3.gz
+F	654	27ed018571a10cb9b211271413c16a7da173fea3d0f4613756fbf7d4346cfce4	share/man/man3/pcre2_get_error_message.3.gz
+F	575	404e152c015af632293914ef5cbbf5033aaeef7a9d8cc238ab112ed8f6f2fc77	share/man/man3/pcre2_get_mark.3.gz
+F	393	10c705a9bf9f43c90fbf73a9ed7b41d8cff8783a04f226666d65ef95f173d1bf	share/man/man3/pcre2_get_match_data_heapframes_size.3.gz
+F	367	689d8b02369ea311e0922d2c2b1a1521028e6d5ac539128de961310109637e5e	share/man/man3/pcre2_get_match_data_size.3.gz
+F	382	0730115fd849749aa0e42a3371dd010d80189a9fb165a4b4efd7bac0fa0a2b81	share/man/man3/pcre2_get_ovector_count.3.gz
+F	420	ccf1acea5e3d043f866d7f2e3b3452ae0ab25470c98ee92aed8f184c83d6d999	share/man/man3/pcre2_get_ovector_pointer.3.gz
+F	550	4dd4b7f0d58a1865ecf05c62f2d31783e9c80667e90a99e5a377e83ff1e0e21b	share/man/man3/pcre2_get_startchar.3.gz
+F	1123	5f98ac468c17491dad5b3f440debdacd70ae2fb1ad9ec48d05d8078bf417e089	share/man/man3/pcre2_jit_compile.3.gz
+F	498	d2c755286d8adc50150224dfd91cef16749528634d43f693ae72d652b0926a8b	share/man/man3/pcre2_jit_free_unused_memory.3.gz
+F	973	ca991a50873f4140322933bfa0d1f1ed4e378bb71fafd944a1ba354cb8f49102	share/man/man3/pcre2_jit_match.3.gz
+F	904	a87c506ccfb04ece98e41ff9b0300d21a3df0b5486ecf2e61f6e6e9a0f677ddf	share/man/man3/pcre2_jit_stack_assign.3.gz
+F	700	ad1cf4c8ef9494fc7e052ea117ed5ee2166922cfdfcc5fc96789b90458ae53f8	share/man/man3/pcre2_jit_stack_create.3.gz
+F	441	b15595874e806169121cb01c067390550ffd3cb8750c9e30bba7247b3431f2ec	share/man/man3/pcre2_jit_stack_free.3.gz
+F	637	d7a776f79f5468a2136cea027ba9780997e7d2c53999a8185f0d6d165a85c0fc	share/man/man3/pcre2_maketables.3.gz
+F	474	866403acb3ccec147b29ef40e5726d2406b8169318fb21ad6266ae9c0ad3a667	share/man/man3/pcre2_maketables_free.3.gz
+F	1401	09d68e0707fb5f77d1ec867004f3f985fa52fcf082383903561ed514d16d5f65	share/man/man3/pcre2_match.3.gz
+F	418	d2ce6f5570c285d6e78ec3e9d75e0a609815b21b607a0887718a19540a6ed9c9	share/man/man3/pcre2_match_context_copy.3.gz
+F	465	153ef124f83689c09ffaa38b5e6f23ce320aa3d78d50e78bcc82f34910d7e997	share/man/man3/pcre2_match_context_create.3.gz
+F	455	0eebbcdb1666d4919ee1d7efa0b5a1dc44a92edfa3e9df8fd90ca60826527875	share/man/man3/pcre2_match_context_free.3.gz
+F	690	838de9470fe3c676d51bd8303302aa75713d228e82c6305222fd72fdb7ca945a	share/man/man3/pcre2_match_data_create.3.gz
+F	778	3847eb4b5bdc7ebfe71f4f6d3aeab86e614e3c188e84feef57e7b5e13e207367	share/man/man3/pcre2_match_data_create_from_pattern.3.gz
+F	591	86b55ec0992bf5dc46e643db41345cd49d242e431cc1ba9026f9a92162a35856	share/man/man3/pcre2_match_data_free.3.gz
+F	715	d4c5e6cd4fef56ec8ba7bb8adf260d52b02781aea2cf004b73edb46a56ad14de	share/man/man3/pcre2_next_match.3.gz
+F	952	a5add6983d8673a985aacfdfecc86a0af91e9b68cf80392e25a25c71f85c6cf5	share/man/man3/pcre2_pattern_convert.3.gz
+F	1631	67fc05d348ca304b5cae13d6c6bbc25be687040f263bee0b1d5d6f984d8fc0a4	share/man/man3/pcre2_pattern_info.3.gz
+F	960	b6a8246c7818764dfd999041a610a95f408a5f4d696d20ad50daf3b2fe507ed0	share/man/man3/pcre2_serialize_decode.3.gz
+F	1002	5941242138c49282b1d214564c35ec1495531c76f75383f0bd842a7ed121c667	share/man/man3/pcre2_serialize_encode.3.gz
+F	440	5b9247ff10dc94fd8cfb27ec68b7ea83c4c67e4aea687788a29992a5fd996003	share/man/man3/pcre2_serialize_free.3.gz
+F	637	1371978e31766ad6bb14f4d60b653f64fc6d41565100e40450022966f6455d01	share/man/man3/pcre2_serialize_get_number_of_codes.3.gz
+F	452	28190fdc9991437c05383946e849ceeaa85009a99b164e6f1ebd0d729ecad4de	share/man/man3/pcre2_set_bsr.3.gz
+F	469	5845efb8d91a29add23894d64c158874cca7a9c4353c24413152882a1c65905c	share/man/man3/pcre2_set_callout.3.gz
+F	536	d84c00a3df7f4d86594e3789d9521ea008560efe120e70937701c16d08e53fd3	share/man/man3/pcre2_set_character_tables.3.gz
+F	942	d9266faa9d5da79617e71df2f8a540a72b5d2651cdd71d9698b073a0df554782	share/man/man3/pcre2_set_compile_extra_options.3.gz
+F	665	2d35631321dfdb9ec3b5c8bd4f322c6fb891c7d5d36c8f55d1d15da03f50ab75	share/man/man3/pcre2_set_compile_recursion_guard.3.gz
+F	393	363a00ed70c0204d7ca6beb4826c507949cfbc6027f190d0e48d99f68543bc49	share/man/man3/pcre2_set_depth_limit.3.gz
+F	549	95a31b532fc1f97f5d49c2a8a1e355d218dfd5db3bc1d0f12647b761f7ca10a0	share/man/man3/pcre2_set_glob_escape.3.gz
+F	521	55f67932811bac551186697fe7ccdefeee42b12d95278d673a4de01f7d75cf0a	share/man/man3/pcre2_set_glob_separator.3.gz
+F	391	7faa22473b4ccd1082e3459e1b4d2a224ed26db69de193e7ec546b8aef9e5ef7	share/man/man3/pcre2_set_heap_limit.3.gz
+F	382	5f7e45b3d7a32e1b0b4283390f12c6fb2cd9fbd182604f0e2713ceeae0634593	share/man/man3/pcre2_set_match_limit.3.gz
+F	555	1ed829d1b6970724d46f5322963a2399fe681ebdb14dd78d687a3c1fd8b0ec58	share/man/man3/pcre2_set_max_pattern_compiled_length.3.gz
+F	511	b2efe91a1608fcdec600cc18ff48fa1b48c5d74e294af49973c0ddc1cd8db446	share/man/man3/pcre2_set_max_pattern_length.3.gz
+F	490	0ebe25cb137a2166b96d8732b0b12e8af568b94425d81d88d39404c4c0e1eacc	share/man/man3/pcre2_set_max_varlookbehind.3.gz
+F	599	330e24b7216cf09640e4b377069ed8ebdc86295bb02233c303636ac9d4d6926a	share/man/man3/pcre2_set_newline.3.gz
+F	384	7c70d448bc53886e125b878b5da0efee5dca01ef0fae278012d0a195d5ed2afd	share/man/man3/pcre2_set_offset_limit.3.gz
+F	755	75328140f872e9c75a85a46e9f0c0505424a1d87d8166163a2f5ce8b8346595b	share/man/man3/pcre2_set_optimize.3.gz
+F	413	55da37b985ab0270a7f2ece61ae4ce4fae43a049d35c44f164d3aa08c4e575e4	share/man/man3/pcre2_set_parens_nest_limit.3.gz
+F	396	ba1718989911aee4dea791ed7c666918dd7b445dd0fd2d1e5896bd7399233054	share/man/man3/pcre2_set_recursion_limit.3.gz
+F	460	8bec8a7e71d3900cb8915c5a1a657311e0f83902f66cb164b8dee87a51130c1a	share/man/man3/pcre2_set_recursion_memory_management.3.gz
+F	494	22066564705cc32abd0a97535b86701e7a0fdca713c4771e07152163326fd1d2	share/man/man3/pcre2_set_substitute_callout.3.gz
+F	525	5216a06b957642bf91ce382cbae059c396ad1bd02c1f0c321da748ad22cc9972	share/man/man3/pcre2_set_substitute_case_callout.3.gz
+F	1740	66ea002b220172c0d210bc990fd6b8a614472bf6e204a462fc88ff744c3a4537	share/man/man3/pcre2_substitute.3.gz
+F	798	a55b60da5ec57e380103609431754cf0e18f0898fd27084232f158f2253164de	share/man/man3/pcre2_substring_copy_byname.3.gz
+F	700	3bd2f8ea5cd90aaa572f125075de175f111d333cc649a4b875b7d0d5fa6ceb65	share/man/man3/pcre2_substring_copy_bynumber.3.gz
+F	436	3b53dd97b9a7adef0161e813730757e15573ab15ff07e378f943d90a1d47cbc8	share/man/man3/pcre2_substring_free.3.gz
+F	846	98cb470ada6d368a9841c724effe99ee8a37e71512e78f818a7d718b31b36f65	share/man/man3/pcre2_substring_get_byname.3.gz
+F	778	7a96c3ed0871609941220af6bc4b4511154b301704a0953ca1296d1f2c518d98	share/man/man3/pcre2_substring_get_bynumber.3.gz
+F	553	56b5e8a1ef8ebec891c2ef4004d3be2c2c8ef151eb490cd0151bcb38a91a76a9	share/man/man3/pcre2_substring_length_byname.3.gz
+F	586	6d4a1563e890af86608159bb810e1d36d43d19d0d39e5df3d64eb763f1b4e3d4	share/man/man3/pcre2_substring_length_bynumber.3.gz
+F	458	1e2f1a1c559dd41629fb6c56d2118c6f7107afc5426a6d062a2cc250d4a6e1d6	share/man/man3/pcre2_substring_list_free.3.gz
+F	829	c92874b886cf08f06b900d231e0ad8b93b0c38a60f627c4238356df15d9c8f86	share/man/man3/pcre2_substring_list_get.3.gz
+F	700	bf54b7cd0d019dcca10ac4166d14daeb6b094c55f1c6e4b61b0b05610b300ac1	share/man/man3/pcre2_substring_nametable_scan.3.gz
+F	633	afc6dcf9fadd7b673bd1a586519cfca90259cc9bc3557d0d9e81dfff94c25baf	share/man/man3/pcre2_substring_number_from_name.3.gz
+F	57259	feaf99b7ece3f5e759ba2bbde4feac80d139dc1966611fdd35852490a4d3f9cf	share/man/man3/pcre2api.3.gz
+F	9251	3af9f27d404dbae3b8092b2ad72ecef31a78746228497807dba9a311be76dc25	share/man/man3/pcre2build.3.gz
+F	6412	ad2035b0121d18e8f9442f860545df04d40cdf42a15e1bdeb34ca1a12e904927	share/man/man3/pcre2callout.3.gz
+F	5336	853f7d39106dfb09ace43b3e71b0bbbefa3dbe5e1aacd688bafe030b57073b75	share/man/man3/pcre2compat.3.gz
+F	2615	868c288c9a42bcd051b2029ec5afa157e9c6183c2270993e41e30cb58937db28	share/man/man3/pcre2convert.3.gz
+F	5374	a7f372920392ddd0b0c59f77aea73ec82d2cdd239e3e66baaf06123b2adc7d97	share/man/man3/pcre2demo.3.gz
+F	7763	5c0721de904fc67d356f195588812678e240cab08bb50f5de30c7cbb5f9297e3	share/man/man3/pcre2jit.3.gz
+F	1598	a3ea2c67c102af649be069fd31bb6b658c2170f15bc1a1728f464fd8e5974bd6	share/man/man3/pcre2limits.3.gz
+F	3781	a212fe10a53da98a5c24fd173bbe2eff8cb9082136b5582e354b16713aed33a8	share/man/man3/pcre2matching.3.gz
+F	6206	e2500927ae79a0e4d84ebc17447966de9283e97e464186247045a8186181e98b	share/man/man3/pcre2partial.3.gz
+F	56433	a248682b0ea1559c0f97f0d955e012aaf78d7e52b0ce700e28e65d43b6754e58	share/man/man3/pcre2pattern.3.gz
+F	4801	250f5fe330179d16cd9ddd424b1879be7a33970502a0976facd21723fe476bd3	share/man/man3/pcre2perform.3.gz
+F	5398	b8d98ebf12d3ae7d1ffa026b7859a18a7f37db469d6438f21ccff40b0f18e151	share/man/man3/pcre2posix.3.gz
+F	1525	5a5a31d15541be738f37c1d755d7b46e236836d9e0aba006fa477625b276de7f	share/man/man3/pcre2sample.3.gz
+F	3401	fc3eac3a9587828c1c0008d97e6eae4a8981f007ed1d477b912af24a074cd523	share/man/man3/pcre2serialize.3.gz
+F	8802	fdfd4d9480f05822743228fd616e9553600fd965ab89ac9cf76c1acada33e612	share/man/man3/pcre2syntax.3.gz
+F	8281	7c7d8ac6880c6c27d3a5cbb81d356a028c70bcef0b9102216f0cf8d52138a043	share/man/man3/pcre2unicode.3.gz
+L		pad.3ncurses.gz	share/man/man3/pecho_wchar.3ncurses.gz
+L		pad.3ncurses.gz	share/man/man3/pechochar.3ncurses.gz
+L		pad.3ncurses.gz	share/man/man3/pnoutrefresh.3ncurses.gz
+L		cursor.3form.gz	share/man/man3/pos_form_cursor.3form.gz
+L		cursor.3menu.gz	share/man/man3/pos_menu_cursor.3menu.gz
+F	1615	5adda1335e1cf06a7c98937b42683c5cc1e852bd95f65ae4a354fdc451ce30cd	share/man/man3/post.3form.gz
+F	1687	5195a838aecef0ef238fe8a29089e17d23c658fef2f5c48f8534f1967b4c9d9c	share/man/man3/post.3menu.gz
+L		post.3form.gz	share/man/man3/post_form.3form.gz
+L		post.3menu.gz	share/man/man3/post_menu.3menu.gz
+L		pad.3ncurses.gz	share/man/man3/prefresh.3ncurses.gz
+F	1897	e36babcabe8836041109abeb4931c651372ff81d316776ba5293b6b2b5f8e10a	share/man/man3/print.3ncurses.gz
+F	3319	8857863a0bd62321bcc3134ed95795d2ce7374cc39e54f292efc3a1a5d2d3f3d	share/man/man3/printw.3ncurses.gz
+L		terminfo.3ncurses.gz	share/man/man3/putp.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/putp_sp.3ncurses.gz
+L		util.3ncurses.gz	share/man/man3/putwin.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/qiflush.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/qiflush_sp.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/raw.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/raw_sp.3ncurses.gz
+F	17861	3bf95d11c65784ecc5f847706a7f7db026b27282552bd5ae004d886f61ae212e	share/man/man3/readline.3.gz
+L		refresh.3ncurses.gz	share/man/man3/redrawwin.3ncurses.gz
+F	2821	657911d46eaf2a7f016288d8a805405ef53d018f4edd5cb4074392ca839844e3	share/man/man3/refresh.3ncurses.gz
+L		panel.3ncurses.gz	share/man/man3/replace_panel.3ncurses.gz
+F	1468	2557d743cd0921b7a20016d4c1acf6bd5e2c4be96c85f88348099df2954ab31c	share/man/man3/requestname.3form.gz
+F	1471	72b0dc7b7395f8be506e86c0f6348010f462f7969c978ee15ffbb7dcf9c2310e	share/man/man3/requestname.3menu.gz
+L		color.3ncurses.gz	share/man/man3/reset_color_pairs.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/reset_color_pairs_sp.3ncurses.gz
+L		kernel.3ncurses.gz	share/man/man3/reset_prog_mode.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/reset_prog_mode_sp.3ncurses.gz
+L		kernel.3ncurses.gz	share/man/man3/reset_shell_mode.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/reset_shell_mode_sp.3ncurses.gz
+L		kernel.3ncurses.gz	share/man/man3/resetty.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/resetty_sp.3ncurses.gz
+L		resizeterm.3ncurses.gz	share/man/man3/resize_term.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/resize_term_sp.3ncurses.gz
+F	3163	e8d5c3118a5ef3d57189f12604b7ff47113d4800208fab538f2c5bc6294f22be	share/man/man3/resizeterm.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/resizeterm_sp.3ncurses.gz
+L		terminfo.3ncurses.gz	share/man/man3/restartterm.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/restartterm_sp.3ncurses.gz
+L		kernel.3ncurses.gz	share/man/man3/ripoffline.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/ripoffline_sp.3ncurses.gz
+L		kernel.3ncurses.gz	share/man/man3/savetty.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/savetty_sp.3ncurses.gz
+L		win.3form.gz	share/man/man3/scale_form.3form.gz
+L		win.3menu.gz	share/man/man3/scale_menu.3menu.gz
+F	3638	f08aa1a10dff36d510ea5c2092b7d142033387171a8311347c407504150a51f3	share/man/man3/scanw.3ncurses.gz
+F	2903	33b2fabe513c37a000c6488648bc0ca77a704238727071b104ae6f197cbde904	share/man/man3/scr_dump.3ncurses.gz
+L		scr_dump.3ncurses.gz	share/man/man3/scr_init.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/scr_init_sp.3ncurses.gz
+L		scr_dump.3ncurses.gz	share/man/man3/scr_restore.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/scr_restore_sp.3ncurses.gz
+L		scr_dump.3ncurses.gz	share/man/man3/scr_set.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/scr_set_sp.3ncurses.gz
+L		scroll.3ncurses.gz	share/man/man3/scrl.3ncurses.gz
+F	2294	15b09ab23b9cc41956f60ee8468622886321e069a2bfc6f363968c7ec254a362	share/man/man3/scroll.3ncurses.gz
+L		outopts.3ncurses.gz	share/man/man3/scrollok.3ncurses.gz
+L		page.3form.gz	share/man/man3/set_current_field.3form.gz
+L		menu_current.3menu.gz	share/man/man3/set_current_item.3menu.gz
+L		terminfo.3ncurses.gz	share/man/man3/set_curterm.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/set_curterm_sp.3ncurses.gz
+L		threads.3ncurses.gz	share/man/man3/set_escdelay.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/set_escdelay_sp.3ncurses.gz
+L		field_attributes.3form.gz	share/man/man3/set_field_back.3form.gz
+L		field_buffer.3form.gz	share/man/man3/set_field_buffer.3form.gz
+L		field_attributes.3form.gz	share/man/man3/set_field_fore.3form.gz
+L		hook.3form.gz	share/man/man3/set_field_init.3form.gz
+L		field_just.3form.gz	share/man/man3/set_field_just.3form.gz
+L		field_opts.3form.gz	share/man/man3/set_field_opts.3form.gz
+L		field_attributes.3form.gz	share/man/man3/set_field_pad.3form.gz
+L		field_buffer.3form.gz	share/man/man3/set_field_status.3form.gz
+L		hook.3form.gz	share/man/man3/set_field_term.3form.gz
+L		field_validation.3form.gz	share/man/man3/set_field_type.3form.gz
+L		field_userptr.3form.gz	share/man/man3/set_field_userptr.3form.gz
+L		fieldtype.3form.gz	share/man/man3/set_fieldtype_arg.3form.gz
+L		fieldtype.3form.gz	share/man/man3/set_fieldtype_choice.3form.gz
+L		field.3form.gz	share/man/man3/set_form_fields.3form.gz
+L		hook.3form.gz	share/man/man3/set_form_init.3form.gz
+L		opts.3form.gz	share/man/man3/set_form_opts.3form.gz
+L		page.3form.gz	share/man/man3/set_form_page.3form.gz
+L		win.3form.gz	share/man/man3/set_form_sub.3form.gz
+L		hook.3form.gz	share/man/man3/set_form_term.3form.gz
+L		userptr.3form.gz	share/man/man3/set_form_userptr.3form.gz
+L		win.3form.gz	share/man/man3/set_form_win.3form.gz
+L		hook.3menu.gz	share/man/man3/set_item_init.3menu.gz
+L		menu_opts.3menu.gz	share/man/man3/set_item_opts.3menu.gz
+L		hook.3menu.gz	share/man/man3/set_item_term.3menu.gz
+L		menu_userptr.3menu.gz	share/man/man3/set_item_userptr.3menu.gz
+L		menu_value.3menu.gz	share/man/man3/set_item_value.3menu.gz
+L		field_buffer.3form.gz	share/man/man3/set_max_field.3form.gz
+L		attributes.3menu.gz	share/man/man3/set_menu_back.3menu.gz
+L		attributes.3menu.gz	share/man/man3/set_menu_fore.3menu.gz
+L		format.3menu.gz	share/man/man3/set_menu_format.3menu.gz
+L		attributes.3menu.gz	share/man/man3/set_menu_grey.3menu.gz
+L		hook.3menu.gz	share/man/man3/set_menu_init.3menu.gz
+L		items.3menu.gz	share/man/man3/set_menu_items.3menu.gz
+L		mark.3menu.gz	share/man/man3/set_menu_mark.3menu.gz
+L		opts.3menu.gz	share/man/man3/set_menu_opts.3menu.gz
+L		attributes.3menu.gz	share/man/man3/set_menu_pad.3menu.gz
+L		pattern.3menu.gz	share/man/man3/set_menu_pattern.3menu.gz
+L		spacing.3menu.gz	share/man/man3/set_menu_spacing.3menu.gz
+L		win.3menu.gz	share/man/man3/set_menu_sub.3menu.gz
+L		hook.3menu.gz	share/man/man3/set_menu_term.3menu.gz
+L		userptr.3menu.gz	share/man/man3/set_menu_userptr.3menu.gz
+L		win.3menu.gz	share/man/man3/set_menu_win.3menu.gz
+L		new_page.3form.gz	share/man/man3/set_new_page.3form.gz
+L		panel.3ncurses.gz	share/man/man3/set_panel_userptr.3ncurses.gz
+L		threads.3ncurses.gz	share/man/man3/set_tabsize.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/set_tabsize_sp.3ncurses.gz
+L		initscr.3ncurses.gz	share/man/man3/set_term.3ncurses.gz
+L		menu_current.3menu.gz	share/man/man3/set_top_row.3menu.gz
+L		getcchar.3ncurses.gz	share/man/man3/setcchar.3ncurses.gz
+L		outopts.3ncurses.gz	share/man/man3/setscrreg.3ncurses.gz
+L		kernel.3ncurses.gz	share/man/man3/setsyx.3ncurses.gz
+L		terminfo.3ncurses.gz	share/man/man3/setterm.3ncurses.gz
+L		terminfo.3ncurses.gz	share/man/man3/setupterm.3ncurses.gz
+L		panel.3ncurses.gz	share/man/man3/show_panel.3ncurses.gz
+F	4324	88d6adffbd621bfbc09eb28fccfb3dc45269822d2300179617dd16c69648ec41	share/man/man3/slk.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/slk_attr.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/slk_attr_off.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/slk_attr_on.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/slk_attr_set.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/slk_attr_set_sp.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/slk_attr_sp.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/slk_attroff.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/slk_attroff_sp.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/slk_attron.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/slk_attron_sp.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/slk_attrset.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/slk_attrset_sp.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/slk_clear.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/slk_clear_sp.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/slk_color.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/slk_color_sp.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/slk_init.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/slk_init_sp.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/slk_label.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/slk_label_sp.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/slk_noutrefresh.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/slk_noutrefresh_sp.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/slk_refresh.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/slk_refresh_sp.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/slk_restore.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/slk_restore_sp.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/slk_set.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/slk_set_sp.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/slk_touch.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/slk_touch_sp.3ncurses.gz
+L		slk.3ncurses.gz	share/man/man3/slk_wset.3ncurses.gz
+F	3793	57962411ead893225b2480a3ae76e25088d160138039703683d570c6a9f10071	share/man/man3/sp_funcs.3ncurses.gz
+F	1823	518f9a4454df2c9adbf7e8331e2c9a16ef8a85d3d997d3d5876c67b9d4180884	share/man/man3/spacing.3menu.gz
+L		attr.3ncurses.gz	share/man/man3/standend.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/standout.3ncurses.gz
+L		color.3ncurses.gz	share/man/man3/start_color.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/start_color_sp.3ncurses.gz
+L		curses_variables.3ncurses.gz	share/man/man3/stdscr.3ncurses.gz
+L		terminfo_variables.3ncurses.gz	share/man/man3/strcodes.3ncurses.gz
+L		terminfo_variables.3ncurses.gz	share/man/man3/strfnames.3ncurses.gz
+L		terminfo_variables.3ncurses.gz	share/man/man3/strnames.3ncurses.gz
+L		pad.3ncurses.gz	share/man/man3/subpad.3ncurses.gz
+L		window.3ncurses.gz	share/man/man3/subwin.3ncurses.gz
+L		window.3ncurses.gz	share/man/man3/syncok.3ncurses.gz
+F	7550	bef99bc0da728a4dc1ae37b877e79b28cdcc4753ac1957477afcb450040697e3	share/man/man3/talloc.3.gz
+L		termattrs.3ncurses.gz	share/man/man3/term_attrs.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/term_attrs_sp.3ncurses.gz
+F	2547	1c633c61e2a2d303f31c9e790a284130d445909945a21eb172113932f3838fa7	share/man/man3/termattrs.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/termattrs_sp.3ncurses.gz
+F	7543	8da51c082cbf0a5a51391bf22e12611801a553f32ca87be31ced1e2f488e4e4d	share/man/man3/termcap.3ncurses.gz
+F	9788	6b9328c71b79290104a4316a7b310264742e8167c23f07bdeeede3a21db32a1a	share/man/man3/terminfo.3ncurses.gz
+F	3014	05815ea9a11dfeeb5e2b46a7ed2fd23bd275c13515abcc2535f7fdfebf1d3c5b	share/man/man3/terminfo_variables.3ncurses.gz
+L		termattrs.3ncurses.gz	share/man/man3/termname.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/termname_sp.3ncurses.gz
+L		termcap.3ncurses.gz	share/man/man3/tgetent.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/tgetent_sp.3ncurses.gz
+L		termcap.3ncurses.gz	share/man/man3/tgetflag.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/tgetflag_sp.3ncurses.gz
+L		termcap.3ncurses.gz	share/man/man3/tgetnum.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/tgetnum_sp.3ncurses.gz
+L		termcap.3ncurses.gz	share/man/man3/tgetstr.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/tgetstr_sp.3ncurses.gz
+L		termcap.3ncurses.gz	share/man/man3/tgoto.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/tgoto_sp.3ncurses.gz
+F	4880	45b414d5559a3e28fe0f280896422cc409b40aa9cb918e1210f36dcce1f02424	share/man/man3/threads.3ncurses.gz
+L		terminfo.3ncurses.gz	share/man/man3/tigetflag.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/tigetflag_sp.3ncurses.gz
+L		terminfo.3ncurses.gz	share/man/man3/tigetnum.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/tigetnum_sp.3ncurses.gz
+L		terminfo.3ncurses.gz	share/man/man3/tigetstr.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/tigetstr_sp.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/timeout.3ncurses.gz
+L		terminfo.3ncurses.gz	share/man/man3/tiparm.3ncurses.gz
+L		terminfo.3ncurses.gz	share/man/man3/tiparm_s.3ncurses.gz
+L		terminfo.3ncurses.gz	share/man/man3/tiscan_s.3ncurses.gz
+L		panel.3ncurses.gz	share/man/man3/top_panel.3ncurses.gz
+L		menu_current.3menu.gz	share/man/man3/top_row.3menu.gz
+F	2344	b6c11b83219586b52d6eb383c91156a632e7fe4a30418d35a4edaf0f27df4beb	share/man/man3/touch.3ncurses.gz
+L		touch.3ncurses.gz	share/man/man3/touchline.3ncurses.gz
+L		touch.3ncurses.gz	share/man/man3/touchwin.3ncurses.gz
+L		terminfo.3ncurses.gz	share/man/man3/tparm.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/tparm_sp.3ncurses.gz
+L		terminfo.3ncurses.gz	share/man/man3/tputs.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/tputs_sp.3ncurses.gz
+F	3857	1207346b29265f2c2463c8f0079d7641e7f4a0e528afb5cf0c87998a5378ea7e	share/man/man3/trace.3ncurses.gz
+L		terminfo_variables.3ncurses.gz	share/man/man3/ttytype.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/typeahead.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/typeahead_sp.3ncurses.gz
+L		util.3ncurses.gz	share/man/man3/unctrl.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/unctrl_sp.3ncurses.gz
+L		page.3form.gz	share/man/man3/unfocus_current_field.3form.gz
+L		get_wch.3ncurses.gz	share/man/man3/unget_wch.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/unget_wch_sp.3ncurses.gz
+L		getch.3ncurses.gz	share/man/man3/ungetch.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/ungetch_sp.3ncurses.gz
+L		mouse.3ncurses.gz	share/man/man3/ungetmouse.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/ungetmouse_sp.3ncurses.gz
+L		post.3form.gz	share/man/man3/unpost_form.3form.gz
+L		post.3menu.gz	share/man/man3/unpost_menu.3menu.gz
+L		touch.3ncurses.gz	share/man/man3/untouchwin.3ncurses.gz
+L		panel.3ncurses.gz	share/man/man3/update_panels.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/update_panels_sp.3ncurses.gz
+L		default_colors.3ncurses.gz	share/man/man3/use_default_colors.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/use_default_colors_sp.3ncurses.gz
+L		util.3ncurses.gz	share/man/man3/use_env.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/use_env_sp.3ncurses.gz
+L		extensions.3ncurses.gz	share/man/man3/use_extended_names.3ncurses.gz
+L		legacy_coding.3ncurses.gz	share/man/man3/use_legacy_coding.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/use_legacy_coding_sp.3ncurses.gz
+L		threads.3ncurses.gz	share/man/man3/use_screen.3ncurses.gz
+L		util.3ncurses.gz	share/man/man3/use_tioctl.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/use_tioctl_sp.3ncurses.gz
+L		threads.3ncurses.gz	share/man/man3/use_window.3ncurses.gz
+F	1476	bf9d9fd38f67d9a1dbb4adf5bbe16b1ce26c51b21653921349e206af5e6010bf	share/man/man3/userptr.3form.gz
+F	1469	cca72761f933e2072fe82182a5fd6cc3c9ec6aa1e03d3e8e991270d37df68e79	share/man/man3/userptr.3menu.gz
+F	6563	c59521fae3dbfafe074d4cc4bfb94d46f5bdd393b2b448f40ff258e9e7873ead	share/man/man3/util.3ncurses.gz
+L		terminfo.3ncurses.gz	share/man/man3/vid_attr.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/vid_attr_sp.3ncurses.gz
+L		terminfo.3ncurses.gz	share/man/man3/vid_puts.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/vid_puts_sp.3ncurses.gz
+L		terminfo.3ncurses.gz	share/man/man3/vidattr.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/vidattr_sp.3ncurses.gz
+L		terminfo.3ncurses.gz	share/man/man3/vidputs.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/vidputs_sp.3ncurses.gz
+L		border.3ncurses.gz	share/man/man3/vline.3ncurses.gz
+L		border_set.3ncurses.gz	share/man/man3/vline_set.3ncurses.gz
+L		printw.3ncurses.gz	share/man/man3/vw_printw.3ncurses.gz
+L		scanw.3ncurses.gz	share/man/man3/vw_scanw.3ncurses.gz
+L		printw.3ncurses.gz	share/man/man3/vwprintw.3ncurses.gz
+L		scanw.3ncurses.gz	share/man/man3/vwscanw.3ncurses.gz
+L		add_wch.3ncurses.gz	share/man/man3/wadd_wch.3ncurses.gz
+L		add_wchstr.3ncurses.gz	share/man/man3/wadd_wchnstr.3ncurses.gz
+L		add_wchstr.3ncurses.gz	share/man/man3/wadd_wchstr.3ncurses.gz
+L		addch.3ncurses.gz	share/man/man3/waddch.3ncurses.gz
+L		addchstr.3ncurses.gz	share/man/man3/waddchnstr.3ncurses.gz
+L		addchstr.3ncurses.gz	share/man/man3/waddchstr.3ncurses.gz
+L		addstr.3ncurses.gz	share/man/man3/waddnstr.3ncurses.gz
+L		addwstr.3ncurses.gz	share/man/man3/waddnwstr.3ncurses.gz
+L		addstr.3ncurses.gz	share/man/man3/waddstr.3ncurses.gz
+L		addwstr.3ncurses.gz	share/man/man3/waddwstr.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/wattr_get.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/wattr_off.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/wattr_on.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/wattr_set.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/wattroff.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/wattron.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/wattrset.3ncurses.gz
+L		bkgd.3ncurses.gz	share/man/man3/wbkgd.3ncurses.gz
+L		bkgd.3ncurses.gz	share/man/man3/wbkgdset.3ncurses.gz
+L		bkgrnd.3ncurses.gz	share/man/man3/wbkgrnd.3ncurses.gz
+L		bkgrnd.3ncurses.gz	share/man/man3/wbkgrndset.3ncurses.gz
+L		border.3ncurses.gz	share/man/man3/wborder.3ncurses.gz
+L		border_set.3ncurses.gz	share/man/man3/wborder_set.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/wchgat.3ncurses.gz
+L		clear.3ncurses.gz	share/man/man3/wclear.3ncurses.gz
+L		clear.3ncurses.gz	share/man/man3/wclrtobot.3ncurses.gz
+L		clear.3ncurses.gz	share/man/man3/wclrtoeol.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/wcolor_set.3ncurses.gz
+L		window.3ncurses.gz	share/man/man3/wcursyncup.3ncurses.gz
+L		delch.3ncurses.gz	share/man/man3/wdelch.3ncurses.gz
+L		deleteln.3ncurses.gz	share/man/man3/wdeleteln.3ncurses.gz
+L		add_wch.3ncurses.gz	share/man/man3/wecho_wchar.3ncurses.gz
+L		addch.3ncurses.gz	share/man/man3/wechochar.3ncurses.gz
+L		mouse.3ncurses.gz	share/man/man3/wenclose.3ncurses.gz
+L		clear.3ncurses.gz	share/man/man3/werase.3ncurses.gz
+L		get_wch.3ncurses.gz	share/man/man3/wget_wch.3ncurses.gz
+L		get_wstr.3ncurses.gz	share/man/man3/wget_wstr.3ncurses.gz
+L		bkgrnd.3ncurses.gz	share/man/man3/wgetbkgrnd.3ncurses.gz
+L		getch.3ncurses.gz	share/man/man3/wgetch.3ncurses.gz
+L		opaque.3ncurses.gz	share/man/man3/wgetdelay.3ncurses.gz
+L		get_wstr.3ncurses.gz	share/man/man3/wgetn_wstr.3ncurses.gz
+L		getstr.3ncurses.gz	share/man/man3/wgetnstr.3ncurses.gz
+L		opaque.3ncurses.gz	share/man/man3/wgetparent.3ncurses.gz
+L		opaque.3ncurses.gz	share/man/man3/wgetscrreg.3ncurses.gz
+L		getstr.3ncurses.gz	share/man/man3/wgetstr.3ncurses.gz
+L		border.3ncurses.gz	share/man/man3/whline.3ncurses.gz
+L		border_set.3ncurses.gz	share/man/man3/whline_set.3ncurses.gz
+F	1804	8cd1da5f7a2fe76a50b0d412096f94f767e27ff6958171b8b5e23d5128b9671e	share/man/man3/win.3form.gz
+F	1802	5eaf40339c258db1630502b263e0e9952422dfc4f0d9ceef6ea9a03d905a4c6a	share/man/man3/win.3menu.gz
+L		in_wch.3ncurses.gz	share/man/man3/win_wch.3ncurses.gz
+L		in_wchstr.3ncurses.gz	share/man/man3/win_wchnstr.3ncurses.gz
+L		in_wchstr.3ncurses.gz	share/man/man3/win_wchstr.3ncurses.gz
+L		inch.3ncurses.gz	share/man/man3/winch.3ncurses.gz
+L		inchstr.3ncurses.gz	share/man/man3/winchnstr.3ncurses.gz
+L		inchstr.3ncurses.gz	share/man/man3/winchstr.3ncurses.gz
+F	3671	9a454f2901e8ebb2fe9569180f0f39bbd281021d2c1d09ec89323c16416b1a77	share/man/man3/window.3ncurses.gz
+L		instr.3ncurses.gz	share/man/man3/winnstr.3ncurses.gz
+L		inwstr.3ncurses.gz	share/man/man3/winnwstr.3ncurses.gz
+L		ins_wstr.3ncurses.gz	share/man/man3/wins_nwstr.3ncurses.gz
+L		ins_wch.3ncurses.gz	share/man/man3/wins_wch.3ncurses.gz
+L		ins_wstr.3ncurses.gz	share/man/man3/wins_wstr.3ncurses.gz
+L		insch.3ncurses.gz	share/man/man3/winsch.3ncurses.gz
+L		deleteln.3ncurses.gz	share/man/man3/winsdelln.3ncurses.gz
+L		deleteln.3ncurses.gz	share/man/man3/winsertln.3ncurses.gz
+L		insstr.3ncurses.gz	share/man/man3/winsnstr.3ncurses.gz
+L		insstr.3ncurses.gz	share/man/man3/winsstr.3ncurses.gz
+L		instr.3ncurses.gz	share/man/man3/winstr.3ncurses.gz
+L		inwstr.3ncurses.gz	share/man/man3/winwstr.3ncurses.gz
+L		mouse.3ncurses.gz	share/man/man3/wmouse_trafo.3ncurses.gz
+L		move.3ncurses.gz	share/man/man3/wmove.3ncurses.gz
+L		refresh.3ncurses.gz	share/man/man3/wnoutrefresh.3ncurses.gz
+L		printw.3ncurses.gz	share/man/man3/wprintw.3ncurses.gz
+L		refresh.3ncurses.gz	share/man/man3/wredrawln.3ncurses.gz
+L		refresh.3ncurses.gz	share/man/man3/wrefresh.3ncurses.gz
+F	1837	f72dc4eb97f6e0d9cd99c1cd3adc802a2ec6cc9330ae4783a44241257649e65d	share/man/man3/wresize.3ncurses.gz
+L		scanw.3ncurses.gz	share/man/man3/wscanw.3ncurses.gz
+L		scroll.3ncurses.gz	share/man/man3/wscrl.3ncurses.gz
+L		outopts.3ncurses.gz	share/man/man3/wsetscrreg.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/wstandend.3ncurses.gz
+L		attr.3ncurses.gz	share/man/man3/wstandout.3ncurses.gz
+L		window.3ncurses.gz	share/man/man3/wsyncdown.3ncurses.gz
+L		window.3ncurses.gz	share/man/man3/wsyncup.3ncurses.gz
+L		inopts.3ncurses.gz	share/man/man3/wtimeout.3ncurses.gz
+L		touch.3ncurses.gz	share/man/man3/wtouchln.3ncurses.gz
+L		util.3ncurses.gz	share/man/man3/wunctrl.3ncurses.gz
+L		sp_funcs.3ncurses.gz	share/man/man3/wunctrl_sp.3ncurses.gz
+L		border.3ncurses.gz	share/man/man3/wvline.3ncurses.gz
+L		border_set.3ncurses.gz	share/man/man3/wvline_set.3ncurses.gz
+D			share/man/man5
+F	5325	77ed4a75dcce844c91faf241bd098a868d6d9854ea85d6ce34eab13c96931550	share/man/man5/acl.5.gz
+D			share/man/man8
+F	2399	5075fa92022520606f366184eaf950bf646dcf792a3c25048957103a370f9d95	share/man/man8/rmt.8.gz
+D			share/readline
+F	5537	583e40cbdf2990190776a59cdca9267a8eb46bb20719cfd46f9f9db2e88f4b7c	share/readline/excallback.c
+F	11420	9f765983085f5b1a86bacf9a5ae2b954dbb3f834484395c593727b29998cb823	share/readline/fileman.c
+F	2724	20192a1c172ea1bf1f1a67c3670097566d57086aca9f70ecb9bd5857d554826d	share/readline/hist_erasedups.c
+F	3333	c0444e7ebf139812f23595eddbe05fb00a9a68307c69fec373bac72d8182563b	share/readline/hist_purgecmd.c
+F	2971	074455ed23590fd0eb4dd0c7d058b96fb83391fdba8d00e4f091675a1311c1c8	share/readline/histexamp.c
+F	3702	29e099b54928ab2cb42d50553d2e28cf2db9b3dc9cc91337960981e2d2e06367	share/readline/manexamp.c
+F	2756	9a07023c8fdd7386042b4b3aa669b4a9e45f9423880a66d671707a75ece7a581	share/readline/rl-callbacktest.c
+F	3252	cc3a89607fd03874e71058417c875d03adc2a6aab4b8426e5879289f5abeb162	share/readline/rl-callbacktest2.c
+F	3356	15ff6f13edbe49bb3a8cc3a14190e986facd181222333f873a71a9f0c18c54af	share/readline/rl-callbacktest3.c
+F	11147	980c3460e4626b7806e7abe0e53d92620ff353e1dc9be1b332f91fc82c35fa7b	share/readline/rl-fgets.c
+F	6140	9e479b92e800b1b11b5194ec0272bd26d857fce51c88943e700158641875b8a8	share/readline/rl-timeout.c
+F	3215	aec244574a07e72bdbfdc5d5ef1a98f304497a7b68079a954607d3a019996cab	share/readline/rl.c
+F	565	6474e618baf6dd874050ec10b88552ba2ecb17bba431258a1319d61fb5019701	share/readline/rlbasic.c
+F	3402	7cb48e18f6b912aca1c978481f55fd5bd3b102ff64d8ee7d935b2fa4a737b469	share/readline/rlcat.c
+F	3490	5c7974a830002c05dafe53137312807c61d79454b4e863b78f503588b1c4686b	share/readline/rlevent.c
+F	1333	954b2c61167f7d52e07ea68f23ea9123a2a70e52b502181ddec791c77071600c	share/readline/rlkeymaps.c
+F	6916	24b2cd7d4e4903589e0479eaf4f7df5e7d3845e8d7283cd0aa84b5aa41d25471	share/readline/rlptytest.c
+F	2239	0a35b0c9466f849f2d1dd03ea795936e81385b716bab30b4c0aa4642ccaac87e	share/readline/rltest.c
+F	1291	a69a5d20adec803b5006b93e5fbb0c32e1b5bfabfc733cc8eb3e525754d06f86	share/readline/rlversion.c
+D			share/tabset
+F	135	fbadb5f608b355fe481c0c7d9c6265b2372bfa35250662f81f68d46540080770	share/tabset/std
+F	95	cf6c37b18ceea7c306f7e3a5e604a03b0dfb9c22ec99163e4b52f885ce063145	share/tabset/stdcrt
+F	160	075251754239d9973945d82b95c18cd90997acd2017393e70c8832e9297de056	share/tabset/vt100
+F	64	61f8388cad6a381feb819bc6a8d299d06a853d15e1f4bfdfd6b6f40069ad4956	share/tabset/vt300
+D			share/terminfo
+D			share/terminfo/a
+F	3634	fc0cdbd223eb02528f74e73b7aaf71d14927f258b6acd56d98544fb119a9d7e3	share/terminfo/a/alacritty
+F	3568	3db2b1574c030858a933c954236ea840c39cf3398956b8560cdb66749a1a4223	share/terminfo/a/alacritty+common
+F	3620	cc21347c3ffe4d6a3bb4e8e8f6f78b93c1bc768c23272e5169f507e0c6946f10	share/terminfo/a/alacritty-direct
+F	1481	93ec8cb9beb0c898ebc7dda0f670de31addb605be9005735228680d592cff657	share/terminfo/a/ansi
+D			share/terminfo/d
+F	1557	60bd664c84b2b655c19fe89490a891eca8153c8ce816608c8a168d134d676b42	share/terminfo/d/dtterm
+F	308	123c85a2812a517d967db5f31660db0e6aded4a0b95ed943c5ab435368e7a25c	share/terminfo/d/dumb
+D			share/terminfo/e
+F	1271	82a89280e12736ccf61b08be0856ae860c3fd3503e5d46a865cbdca3eefb9f70	share/terminfo/e/eterm-color
+D			share/terminfo/f
+F	4080	f8e7920e74a6fff94daeab3de75baf9c56344fcd9620718ac719bd4a458e190e	share/terminfo/f/foot
+F	3501	d4d9c01ad03a97ca91dce080a1cb38079b802e42b9d6778eaa11fa65d157c756	share/terminfo/f/foot+base
+F	4142	4ec7b368520545aba476fdad7ba9602c41e12d8f92851d90a7b86955b4bfa4c6	share/terminfo/f/foot-direct
+D			share/terminfo/g
+F	3029	9054b3a9afffd27c0fb4748f1181703168c8f0d0ce4dd0fa83af850a8672c2ab	share/terminfo/g/gnome
+F	3299	7c411676c7c6aa80510f711598786df0ef9ad986bbe9496b71d41da73734dab4	share/terminfo/g/gnome-256color
+D			share/terminfo/k
+F	3611	565be7191a53639f7b626728016b8003dab261678610019acc44de626fa12f0e	share/terminfo/k/kitty
+F	3343	7e81d3781d558bcab349a2acfc6139919f33201e5e75ceac8fc75859db0421db	share/terminfo/k/kitty+common
+F	3598	92e19ae0233831f9cd458db2dcf630ee2e12000cea6c46de1ca4b62abc9142ae	share/terminfo/k/kitty-direct
+D			share/terminfo/l
+F	1740	b70a4941416eb703a01b5a06fd1c914880452302b0e0b2a7dea12600607824a7	share/terminfo/l/linux
+D			share/terminfo/n
+F	2048	70e05e665576ab291aabbf61a19cdc7cf82844c95f243cd5dcbaf67ee98a7d88	share/terminfo/n/nsterm
+D			share/terminfo/p
+F	2562	e4469ec3a6e1f8dca98e8bd67b113c4f37be21bf77935831503089d05de23588	share/terminfo/p/putty
+F	2640	037f3c2cb482f6b7f457ff1a2878d3641c1a23fe114efd53ed4e5e3a272c46a0	share/terminfo/p/putty-256color
+D			share/terminfo/r
+F	2234	e20569b88d29b6338adc5258440508df33f14ff628a6dac6e189015c05850416	share/terminfo/r/rxvt
+F	2460	4418a18ca03accf0fc83b55c22ffc2be471a409a7dcac3059aa097ee1ed937a9	share/terminfo/r/rxvt-256color
+F	2508	280165734528e93ec7c770524e8ce3a3d29dcf5ca5696dacd093d1eb5ce3460a	share/terminfo/r/rxvt-unicode
+F	2534	8855f7a9c77a4447f16398cc2542eb56ee80f3e066ad0a01e7183673d0e9e3c9	share/terminfo/r/rxvt-unicode-256color
+D			share/terminfo/s
+F	1667	959a7f2be76d57c46890d4762c6f9b3658138d1f695ac0f4cd31fc7d5c3c6c79	share/terminfo/s/screen
+F	1807	33ec1d53ea6c5a494ec1e00148604f408bc43d0fd1669201e50f552619b22afa	share/terminfo/s/screen-256color
+F	591	587fe5d3d0da8ef4d30a2660c390f5372f66b29d0f4311ce9efe79e7b1eb58ee	share/terminfo/s/screen2
+F	2678	eef72a25b763b87fd1755e020909f45c49ca6b054b0e58ee1d20dc8fe58d37d8	share/terminfo/s/st
+F	2798	332f4c6fbec2b9d21c4128d34bf9496f53a57301a5d1f6782560357f9824b3fc	share/terminfo/s/st-256color
+D			share/terminfo/t
+F	3317	ffe7235fb1b775cc0cb112f84151f5755597c0705e45961235db13f8cfe48470	share/terminfo/t/tmux
+F	3459	7f2870efd2bc94ba6ff2c6dd6e84777b687f4331920ad388991c5ffcfc444cca	share/terminfo/t/tmux-256color
+D			share/terminfo/v
+F	1282	779a219d6ed2ed282f9416ee04fe65f92a1c90606cf6e93a61cebfc3aa96c982	share/terminfo/v/vt100
+F	1276	7fe8275bde4dc821f6b89ca2fd99badff00d02db7d92fe9a419ebe7331426e36	share/terminfo/v/vt102
+F	839	84e298d614f21185e2da434d327791c6a9900c81d1d7a40c51878223cff9e9db	share/terminfo/v/vt52
+D			share/terminfo/x
+F	3980	2297ef68a12c679eeeb13e4e28b8536113cbba54d3bd506793c4f0ef8c1fef59	share/terminfo/x/xterm
+F	1098	8a4d6b07b430650ef6265d2037abab0604c1f7e48b66f4d53337741f89fdb875	share/terminfo/x/xterm+256color
+F	4220	c3bc536f79347ed6f23be7904f45ef47cf16a8a11d8d0d3ffd92d63332394739	share/terminfo/x/xterm-16color
+F	4074	d99d67da666c615e66948bf5998e2f0b90db569dc4a3fed13cabd7dfd5a91aa9	share/terminfo/x/xterm-256color
+F	1551	fcb5173ee0c48a229b82180eebf160b8f2b4b2593767d6373d9c28d2aea705fc	share/terminfo/x/xterm-color
+F	3721	75a5836628e596ab1c236aeff22a298558ed50e2301248f30b8e236e8e52aabd	share/terminfo/x/xterm-kitty
+F	3974	eb68e7731f57af250c020836703d2f6176c7314acf10dae009fcb24bff6ae250	share/terminfo/x/xterm-new
+D			tmp
+D			var
+D			var/lib
+D			var/lib/dpkg
+F	0	e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855	var/lib/dpkg/available
+D			var/lib/dpkg/info
+F	2356	2b161910bbb355b60facd2e9b9e1c61c1fd08633b20fddc461378d396bfeea36	var/lib/dpkg/info/attr.list
+F	1896	980a1e20e9f799252c1c578643f9b52e0e657f8b4586a9a30c2f04b9d835738a	var/lib/dpkg/info/attr.md5sums
+F	104	3023c3ed7147b9612eb9b9847c0e6f2c8390baa23d40eff97a74810d25927ec4	var/lib/dpkg/info/bash.conffiles
+F	8286	59137c3f8bbc457ba3b83532e78142847a01272c43c6dcbe8043dfa7176ebd5e	var/lib/dpkg/info/bash.list
+F	11373	88dd4b59dd52ff27f1653ced1df9400989cf37668b528096c3ee55682424442a	var/lib/dpkg/info/bash.md5sums
+F	698	358af7d7164e16da1e3b944b031b0345f70947d5f567f90b03519dc994a4f684	var/lib/dpkg/info/dash.list
+F	272	d91f3b61003b8c17a843909fff2723ef6ea453c98abfc27c8e8e4f3391f9146e	var/lib/dpkg/info/dash.md5sums
+F	1858	77dd1be7bcd2bab0d3ce953c9c6fde8633045954a4983c37133b5120d5def3b8	var/lib/dpkg/info/gzip.list
+F	2118	9843a0a32131c4d06a95959e4d098815353a019edb5a72b071c692cfdd842727	var/lib/dpkg/info/gzip.md5sums
+F	216	534faf3a1f7f972df0525f9b524c7db2cc513bc1b49f4fb917f7595c9821853d	var/lib/dpkg/info/iconv.list
+F	81	85d7103f3944ba85cff26eb8c45b22ae3999ecd060dcab1923458ca1f3697409	var/lib/dpkg/info/iconv.md5sums
+F	5027	4102679b865311726b9d5217388195bd748fd8c7a89c4762531d475ddb772cf5	var/lib/dpkg/info/libacl.list
+F	6015	88cc56ae880de45fea220461c027350b5c3b0d47e2b1ca048bd54a1dedea297f	var/lib/dpkg/info/libacl.md5sums
+F	562	6ffdc4cc648a981ab55f03fc3c8ed4a2310ea556d88aadd4bb613f2ef45969cc	var/lib/dpkg/info/libandroid-glob.list
+F	287	d75ded2bcc1c6137f7d4aef12f97e26627d8c1bc6d680c31d61ac0ee442e2b03	var/lib/dpkg/info/libandroid-glob.md5sums
+F	1100	ff64e81f7923297c90e8bae3346b11183fa8a39d6a42a2744c35855ea1142d5c	var/lib/dpkg/info/libandroid-selinux.list
+F	888	988a03306ebfd1adb93dbc5b180b9db03f9bcd5c9ace47f417dbc43dc70ed284	var/lib/dpkg/info/libandroid-selinux.md5sums
+F	619	1de7dec7388b8f760adcdac0b12bd643c82a8e3e6df40d4a9474f7582321d065	var/lib/dpkg/info/libandroid-shmem.list
+F	292	cbfd06f348f7bdf10d584ae5f1559fdd2fc8441d0c501b160ab10025df1ffd51	var/lib/dpkg/info/libandroid-shmem.md5sums
+F	554	05874d4e07e6ef54a986d84a95d48e7dda3f45b23c1d9481c2ad4608b2711d6f	var/lib/dpkg/info/libandroid-support.list
+F	323	20b6f62bd4cf6df9d6c96a69dc8beb545bb31e61eba8f3b4a4b22fb317b1bb6f	var/lib/dpkg/info/libandroid-support.md5sums
+F	3661	a234739e1fb588c538787668b5bc73754a0e5aeacecccbbb759d11b80bc4d869	var/lib/dpkg/info/libevent.list
+F	4263	094e2a4dfea283cf129d1abdbe3929cd7388f7d03790c99d3317dd72b08871de	var/lib/dpkg/info/libevent.md5sums
+F	1742	444fef325de9e0236ca812f43940cbb99ed0d8ab57e5754c7930a90570672cf4	var/lib/dpkg/info/libiconv.list
+F	1643	ead0da201ac9aa39b151a296ccc644070a6cd03457d8bb5d88e6b442ed52573d	var/lib/dpkg/info/libiconv.md5sums
+F	947	ef1f2b15c111ea8a5247828e0969a359fb8a1afcf1ae04f007e79701b5219edc	var/lib/dpkg/info/libtalloc.list
+F	375	f61808b0d1d981645f5a9e6ea8e63e7d6ad8b13f7ea0b76cabf691dfc066f619	var/lib/dpkg/info/libtalloc.md5sums
+F	1591	1798f0f6cac9998e1ced91825371eae48e88e16888a141a8c3eef57c3245cc14	var/lib/dpkg/info/ncurses-ui-libs.list
+F	557	a6ea8bbcd3808fcff172f18edd31606395c253832862ea584db8ba005a32fc3f	var/lib/dpkg/info/ncurses-ui-libs.md5sums
+F	1108	162d9ca63e79ccac547948dc22ea0994609e1044d477f2f4d4fe4dbc5675ab17	var/lib/dpkg/info/ncurses-utils.list
+F	1084	89ccf60cd67627fce990b617377b926418bb79090c3c68fb7df387921de6a982	var/lib/dpkg/info/ncurses-utils.md5sums
+F	75353	0961203303a2de1b886b4176b2a8c7700573ff44adfd22ade3bd8c856e7e1c78	var/lib/dpkg/info/ncurses.list
+F	18612	252a85c7a595b5592641bdf9fdb6457fc76c1cf6ad79fc03cc76cf653d7b4aa7	var/lib/dpkg/info/ncurses.md5sums
+F	19016	9540841103efba85b7fb0eb126c15cac40455c0306b10e972d4f5edf8fa4b98f	var/lib/dpkg/info/pcre2.list
+F	25830	6e4f4e4c196a461290bdf2b046f8ed5c351a0db3cd17f98ab4effbba78f221c6	var/lib/dpkg/info/pcre2.md5sums
+F	436	308cff7e7c9006f0fe268a06670cc025a0d2e744f3638ff7e4339a63a09b8634	var/lib/dpkg/info/pcre2grep.list
+F	186	0518dba254f4bc7a2a01b3cf70e837a2d48bee9e9f31e3401ac5469b7453597e	var/lib/dpkg/info/pcre2grep.md5sums
+F	811	9bbdc3f14337dd5bf0d7325b8aeca5a6efe7dcab6062e6f9a552f43f5c04a5b0	var/lib/dpkg/info/proot.list
+F	359	6d8f4c2b610cd27cae641e8581d17367013b4a1094be13414523de5cfbf581d3	var/lib/dpkg/info/proot.md5sums
+F	50	c637b6a69497be789cdabfd61341ae3baf690873e13e0b6009c995c1cbb50d28	var/lib/dpkg/info/readline.conffiles
+F	3815	71bde198cf6ab47fc1be4e8beea2d84004c8bb156fa4cd0c93f235cc9d9ea9de	var/lib/dpkg/info/readline.list
+F	4211	2f227be152c23c196dd29abc89039fbc59d062f1bab2509d5ad48b2f3a558bb4	var/lib/dpkg/info/readline.md5sums
+F	1089	67d0d7c20cfee8fabee35565bbb75c6c0aec3f39a9ace7749c93ad9bcc3f8b1e	var/lib/dpkg/info/tar.list
+F	722	1cf2c322fba8f7c85e7727da3e1c82e46544976301cd1cfd1abb6a682ef19e57	var/lib/dpkg/info/tar.md5sums
+F	9085	c6e8917a8ab257a54257f5f0e689668da499052b7c0d4687b0ccbf473f99d6d9	var/lib/dpkg/info/termux-core.list
+F	5997	43611a3ed5977e3d6a7c2b6a7ed8d1572f6161a3ad89dc1c078f03ff75e3ae7c	var/lib/dpkg/info/termux-core.md5sums
+F	8315	4c4b0fd4bb3c1369e4da9d6c6803f6f8a65b2504cc282729b009f102263a5d38	var/lib/dpkg/info/termux-exec.list
+F	4087	a8b2e90dda87d7f48d396a523a0f8f96fa3806d637fab4983c7ea57033748097	var/lib/dpkg/info/termux-exec.md5sums
+F	1981	7f45ff0012924c76e099045dc758150c21c78e0bf99eeb5bef61ad47d4ebc2ef	var/lib/dpkg/info/termux-exec.postinst
+F	112	54cf3f13f9be20ec0aa4126f6dc0e7e550d5c7d89afddb85ea349e38ebf145ad	var/lib/dpkg/info/tmux.conffiles
+F	1101	76779dd05fbe45d10b9dc3e936e4d278ac0e27c544b7790a9669e85b95a694a9	var/lib/dpkg/info/tmux.list
+F	560	d58b881327a4bb5faacb48bc0043c8c8c26ca8582fb38f31468c17577a6f95ef	var/lib/dpkg/info/tmux.md5sums
+F	790	3baa088999da6845e2f01266f51e36553ebdfd2d79e519564446030c69e2d020	var/lib/dpkg/info/utf8proc.list
+F	386	10da4e4a1ad7139d565fca9830358354ebd7bdf8960fab10ab889fd27580bb96	var/lib/dpkg/info/utf8proc.md5sums
+F	7624	4a87b44be8512e8f20774dd4af20fc420cb037e5c301f59aaff8477800f1caeb	var/lib/dpkg/status
+D			var/lib/dpkg/triggers
+D			var/lib/dpkg/updates
+D			var/log
+D			var/log/apt
+D			var/run

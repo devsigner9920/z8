@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "applicationId": "dev.devsigner.z8",
+  "prefix": "/data/data/dev.devsigner.z8/files/usr",
+  "architecture": "aarch64",
+  "archive": "bootstrap-aarch64.zip",
+  "sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+  "termuxPackagesCommit": "27d2485b86dd0aed74ae7095434c83cbba7bf1dd"
+}

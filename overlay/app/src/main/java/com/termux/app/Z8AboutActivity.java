@@ -1,0 +1,176 @@
+package com.termux.app;
+
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+import com.termux.BuildConfig;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+/** Public, offline-readable notices. Operator details come only from the release configuration. */
+public final class Z8AboutActivity extends Activity {
+    public enum Page { PRIVACY, DATA, ENVIRONMENT, LICENSES }
+    private static final String EXTRA_PAGE = "dev.devsigner.z8.ABOUT_PAGE";
+    private final ExecutorService reader = Executors.newSingleThreadExecutor();
+    private Z8PanelUi ui;
+    private Page page = Page.PRIVACY;
+    private int licensePage;
+    private List<String> licensePages;
+    private TextView licenseText, licensePosition;
+    private LinearLayout licensePrevious, licenseNext;
+
+    public static Intent intent(Context context, Page page) {
+        return new Intent(context, Z8AboutActivity.class).putExtra(EXTRA_PAGE, page.name());
+    }
+    @Override public void onCreate(Bundle saved) {
+        super.onCreate(saved);
+        try { page = Page.valueOf(getIntent().getStringExtra(EXTRA_PAGE)); } catch (RuntimeException ignored) { }
+        if (saved != null) licensePage = Math.max(0, saved.getInt("licensePage", 0));
+        render();
+    }
+    @Override public void onSaveInstanceState(Bundle state) { state.putInt("licensePage", licensePage); super.onSaveInstanceState(state); }
+    @Override public void onDestroy() { reader.shutdownNow(); super.onDestroy(); }
+
+    private void render() {
+        String title = page == Page.PRIVACY ? "개인정보처리방침" : page == Page.DATA ? "데이터 보관·삭제"
+            : page == Page.ENVIRONMENT ? "환경·외부 도구 안내" : "오픈소스 라이선스·소스";
+        ui = new Z8PanelUi(this, title);
+        switch (page) {
+            case PRIVACY: privacy(); break;
+            case DATA: data(); break;
+            case ENVIRONMENT: environment(); break;
+            case LICENSES: licenses(); break;
+        }
+    }
+
+    private void privacy() {
+        paragraph("Z8 개인정보처리방침 · " + BuildConfig.Z8_POLICY_DATE);
+        ui.section("운영자와 문의");
+        if (!BuildConfig.Z8_DEVELOPER_NAME.trim().isEmpty()) paragraph("운영자: " + BuildConfig.Z8_DEVELOPER_NAME);
+        if (!BuildConfig.Z8_SUPPORT_EMAIL.trim().isEmpty()) {
+            paragraph("개인정보 문의: " + BuildConfig.Z8_SUPPORT_EMAIL);
+            ui.setting("문의 이메일 작성", "내용을 검토한 뒤 직접 전송할 수 있습니다.", this::email);
+        } else paragraph("이 빌드에는 운영자 연락처가 등록되지 않았습니다.");
+        webLink("공개 개인정보처리방침", BuildConfig.Z8_PRIVACY_URL);
+        ui.section("Z8의 역할");
+        paragraph("Z8는 Android에서 프로젝트별 Linux 환경과 터미널을 제공하는 개발 도구입니다. Z8 자체 계정이나 AI 모델 서버를 운영하지 않습니다. 광고, 사용 분석, 자동 오류 보고 기능을 제공하지 않습니다.");
+        ui.section("기기에 보관하는 정보");
+        paragraph("프로젝트 이름과 소스 파일, Linux 환경, 프로젝트 HOME의 설정·셸 기록·CLI 인증 정보, 앱 설정과 알림 기록을 앱 저장소에서 처리합니다. 알림 연결은 종류·시간·프로젝트 및 세션의 이름·식별자를 기록하며 프롬프트나 명령 원문을 알림 기록으로 복사하지 않습니다.");
+        paragraph("내부 미리보기는 방문한 개발 서버의 쿠키·사이트 저장소·캐시를 기기에 보관할 수 있습니다. 미리보기 데이터는 모든 프로젝트가 공유합니다. 이 브라우저 데이터와 CLI의 인증 파일은 서로 별개입니다.");
+        ui.section("네트워크와 외부 서비스");
+        paragraph("개발 환경과 도구를 내려받을 때 선택한 배포 서버로 접속하며, 서버에는 IP 주소와 다운로드 요청 정보가 전달됩니다. 사용자가 실행한 Git, CLI, 패키지 설치 도구와 개발 서버는 해당 명령과 설정에 따라 네트워크에 접속합니다. 미리보기에서 연 웹페이지도 페이지 코드에 따라 외부 서버에 접속할 수 있습니다.");
+        paragraph("Codex·Claude Code 등 외부 CLI는 사용자가 선택한 서비스와 계정으로 인증하며, 입력·소스·명령 결과 등을 서비스로 보낼 수 있습니다. 실제 전송 범위, 진단 정보, 보관 기간과 삭제 절차는 설치한 도구의 버전·설정 및 공급자 정책에 따릅니다. 로컬에서 실행된다는 말은 AI 처리나 모든 작업이 오프라인이라는 뜻이 아닙니다.");
+        paragraph("외부 사이트와 로그인은 기기 브라우저의 창에서 열립니다. 해당 브라우저와 사이트는 각자의 개인정보처리방침을 적용합니다. Z8가 브라우저 로그인 정보나 외부 서비스의 계정을 대신 삭제하지는 않습니다.");
+        ui.section("보호와 보관·삭제");
+        paragraph("Z8는 Android 앱 전용 저장소를 사용하며 앱의 자동 백업을 허용하지 않습니다. 외부 인증 URL은 저장된 화면 상태나 알림 기록에 쓰지 않습니다. CLI 인증 파일의 보호 방식은 해당 도구에 따르며, 모든 인증 정보가 별도 암호화 저장소에 보관된다고 보장하지 않습니다.");
+        paragraph("프로젝트 데이터는 사용자가 프로젝트를 삭제하거나 앱 데이터를 지울 때까지 남을 수 있습니다. CLI가 기록하는 대화·히스토리는 도구 설정에 따라 달라집니다. 앱 알림 기록은 최대 256개이며, 한도에 도달하면 읽었거나 종료된 오래된 기록을 새 기록으로 대체할 수 있습니다. 알림 화면에서도 기록을 정리할 수 있습니다.");
+        paragraph("내부 미리보기 데이터는 설정에서 별도로 삭제합니다. 앱 공통 설정과 남은 로컬 데이터는 Android 설정의 앱 데이터 삭제로 제거할 수 있습니다. 외부 서버에 보관된 정보는 공급자의 삭제 절차를 이용해야 합니다. 개인정보 관련 문의는 위 연락처로 요청할 수 있습니다.");
+        ui.setting("삭제 방법 자세히 보기", "종료·로그아웃·프로젝트 삭제의 차이", () -> startActivity(intent(this, Page.DATA)));
+    }
+
+    private void data() {
+        ui.section("터미널 종료와 로그아웃");
+        paragraph("터미널을 닫아도 프로젝트 파일, 셸 기록과 저장된 CLI 로그인 정보는 남습니다. 각 도구의 공식 로그아웃 명령을 해당 프로젝트에서 사용하세요. 설치한 버전의 도움말을 먼저 확인하세요.");
+        paragraph("로컬 로그아웃이나 인증 파일 삭제는 외부 서비스 계정 삭제 또는 발급된 토큰의 폐기를 보장하지 않습니다. 공급자 계정 설정에서 연결된 앱·세션·토큰을 확인하고 필요하면 직접 해제하세요. 사용자 지정 인증 경로나 환경변수는 별도일 수 있습니다.");
+        ui.section("프로젝트 삭제");
+        paragraph("프로젝트 목록에서 이름을 길게 눌러 삭제할 수 있습니다. 실행 중인 세션을 종료한 뒤 해당 프로젝트의 소스, Linux 환경, HOME과 프로젝트 설정을 지웁니다. HOME에 있는 CLI 인증 정보와 기록도 함께 삭제됩니다. 필요한 파일을 먼저 보관하세요.");
+        paragraph("프로젝트를 삭제해도 다른 프로젝트, 앱 공통 알림 기록, 내부 미리보기 데이터, 기기 브라우저 로그인 상태와 외부 서버의 데이터는 함께 삭제되지 않습니다. 읽을 수 없는 프로젝트는 파일을 보존하며, 자동으로 지우지 않습니다.");
+        ui.section("미리보기 데이터");
+        paragraph("설정의 ‘미리보기 데이터 삭제’는 모든 프로젝트가 공유하는 내부 WebView의 쿠키·사이트 저장소·캐시·서비스 워커를 삭제합니다. 열린 미리보기를 멈추고 WebView가 완료를 알려준 뒤 결과를 표시합니다. 지원되지 않는 WebView에서는 업데이트 안내를 제공합니다.");
+        paragraph("이 작업은 프로젝트 소스, CLI 인증 정보, Chrome 등 외부 브라우저의 로그인 상태를 지우지 않습니다. 터미널에서 실행한 개발 서버는 계속 실행됩니다.");
+        ui.section("알림과 앱 전체 데이터");
+        paragraph("알림 화면의 ‘기록 정리’는 읽은 알림과 종료된 세션의 기록을 정리합니다. 알림을 정리하는 것은 CLI의 요청을 승인하거나 거절하는 동작이 아닙니다.");
+        paragraph("Android 설정에서 Z8의 앱 데이터를 지우면 프로젝트를 포함한 앱의 로컬 데이터가 삭제됩니다. 외부 서비스에 이미 전송된 데이터와 외부 브라우저 정보는 별도로 관리하세요.");
+    }
+
+    private void environment() {
+        ui.section("기기에서 실행하는 개발 환경");
+        paragraph("프로젝트마다 소스와 HOME, Linux 환경을 나눕니다. PRoot는 Android 커널과 앱 권한을 공유하며 보안 가상 머신이 아닙니다. 같은 앱 권한으로 실행되는 도구에 대해 다른 프로젝트나 인증 파일의 접근 차단을 보장하지 않습니다. 신뢰하는 코드와 도구만 실행하세요.");
+        ui.section("외부 CLI와 AI 서비스");
+        paragraph("Z8는 공식 명령줄 도구의 설치와 실행, 브라우저 인증 연결을 돕습니다. 각 외부 서비스의 계정·구독·약관은 별도로 적용됩니다. Z8가 이용권을 판매하거나 사용자의 계정을 대신 제공하지 않습니다.");
+        paragraph("실행 파일의 설치나 버전 확인이 로그인과 모든 기능의 호환성을 보장하지는 않습니다. 일부 Linux sandbox 기능은 Android에서 사용할 수 없습니다. Codex의 로컬 실행 모드를 선택하면 해당 도구의 sandbox 없이 파일 수정·셸·네트워크 작업이 추가 승인 없이 실행될 수 있습니다. 실행 전에 표시되는 설명과 선택을 확인하세요.");
+        paragraph("Codex 로컬 실행 동의는 프로젝트별로 저장됩니다. ‘codex --z8-reset-local-mode’로 향후 실행의 선택을 해제할 수 있습니다. 이미 실행 중인 세션이나 공급자 계정의 상태는 바꾸지 않습니다.");
+        ui.section("설치와 저장 공간");
+        paragraph("개발 도구 설치에는 인터넷 연결과 수백 MB 이상의 다운로드, 프로젝트별로 수 GB의 여유 공간이 필요할 수 있습니다. 초기 설치 화면에서 네트워크 사용을 선택할 수 있으며 실제 크기는 도구와 버전에 따라 달라집니다.");
+        ui.section("미리보기와 인증");
+        paragraph("localhost 개발 서버는 내부 미리보기에서 표시합니다. 외부 사이트와 로그인은 기기 브라우저의 창에서 이어지며 창을 닫으면 터미널로 돌아갑니다. 외부 서비스의 보관·전송 정책을 확인한 뒤 민감한 정보를 입력하세요.");
+    }
+
+    private void licenses() {
+        paragraph("이 앱과 포함된 소프트웨어의 라이선스·저작권 고지입니다. 긴 고지는 페이지를 나누어 표시합니다.");
+        webLink("대응 소스와 빌드 안내", BuildConfig.Z8_SOURCE_URL);
+        licensePosition = paragraph("고지를 불러오는 중…");
+        licenseText = paragraph("");
+        licensePrevious = ui.setting("이전 페이지", "", () -> showLicensePage(licensePage - 1));
+        licenseNext = ui.setting("다음 페이지", "", () -> showLicensePage(licensePage + 1));
+        licensePrevious.setVisibility(View.GONE); licenseNext.setVisibility(View.GONE);
+        reader.execute(() -> {
+            List<String> pages = new ArrayList<>();
+            try (InputStream input = getAssets().open("z8-licenses/third-party-notices.txt");
+                 ByteArrayOutputStream bytes = new ByteArrayOutputStream()) {
+                byte[] buffer = new byte[8192]; int count;
+                while ((count = input.read(buffer)) != -1) {
+                    if (Thread.currentThread().isInterrupted() || bytes.size() + count > 16 * 1024 * 1024)
+                        throw new java.io.IOException("Notice unavailable");
+                    bytes.write(buffer, 0, count);
+                }
+                String text = new String(bytes.toByteArray(), StandardCharsets.UTF_8);
+                for (int start = 0; start < text.length();) {
+                    int end = Math.min(start + 14000, text.length());
+                    if (end < text.length()) {
+                        int line = text.lastIndexOf('\n', end);
+                        if (line > start) end = line + 1;
+                        else if (Character.isHighSurrogate(text.charAt(end - 1))) end--;
+                    }
+                    pages.add(text.substring(start, end)); start = end;
+                }
+            } catch (Exception unavailable) { pages.clear(); }
+            runOnUiThread(() -> {
+                if (isFinishing() || isDestroyed()) return;
+                licensePages = pages;
+                if (pages.isEmpty()) { licensePosition.setText("이 빌드의 오픈소스 고지를 읽을 수 없습니다."); return; }
+                showLicensePage(Math.min(licensePage, pages.size() - 1));
+            });
+        });
+    }
+    private void showLicensePage(int next) {
+        if (licensePages == null || next < 0 || next >= licensePages.size()) return;
+        licensePage = next;
+        licensePosition.setText((next + 1) + " / " + licensePages.size() + " 페이지");
+        licenseText.setText(licensePages.get(next));
+        licensePrevious.setVisibility(next > 0 ? View.VISIBLE : View.GONE);
+        licenseNext.setVisibility(next + 1 < licensePages.size() ? View.VISIBLE : View.GONE);
+        ui.scroll.post(() -> { if (!isDestroyed()) ui.scroll.scrollTo(0, 0); });
+    }
+    private TextView paragraph(String text) {
+        TextView view = ui.text(text, 14, ui.style.text, false);
+        view.setLineSpacing(ui.dp(5), 1); view.setTextIsSelectable(true);
+        view.setPadding(ui.dp(8), ui.dp(12), ui.dp(8), ui.dp(4));
+        ui.content.addView(view, new LinearLayout.LayoutParams(-1, -2)); return view;
+    }
+    private void webLink(String label, String value) {
+        String url = Z8BrowserUrls.normalize(value);
+        if (url == null || !"https".equalsIgnoreCase(Uri.parse(url).getScheme())) return;
+        ui.setting(label, Uri.parse(url).getHost(), () -> {
+            try { startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url))); }
+            catch (ActivityNotFoundException | SecurityException unavailable) { Toast.makeText(this, "브라우저에서 링크를 열 수 없습니다.", Toast.LENGTH_LONG).show(); }
+        });
+    }
+    private void email() {
+        if (BuildConfig.Z8_SUPPORT_EMAIL.trim().isEmpty()) return;
+        try { startActivity(new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", BuildConfig.Z8_SUPPORT_EMAIL, null))); }
+        catch (ActivityNotFoundException | SecurityException unavailable) { Toast.makeText(this, "메일 앱에서 작성할 수 없습니다. 표시된 주소를 복사해 주세요.", Toast.LENGTH_LONG).show(); }
+    }
+}

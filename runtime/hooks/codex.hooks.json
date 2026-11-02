@@ -1,0 +1,10 @@
+{
+  "hooks": {
+    "PermissionRequest": [
+      {"hooks": [{"type": "command", "command": "python3 /opt/z8/hooks/z8_event.py --provider codex", "timeout": 2}]}
+    ],
+    "Stop": [
+      {"hooks": [{"type": "command", "command": "python3 /opt/z8/hooks/z8_event.py --provider codex", "timeout": 2}]}
+    ]
+  }
+}

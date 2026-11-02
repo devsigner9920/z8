@@ -1,0 +1,16 @@
+<!--
+    Material Icons Outlined by Google; Apache-2.0.
+    Source: https://github.com/google/material-design-icons/blob/737e3324305806514d7909874fa1818ae1808232/android/action/terminal/materialiconsoutlined/black/res/drawable/outline_terminal_24.xml
+    z8 modifications: removed theme tint and set a solid black fill for runtime tinting.
+    All source path geometry and 24 x 24 viewport values are unchanged.
+    Full upstream license: docs/design/ICON_SOURCES.md
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:fillColor="#FF000000"
+      android:pathData="M20,4H4C2.89,4 2,4.9 2,6v12c0,1.1 0.89,2 2,2h16c1.1,0 2,-0.9 2,-2V6C22,4.9 21.11,4 20,4zM20,18H4V8h16V18zM18,17h-6v-2h6V17zM7.5,17l-1.41,-1.41L8.67,13l-2.59,-2.59L7.5,9l4,4L7.5,17z"/>
+</vector>

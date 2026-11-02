@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "host": "darwin-arm64",
+  "bundletool": {
+    "version": "1.18.3",
+    "url": "https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar",
+    "sha256": "a099cfa1543f55593bc2ed16a70a7c67fe54b1747bb7301f37fdfd6d91028e29"
+  },
+  "jdk": {
+    "version": "21.0.12.1+1-LTS",
+    "url": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jdk_aarch64_mac_hotspot_21.0.12.1_1.tar.gz",
+    "sha256": "3623232f33a9c3baadf304480b2535f9a3cba8a58d42ecbb438ba267315d9998"
+  },
+  "commandLineTools": {
+    "revision": "23",
+    "url": "https://dl.google.com/android/repository/commandlinetools-mac_arm64-16111833_latest.zip",
+    "sha1": "ad03dc49bfacfd52c110b14104ea548b8a07e830"
+  },
+  "sdkPackages": [
+    "platform-tools",
+    "platforms;android-36",
+    "build-tools;35.0.0",
+    "build-tools;36.0.0",
+    "ndk;29.0.14206865"
+  ]
+}

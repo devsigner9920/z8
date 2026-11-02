@@ -1,0 +1,51 @@
+# Managed z8 interactive defaults. Put personal overrides after the .bashrc loader.
+case $- in
+    *i*) ;;
+    *) return ;;
+esac
+
+if [ "${HOME-}" = /z8/home ]; then
+    case ":${PATH:-}:" in
+        *:/z8/home/.local/bin:*) ;;
+        *) PATH="/z8/home/.local/bin:${PATH:-/usr/local/bin:/usr/bin:/bin}"; export PATH ;;
+    esac
+fi
+
+# This app-owned profile is refreshed independently of preserved user defaults.
+[ ! -r /etc/profile.d/z8-cli.sh ] || . /etc/profile.d/z8-cli.sh
+
+alias ll >/dev/null 2>&1 || alias ll='ls -alF'
+alias la >/dev/null 2>&1 || alias la='ls -A'
+alias l >/dev/null 2>&1 || alias l='ls -CF'
+alias .. >/dev/null 2>&1 || alias ..='cd ..'
+alias ... >/dev/null 2>&1 || alias ...='cd ../..'
+command -v cls >/dev/null 2>&1 || alias cls='clear'
+if ! command -v fd >/dev/null 2>&1 && command -v fdfind >/dev/null 2>&1; then
+    alias fd='fdfind'
+fi
+if ! command -v mkcd >/dev/null 2>&1; then
+    # Parse the static definition only when absent: an existing alias could
+    # otherwise expand the function name while this file is being read.
+    eval 'mkcd() {
+        if [ "$#" -ne 1 ]; then
+            printf "%s\n" "Usage: mkcd <directory>" >&2
+            return 2
+        fi
+        mkdir -p -- "$1" || return $?
+        case "$1" in
+            /*) cd -- "$1" ;;
+            *) cd -- "./$1" ;;
+        esac
+    }'
+fi
+
+if [ -n "${BASH_VERSION-}" ]; then
+    shopt -s histappend checkwinsize
+    : "${HISTSIZE:=5000}"
+    : "${HISTFILESIZE:=10000}"
+    if [ -r /usr/share/bash-completion/bash_completion ]; then
+        . /usr/share/bash-completion/bash_completion
+    fi
+fi
+
+[ ! -r /etc/z8/welcome.sh ] || . /etc/z8/welcome.sh

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Approved z8 mark, packaged on a transparent 108dp layer at xxxhdpi.
+     The full asymmetrical silhouette fits inside the adaptive safe circle. -->
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android"
+    android:src="@drawable/z8_launcher_foreground"
+    android:gravity="fill"
+    android:filter="true" />
