@@ -21,11 +21,11 @@ final class Z8GuestGit implements Z8Git.Runner {
             int commandOffset, Z8Git.Runner process) throws IOException {
         if (commandOffset < 1 || commandOffset != launchArguments.size() - 1
                 || !"/usr/bin/git".equals(launchArguments.get(commandOffset)))
-            throw new IOException("프로젝트 Git 실행 경로를 확인할 수 없습니다.");
+            throw new IOException(Z8Text.text("Could not verify the project's Git command path.", "프로젝트 Git 실행 경로를 확인할 수 없습니다."));
         List<String> beforeCommand = launchArguments.subList(0, commandOffset);
         if (!beforeCommand.contains("/usr/bin/env") || !beforeCommand.contains("HOME=/z8/home")
                 || !beforeCommand.contains("-r") || !beforeCommand.contains("--kill-on-exit"))
-            throw new IOException("프로젝트 Linux 실행 설정을 확인할 수 없습니다.");
+            throw new IOException(Z8Text.text("Could not verify the project's Linux launch settings.", "프로젝트 Linux 실행 설정을 확인할 수 없습니다."));
         this.proot = proot;
         this.source = source;
         this.hostGit = hostGit.getAbsolutePath();
@@ -47,9 +47,9 @@ final class Z8GuestGit implements Z8Git.Runner {
 
     @Override public Z8Git.Result run(List<String> argv, File cwd, Map<String, String> environment,
             byte[] input, int timeout, int limit) throws IOException {
-        if (!available()) throw new IOException(unavailableReason == null ? "z8 전용 PRoot 실행 파일이 없습니다." : unavailableReason);
+        if (!available()) throw new IOException(unavailableReason == null ? Z8Text.text("The z8 PRoot executable is missing.", "z8 전용 PRoot 실행 파일이 없습니다.") : unavailableReason);
         if (!cwd.getCanonicalFile().equals(source.getCanonicalFile()))
-            throw new IOException("Git 작업 디렉터리가 선택한 프로젝트와 다릅니다.");
+            throw new IOException(Z8Text.text("The Git working directory does not match the selected project.", "Git 작업 디렉터리가 선택한 프로젝트와 다릅니다."));
         List<String> gitCommand = mapCommand(argv, hostGit, source.getAbsolutePath());
         List<String> wrapped = new ArrayList<>();
         wrapped.add(proot.getAbsolutePath());
@@ -79,14 +79,14 @@ final class Z8GuestGit implements Z8Git.Runner {
         List<String> expected = Arrays.asList(hostGit, "--literal-pathspecs", "--no-pager", "-c", "core.fsmonitor=false",
             "-c", "color.ui=false", "-C", source);
         if (argv.size() <= expected.size() || !argv.subList(0, expected.size()).equals(expected))
-            throw new IOException("지원하지 않는 Git 실행 인수입니다.");
+            throw new IOException(Z8Text.text("Unsupported Git command arguments.", "지원하지 않는 Git 실행 인수입니다."));
         List<String> result = new ArrayList<>(argv);
         result.set(0, "/usr/bin/git");
         result.set(8, "/workspace");
         if ("init".equals(result.get(9))) {
             if (result.size() != 13 || !"--initial-branch=main".equals(result.get(10))
                     || !"--".equals(result.get(11)) || !source.equals(result.get(12)))
-                throw new IOException("Git 저장소 생성 경로를 확인할 수 없습니다.");
+                throw new IOException(Z8Text.text("Could not verify the path for the new Git repository.", "Git 저장소 생성 경로를 확인할 수 없습니다."));
             result.set(12, "/workspace");
         }
         // All remaining user paths and per-commit identity values stay literal.

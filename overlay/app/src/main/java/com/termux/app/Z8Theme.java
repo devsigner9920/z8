@@ -28,7 +28,8 @@ public final class Z8Theme {
     public static final class Palette {
         public final String id;
         public final String name;
-        public final String description;
+        private final String englishDescription;
+        private final String koreanDescription;
         public final int background;
         public final int foreground;
         public final int secondary;
@@ -36,12 +37,13 @@ public final class Z8Theme {
         public final boolean light;
         private final int[] ansi;
 
-        private Palette(String id, String name, String description,
+        private Palette(String id, String name, String englishDescription, String koreanDescription,
                 int background, int foreground, int secondary, int accent,
                 boolean light, int[] ansi) {
             this.id = id;
             this.name = name;
-            this.description = description;
+            this.englishDescription = englishDescription;
+            this.koreanDescription = koreanDescription;
             this.background = background;
             this.foreground = foreground;
             this.secondary = secondary;
@@ -50,6 +52,9 @@ public final class Z8Theme {
             this.ansi = ansi.clone();
         }
 
+        /** Evaluate after language changes; palettes remain stable color objects. */
+        public String description() { return Z8Text.text(englishDescription, koreanDescription); }
+
         public int ansi(int index) {
             if (index < 0 || index >= 16) throw new IllegalArgumentException("ANSI color index");
             return ansi[index];
@@ -57,7 +62,7 @@ public final class Z8Theme {
     }
 
     private static final List<Palette> PALETTES = Collections.unmodifiableList(Arrays.asList(
-        new Palette("prism", "Prism", "블루·라일락·코럴이 번지는 스펙트럼",
+        new Palette("prism", "Prism", "A blend of blue, lilac, and coral", "블루·라일락·코럴이 번지는 스펙트럼",
             0xff11141c, 0xffeef0f7, 0xffabb3c5, 0xffbdceff, false,
             new int[] {
                 0xff353e50, 0xfff29aac, 0xffa9deb8, 0xffedc89c,
@@ -65,7 +70,7 @@ public final class Z8Theme {
                 0xff8d9cb7, 0xffffb3c1, 0xffcaf0d3, 0xffffdebb,
                 0xffc2d8ff, 0xffdfceff, 0xffb4edf9, 0xfff8faff
             }),
-        new Palette("midnight", "Midnight", "짙은 남색과 선명한 푸른 포인트",
+        new Palette("midnight", "Midnight", "Deep navy with vivid blue accents", "짙은 남색과 선명한 푸른 포인트",
             0xff101827, 0xffe5edf7, 0xffa5b4c9, 0xff87b9ff, false,
             new int[] {
                 0xff303c50, 0xffff7c8e, 0xff91d7a3, 0xffecd287,
@@ -73,7 +78,7 @@ public final class Z8Theme {
                 0xff8294af, 0xffffa5b1, 0xffb6ecc1, 0xffffe5a0,
                 0xffaecfff, 0xffdfbfff, 0xffa7edf2, 0xfff4f8ff
             }),
-        new Palette("graphite", "Graphite", "차분한 회색과 민트 포인트",
+        new Palette("graphite", "Graphite", "Calm gray with mint accents", "차분한 회색과 민트 포인트",
             0xff1b1e22, 0xffebedef, 0xffb0b7c0, 0xff94d8c1, false,
             new int[] {
                 0xff3d424a, 0xffee8e91, 0xffa6cf91, 0xffe0c58a,
@@ -81,7 +86,7 @@ public final class Z8Theme {
                 0xff969faa, 0xffffb0b2, 0xffc6e7b5, 0xffffe3ab,
                 0xffbed8ff, 0xffe4caff, 0xffb4eef3, 0xffffffff
             }),
-        new Palette("ember", "Ember", "따뜻한 배경과 앰버 포인트",
+        new Palette("ember", "Ember", "Warm tones with amber accents", "따뜻한 배경과 앰버 포인트",
             0xff251d1a, 0xfff2e7d8, 0xffc5b6a5, 0xffefb56f, false,
             new int[] {
                 0xff4a3c35, 0xffee8b7d, 0xffb7ce88, 0xffefc27d,
@@ -89,7 +94,7 @@ public final class Z8Theme {
                 0xffaf9b89, 0xffffb0a3, 0xffd3e9ad, 0xffffdda6,
                 0xffb9d9f1, 0xfff1c5e6, 0xffb2e4da, 0xfffff6e9
             }),
-        new Palette("paper", "Paper", "밝은 종이색과 또렷한 글자",
+        new Palette("paper", "Paper", "Light paper tones and crisp text", "밝은 종이색과 또렷한 글자",
             0xfff6f4ef, 0xff24314b, 0xff536174, 0xff2759b8, true,
             new int[] {
                 0xff263044, 0xffa12735, 0xff2f6e42, 0xff806000,

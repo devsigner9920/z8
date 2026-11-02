@@ -35,7 +35,7 @@ def main():
     device.adb("shell", "input", "keyevent", "224")
     device.adb("shell", "wm", "dismiss-keyguard")
     device.diagnostics()
-    device.click(visible_button({"Linux 런타임 설치 / 터미널 열기", "Linux 런타임 터미널 열기"}))
+    device.click(visible_button(device.ui.labels('install_runtime') + device.ui.labels('open_runtime')))
     deadline = time.monotonic() + 120
     while True:
         tree = device.observe()

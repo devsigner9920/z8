@@ -27,6 +27,7 @@ def load(name, file):
 
 device = load('z8_continuity_device', 'smoke-emulator.py')
 runtime = load('z8_continuity_runtime', 'smoke-tmux.py')
+ui = device.ui
 
 
 def bounds(node):
@@ -196,9 +197,10 @@ def rows(tree):
         if not node.get('resource-id', '').endswith(':id/z8_session_row'):
             continue
         description = node.get('content-desc', '')
-        if not description.startswith('세션 선택: '):
+        identity_text = ui.strip_prefix(description, ui.labels('select_prefix'))
+        if identity_text is None:
             raise RuntimeError('Session row has no project/name description')
-        fields = description[len('세션 선택: '):].rsplit(' / ', 1)
+        fields = identity_text.rsplit(' / ', 1)
         identity = fields[0].split(' / ', 1)
         if len(fields) != 2 or len(identity) != 2 or not all(identity) or not fields[1]:
             raise RuntimeError('Invalid session row description')
@@ -248,8 +250,7 @@ def expand_groups(tree):
         if panel is None:
             raise RuntimeError('Session panel disappeared while expanding projects')
         collapsed = next((node for node in panel.iter('node')
-                          if node.get('content-desc', '').startswith('프로젝트 세션 목록: ')
-                          and node.get('content-desc', '').endswith(' · 접힘')
+                          if ui.collapsed_project(node.get('content-desc', ''))
                           and node.get('clickable') == 'true' and node.get('enabled') != 'false'), None)
         if collapsed is None:
             return tree
@@ -307,7 +308,7 @@ def select_created_session(expected_total, project_name, expected_shells):
                     selected = [tab for tab in tree.iter('node')
                                 if tab.get('resource-id', '').endswith(':id/z8_session_tab')
                                 and tab.get('selected') == 'true']
-                    label = '세션 전환: ' + project_name + ' / ' + key[1] + ' / '
+                    label = ui.labels('switch_session', project=project_name, title=key[1])
                     if len(selected) != 1 or not selected[0].get('content-desc', '').startswith(label):
                         raise RuntimeError('The actual selected tab does not identify the new fixture Shell')
                     time.sleep(.4)
@@ -323,10 +324,10 @@ def select_created_session(expected_total, project_name, expected_shells):
 def wait_direct_shell(project_name):
     """Observe direct Terminal creation; never dismiss or select a session chooser."""
     deadline = time.monotonic() + 20
-    prefix = '세션 전환: ' + project_name + ' / '
+    prefixes = ui.labels('switch_project', project=project_name)
     while time.monotonic() < deadline:
         tree = device.observe()
-        if any(node.get('text') in ('새 세션의 프로젝트', project_name + ' · 새 세션')
+        if any(node.get('text') in ui.labels('chooser') + ui.labels('project_chooser', project=project_name)
                for node in tree.iter('node')):
             raise RuntimeError('New-session creation unexpectedly opened a chooser')
         current = control(tree, 'z8_current_project')
@@ -335,8 +336,9 @@ def wait_direct_shell(project_name):
                     and node.get('selected') == 'true']
         if current is not None and current.get('text') == project_name and len(selected) == 1:
             description = selected[0].get('content-desc', '')
-            if description.startswith(prefix):
-                parts = description[len(prefix):].rsplit(' / ', 1)
+            identity_text = ui.strip_prefix(description, prefixes)
+            if identity_text is not None:
+                parts = identity_text.rsplit(' / ', 1)
                 if len(parts) == 2 and parts[1] and re.fullmatch(r'Terminal [1-9][0-9]{0,95}', parts[0]) \
                         and control(tree, 'terminal_view') is not None:
                     time.sleep(.4)

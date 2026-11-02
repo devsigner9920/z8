@@ -26,7 +26,7 @@ class GitHubReadTests(unittest.TestCase):
             probe = output / "GitHubProbe.java"
             probe.write_text(JAVA_PROBE)
             sources = ROOT / "overlay/app/src/main/java/com/termux/app"
-            compiled = subprocess.run([javac, "-encoding", "UTF-8", "-cp", gson, "-d", str(output),
+            compiled = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), "-encoding", "UTF-8", "-cp", gson, "-d", str(output),
                 str(sources / "Z8Files.java"), str(sources / "Z8Git.java"), str(sources / "Z8GitHub.java"), str(probe)],
                 capture_output=True, text=True, timeout=45)
             self.assertEqual(0, compiled.returncode, compiled.stdout + compiled.stderr)
@@ -175,8 +175,8 @@ public final class GitHubProbe {
         check(parse(Z8GitHub.View.STATUSES, "{\"state\":\"pending\",\"statuses\":[]}").rows.isEmpty(), "empty statuses do not fabricate a green aggregate");
         check(parse(Z8GitHub.View.ACTIONS, "{\"workflow_runs\":[{\"name\":\"Build\",\"status\":\"completed\",\"conclusion\":\"cancelled\",\"head_branch\":\"main\"}]}").rows.get(0).detail.endsWith("cancelled"), "Actions cancellation preserved");
         String repo = "{\"full_name\":\"octo/work\",\"private\":true,\"description\":null,\"default_branch\":\"main\"}";
-        check(parse(Z8GitHub.View.REPOSITORY, repo).rows.get(0).detail.equals("비공개"), "private repository metadata");
-        check(parse(Z8GitHub.View.SEARCH, "{\"items\":[" + repo + "],\"incomplete_results\":true}").summary.contains("일부"), "incomplete search explicitly labeled");
+        check(parse(Z8GitHub.View.REPOSITORY, repo).rows.get(0).detail.equals("Private"), "private repository metadata");
+        check(parse(Z8GitHub.View.SEARCH, "{\"items\":[" + repo + "],\"incomplete_results\":true}").summary.contains("Partial"), "incomplete search explicitly labeled");
         denied(() -> parse(Z8GitHub.View.ISSUE, "{\"number\":1.5,\"title\":\"bad\"}"), "fractional issue number rejected");
         denied(() -> parse(Z8GitHub.View.REPOSITORY, "{\"full_name\":\"https://evil.invalid/a\"}"), "remote repository cannot select another host");
         denied(() -> parse(Z8GitHub.View.CHECKS, "{\"check_runs\":{}}"), "wrong JSON list shape rejected");

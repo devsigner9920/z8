@@ -48,7 +48,7 @@ public final class Z8ThemeActivity extends Activity {
             || !Z8Theme.isSetupComplete(this);
         selectedId = state == null ? Z8Theme.selected(this).id : state.getString("selectedTheme");
         selectedId = Z8Theme.find(selectedId).id;
-        setTitle(firstSetup ? "z8 · 시작 테마" : "z8 · 테마 설정");
+        setTitle(firstSetup ? Z8Text.text("z8 · Choose a theme", "z8 · 시작 테마") : Z8Text.text("z8 · Theme settings", "z8 · 테마 설정"));
         render();
         if (state != null && state.getBoolean("saveInProgress", false)) save();
     }
@@ -89,17 +89,17 @@ public final class Z8ThemeActivity extends Activity {
             close.setRotation(180);
             close.setPadding(dp(14), dp(14), dp(14), dp(14));
             close.setBackground(chrome.interactive(this, Color.TRANSPARENT, Color.TRANSPARENT, 12));
-            close.setContentDescription("테마 설정 닫기");
+            close.setContentDescription(Z8Text.text("Close theme settings", "테마 설정 닫기"));
             close.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
             close.setFocusable(true);
             close.setOnClickListener(view -> { if (!saving) finish(); });
             back = close;
             bar.addView(close, new LinearLayout.LayoutParams(dp(48), dp(48)));
         }
-        TextView brand = text(firstSetup ? "z8" : "테마", firstSetup ? 25 : 16, chrome.text, true);
+        TextView brand = text(firstSetup ? "z8" : Z8Text.text("Theme", "테마"), firstSetup ? 25 : 16, chrome.text, true);
         brand.setPadding(dp(8), 0, 0, 0);
         bar.addView(brand, new LinearLayout.LayoutParams(0, -2, 1));
-        if (firstSetup) bar.addView(text("처음 설정", 12, chrome.muted, false));
+        if (firstSetup) bar.addView(text(Z8Text.text("First setup", "처음 설정"), 12, chrome.muted, false));
         root.addView(bar, new LinearLayout.LayoutParams(width, dp(56)));
 
         scroll = new ScrollView(this);
@@ -109,10 +109,10 @@ public final class Z8ThemeActivity extends Activity {
         LinearLayout content = column();
         content.setPadding(dp(24), dp(wide ? 22 : 12), dp(24), dp(wide ? 24 : 16));
         scroll.addView(content);
-        TextView heading = text(firstSetup ? "어떤 색으로 시작할까요?" : "작업 공간의 테마", wide ? 27 : 24, chrome.text, true);
+        TextView heading = text(firstSetup ? Z8Text.text("Choose your starting colors", "어떤 색으로 시작할까요?") : Z8Text.text("Workspace theme", "작업 공간의 테마"), wide ? 27 : 24, chrome.text, true);
         heading.setAccessibilityHeading(true);
         content.addView(heading);
-        add(content, text("테마를 눌러 터미널의 색을 미리 확인하세요.", 13, chrome.muted, false), 8);
+        add(content, text(Z8Text.text("Select a theme to preview the terminal colors.", "테마를 눌러 터미널의 색을 미리 확인하세요."), 13, chrome.muted, false), 8);
 
         LinearLayout body = wide ? row() : column();
         body.setGravity(Gravity.TOP);
@@ -124,7 +124,7 @@ public final class Z8ThemeActivity extends Activity {
         if (wide) optionsParams.leftMargin = dp(28);
         else optionsParams.topMargin = dp(16);
         body.addView(options, optionsParams);
-        TextView label = text("테마 선택", 12, chrome.muted, true);
+        TextView label = text(Z8Text.text("Choose theme", "테마 선택"), 12, chrome.muted, true);
         label.setAccessibilityHeading(true);
         options.addView(label);
         choices.clear(); checks.clear();
@@ -147,7 +147,7 @@ public final class Z8ThemeActivity extends Activity {
         footer.addView(divider, new LinearLayout.LayoutParams(-1, dp(1)));
         LinearLayout actions = row();
         actions.setPadding(dp(24), dp(14), dp(24), dp(18));
-        if (wide) actions.addView(text("나중에도 언제든 바꿀 수 있어요.", 12, chrome.muted, false),
+        if (wide) actions.addView(text(Z8Text.text("You can change this any time.", "나중에도 언제든 바꿀 수 있어요."), 12, chrome.muted, false),
             new LinearLayout.LayoutParams(0, -2, 1));
         apply = new Button(this);
         apply.setAllCaps(false); apply.setTextSize(15);
@@ -170,7 +170,7 @@ public final class Z8ThemeActivity extends Activity {
         option.setPadding(dp(12), dp(12), dp(12), dp(12));
         option.setMinimumHeight(dp(64));
         option.setFocusable(true);
-        option.setContentDescription(palette.name + ", " + palette.description);
+        option.setContentDescription(palette.name + ", " + palette.description());
         option.setAccessibilityDelegate(new View.AccessibilityDelegate() {
             @Override public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
                 super.onInitializeAccessibilityNodeInfo(host, info);
@@ -225,7 +225,7 @@ public final class Z8ThemeActivity extends Activity {
         window.setBackground(style.shape(this, palette.background, style.border, 16));
         window.setClipToOutline(true);
         window.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
-        window.setContentDescription(palette.name + " 터미널 미리보기. " + palette.description + ". 샘플 출력입니다.");
+        window.setContentDescription(palette.name + Z8Text.text(" terminal preview. ", " 터미널 미리보기. ") + palette.description() + Z8Text.text(". Sample output.", ". 샘플 출력입니다."));
         LinearLayout navigation = row();
         navigation.setPadding(dp(16), dp(12), dp(16), dp(12));
         navigation.setBackground(style.ambient(this));
@@ -234,7 +234,7 @@ public final class Z8ThemeActivity extends Activity {
         TextView project = text("my-project", 13, style.text, true);
         project.setPadding(dp(10), 0, 0, 0);
         navigation.addView(project, new LinearLayout.LayoutParams(0, -2, 1));
-        navigation.addView(text("미리보기", 10, style.muted, false));
+        navigation.addView(text(Z8Text.text("Preview", "미리보기"), 10, style.muted, false));
         window.addView(navigation);
         LinearLayout tabs = column();
         tabs.setPadding(dp(16), dp(8), dp(16), 0);
@@ -265,9 +265,9 @@ public final class Z8ThemeActivity extends Activity {
         LinearLayout caption = row();
         TextView name = text(palette.name, 14, chrome.text, true);
         caption.addView(name, new LinearLayout.LayoutParams(0, -2, 1));
-        caption.addView(text(palette.light ? "라이트" : "다크", 11, chrome.muted, false));
+        caption.addView(text(palette.light ? Z8Text.text("Light", "라이트") : Z8Text.text("Dark", "다크"), 11, chrome.muted, false));
         add(preview, caption, wide ? 14 : 10);
-        add(preview, text(palette.description, 12, chrome.muted, false), 5);
+        add(preview, text(palette.description(), 12, chrome.muted, false), 5);
     }
 
     private void setSavingState() {
@@ -275,7 +275,7 @@ public final class Z8ThemeActivity extends Activity {
         if (back != null) back.setEnabled(!saving);
         apply.setEnabled(!saving);
         apply.setAlpha(saving ? .6f : 1f);
-        apply.setText(saving ? "저장 중…" : firstSetup ? "이 테마로 시작" : "테마 적용");
+        apply.setText(saving ? Z8Text.text("Saving…", "저장 중…") : firstSetup ? Z8Text.text("Start with this theme", "이 테마로 시작") : Z8Text.text("Apply theme", "테마 적용"));
     }
 
     private void save() {
@@ -289,7 +289,7 @@ public final class Z8ThemeActivity extends Activity {
                 if (isFinishing() || isDestroyed() || isChangingConfigurations()) return;
                 saving = false;
                 if (!saved) {
-                    Toast.makeText(this, "테마를 저장하지 못했습니다. 다시 시도해 주세요.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, Z8Text.text("Could not save the theme. Please try again.", "테마를 저장하지 못했습니다. 다시 시도해 주세요."), Toast.LENGTH_LONG).show();
                     setSavingState();
                     return;
                 }

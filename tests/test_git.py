@@ -26,7 +26,7 @@ class NativeGitTests(unittest.TestCase):
             probe = directory / "GitProbe.java"
             probe.write_text(JAVA_PROBE)
             source = ROOT / "overlay/app/src/main/java/com/termux/app"
-            compiled = subprocess.run([javac, "-encoding", "UTF-8", "-d", str(directory),
+            compiled = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), "-encoding", "UTF-8", "-d", str(directory),
                 str(source / "Z8Files.java"), str(source / "Z8Git.java"), str(source / "Z8GuestGit.java"), str(probe)],
                 capture_output=True, text=True, timeout=45)
             self.assertEqual(0, compiled.returncode, compiled.stdout + compiled.stderr)

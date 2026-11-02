@@ -45,6 +45,6 @@ public final class Z8BrowserUrls {
     /** Host only: authentication query strings never become tab labels. */
     public static String host(String value) {
         String url = normalize(value);
-        return url == null ? "브라우저" : URI.create(url).getHost();
+        return url == null ? Z8Text.text("Browser", "브라우저") : URI.create(url).getHost();
     }
 }

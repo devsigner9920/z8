@@ -92,13 +92,14 @@ def generate(args):
             raise ValueError('Expected resolved releaseRuntimeClasspath evidence')
         inputs['gradleArtifactsSha256'] = sha256(args.gradle_artifacts)
         cache = args.gradle_cache
+        project_roots = [(root / '.local' / name).resolve() for name in ('build-src', 'build-candidate')]
         for item in evidence['components']:
             coordinate = ':'.join(item[x] for x in ('group', 'name', 'version'))
             path = Path(item['file'])
             if not path.is_file() or path.is_symlink() or sha256(path) != item['sha256']:
                 raise ValueError('Resolved dependency artifact changed: ' + coordinate)
             # Project modules are already included in the full modified application source.
-            if path.resolve().is_relative_to((root / '.local/build-src').resolve()):
+            if any(path.resolve().is_relative_to(project_root) for project_root in project_roots):
                 components.append(dict(id='project:' + coordinate, name=coordinate, version=item['version'],
                     scope='application-project-module', licenseDeclared='See Termux module/per-file notices', artifactSha256=item['sha256']))
                 continue
@@ -123,14 +124,14 @@ def generate(args):
             and str(review.get('reviewedBy', '')).strip() and re.fullmatch(r'\d{4}-\d{2}-\d{2}', review.get('reviewedAt', ''))
             and review.get('sourceClosureReviewed') is True and review.get('noticeCompletenessReviewed') is True):
         unresolved.append(review_required)
-    header = ('Z8 오픈소스 및 제3자 고지\n\n'
-              'Z8는 GPL-3.0-only 기반 Termux 앱의 수정 버전이며 모듈/파일별 예외가 있습니다.\n'
-              '원저작자의 저작권·라이선스와 변경사항은 아래 고지를 참조하세요. 소스 제공 위치는 앱의 소스 링크에 표시합니다.\n'
-              'Z8 자체 저작권 고지는 사용자에게 GPL 및 각 구성요소 라이선스가 부여한 권리를 제한하지 않습니다.\n'
-              '아래에는 실제 포함 패키지의 원문과 런타임 의존성 메타데이터가 보존됩니다.\n')
+    header = ('Z8 Open-Source and Third-Party Notices\n\n'
+              'Z8 is a modified version of the GPL-3.0-only Termux app, with module- and file-specific exceptions.\n'
+              'The notices below identify original copyrights, licenses and changes. Use the source link in the app to obtain source code.\n'
+              'Z8 copyright notices do not restrict the rights granted by the GPL or individual component licenses.\n'
+              'Original notices for included packages and runtime dependency metadata are preserved below.\n')
     if unresolved:
-        header += ('\n출시 후보 고지: 일부 대응 소스 또는 라이선스 검토가 미완료입니다. '
-                   '이 문서 생성만으로 공개 배포 요건 충족을 확인한 것은 아닙니다.\n')
+        header += ('\nRelease candidate notice: some corresponding-source or license review remains incomplete. '
+                   'Generating this document alone does not establish compliance with public distribution requirements.\n')
     text = header + '\n'.join('\n' + '=' * 72 + '\n' + name + '\n\n' + content for name, content in sections)
     data = text.encode()
     report = {'schemaVersion': 1, 'kind': 'z8-release-notices', 'status': 'INCOMPLETE' if unresolved else 'READY',

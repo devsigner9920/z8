@@ -22,7 +22,7 @@ class PreviewDataTests(unittest.TestCase):
         probe = cls.directory / 'PreviewDataProbe.java'
         probe.write_text(PROBE)
         actual = ROOT / 'overlay/app/src/main/java/com/termux/app/Z8PreviewDataOperation.java'
-        result = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(cls.directory), str(actual), str(probe)],
+        result = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(cls.directory), str(actual), str(probe)],
                                 capture_output=True, text=True, timeout=30)
         if result.returncode:
             raise AssertionError(result.stdout + result.stderr)

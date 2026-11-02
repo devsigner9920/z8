@@ -171,7 +171,7 @@ public final class Z8GuestSessionLauncher {
         }
         String interrupted = context.getSharedPreferences(PREPARATION_PREFS, android.content.Context.MODE_PRIVATE).getString(projectId, null);
         return interrupted == null ? null : new Preparation("error", -1,
-            "준비가 중단되었습니다. 다시 시도하면 완료된 단계는 유지하고 나머지를 설치합니다.", true);
+            Z8Text.text("Setup was interrupted. Retry to keep completed steps and install the rest.", "준비가 중단되었습니다. 다시 시도하면 완료된 단계는 유지하고 나머지를 설치합니다."), true);
     }
 
     /** Only an unfinished installer may resume. CLI commands and old launch Intents never replay. */
@@ -317,7 +317,7 @@ public final class Z8GuestSessionLauncher {
         ticket.projectId = projectId; ticket.action = action;
         ticket.autoPreparation = action == null;
         if (ticket.autoPreparation) ticket.preparation = new Preparation("bootstrap", -1,
-            ticket.recovering ? "완료된 단계 확인" : "프로젝트 준비", false, ticket.recovering);
+            ticket.recovering ? Z8Text.text("Check completed steps", "완료된 단계 확인") : Z8Text.text("Prepare project", "프로젝트 준비"), false, ticket.recovering);
         ticket.phase = Phase.QUEUED;
         generation.pending = true;
         service.z8AcquireExecution();
@@ -326,7 +326,7 @@ public final class Z8GuestSessionLauncher {
         if (service.getTermuxSessionsSize() + pending > MAX_SESSIONS) {
             ticket.phase = Phase.FAILED;
             updatePending(generation);
-            String message = "터미널은 최대 8개까지 열 수 있습니다.";
+            String message = Z8Text.text("You can open up to 8 terminals.", "터미널은 최대 8개까지 열 수 있습니다.");
             if (ticket.autoPreparation) ticket.preparation = new Preparation("error", -1, message, true);
             else generation.failure = message;
             deliver(generation); return;
@@ -338,7 +338,7 @@ public final class Z8GuestSessionLauncher {
         if (ticket.preparesShell && !context.getSharedPreferences(PREPARATION_PREFS,
                 android.content.Context.MODE_PRIVATE).edit().putString(projectId, "running:queued").commit()) {
             MAIN.post(() -> complete(generation, ticket, null, projectId, name, action,
-                "설치 상태를 저장하지 못했습니다. 저장 공간을 확인한 뒤 다시 시도해 주세요."));
+                Z8Text.text("Could not save setup progress. Check available storage, then retry.", "설치 상태를 저장하지 못했습니다. 저장 공간을 확인한 뒤 다시 시도해 주세요.")));
             return;
         }
         if (ticket.preparesShell)
@@ -348,13 +348,13 @@ public final class Z8GuestSessionLauncher {
                 if (ticket.autoPreparation) {
                     if (ticket.preparesShell && !context.getSharedPreferences(PREPARATION_PREFS, android.content.Context.MODE_PRIVATE)
                             .edit().putString(projectId, "running:bootstrap").commit())
-                        throw new java.io.IOException("설치 상태를 저장하지 못했습니다.");
+                        throw new java.io.IOException(Z8Text.text("Could not save setup progress.", "설치 상태를 저장하지 못했습니다."));
                     final String[] persistedStage = {"bootstrap"};
                     Z8ProjectPreparation.run(context, projectId, (stage, percent, message) -> {
                         if (ticket.preparesShell && !stage.equals(persistedStage[0])) {
                             if (!context.getSharedPreferences(PREPARATION_PREFS, android.content.Context.MODE_PRIVATE)
                                     .edit().putString(projectId, "running:" + stage).commit())
-                                throw new IllegalStateException("설치 상태를 저장하지 못했습니다.");
+                                throw new IllegalStateException(Z8Text.text("Could not save setup progress.", "설치 상태를 저장하지 못했습니다."));
                             persistedStage[0] = stage;
                         }
                         ticket.preparation = new Preparation(stage, percent, message, false, ticket.recovering);
@@ -363,7 +363,7 @@ public final class Z8GuestSessionLauncher {
                     });
                     if (Thread.currentThread().isInterrupted()) throw new InterruptedException();
                     if (ticket.preparesShell && !context.getSharedPreferences(PREPARATION_PREFS, android.content.Context.MODE_PRIVATE).edit().remove(projectId).commit())
-                        throw new java.io.IOException("설치 완료 상태를 저장하지 못했습니다. 다시 시도해 주세요.");
+                        throw new java.io.IOException(Z8Text.text("Could not save setup completion. Please try again.", "설치 완료 상태를 저장하지 못했습니다. 다시 시도해 주세요."));
                 } else Z8Bootstrap.ensure(context, (percent, message) -> {});
                 Z8Guest.Launch launch = action == null ? Z8Guest.command(context, projectId, directory)
                     : Z8Guest.actionCommand(context, projectId, directory, action);
@@ -375,7 +375,7 @@ public final class Z8GuestSessionLauncher {
                         && !Thread.currentThread().isInterrupted())
                     context.getSharedPreferences(PREPARATION_PREFS, android.content.Context.MODE_PRIVATE)
                         .edit().putString(projectId, "failed").commit();
-                String message = error.getMessage() == null ? "Linux 세션을 준비하지 못했습니다." : error.getMessage();
+                String message = error.getMessage() == null ? Z8Text.text("Could not prepare the Linux session.", "Linux 세션을 준비하지 못했습니다.") : error.getMessage();
                 MAIN.post(() -> complete(generation, ticket, null, projectId, name, action, message));
             }
         });
@@ -387,16 +387,16 @@ public final class Z8GuestSessionLauncher {
         TermuxService service = generation.service.get();
         if (!alive(generation, service) || ticket.phase != Phase.QUEUED) return;
         ticket.phase = Phase.FAILED;
-        if (error == null && service.z8IsStopRequested()) error = "앱의 터미널 종료를 확인하는 중입니다.";
-        if (error == null && service.getTermuxSessionsSize() >= MAX_SESSIONS) error = "터미널은 최대 8개까지 열 수 있습니다.";
+        if (error == null && service.z8IsStopRequested()) error = Z8Text.text("Waiting for the app's terminals to close.", "앱의 터미널 종료를 확인하는 중입니다.");
+        if (error == null && service.getTermuxSessionsSize() >= MAX_SESSIONS) error = Z8Text.text("You can open up to 8 terminals.", "터미널은 최대 8개까지 열 수 있습니다.");
         if (error == null) {
-            String label = name == null ? "프로젝트" : name;
+            String label = name == null ? Z8Text.text("Project", "프로젝트") : name;
             String sessionName = action == null
                 ? Z8SessionCatalog.nextTerminalName(service, projectId)
                 : label + " · " + Z8Guest.actionLabel(action);
             TermuxSession session = service.createTermuxSession(launch.executable, launch.arguments, null,
                 launch.workingDirectory, false, sessionName);
-            if (session == null) error = "Linux 세션을 시작하지 못했습니다.";
+            if (session == null) error = Z8Text.text("Could not start the Linux session.", "Linux 세션을 시작하지 못했습니다.");
             else {
                 Z8SessionOrigin.remember(session.getTerminalSession(), projectId, label, action);
                 if (launch.preparesShell || "setup-tools".equals(action)) generation.preparingShells.put(projectId, session);
@@ -431,7 +431,7 @@ public final class Z8GuestSessionLauncher {
         }
         if (generation.failure != null) {
             String message = generation.failure; generation.failure = null;
-            new AlertDialog.Builder(activity).setTitle("Linux 세션을 열 수 없습니다")
+            new AlertDialog.Builder(activity).setTitle(Z8Text.text("Cannot open the Linux session", "Linux 세션을 열 수 없습니다"))
                 .setMessage(message).setPositiveButton(android.R.string.ok, null).show();
         }
     }

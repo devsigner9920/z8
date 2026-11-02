@@ -1,47 +1,53 @@
-# 기여 안내
+# Contributing
 
-Z8은 정식 출시 전의 Android 개발 터미널입니다. 작은 수정과 재현 가능한 문제 보고를 환영합니다. 큰 기능 변경은 구현 전에 문제와 사용 흐름을 설명해 범위를 맞춰 주세요. 제품의 기본 범위는 기기 내부 개발 환경과 공식 CLI 실행이며, 현재 상태는 [출시 상태](docs/RELEASE_STATUS.md)에 정리합니다.
+Documentation: [English](README.md) | [한국어](README.ko.md)
 
-## 개발 환경
+Z8 is an Android development terminal that has not reached a stable release. Small fixes and reproducible issue reports are welcome. Before implementing a large feature, describe the problem and user flow so its scope can be agreed. The product focuses on local development environments and official CLI execution. See [release status](docs/RELEASE_STATUS.md) for its current scope.
 
-[BUILDING.md](BUILDING.md)의 순서대로 도구를 준비하세요. 현재 준비 스크립트는 macOS ARM64를 기준으로 하며, Python 3.12 이상과 Git이 필요합니다. 런타임 소스 빌드는 Linux Docker 환경을 사용합니다.
+## Development environment
 
-- `overlay/`: Z8의 Android 소스·리소스와 upstream에 적용할 파일
-- `tools/`: 소스 준비, 빌드, 런타임 준비, 배포 검증 도구
-- `runtime/`: Linux 환경과 명시적 CLI 설치·실행 스크립트
-- `tests/`: 호스트에서 실행하는 회귀 검사
-- `tools/sources.lock.json`: 사용할 upstream 커밋
+Follow [BUILDING.md](BUILDING.md) to prepare your tools. The setup scripts currently target macOS ARM64 and require Python 3.12 or later and Git. Runtime source builds use a Linux Docker environment.
 
-`upstream/`은 고정된 원본이며, `.local/build-src`와 `.local/build-candidate`는 생성 결과입니다. 수정은 `overlay/` 또는 필요한 준비 도구에 반영하세요. 의존성이나 버전을 바꾸면 출처·해시·라이선스 고지도 함께 검토하세요.
+- `overlay/`: Z8 Android sources, resources, and files applied to upstream
+- `tools/`: Source preparation, builds, runtime preparation, and release verification
+- `runtime/`: Linux environment and explicit CLI installation and execution scripts
+- `tests/`: Regression checks run on the development host
+- `tools/sources.lock.json`: Pinned upstream commits
 
-## 변경과 검증
+`upstream/` contains the pinned original sources. `.local/build-src` and `.local/build-candidate` are generated output. Make changes in `overlay/` or the relevant preparation tool. Review provenance, hashes, and license notices when changing dependencies or versions.
 
-PR에는 해결하는 문제, 사용자가 보는 동작 변화, 실행한 검증과 남은 제한을 적어 주세요. UI 변경에는 비공개 정보가 없는 화면을, 오류 수정에는 재현 조건을 포함하면 검토에 도움이 됩니다. 실제 계정·인증 정보 대신 합성 데이터를 사용하세요.
+## Changes and validation
 
-전체 호스트 검사는 저장소 루트에서 실행합니다.
+Describe the problem, user-visible behavior changes, checks performed, and remaining limitations in your PR. Include screenshots without private information for UI changes and reproduction conditions for bug fixes. Use synthetic data instead of real accounts or credentials.
+
+Run the host test suite from the repository root:
 
 ```sh
 python3 -m unittest discover -s tests -v
 ```
 
-개별 영역만 확인할 수도 있습니다. 예를 들어 미리보기 데이터 삭제 상태 검사는 다음과 같습니다.
+You can also check an individual area. For example, the preview data deletion state tests are:
 
 ```sh
 python3 -m unittest discover -s tests -p 'test_preview_data.py' -v
 ```
 
-일부 검사는 준비된 JDK, Gradle 또는 고정 upstream checkout이 필요합니다. 환경이 없어 건너뛴 검사는 통과로 기록하지 마세요. APK 빌드 명령은 별도로 terminal-emulator 단위 검사와 서명·앱 ID·ABI·SDK 등의 검사를 수행합니다. UI·프로세스·PRoot 동작 변경은 전용 에뮬레이터나 시험 기기에서도 확인하고, Android 버전·ABI·APK 해시와 실행한 경로를 기록하세요. 시험 스크립트는 앱 설치나 시험 프로젝트를 변경할 수 있으므로 대상 기기와 사전 조건을 먼저 확인하세요.
+Some checks require a prepared JDK, Gradle, or the pinned upstream checkout. Do not report tests skipped because of missing tools as passed. The APK build command separately runs terminal-emulator unit tests and checks signing, app identity, ABI, SDK, and other artifact properties. For UI, process, or PRoot changes, also test on a dedicated emulator or test device. Record the Android version, ABI, APK hash, and paths exercised. Test scripts may install apps or modify test projects; verify their target device and prerequisites first.
 
-소스 공개용 CI의 `test_release_compliance.py`, `test_public_source.py`, `test_release_build.py`, `test_native_alignment.py`, `test_signing_identity.py`는 소스 배포와 키 유출 방지 등의 계약을 검사합니다. 이 검사는 전체 앱 빌드·기기 시험이나 스토어 출시 검증을 대신하지 않습니다.
+For app-owned text, follow the [language guide](docs/LOCALIZATION.md). Keep English and Korean consent and data-handling explanations equivalent, and preserve commands and user content.
 
-변경과 관련된 실패를 재현하는 검증을 우선합니다. 실행하지 않은 검증을 완료로 표시하거나, 다른 APK의 결과를 새 빌드에 그대로 적용하지 마세요. 계정 로그인이나 외부 서비스 작업을 자동 시험의 기본 단계로 추가하지 마세요.
+The source publication CI runs `test_release_compliance.py`, `test_public_source.py`, `test_release_build.py`, `test_native_alignment.py`, and `test_signing_identity.py`. These check contracts such as source distribution and prevention of key disclosure. They do not replace a complete app build, device testing, or store release verification.
 
-## 공개할 파일
+The workflow also runs `test_language.py` and `test_codex_launch.py` for language preferences and CLI consent behavior. These are host checks, not Android UI tests.
 
-서명키, 토큰, `.env`, CLI 인증 파일, 사용자 프로젝트, 개인 경로가 담긴 로그·화면을 포함하지 마세요. `.local/`, `upstream/`, `artifacts/`, 내부 `reports/`는 개발 산출물이며 일반 기여에 포함하지 않습니다. 문제 재현에 필요한 로그는 내용을 검토한 최소 발췌본으로 제공하세요. 보안 취약점은 공개 이슈 대신 [비공개 신고 절차](SECURITY.md)를 이용하세요.
+Prioritize checks that reproduce the relevant failure. Do not mark unperformed checks complete or reuse results from a different APK as evidence for a new build. Do not add account login or external service operations as default automated test steps.
 
-## 기여물의 라이선스
+## Files to publish
 
-자신이 제공할 권한이 있는 코드와 자료만 제출하세요. Z8에 새로 기여하는 코드는 프로젝트와 같은 GPL-3.0-only 조건으로 제공하며, 별도 라이선스가 명시된 기존 파일·모듈의 수정은 그 조건과 고지를 유지합니다. 외부 코드를 가져오면 원문 출처와 라이선스·저작권 고지를 포함하세요.
+Do not include signing keys, tokens, `.env`, CLI credentials, user projects, or logs and screenshots containing private paths. `.local/`, `upstream/`, `artifacts/`, and internal `reports/` are development outputs and are not part of ordinary contributions. Provide only reviewed, minimal log excerpts needed to reproduce an issue. Use the [private reporting procedure](SECURITY.md) for security vulnerabilities instead of public issues.
 
-현재 별도의 CLA 서명이나 저작권 양도를 요구하지 않습니다. 파일·모듈별 예외는 [제3자 고지](THIRD_PARTY_NOTICES.md)와 원래 파일의 고지를 따릅니다.
+## Contribution licensing
+
+Submit only code and materials you have the right to provide. New contributions to Z8 are provided under the project's GPL-3.0-only terms. Modifications to existing files or modules with separate licenses retain those terms and notices. Include the original source, license, and copyright notices when bringing in external code.
+
+No separate CLA or copyright assignment is currently required. File and module exceptions follow the [third-party notices](THIRD_PARTY_NOTICES.md) and original file notices.

@@ -278,8 +278,21 @@ def capabilities(binary):
                 process.stdout.close()
 
 
+def text(english, korean):
+    return korean if os.environ.get('Z8_UI_LANGUAGE') == 'ko' else english
+
+
 def confirm():
-    print('''z8 · Codex 로컬 실행 설정
+    print(text('''z8 · Codex local mode
+
+Allow Codex to run without its Linux sandbox in this project?
+File changes, shell commands and network operations may run without further approval.
+Android app permissions still apply, but other Z8 projects are not guaranteed to be protected.
+Your existing Codex approval settings will not be changed.
+
+Consent is saved for this project only.
+Reset: codex --z8-reset-local-mode
+Type yes to continue. Press Enter to decide later.''', '''z8 · Codex 로컬 실행 설정
 
 이 프로젝트에서 Codex의 Linux sandbox 없이 실행하도록 허용할까요?
 일반 파일 수정·셸 명령·네트워크 작업이 추가 승인 없이 실행될 수 있습니다.
@@ -288,8 +301,8 @@ Codex의 기존 승인 설정은 변경하지 않습니다.
 
 동의는 이 프로젝트에만 저장됩니다.
 해제: codex --z8-reset-local-mode
-계속하려면 yes 또는 동의를 입력하세요. Enter는 나중에입니다.''', flush=True)
-    print('선택: ', end='', flush=True)
+계속하려면 yes 또는 동의를 입력하세요. Enter는 나중에입니다.'''), flush=True)
+    print(text('Choice: ', '선택: '), end='', flush=True)
     answer = sys.stdin.readline(64)
     return answer.endswith('\n') and answer.rstrip('\r\n') in {'yes', '동의'}
 
@@ -309,10 +322,10 @@ def main(argv=None):
             try:
                 home, unused_project = guest_context()
             except (OSError, ValueError):
-                print('z8: 프로젝트 정보를 확인할 수 없습니다. 새 터미널을 열어 다시 실행해 주세요.', file=sys.stderr)
+                print(text('z8: Could not verify the project. Open a new terminal and try again.', 'z8: 프로젝트 정보를 확인할 수 없습니다. 새 터미널을 열어 다시 실행해 주세요.'), file=sys.stderr)
                 return 1
             reset_approval(home)
-            print('z8: 이 프로젝트의 Codex 로컬 실행 동의를 해제했습니다.')
+            print(text('z8: Codex local-mode consent has been cleared for this project.', 'z8: 이 프로젝트의 Codex 로컬 실행 동의를 해제했습니다.'))
             return 0
         if not sys.stdin.isatty() or not sys.stdout.isatty() or not interactive_args(args):
             launch(binary, args)
@@ -320,26 +333,28 @@ def main(argv=None):
         try:
             home, project = guest_context()
         except (OSError, ValueError):
-            print('z8: 프로젝트 정보를 확인할 수 없습니다. 새 터미널을 열어 다시 실행해 주세요.', file=sys.stderr)
+            print(text('z8: Could not verify the project. Open a new terminal and try again.', 'z8: 프로젝트 정보를 확인할 수 없습니다. 새 터미널을 열어 다시 실행해 주세요.'), file=sys.stderr)
             return 1
         if not capabilities(binary):
             launch(binary, args)
             return 0
         if not approved(home, project):
             if not confirm():
-                print('z8: 이번 실행을 취소했습니다. 설정은 바뀌지 않았습니다.')
+                print(text('z8: Launch canceled. No settings were changed.', 'z8: 이번 실행을 취소했습니다. 설정은 바뀌지 않았습니다.'))
                 return 130
             save_approval(home, project)
-        print('z8 · 프로젝트 로컬 모드 · Codex sandbox 꺼짐 · 해제: codex --z8-reset-local-mode', flush=True)
+        print(text('z8 · Project local mode · Codex sandbox OFF · Reset: codex --z8-reset-local-mode', 'z8 · 프로젝트 로컬 모드 · Codex sandbox 꺼짐 · 해제: codex --z8-reset-local-mode'), flush=True)
         launch(binary, ['--no-daemon', '--sandbox', 'danger-full-access', *args])
         return 0
     except KeyboardInterrupt:
-        print('\nz8: 실행을 취소했습니다.', file=sys.stderr)
+        print(text('\nz8: Launch canceled.', '\nz8: 실행을 취소했습니다.'), file=sys.stderr)
         return 130
     except (OSError, ValueError):
         # Never fall back to unsandboxed execution when receipt validation fails.
-        print('z8: 로컬 실행 설정을 확인할 수 없어 실행을 중단했습니다. '
-              'codex --z8-reset-local-mode 로 동의를 초기화할 수 있습니다.', file=sys.stderr)
+        print(text('z8: Launch stopped because local-mode settings could not be verified. '
+                   'Run codex --z8-reset-local-mode to reset consent.',
+                   'z8: 로컬 실행 설정을 확인할 수 없어 실행을 중단했습니다. '
+                   'codex --z8-reset-local-mode 로 동의를 초기화할 수 있습니다.'), file=sys.stderr)
         return 1
 
 

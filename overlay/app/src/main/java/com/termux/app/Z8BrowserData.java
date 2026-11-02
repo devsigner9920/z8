@@ -31,11 +31,11 @@ final class Z8BrowserData {
     static void clear() { checkMain(); operation.start(); }
     static String status() {
         switch (operation.state()) {
-            case RUNNING: return "미리보기 데이터 삭제 중… 완료를 확인하고 있어요.";
-            case COMPLETE: return "미리보기 데이터 삭제를 완료했습니다. 다시 방문하면 데이터가 새로 저장될 수 있습니다.";
-            case UNSUPPORTED: return "현재 Android System WebView는 전체 데이터 삭제를 지원하지 않습니다. WebView를 업데이트한 뒤 다시 시도해 주세요. 데이터는 삭제하지 않았습니다.";
-            case FAILED: return "미리보기 데이터 삭제를 완료했는지 확인할 수 없습니다. 다시 시도해 주세요.";
-            default: return "모든 프로젝트의 미리보기 쿠키·사이트 저장소·캐시";
+            case RUNNING: return Z8Text.text("Clearing preview data… Waiting for confirmation.", "미리보기 데이터 삭제 중… 완료를 확인하고 있어요.");
+            case COMPLETE: return Z8Text.text("Preview data cleared. Visiting a site again may store new data.", "미리보기 데이터 삭제를 완료했습니다. 다시 방문하면 데이터가 새로 저장될 수 있습니다.");
+            case UNSUPPORTED: return Z8Text.text("This Android System WebView does not support clearing all data. Update WebView and try again. No data was deleted.", "현재 Android System WebView는 전체 데이터 삭제를 지원하지 않습니다. WebView를 업데이트한 뒤 다시 시도해 주세요. 데이터는 삭제하지 않았습니다.");
+            case FAILED: return Z8Text.text("Could not confirm that preview data was cleared. Please try again.", "미리보기 데이터 삭제를 완료했는지 확인할 수 없습니다. 다시 시도해 주세요.");
+            default: return Z8Text.text("Preview cookies, site storage, and cache for all projects", "모든 프로젝트의 미리보기 쿠키·사이트 저장소·캐시");
         }
     }
     private static void checkMain() {

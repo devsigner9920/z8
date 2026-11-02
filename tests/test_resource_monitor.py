@@ -24,7 +24,7 @@ class ResourceMonitorTests(unittest.TestCase):
                 path.write_text(code)
                 sources.append(str(path))
             real = ROOT / 'overlay/app/src/main/java/com/termux/app/Z8ResourceMonitor.java'
-            compile_result = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(directory), str(real), *sources],
+            compile_result = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(directory), str(real), *sources],
                                             capture_output=True, text=True, timeout=45)
             self.assertEqual(compile_result.returncode, 0, compile_result.stdout + compile_result.stderr)
             result = subprocess.run([java, '-cp', str(directory), 'com.termux.app.ResourceProbe'],
@@ -89,7 +89,7 @@ STUBS = {
                 check(!Z8ResourceMonitor.memoryRefreshDue(0,14999),"memory reuse has a bounded window");
                 check(Z8ResourceMonitor.memoryRefreshDue(0,15000),"memory refresh at 15 seconds");
                 check(Z8ResourceMonitor.memoryRefreshDue(2000,1000),"clock reversal refreshes memory");
-                check(Z8ResourceMonitor.Snapshot.pending().label().equals("앱  CPU —%  RAM — MB"),"scope visible before sampling");
+                check(Z8ResourceMonitor.Snapshot.pending().label().equals("App  CPU —%  RAM — MB"),"scope visible before sampling");
                 List<Z8ResourceMonitor.Snapshot> samples=new ArrayList<>();
                 Z8ResourceMonitor monitor=new Z8ResourceMonitor(samples::add);
                 monitor.start();monitor.start();
@@ -103,8 +103,8 @@ STUBS = {
                 Handler.next().run();
                 check(samples.size()==2&&!Double.isNaN(samples.get(1).cpuPercent),"second sample measures elapsed CPU");
                 check(Debug.calls==memoryCalls,"frequent CPU updates reuse recent PSS");
-                check(samples.get(1).description().contains("하위 프로세스는 포함하지 않습니다"),"child exclusion is explicit");
-                check(samples.get(1).description().contains("15초"),"memory freshness cadence is disclosed");
+                check(samples.get(1).description().contains("child processes are not included"),"child exclusion is explicit");
+                check(samples.get(1).description().contains("15 seconds"),"memory freshness cadence is disclosed");
                 monitor.stop();Debug.failed=true;
                 monitor.start();Handler.next().run();
                 check(samples.get(2).pssKb==-1,"memory API failure remains unknown");

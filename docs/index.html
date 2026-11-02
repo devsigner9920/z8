@@ -1,17 +1,20 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Android 개발 터미널 Z8의 개인정보처리방침, 소스 코드와 문의 안내입니다.">
+  <meta name="description" content="Privacy policy, source code, and contact information for the Z8 Android development terminal.">
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
   <link rel="canonical" href="https://devsigner9920.github.io/z8/">
-  <title>Z8 · 정책과 소스</title>
+  <link rel="alternate" hreflang="en" href="https://devsigner9920.github.io/z8/index.html">
+  <link rel="alternate" hreflang="ko" href="https://devsigner9920.github.io/z8/index.ko.html">
+  <title>Z8 · Policy and source</title>
   <style>
+    .languages { margin: 0 0 24px; font-size: 14px; }
     :root { color-scheme: light; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: #172033; background: #f4f6fa; }
     * { box-sizing: border-box; }
-    body { margin: 0; font-size: 17px; line-height: 1.85; word-break: keep-all; overflow-wrap: anywhere; }
+    body { margin: 0; font-size: 17px; line-height: 1.85; word-break: normal; overflow-wrap: anywhere; }
     main { width: min(100% - 40px, 800px); margin: 72px auto; background: #fff; border: 1px solid #dfe4ec; border-radius: 20px; padding: 40px; }
     h1, h2 { line-height: 1.4; letter-spacing: -.035em; }
     h1 { margin: 0; font-size: 44px; }
@@ -32,25 +35,26 @@
 </head>
 <body>
   <main>
+    <nav class="languages" aria-label="Language"><a href="index.html" lang="en" hreflang="en" aria-current="page">English</a> · <a href="index.ko.html" lang="ko" hreflang="ko">한국어</a></nav>
     <h1>Z8</h1>
-    <p class="intro">Android에서 사용하는 개발 터미널</p>
-    <p>기기 내부에서 Linux 개발 환경과 여러 터미널 세션, 로컬 웹 미리보기를 제공합니다. 공식 CLI는 사용자가 직접 설치하고 자신의 계정으로 인증해 사용합니다. Z8 자체 AI 모델 서버나 공용 계정은 제공하지 않습니다.</p>
-    <p class="small">정식 앱 출시는 준비 중입니다. 소스 공개와 Play Store 출시는 별도 단계입니다.</p>
+    <p class="intro">A development terminal for Android</p>
+    <p>Run Linux development environments, multiple terminal sessions, and local web previews on your device. Install official CLIs explicitly and sign in with your own accounts. Z8 does not provide its own AI model server or shared accounts.</p>
+    <p class="small">The app is being prepared for release. Publishing source code and launching on the Play Store are separate steps.</p>
 
-    <nav aria-label="정책과 소스">
+    <nav aria-label="Policy and source">
       <ul class="links">
-        <li><a href="privacy.html">개인정보처리방침<span>기기 내 정보 처리, 외부 서비스와 데이터 삭제 방법</span></a></li>
-        <li><a href="https://github.com/devsigner9920/z8">소스 저장소<span>프로젝트 소개, 빌드 방법과 기여 안내</span></a></li>
-        <li><a href="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc1/z8-source.zip">v0.1.0-rc1 소스 ZIP<span>수집한 패키지 소스와 빌드 자료</span></a></li>
+        <li><a href="privacy.html">Privacy policy<span>Local information, external services, and data deletion</span></a></li>
+        <li><a href="https://github.com/devsigner9920/z8">Source repository<span>Project introduction, build instructions, and contributing</span></a></li>
+        <li><a href="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc2/z8-source.zip">v0.1.0-rc2 source ZIP<span>Collected package sources and build materials</span></a></li>
       </ul>
     </nav>
 
-    <h2>문의</h2>
-    <p>운영자: romi<br>개인정보·지원 문의: <a href="mailto:ethsy2462@gmail.com">ethsy2462@gmail.com</a></p>
-    <p class="small">이메일에 비밀번호, 토큰이나 CLI 인증 파일을 첨부하지 마세요. 보안 문제는 공개 이슈 대신 이메일로 비공개 신고해 주세요.</p>
+    <h2>Contact</h2>
+    <p>Operator: romi<br>Privacy and support: <a href="mailto:ethsy2462@gmail.com">ethsy2462@gmail.com</a></p>
+    <p class="small">Do not attach passwords, tokens, or CLI credential files to email. Report security issues privately by email rather than in public issues.</p>
 
     <footer class="small">
-      <p>이 사이트는 GitHub Pages로 제공됩니다. 사이트 방문 시의 정보 처리는 <a href="privacy.html#contact">개인정보처리방침</a>에서 확인할 수 있습니다.</p>
+      <p>This site is hosted by GitHub Pages. See the <a href="privacy.html#contact">privacy policy</a> for information about data handled when you visit this site.</p>
     </footer>
   </main>
 </body>

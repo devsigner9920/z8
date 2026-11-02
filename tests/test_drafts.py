@@ -15,7 +15,7 @@ class DraftRecoveryTests(unittest.TestCase):
             probe = directory / 'DraftProbe.java'
             probe.write_text(PROBE)
             sources = ROOT / 'overlay/app/src/main/java/com/termux/app'
-            result = subprocess.run([str(jdk/'javac'), '-encoding','UTF-8','-d',temporary,
+            result = subprocess.run([str(jdk/'javac'), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding','UTF-8','-d',temporary,
                 str(sources/'Z8DraftStore.java'),str(sources/'Z8Files.java'),str(probe)], capture_output=True,text=True)
             self.assertEqual(0,result.returncode,result.stderr)
             result = subprocess.run([str(jdk/'java'),'-cp',temporary,'com.termux.app.DraftProbe',temporary],capture_output=True,text=True)

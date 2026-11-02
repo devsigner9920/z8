@@ -122,25 +122,25 @@ public final class Z8Guest {
     public static State state(Context context, String projectId) {
         State value = STATES.get(projectId == null ? "" : projectId);
         if (value != null) return value;
-        if (!validId(projectId)) return new State(Phase.ERROR, 0, "프로젝트 ID를 확인해 주세요.", false, false);
+        if (!validId(projectId)) return new State(Phase.ERROR, 0, Z8Text.text("Check the project ID.", "프로젝트 ID를 확인해 주세요."), false, false);
         File rootfs = new File(context.getFilesDir(), "z8/environments/" + projectId + "/rootfs");
         boolean ready = rootfs.isDirectory() && new File(rootfs, Z8GuestArchive.MARKER).isFile();
         boolean proot = proot().canExecute();
         if (ready) return new State(proot ? Phase.READY : Phase.UNAVAILABLE, 100,
-            proot ? "프로젝트 Linux 환경이 설치되어 있습니다." : "Linux 환경은 있지만 z8 전용 PRoot가 설치되지 않았습니다.", true, proot);
-        return new State(Phase.CHECKING, 0, "Linux 환경을 확인하고 있습니다.", false, proot);
+            proot ? Z8Text.text("The project's Linux environment is installed.", "프로젝트 Linux 환경이 설치되어 있습니다.") : Z8Text.text("The Linux environment exists, but Z8's PRoot runtime is not installed.", "Linux 환경은 있지만 z8 전용 PRoot가 설치되지 않았습니다."), true, proot);
+        return new State(Phase.CHECKING, 0, Z8Text.text("Checking the Linux environment…", "Linux 환경을 확인하고 있습니다."), false, proot);
     }
 
     /** Caller also refuses live/pending sessions. Run off the UI thread. */
     public static void deleteProject(Context context, String projectId) throws IOException {
         synchronized (LOCK) {
-            if (!validId(projectId)) throw new IOException("프로젝트 ID를 확인해 주세요.");
+            if (!validId(projectId)) throw new IOException(Z8Text.text("Check the project ID.", "프로젝트 ID를 확인해 주세요."));
             State current = STATES.get(projectId);
             if (current != null && (current.phase == Phase.INSTALLING || current.phase == Phase.CHECKING
                     || current.phase == Phase.DELETING))
-                throw new IOException("환경 작업이 진행 중입니다. 완료 후 프로젝트를 삭제해 주세요.");
+                throw new IOException(Z8Text.text("An environment task is running. Wait for it to finish before deleting the project.", "환경 작업이 진행 중입니다. 완료 후 프로젝트를 삭제해 주세요."));
             State previous = current == null ? state(context, projectId) : current;
-            STATES.put(projectId, new State(Phase.DELETING, 0, "프로젝트를 삭제하고 있습니다.",
+            STATES.put(projectId, new State(Phase.DELETING, 0, Z8Text.text("Deleting the project…", "프로젝트를 삭제하고 있습니다."),
                 previous.hasRootfs, previous.prootAvailable));
         }
         try {
@@ -149,7 +149,7 @@ public final class Z8Guest {
             new Z8DraftStore(context.getFilesDir()).clear(projectId);
             if (!context.getSharedPreferences("z8-git-draft-" + projectId, Context.MODE_PRIVATE).edit().clear().commit()
                     || !context.getSharedPreferences("z8-github-drafts-" + projectId, Context.MODE_PRIVATE).edit().clear().commit())
-                throw new IOException("프로젝트의 임시 작업 데이터를 지우지 못했습니다. 다시 시도해 주세요.");
+                throw new IOException(Z8Text.text("Could not remove the project's temporary data. Try again.", "프로젝트의 임시 작업 데이터를 지우지 못했습니다. 다시 시도해 주세요."));
             new Z8Projects(context).delete(projectId);
             synchronized (LOCK) {
                 STATES.remove(projectId); LAST_CHECKED.remove(projectId); READINESS_REVISION.remove(projectId);
@@ -159,10 +159,10 @@ public final class Z8Guest {
             File rootfs = new File(context.getFilesDir(), "z8/environments/" + projectId + "/rootfs");
             try { marker(rootfs, projectId); hasRootfs = true; }
             catch (IOException ignored) { /* A partial deletion is never reported as an intact rootfs. */ }
-            String detail = failure.getMessage() == null ? "파일 삭제를 완료하지 못했습니다." : failure.getMessage();
+            String detail = failure.getMessage() == null ? Z8Text.text("Could not finish deleting files.", "파일 삭제를 완료하지 못했습니다.") : failure.getMessage();
             synchronized (LOCK) {
                 LAST_CHECKED.remove(projectId);
-                STATES.put(projectId, new State(Phase.ERROR, 0, "프로젝트 삭제를 완료하지 못했습니다. 다시 시도해 주세요. " + detail,
+                STATES.put(projectId, new State(Phase.ERROR, 0, Z8Text.text("Could not finish deleting the project. Try again. ", "프로젝트 삭제를 완료하지 못했습니다. 다시 시도해 주세요. ") + detail,
                     hasRootfs, proot().canExecute()));
             }
             if (failure instanceof IOException) throw (IOException) failure;
@@ -194,7 +194,7 @@ public final class Z8Guest {
                     && SystemClock.elapsedRealtime() - checkedAt < 60000) return;
             State previous = state(app, projectId);
             revision = READINESS_REVISION.getOrDefault(projectId, 0);
-            STATES.put(projectId, new State(Phase.CHECKING, 0, "Linux 도구를 확인하고 있습니다. 이전 확인 결과는 아래에 유지됩니다.",
+            STATES.put(projectId, new State(Phase.CHECKING, 0, Z8Text.text("Checking Linux tools. Previous results are shown below.", "Linux 도구를 확인하고 있습니다. 이전 확인 결과는 아래에 유지됩니다."),
                 previous.hasRootfs, proot().canExecute(), previous.toolsChecked, previous.versions, previous.toolsCheckIncomplete));
         }
         WORKER.execute(() -> {
@@ -215,7 +215,7 @@ public final class Z8Guest {
             if (!validId(projectId)) return;
             State current = STATES.get(projectId);
             if (current != null && (current.phase == Phase.INSTALLING || current.phase == Phase.CHECKING || current.phase == Phase.DELETING || current.phase == Phase.READY)) return;
-            STATES.put(projectId, new State(Phase.INSTALLING, 0, "설치를 준비하고 있습니다.", false, proot().canExecute()));
+            STATES.put(projectId, new State(Phase.INSTALLING, 0, Z8Text.text("Preparing installation…", "설치를 준비하고 있습니다."), false, proot().canExecute()));
         }
         WORKER.execute(() -> install(app, projectId));
     }
@@ -227,15 +227,15 @@ public final class Z8Guest {
                 Z8EnvironmentTemplate.project(context, id);
                 synchronized (LOCK) {
                     State current = STATES.get(id);
-                    if (current != null && current.phase == Phase.DELETING) throw new IOException("프로젝트를 삭제하는 중입니다.");
-                    STATES.put(id, new State(Phase.INSTALLING, 0, "프로젝트 환경을 준비하고 있습니다.", false, true));
+                    if (current != null && current.phase == Phase.DELETING) throw new IOException(Z8Text.text("The project is being deleted.", "프로젝트를 삭제하는 중입니다."));
+                    STATES.put(id, new State(Phase.INSTALLING, 0, Z8Text.text("Preparing the project environment…", "프로젝트 환경을 준비하고 있습니다."), false, true));
                 }
                 File environment = privateDirectory(context, "z8/environments/" + id);
                 Z8InstallStaging.recover(environment.toPath(), ".install-", "rootfs:" + id);
                 File rootfs = new File(environment, "rootfs");
                 if (Files.exists(rootfs.toPath(), LinkOption.NOFOLLOW_LINKS)) {
                     marker(rootfs, id);
-                    STATES.put(id, new State(Phase.READY, 100, "프로젝트 환경이 준비되었습니다.", true, true)); return;
+                    STATES.put(id, new State(Phase.READY, 100, Z8Text.text("The project environment is ready.", "프로젝트 환경이 준비되었습니다."), true, true)); return;
                 }
                 install(context, id);
                 marker(rootfs, id);
@@ -253,7 +253,7 @@ public final class Z8Guest {
                 catch (java.util.concurrent.TimeoutException waiting) {
                     State current = state(context, id);
                     progress.update(current.phase == Phase.INSTALLING ? current.progress : -1,
-                        Z8EnvironmentTemplate.isTemplate(id) ? "Linux 환경 준비" : "프로젝트 환경 준비");
+                        Z8EnvironmentTemplate.isTemplate(id) ? Z8Text.text("Preparing Linux environment", "Linux 환경 준비") : Z8Text.text("Preparing project environment", "프로젝트 환경 준비"));
                 }
             }
         } catch (InterruptedException interrupted) {
@@ -262,7 +262,7 @@ public final class Z8Guest {
             task.cancel(true); throw cancelled;
         } catch (java.util.concurrent.ExecutionException failed) {
             State current = state(context, id);
-            throw new IOException(current.phase == Phase.ERROR ? current.message : "프로젝트 환경을 준비하지 못했습니다.", failed);
+            throw new IOException(current.phase == Phase.ERROR ? current.message : Z8Text.text("Could not prepare the project environment.", "프로젝트 환경을 준비하지 못했습니다."), failed);
         }
     }
 
@@ -283,14 +283,14 @@ public final class Z8Guest {
                 // Readiness inspection must not erase a validated installed rootfs.
                 State previous = STATES.get(id);
                 inspected(id, new State(Phase.READY, 100,
-                    "도구 확인을 완료하지 못해 이전 결과를 유지했습니다. 상태를 다시 확인하거나 기본 셸을 열어 주세요.",
+                    Z8Text.text("The tool check did not finish. Previous results have been kept. Check again or open the default shell.", "도구 확인을 완료하지 못해 이전 결과를 유지했습니다. 상태를 다시 확인하거나 기본 셸을 열어 주세요."),
                     true, true, previous != null && previous.toolsChecked,
                     previous == null ? Collections.emptyMap() : previous.versions, true));
                 return;
             }
-            String message = !available ? "Linux 환경은 있지만 z8 전용 PRoot가 설치되지 않았습니다."
-                : checked.complete ? "프로젝트 Linux 환경을 확인했습니다."
-                : "일부 도구의 확인 시간이 초과되었습니다. 확인된 버전은 유지했습니다. 필요하면 다시 확인해 주세요.";
+            String message = !available ? Z8Text.text("The Linux environment exists, but Z8's PRoot runtime is not installed.", "Linux 환경은 있지만 z8 전용 PRoot가 설치되지 않았습니다.")
+                : checked.complete ? Z8Text.text("The project's Linux environment has been verified.", "프로젝트 Linux 환경을 확인했습니다.")
+                : Z8Text.text("Some tool checks timed out. Verified versions have been kept. Check again if needed.", "일부 도구의 확인 시간이 초과되었습니다. 확인된 버전은 유지했습니다. 필요하면 다시 확인해 주세요.");
             inspected(id, new State(available ? Phase.READY : Phase.UNAVAILABLE, 100,
                 message, true, available, available, checked.versions, !checked.complete));
             return;
@@ -299,10 +299,10 @@ public final class Z8Guest {
             Asset asset = asset(context);
             try (InputStream ignored = context.getAssets().open(ROOTFS_ASSET)) { /* Verify the asset is present. */ }
             inspected(id, new State(available ? Phase.AVAILABLE : Phase.UNAVAILABLE, 0,
-                available ? asset.distribution + " " + asset.release + " 환경을 이 프로젝트에 설치할 수 있습니다."
-                    : "이 APK에는 Linux 이미지가 있지만 z8 전용 PRoot 실행 기반이 아직 없습니다.", false, available));
+                available ? asset.distribution + " " + asset.release + Z8Text.text(" can be installed in this project.", " 환경을 이 프로젝트에 설치할 수 있습니다.")
+                    : Z8Text.text("This APK includes a Linux image but does not yet include Z8's PRoot runtime.", "이 APK에는 Linux 이미지가 있지만 z8 전용 PRoot 실행 기반이 아직 없습니다."), false, available));
         } catch (FileNotFoundException missing) {
-            inspected(id, new State(Phase.UNAVAILABLE, 0, "이 APK에는 검증된 Linux 이미지가 포함되어 있지 않습니다.", false, available));
+            inspected(id, new State(Phase.UNAVAILABLE, 0, Z8Text.text("This APK does not include a verified Linux image.", "이 APK에는 검증된 Linux 이미지가 포함되어 있지 않습니다."), false, available));
         }
     }
 
@@ -310,7 +310,7 @@ public final class Z8Guest {
         File staging = null;
         try {
             Z8EnvironmentTemplate.project(context, id);
-            if (!proot().isFile() || !proot().canExecute()) throw new IOException("먼저 z8 전용 PRoot 실행 기반을 설치해 주세요.");
+            if (!proot().isFile() || !proot().canExecute()) throw new IOException(Z8Text.text("Install Z8's PRoot runtime first.", "먼저 z8 전용 PRoot 실행 기반을 설치해 주세요."));
             boolean fromTemplate = !Z8EnvironmentTemplate.isTemplate(id) && Z8EnvironmentTemplate.isReady(context);
             File prepared = fromTemplate ? Z8EnvironmentTemplate.rootfs(context) : null;
             Asset asset = fromTemplate ? null : asset(context);
@@ -318,18 +318,18 @@ public final class Z8Guest {
             Z8InstallStaging.recover(environment.toPath(), ".install-", "rootfs:" + id);
             File target = new File(environment, "rootfs");
             if (Files.exists(target.toPath(), LinkOption.NOFOLLOW_LINKS))
-                throw new IOException("기존 Linux 환경을 덮어쓰지 않습니다. 현재 설치 상태를 확인해 주세요.");
+                throw new IOException(Z8Text.text("The existing Linux environment will not be overwritten. Check its installation status.", "기존 Linux 환경을 덮어쓰지 않습니다. 현재 설치 상태를 확인해 주세요."));
             if (!fromTemplate && environment.getUsableSpace() < asset.archive.expandedBytes + 128L * 1024 * 1024)
-                throw new IOException("Linux 환경을 설치할 저장 공간이 부족합니다.");
+                throw new IOException(Z8Text.text("There is not enough storage to install the Linux environment.", "Linux 환경을 설치할 저장 공간이 부족합니다."));
             staging = Z8InstallStaging.create(environment.toPath(), ".install-", "rootfs:" + id).toFile();
             Z8GuestArchive.mode(staging.toPath(), 0700);
             Z8GuestArchive.Progress installProgress = (percent, detail) -> {
-                    if (Thread.currentThread().isInterrupted()) throw new java.util.concurrent.CancellationException("설치가 중단되었습니다.");
+                    if (Thread.currentThread().isInterrupted()) throw new java.util.concurrent.CancellationException(Z8Text.text("Installation was interrupted.", "설치가 중단되었습니다."));
                     STATES.put(id, new State(Phase.INSTALLING, percent, detail, false, true));
                 };
             if (fromTemplate) Z8EnvironmentTemplate.copyRootfs(prepared, staging, installProgress);
             else Z8GuestArchive.extract(() -> context.getAssets().open(ROOTFS_ASSET), asset.archive, staging, installProgress);
-            STATES.put(id, new State(Phase.INSTALLING, 92, "프로젝트 HOME과 연결 경로를 준비하고 있습니다.", false, true));
+            STATES.put(id, new State(Phase.INSTALLING, 92, Z8Text.text("Preparing the project HOME and mount paths…", "프로젝트 HOME과 연결 경로를 준비하고 있습니다."), false, true));
             for (String mount : Arrays.asList("dev", "proc", "sys", "tmp", "workspace", "z8/home", "run/z8/attention"))
                 mountDirectory(staging, mount);
             privateDirectory(context, "z8/homes/" + id);
@@ -346,12 +346,12 @@ public final class Z8Guest {
                 java.nio.file.StandardOpenOption.CREATE_NEW, java.nio.file.StandardOpenOption.WRITE);
             Z8GuestArchive.mode(staging.toPath(), 0755);
             marker(staging, id);
-            if (Thread.currentThread().isInterrupted()) throw new IOException("설치가 중단되었습니다.");
-            if (Files.exists(target.toPath(), LinkOption.NOFOLLOW_LINKS)) throw new IOException("설치 중 다른 환경이 생성되었습니다.");
+            if (Thread.currentThread().isInterrupted()) throw new IOException(Z8Text.text("Installation was interrupted.", "설치가 중단되었습니다."));
+            if (Files.exists(target.toPath(), LinkOption.NOFOLLOW_LINKS)) throw new IOException(Z8Text.text("Another environment was created during installation.", "설치 중 다른 환경이 생성되었습니다."));
             // Same-filesystem directory rename publishes the complete tree. Never
             // request REPLACE_EXISTING, and serialize all installs in this process.
             Files.move(staging.toPath(), target.toPath());
-            STATES.put(id, new State(Phase.READY, 100, "Linux 환경을 설치했습니다. 터미널에서 실제 실행을 확인할 수 있습니다.", true, true));
+            STATES.put(id, new State(Phase.READY, 100, Z8Text.text("Linux is installed. Open a terminal to verify that it runs.", "Linux 환경을 설치했습니다. 터미널에서 실제 실행을 확인할 수 있습니다."), true, true));
         } catch (Exception error) { failed(id, error); }
         finally {
             if (staging != null) {
@@ -388,20 +388,20 @@ public final class Z8Guest {
     public static String actionLabel(String action) {
         if (action == null) return "Linux";
         switch (action) {
-            case "setup-tools": return "개발 도구 설치";
-            case "setup-codex": return "Codex 설치";
-            case "setup-claude": return "Claude 설치";
+            case "setup-tools": return Z8Text.text("Install developer tools", "개발 도구 설치");
+            case "setup-codex": return Z8Text.text("Install Codex", "Codex 설치");
+            case "setup-claude": return Z8Text.text("Install Claude", "Claude 설치");
             case "codex": return "Codex";
             case "claude": return "Claude Code";
-            case "github-auth": return "GitHub 로그인";
-            case "hooks-codex": return "Codex 알림";
-            case "hooks-claude": return "Claude 알림";
+            case "github-auth": return Z8Text.text("Sign in to GitHub", "GitHub 로그인");
+            case "hooks-codex": return Z8Text.text("Codex notifications", "Codex 알림");
+            case "hooks-claude": return Z8Text.text("Claude notifications", "Claude 알림");
             default: return "Linux";
         }
     }
 
     public static Launch actionCommand(Context context, String id, String relativeCwd, String action) throws IOException {
-        if (!validAction(action)) throw new IOException("등록되지 않은 터미널 작업입니다.");
+        if (!validAction(action)) throw new IOException(Z8Text.text("Unknown terminal action.", "등록되지 않은 터미널 작업입니다."));
         if ("rescue-shell".equals(action))
             return commandFor(context, id, relativeCwd, new String[]{"/bin/bash", "--login"});
         if (action.startsWith("setup-") || action.startsWith("hooks-")) invalidateReadiness(id);
@@ -409,7 +409,7 @@ public final class Z8Guest {
             String required = action.startsWith("hooks-") ? "python" : "github-auth".equals(action) ? "gh" : action;
             Map<String, String> versions = probe(context, id, required).versions;
             if (!versions.containsKey(required)) throw new IOException(actionLabel(action)
-                + " 실행 준비가 되지 않았습니다. 프로젝트의 Linux 환경에서 설치 상태를 확인해 주세요.");
+                + Z8Text.text(" is not ready to run. Check its installation in the project's Linux environment.", " 실행 준비가 되지 않았습니다. 프로젝트의 Linux 환경에서 설치 상태를 확인해 주세요."));
         }
         return commandFor(context, id, relativeCwd, "setup-tools".equals(action)
             ? new String[]{"/bin/bash", "/usr/local/lib/z8/setup-tools.sh"}
@@ -421,15 +421,15 @@ public final class Z8Guest {
         synchronized (LOCK) {
             State current = STATES.get(id == null ? "" : id);
             if (current != null && current.phase == Phase.DELETING)
-                throw new IOException("삭제 중인 프로젝트에서는 새 작업을 실행할 수 없습니다.");
+                throw new IOException(Z8Text.text("New tasks cannot start while this project is being deleted.", "삭제 중인 프로젝트에서는 새 작업을 실행할 수 없습니다."));
         }
         if (guestCommand == null || guestCommand.length == 0 || guestCommand.length > 2048
                 || guestCommand[0] == null || !guestCommand[0].startsWith("/"))
-            throw new IOException("절대 경로의 Linux 실행 파일이 필요합니다.");
+            throw new IOException(Z8Text.text("An absolute path to a Linux executable is required.", "절대 경로의 Linux 실행 파일이 필요합니다."));
         if (Z8EnvironmentTemplate.isTemplate(id) && !Z8EnvironmentTemplate.allows(guestCommand))
-            throw new IOException("기본 개발 환경에서는 초기 설치와 확인 작업만 실행할 수 있습니다.");
+            throw new IOException(Z8Text.text("Only initial setup and verification tasks may run in the base environment.", "기본 개발 환경에서는 초기 설치와 확인 작업만 실행할 수 있습니다."));
         if (!Arrays.asList("/bin/bash", "/usr/bin/git", "/usr/bin/gh", "/usr/bin/python3").contains(guestCommand[0]))
-            throw new IOException("등록되지 않은 Linux 실행 파일입니다.");
+            throw new IOException(Z8Text.text("Unregistered Linux executable.", "등록되지 않은 Linux 실행 파일입니다."));
         boolean loginOrSetup = guestCommand.length == 2
             && ("--login".equals(guestCommand[1]) || "/usr/local/lib/z8/setup-tools.sh".equals(guestCommand[1])
                 || "/usr/local/lib/z8/probe-tools.sh".equals(guestCommand[1]));
@@ -439,20 +439,20 @@ public final class Z8Guest {
             && Arrays.asList("python", "pip", "venv", "node", "npm", "git", "gh", "make", "cc", "tmux", "claude", "codex").contains(guestCommand[2]);
         boolean prepareShell = guestCommand.length == 3 && "-c".equals(guestCommand[1]) && PREPARE_SHELL.equals(guestCommand[2]);
         if (guestCommand[0].equals("/bin/bash") && !loginOrSetup && !fixedAction && !fixedProbe && !prepareShell)
-            throw new IOException("등록되지 않은 Linux 셸 진입점입니다.");
+            throw new IOException(Z8Text.text("Unregistered Linux shell entry point.", "등록되지 않은 Linux 셸 진입점입니다."));
         long argumentBytes = 0;
         for (String argument : guestCommand) {
-            if (argument == null || argument.indexOf('\0') >= 0) throw new IOException("Linux 실행 인수가 올바르지 않습니다.");
+            if (argument == null || argument.indexOf('\0') >= 0) throw new IOException(Z8Text.text("Invalid Linux launch argument.", "Linux 실행 인수가 올바르지 않습니다."));
             argumentBytes += argument.getBytes(StandardCharsets.UTF_8).length;
-            if (argumentBytes > 65536) throw new IOException("Linux 실행 인수가 크기 제한을 초과했습니다.");
+            if (argumentBytes > 65536) throw new IOException(Z8Text.text("Linux launch arguments exceed the size limit.", "Linux 실행 인수가 크기 제한을 초과했습니다."));
         }
         Z8Projects.Project project = Z8EnvironmentTemplate.project(context, id);
         File rootfs = new File(privateDirectory(context, "z8/environments/" + id), "rootfs");
         if (!Files.exists(rootfs.toPath(), LinkOption.NOFOLLOW_LINKS))
-            throw new IOException("이 프로젝트에 Linux 환경을 먼저 설치해 주세요.");
+            throw new IOException(Z8Text.text("Install a Linux environment in this project first.", "이 프로젝트에 Linux 환경을 먼저 설치해 주세요."));
         marker(rootfs, id);
         File executable = proot();
-        if (!executable.isFile() || !executable.canExecute()) throw new IOException("z8 전용 PRoot 실행 파일이 없습니다.");
+        if (!executable.isFile() || !executable.canExecute()) throw new IOException(Z8Text.text("Z8's PRoot executable is missing.", "z8 전용 PRoot 실행 파일이 없습니다."));
         Z8RuntimeLauncher.ensureAppLibraries(context);
         File home = privateDirectory(context, "z8/homes/" + id);
         File temp = privateDirectory(context, "z8/environments/" + id + "/tmp");
@@ -479,6 +479,7 @@ public final class Z8Guest {
             "/usr/bin/env", "-u", "LD_PRELOAD", "-u", "LD_LIBRARY_PATH", "-u", "PREFIX",
             "-u", "ENV", "-u", "BASH_ENV", "-u", "GIT_DIR", "-u", "GIT_WORK_TREE",
             "HOME=/z8/home", "SHELL=/bin/bash", "USER=root", "LOGNAME=root", "Z8_PROJECT_ID=" + id,
+            "Z8_UI_LANGUAGE=" + Z8Text.language(),
             "PATH=/usr/local/lib/z8/browser/bin:/opt/z8/node/current/bin:/z8/home/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", "TERM=xterm-256color", "LANG=C.UTF-8",
             "BROWSER=/usr/local/lib/z8/browser/bin/xdg-open", "GH_BROWSER=/usr/local/lib/z8/browser/bin/xdg-open",
             "TMPDIR=/tmp", "Z8_EVENT_SOCKET=/run/z8/attention/events.sock"));
@@ -510,9 +511,9 @@ public final class Z8Guest {
         try {
             result = new Z8Git.ProcessRunner().run(argv, new File(launch.workingDirectory), environment,
                 new byte[0], 100, 64 * 1024);
-        } catch (IOException error) { throw new IOException("Linux 도구 상태를 확인하지 못했습니다. 잠시 후 다시 확인해 주세요.", error); }
+        } catch (IOException error) { throw new IOException(Z8Text.text("Could not check Linux tools. Try again shortly.", "Linux 도구 상태를 확인하지 못했습니다. 잠시 후 다시 확인해 주세요."), error); }
         if (result.code != 0 && result.code != 124)
-            throw new IOException("Linux 도구 상태 확인이 완료되지 않았습니다 (" + result.code + ").");
+            throw new IOException(Z8Text.text("Linux tool verification did not finish (", "Linux 도구 상태 확인이 완료되지 않았습니다 (") + result.code + ").");
         Map<String, String> values = new LinkedHashMap<>();
         boolean complete = result.code == 0;
         for (String line : result.output().split("\n")) {
@@ -543,7 +544,7 @@ public final class Z8Guest {
                     Path childPath = Z8GuestArchive.checked(rootfs, "usr/local/lib/z8/" + child);
                     if (!Files.exists(childPath, LinkOption.NOFOLLOW_LINKS)) Files.createDirectory(childPath);
                     if (!Files.isDirectory(childPath, LinkOption.NOFOLLOW_LINKS))
-                        throw new IOException("브라우저 실행 경로가 폴더가 아닙니다.");
+                        throw new IOException(Z8Text.text("The browser launcher path is not a directory.", "브라우저 실행 경로가 폴더가 아닙니다."));
                 }
                 targetDirectory = Z8Files.directory(rootfs, "usr/local/lib/z8/browser/bin");
             }
@@ -554,7 +555,7 @@ public final class Z8Guest {
             Path target = new File(targetDirectory, targetName).toPath();
             if (Files.isSymbolicLink(target) || (Files.exists(target, LinkOption.NOFOLLOW_LINKS)
                     && !Files.isRegularFile(target, LinkOption.NOFOLLOW_LINKS)))
-                throw new IOException("앱 관리 스크립트 경로가 변경되어 업데이트를 중단했습니다: " + name);
+                throw new IOException(Z8Text.text("An app-managed script path changed. The update was stopped: ", "앱 관리 스크립트 경로가 변경되어 업데이트를 중단했습니다: ") + name);
             if (Files.isRegularFile(target, LinkOption.NOFOLLOW_LINKS) && Files.size(target) == content.length
                     && Arrays.equals(Files.readAllBytes(target), content)
                     && (!"xdg-open".equals(name) || Files.isExecutable(target))) continue;
@@ -571,45 +572,45 @@ public final class Z8Guest {
             JSONObject json = new JSONObject(new String(read(input, 16 * 1024 * 1024), StandardCharsets.UTF_8));
             if (json.getInt("schemaVersion") != 1 || !"z8-guest-rootfs".equals(json.getString("type"))
                     || !"aarch64".equals(json.getString("architecture")) || json.getInt("normalizationVersion") != 1
-                    || !"rootfs.zip".equals(json.getString("archive"))) throw new IOException("지원하지 않는 Linux 이미지 형식입니다.");
+                    || !"rootfs.zip".equals(json.getString("archive"))) throw new IOException(Z8Text.text("Unsupported Linux image format.", "지원하지 않는 Linux 이미지 형식입니다."));
             String distribution = json.getString("distribution");
             String release = json.getString("release");
             if (!distribution.matches("[a-z0-9._-]{1,40}") || !release.matches("[A-Za-z0-9._-]{1,40}"))
-                throw new IOException("Linux 이미지 정보가 올바르지 않습니다.");
+                throw new IOException(Z8Text.text("The Linux image information is invalid.", "Linux 이미지 정보가 올바르지 않습니다."));
             String sourceSha = json.getJSONObject("source").getString("sha256");
-            if (!sourceSha.matches("[a-f0-9]{64}")) throw new IOException("원본 이미지 해시가 올바르지 않습니다.");
+            if (!sourceSha.matches("[a-f0-9]{64}")) throw new IOException(Z8Text.text("The original image hash is invalid.", "원본 이미지 해시가 올바르지 않습니다."));
             JSONArray records = json.getJSONArray("files");
             if (records.length() != json.getInt("entryCount") || records.length() > Z8GuestArchive.MAX_ENTRIES)
-                throw new IOException("이미지 항목 수가 올바르지 않습니다.");
+                throw new IOException(Z8Text.text("The image entry count is invalid.", "이미지 항목 수가 올바르지 않습니다."));
             List<Z8GuestArchive.Item> items = new ArrayList<>();
             for (int index = 0; index < records.length(); index++) {
                 JSONObject item = records.getJSONObject(index);
                 String type = item.getString("type");
-                if (!type.equals("file") && !type.equals("directory")) throw new IOException("특수 파일이 포함된 이미지는 설치할 수 없습니다.");
+                if (!type.equals("file") && !type.equals("directory")) throw new IOException(Z8Text.text("Images containing special files cannot be installed.", "특수 파일이 포함된 이미지는 설치할 수 없습니다."));
                 items.add(new Z8GuestArchive.Item(item.getString("path"), type.equals("directory"), item.getLong("size"), item.getInt("mode")));
             }
             return new Asset(new Z8GuestArchive.Manifest(json.getString("archiveSha256"), json.getLong("archiveBytes"),
                 json.getLong("totalUncompressedBytes"), items), distribution, release, sourceSha);
         } catch (IOException error) { throw error; }
-        catch (Exception error) { throw new IOException("Linux 이미지 메타데이터를 읽을 수 없습니다.", error); }
+        catch (Exception error) { throw new IOException(Z8Text.text("Could not read Linux image metadata.", "Linux 이미지 메타데이터를 읽을 수 없습니다."), error); }
     }
 
     static JSONObject marker(File rootfs, String id) throws IOException {
         Z8Files.directory(rootfs, "");
         Path path = Z8GuestArchive.checked(rootfs, Z8GuestArchive.MARKER);
-        if (!Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) throw new IOException("완료된 Linux 환경이 없습니다. 환경 설치 상태를 확인해 주세요.");
+        if (!Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) throw new IOException(Z8Text.text("No complete Linux environment was found. Check its installation status.", "완료된 Linux 환경이 없습니다. 환경 설치 상태를 확인해 주세요."));
         JSONObject value;
         try (InputStream input = Files.newInputStream(path, LinkOption.NOFOLLOW_LINKS)) {
             value = new JSONObject(new String(read(input, 8192), StandardCharsets.UTF_8));
             if (value.getInt("schemaVersion") != 1 || !id.equals(value.getString("projectId"))
                     || !"aarch64".equals(value.getString("architecture"))
                     || !value.getString("archiveSha256").matches("[a-f0-9]{64}"))
-                throw new IOException("Linux 환경의 프로젝트 또는 이미지 정보가 맞지 않습니다.");
+                throw new IOException(Z8Text.text("The Linux environment's project or image information does not match.", "Linux 환경의 프로젝트 또는 이미지 정보가 맞지 않습니다."));
         } catch (IOException error) { throw error; }
-        catch (Exception error) { throw new IOException("Linux 환경의 설치 기록을 읽을 수 없습니다.", error); }
+        catch (Exception error) { throw new IOException(Z8Text.text("Could not read the Linux installation record.", "Linux 환경의 설치 기록을 읽을 수 없습니다."), error); }
         File bash = new File(rootfs, "bin/bash").getCanonicalFile();
         if (!bash.toPath().startsWith(rootfs.getCanonicalFile().toPath()) || !bash.isFile() || !bash.canExecute())
-            throw new IOException("Linux bash 실행 파일이 없거나 환경 밖을 가리킵니다.");
+            throw new IOException(Z8Text.text("The Linux bash executable is missing or points outside the environment.", "Linux bash 실행 파일이 없거나 환경 밖을 가리킵니다."));
         return value;
     }
 
@@ -618,9 +619,9 @@ public final class Z8Guest {
         Path current = root.toPath();
         for (String part : relative.split("/", -1)) {
             Z8Files.name(part); current = current.resolve(part);
-            if (Files.isSymbolicLink(current)) throw new IOException("앱 저장 경로에 링크가 있습니다.");
+            if (Files.isSymbolicLink(current)) throw new IOException(Z8Text.text("The app storage path contains a link.", "앱 저장 경로에 링크가 있습니다."));
             if (!Files.exists(current, LinkOption.NOFOLLOW_LINKS)) Files.createDirectory(current);
-            if (!Files.isDirectory(current, LinkOption.NOFOLLOW_LINKS)) throw new IOException("앱 저장 경로가 폴더가 아닙니다.");
+            if (!Files.isDirectory(current, LinkOption.NOFOLLOW_LINKS)) throw new IOException(Z8Text.text("The app storage path is not a directory.", "앱 저장 경로가 폴더가 아닙니다."));
         }
         return current.toFile();
     }
@@ -628,7 +629,7 @@ public final class Z8Guest {
     private static void mountDirectory(File rootfs, String relative) throws IOException {
         Path path = Z8GuestArchive.checked(rootfs, relative);
         Files.createDirectories(path);
-        if (!Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) throw new IOException("Linux 연결 경로가 폴더가 아닙니다.");
+        if (!Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) throw new IOException(Z8Text.text("The Linux mount path is not a directory.", "Linux 연결 경로가 폴더가 아닙니다."));
     }
 
     private static void updateDns(Context context, File rootfs, boolean firstInstall) throws IOException {
@@ -642,7 +643,7 @@ public final class Z8Guest {
             }
         } catch (SecurityException ignored) { /* Never substitute an unrequested public DNS service. */ }
         Path etc = Z8GuestArchive.checked(rootfs, "etc");
-        if (!Files.isDirectory(etc, LinkOption.NOFOLLOW_LINKS)) throw new IOException("Linux /etc 경로가 없습니다.");
+        if (!Files.isDirectory(etc, LinkOption.NOFOLLOW_LINKS)) throw new IOException(Z8Text.text("The Linux /etc path is missing.", "Linux /etc 경로가 없습니다."));
         Path resolver = etc.resolve("resolv.conf");
         if (!firstInstall && !Files.isSymbolicLink(resolver) && Files.isRegularFile(resolver, LinkOption.NOFOLLOW_LINKS)) {
             try (InputStream input = Files.newInputStream(resolver, LinkOption.NOFOLLOW_LINKS)) {
@@ -665,7 +666,7 @@ public final class Z8Guest {
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         byte[] buffer = new byte[8192]; int count;
         while ((count = input.read(buffer)) != -1) {
-            if (output.size() + count > limit) throw new IOException("메타데이터가 크기 제한을 초과했습니다.");
+            if (output.size() + count > limit) throw new IOException(Z8Text.text("Metadata exceeds the size limit.", "메타데이터가 크기 제한을 초과했습니다."));
             output.write(buffer, 0, count);
         }
         return output.toByteArray();
@@ -686,6 +687,6 @@ public final class Z8Guest {
         }
     }
     private static void failed(String id, Exception error) {
-        STATES.put(id, new State(Phase.ERROR, 0, error.getMessage() == null ? "Linux 환경 작업에 실패했습니다." : error.getMessage(), false, proot().canExecute()));
+        STATES.put(id, new State(Phase.ERROR, 0, error.getMessage() == null ? Z8Text.text("The Linux environment task failed.", "Linux 환경 작업에 실패했습니다.") : error.getMessage(), false, proot().canExecute()));
     }
 }

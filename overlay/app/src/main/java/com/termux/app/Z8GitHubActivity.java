@@ -50,7 +50,7 @@ public final class Z8GitHubActivity extends Activity {
     private boolean stale;
     private String runtimeError = "";
     private String error = "";
-    private String auth = "인증 상태 확인 중…";
+    private String auth = Z8Text.text("Checking authentication…", "인증 상태 확인 중…");
     private boolean authChecking;
     private TextView authLabel;
     private String originRepository = "";
@@ -160,12 +160,12 @@ public final class Z8GitHubActivity extends Activity {
                 File rootfs = new File(getFilesDir(), "z8/environments/" + checked.id + "/rootfs");
                 File gh = new File(rootfs, "usr/bin/gh").getCanonicalFile();
                 if (!gh.toPath().startsWith(rootfs.getCanonicalFile().toPath()))
-                    throw new IOException("프로젝트 gh 경로가 Linux 환경 밖을 가리킵니다.");
+                    throw new IOException(Z8Text.text("The project's gh path points outside the Linux environment.", "프로젝트 gh 경로가 Linux 환경 밖을 가리킵니다."));
                 Z8Guest.Launch launch = Z8Guest.commandFor(this, checked.id, "", new String[] { "/usr/bin/gh" });
                 Z8GitHub client = new Z8GitHub(new File(launch.executable), checked.source, gh,
                     new File(getFilesDir(), "z8/environments/" + checked.id + "/tmp"),
                     Arrays.asList(launch.arguments), launch.commandOffset, new Z8Git.ProcessRunner(), Z8GitHubActivity::decode);
-                return new Prepared(checked, client, client.available() ? "" : "프로젝트 Linux 환경에 GitHub CLI(gh)가 필요합니다. Linux 환경의 개발 도구 설치를 실행해 주세요.", client.projectRepository());
+                return new Prepared(checked, client, client.available() ? "" : Z8Text.text("The project's Linux environment needs GitHub CLI (gh). Run the Linux environment's developer tools setup.", "프로젝트 Linux 환경에 GitHub CLI(gh)가 필요합니다. Linux 환경의 개발 도구 설치를 실행해 주세요."), client.projectRepository());
             } catch (IOException invalid) { return new Prepared(checked, null, message(invalid), ""); }
         }, ready -> {
             project = ready.project; client = ready.client; runtimeError = ready.error; originRepository = ready.origin;
@@ -187,10 +187,10 @@ public final class Z8GitHubActivity extends Activity {
         LinearLayout content = column(); content.setPadding(dp(20), dp(18), dp(20), dp(24)); scroll.addView(content);
         TextView title = text(project == null ? "GitHub" : project.name + " / GitHub", 25, palette.foreground);
         title.setTypeface(Typeface.DEFAULT, Typeface.BOLD); content.addView(title);
-        add(content, text("LOCAL · 프로젝트 Linux CLI  →  github.com", 12, palette.accent), 6);
-        Button back = Z8Ui.quiet(this, palette, "‹ 프로젝트로", this::finish); back.setEnabled(true); back.setOnClickListener(ignored -> finish()); add(content, back, 14);
+        add(content, text(Z8Text.text("LOCAL · Project Linux CLI  →  github.com", "LOCAL · 프로젝트 Linux CLI  →  github.com"), 12, palette.accent), 6);
+        Button back = Z8Ui.quiet(this, palette, Z8Text.text("‹ Back to project", "‹ 프로젝트로"), this::finish); back.setEnabled(true); back.setOnClickListener(ignored -> finish()); add(content, back, 14);
         if (project == null) {
-            add(content, text(busy ? "프로젝트 환경을 확인하고 있습니다…" : error, 16, palette.secondary), 24);
+            add(content, text(busy ? Z8Text.text("Checking the project environment…", "프로젝트 환경을 확인하고 있습니다…") : error, 16, palette.secondary), 24);
             setContentView(frame); return;
         }
         shownClone = Z8GitHub.cloneState(projectId);
@@ -200,7 +200,7 @@ public final class Z8GitHubActivity extends Activity {
             add(content, text(shownClone.repository + " → " + project.name, 16, palette.foreground), 18);
             add(content, text(shownClone.message, 14, shownClone.phase == Z8GitHub.ClonePhase.FAILED ? palette.accent : palette.secondary), 6);
             if (shownClone.phase != Z8GitHub.ClonePhase.RUNNING)
-                add(content, button("프로젝트 Git 확인", () -> startActivity(Z8GitActivity.intent(this, project.id))), 8);
+                add(content, button(Z8Text.text("Open project Git", "프로젝트 Git 확인"), () -> startActivity(Z8GitActivity.intent(this, project.id))), 8);
         }
         if (shownDraft != null) {
             add(content, text("Draft PR · " + shownDraft.repository + "\n" + shownDraft.head + " → " + shownDraft.base, 16, palette.foreground), 18);
@@ -210,85 +210,85 @@ public final class Z8GitHubActivity extends Activity {
             }
             if (!shownDraft.running()) {
                 Z8GitHub.DraftState completed = shownDraft;
-                add(content, button(completed.number > 0 ? "PR #" + completed.number + " 상세 보기" : "열린 PR에서 결과 확인",
+                add(content, button(completed.number > 0 ? "PR #" + completed.number + Z8Text.text(" details", " 상세 보기") : Z8Text.text("Check the result in open PRs", "열린 PR에서 결과 확인"),
                     () -> load(completed.number > 0 ? Z8GitHub.View.PULL : Z8GitHub.View.PULLS, completed.repository,
                         completed.number > 0 ? Long.toString(completed.number) : "", 1, false)), 8);
             }
         }
         if (shownReview != null) {
-            add(content, text("리뷰 · " + shownReview.repository + " #" + shownReview.number, 16, palette.foreground), 18);
+            add(content, text(Z8Text.text("Review · ", "리뷰 · ") + shownReview.repository + " #" + shownReview.number, 16, palette.foreground), 18);
             add(content, text(shownReview.message, 14, palette.secondary), 6);
             if (!shownReview.running) {
                 Z8GitHub.ReviewState done = shownReview;
-                add(content, button("제출된 리뷰 확인", () -> load(Z8GitHub.View.REVIEWS, done.repository, Long.toString(done.number), 1, false)), 8);
+                add(content, button(Z8Text.text("View submitted reviews", "제출된 리뷰 확인"), () -> load(Z8GitHub.View.REVIEWS, done.repository, Long.toString(done.number), 1, false)), 8);
             }
         }
         if (!runtimeError.isEmpty() || client == null || !client.available()) {
-            add(content, text("프로젝트 GitHub 도구 준비", 22, palette.foreground), 24);
-            add(content, text(runtimeError.isEmpty() ? "프로젝트 환경을 확인해 주세요." : runtimeError, 15, palette.secondary), 12);
+            add(content, text(Z8Text.text("Set up project GitHub tools", "프로젝트 GitHub 도구 준비"), 22, palette.foreground), 24);
+            add(content, text(runtimeError.isEmpty() ? Z8Text.text("Check the project environment.", "프로젝트 환경을 확인해 주세요.") : runtimeError, 15, palette.secondary), 12);
             if (client != null && client.cloneAvailable()) {
-                add(content, text("Git은 준비되어 있습니다. 공개 저장소는 GitHub CLI 설치나 로그인 없이 clone할 수 있습니다.", 15, palette.secondary), 12);
+                add(content, text(Z8Text.text("Git is ready. Public repositories can be cloned without installing GitHub CLI or signing in.", "Git은 준비되어 있습니다. 공개 저장소는 GitHub CLI 설치나 로그인 없이 clone할 수 있습니다."), 15, palette.secondary), 12);
                 repositoryInput = input("owner/repository", draftRepository, 140); add(content, repositoryInput, 12);
-                Button clone = button("입력한 공개 저장소 clone", () -> { inputs(); confirmClone(draftRepository.trim()); });
+                Button clone = button(Z8Text.text("Clone entered public repository", "입력한 공개 저장소 clone"), () -> { inputs(); confirmClone(draftRepository.trim()); });
                 clone.setEnabled(!busy && !operationRunning()); add(content, clone, 8);
                 if (!error.isEmpty()) add(content, text(error, 14, palette.accent), 8);
             }
-            add(content, button("Linux 환경 열기", () -> startActivity(Z8EnvironmentActivity.intent(this, project.id))), 16);
-            add(content, button("설치 상태 다시 확인", this::prepare), 8);
+            add(content, button(Z8Text.text("Open Linux environment", "Linux 환경 열기"), () -> startActivity(Z8EnvironmentActivity.intent(this, project.id))), 16);
+            add(content, button(Z8Text.text("Check installation again", "설치 상태 다시 확인"), this::prepare), 8);
             setContentView(frame); return;
         }
         authLabel = text(auth, 13, palette.secondary); add(content, authLabel, 12);
         if (!draftRepository.isEmpty()) {
             TextView selected = text(draftRepository, 21, palette.foreground); selected.setTypeface(Typeface.DEFAULT, Typeface.BOLD); add(content, selected, 18);
             if (!originRepository.isEmpty() && !originRepository.equalsIgnoreCase(draftRepository))
-                add(content, text("프로젝트 origin · " + originRepository, 12, palette.secondary), 5);
+                add(content, text(Z8Text.text("Project origin · ", "프로젝트 origin · ") + originRepository, 12, palette.secondary), 5);
             LinearLayout repositoryTools = row();
-            equal(repositoryTools, button("저장소 정보", () -> selected(Z8GitHub.View.REPOSITORY)));
-            equal(repositoryTools, button("이슈", () -> selected(Z8GitHub.View.ISSUES)));
+            equal(repositoryTools, button(Z8Text.text("Repository details", "저장소 정보"), () -> selected(Z8GitHub.View.REPOSITORY)));
+            equal(repositoryTools, button(Z8Text.text("Issues", "이슈"), () -> selected(Z8GitHub.View.ISSUES)));
             equal(repositoryTools, button("PR", () -> selected(Z8GitHub.View.PULLS))); add(content, repositoryTools, 10);
             LinearLayout workTools = row();
             equal(workTools, button("Actions", () -> selected(Z8GitHub.View.ACTIONS)));
-            Button newPr = Z8Ui.primary(this, palette, "Draft PR 작성", () -> { if (!busy) openDraftForm(); });
+            Button newPr = Z8Ui.primary(this, palette, Z8Text.text("Draft a PR", "Draft PR 작성"), () -> { if (!busy) openDraftForm(); });
             newPr.setEnabled(!busy && !operationRunning()); equal(workTools, newPr); add(content, workTools, 8);
         }
-        add(content, Z8Ui.quiet(this, palette, toolsExpanded ? "계정·저장소 설정 접기" : "계정·저장소 전환", () -> { toolsExpanded = !toolsExpanded; render(); }), 8);
+        add(content, Z8Ui.quiet(this, palette, toolsExpanded ? Z8Text.text("Hide account and repository settings", "계정·저장소 설정 접기") : Z8Text.text("Switch account or repository", "계정·저장소 전환"), () -> { toolsExpanded = !toolsExpanded; render(); }), 8);
         if (toolsExpanded) {
             LinearLayout authTools = row();
-            equal(authTools, button("인증 다시 확인", this::checkAuth));
-            equal(authTools, button("GitHub 로그인", this::login)); add(content, authTools, 8);
-            add(content, text("조회할 저장소", 13, palette.secondary), 18);
+            equal(authTools, button(Z8Text.text("Check authentication again", "인증 다시 확인"), this::checkAuth));
+            equal(authTools, button(Z8Text.text("Sign in to GitHub", "GitHub 로그인"), this::login)); add(content, authTools, 8);
+            add(content, text(Z8Text.text("Repository to view", "조회할 저장소"), 13, palette.secondary), 18);
             repositoryInput = input("owner/repository", draftRepository, 140); content.addView(repositoryInput);
             LinearLayout repositoryTools = row();
-            equal(repositoryTools, button("저장소 열기", () -> { inputs(); toolsExpanded = false; selected(Z8GitHub.View.REPOSITORY); }));
-            Button clone = button("빈 프로젝트에 clone", () -> { inputs(); confirmClone(draftRepository.trim()); });
+            equal(repositoryTools, button(Z8Text.text("Open repository", "저장소 열기"), () -> { inputs(); toolsExpanded = false; selected(Z8GitHub.View.REPOSITORY); }));
+            Button clone = button(Z8Text.text("Clone into empty project", "빈 프로젝트에 clone"), () -> { inputs(); confirmClone(draftRepository.trim()); });
             clone.setEnabled(!busy && !operationRunning()); equal(repositoryTools, clone); add(content, repositoryTools, 8);
-            add(content, text("저장소 검색", 13, palette.secondary), 18);
-            searchInput = input("검색어 · 예: android terminal", draftSearch, 200); content.addView(searchInput);
-            add(content, button("GitHub에서 검색", () -> { inputs(); load(Z8GitHub.View.SEARCH, "", draftSearch, 1, false); }), 8);
+            add(content, text(Z8Text.text("Repository search", "저장소 검색"), 13, palette.secondary), 18);
+            searchInput = input(Z8Text.text("Search term · Example: android terminal", "검색어 · 예: android terminal"), draftSearch, 200); content.addView(searchInput);
+            add(content, button(Z8Text.text("Search GitHub", "GitHub에서 검색"), () -> { inputs(); load(Z8GitHub.View.SEARCH, "", draftSearch, 1, false); }), 8);
         }
-        add(content, text(busy ? "GitHub에서 확인하고 있습니다…" : error, 14, error.isEmpty() ? palette.secondary : palette.accent), 16);
+        add(content, text(busy ? Z8Text.text("Checking GitHub…", "GitHub에서 확인하고 있습니다…") : error, 14, error.isEmpty() ? palette.secondary : palette.accent), 16);
         if (result == null) {
-            add(content, text(originRepository.isEmpty() ? "GitHub 저장소를 입력하거나 검색해 주세요. clone은 빈 프로젝트에서 시작할 수 있습니다." : "프로젝트의 origin 저장소를 불러왔습니다. 이슈·PR·Actions를 선택해 주세요.", 15, palette.secondary), 16);
-            if (!selectedRepository.isEmpty() || !selectedArgument.isEmpty()) add(content, button("마지막 조회 다시 열기", this::reload), 10);
+            add(content, text(originRepository.isEmpty() ? Z8Text.text("Enter or search for a GitHub repository. Clone into an empty project.", "GitHub 저장소를 입력하거나 검색해 주세요. clone은 빈 프로젝트에서 시작할 수 있습니다.") : Z8Text.text("Loaded the project's origin repository. Select Issues, PRs, or Actions.", "프로젝트의 origin 저장소를 불러왔습니다. 이슈·PR·Actions를 선택해 주세요."), 15, palette.secondary), 16);
+            if (!selectedRepository.isEmpty() || !selectedArgument.isEmpty()) add(content, button(Z8Text.text("Reopen last query", "마지막 조회 다시 열기"), this::reload), 10);
         } else {
             add(content, text(result.summary + (selectedRepository.isEmpty() ? "" : " · " + selectedRepository), 19, palette.foreground), 20);
-            add(content, text((stale || busy ? "이전 결과 · " : "조회 완료 · ") + DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date(receivedAt))
-                + " · " + selectedPage + "페이지", 12, palette.secondary), 5);
-            add(content, button("결과 새로고침", this::reload), 8);
+            add(content, text((stale || busy ? Z8Text.text("Previous results · ", "이전 결과 · ") : Z8Text.text("Query complete · ", "조회 완료 · ")) + DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date(receivedAt))
+                + " · " + Z8Text.text("Page " + selectedPage, selectedPage + "페이지"), 12, palette.secondary), 5);
+            add(content, button(Z8Text.text("Refresh results", "결과 새로고침"), this::reload), 8);
             if (selectedView == Z8GitHub.View.PULL_FILES || selectedView == Z8GitHub.View.REVIEWS) {
                 String repo = selectedRepository, number = selectedArgument;
-                add(content, button("‹ PR #" + number + " 상세로", () -> load(Z8GitHub.View.PULL, repo, number, 1, false)), 8);
+                add(content, button("‹ PR #" + number + Z8Text.text(" details", " 상세로"), () -> load(Z8GitHub.View.PULL, repo, number, 1, false)), 8);
             }
-            if (result.rows.isEmpty()) add(content, text("이 페이지에 표시할 항목이 없습니다.", 16, palette.secondary), 16);
+            if (result.rows.isEmpty()) add(content, text(Z8Text.text("No items to show on this page.", "이 페이지에 표시할 항목이 없습니다."), 16, palette.secondary), 16);
             for (Z8GitHub.Row entry : result.rows) resultRow(content, entry);
             if (selectedPage > 1 || result.mayHaveNext) {
                 LinearLayout pages = row();
-                Button previous = button("‹ 이전 페이지", () -> load(selectedView, selectedRepository, selectedArgument, selectedPage - 1, false));
+                Button previous = button(Z8Text.text("‹ Previous page", "‹ 이전 페이지"), () -> load(selectedView, selectedRepository, selectedArgument, selectedPage - 1, false));
                 previous.setEnabled(!busy && selectedPage > 1); equal(pages, previous);
-                Button next = button("다음 페이지 ›", () -> load(selectedView, selectedRepository, selectedArgument, selectedPage + 1, false));
+                Button next = button(Z8Text.text("Next page ›", "다음 페이지 ›"), () -> load(selectedView, selectedRepository, selectedArgument, selectedPage + 1, false));
                 next.setEnabled(!busy && result.mayHaveNext); equal(pages, next); add(content, pages, 16);
             }
-            add(content, text("페이지당 최대 30개. 체크 실행·커밋 상태·Actions는 서로 다른 조회 결과입니다.", 12, palette.secondary), 16);
+            add(content, text(Z8Text.text("Up to 30 items per page. Check runs, commit statuses, and Actions are separate queries.", "페이지당 최대 30개. 체크 실행·커밋 상태·Actions는 서로 다른 조회 결과입니다."), 12, palette.secondary), 16);
         }
         setContentView(frame);
     }
@@ -307,30 +307,30 @@ public final class Z8GitHubActivity extends Activity {
             add(item, body, 10);
         }
         if (entry.kind == Z8GitHub.Kind.REPOSITORY && selectedView != Z8GitHub.View.REPOSITORY) {
-            add(item, button("이 저장소 열기", () -> {
+            add(item, button(Z8Text.text("Open this repository", "이 저장소 열기"), () -> {
                 draftRepository = entry.repository; if (repositoryInput != null) repositoryInput.setText(entry.repository);
                 load(Z8GitHub.View.REPOSITORY, entry.repository, "", 1, false);
             }), 10);
         } else if ((entry.kind == Z8GitHub.Kind.ISSUE || entry.kind == Z8GitHub.Kind.PULL) && !detail) {
-            add(item, button("상세 보기", () -> load(entry.kind == Z8GitHub.Kind.PULL ? Z8GitHub.View.PULL : Z8GitHub.View.ISSUE,
+            add(item, button(Z8Text.text("View details", "상세 보기"), () -> load(entry.kind == Z8GitHub.Kind.PULL ? Z8GitHub.View.PULL : Z8GitHub.View.ISSUE,
                 entry.repository, Long.toString(entry.number), 1, false)), 10);
         }
         if (entry.kind == Z8GitHub.Kind.REPOSITORY) {
-            Button clone = button("이 프로젝트에 clone", () -> confirmClone(entry.repository));
+            Button clone = button(Z8Text.text("Clone into this project", "이 프로젝트에 clone"), () -> confirmClone(entry.repository));
             boolean running = operationRunning();
             clone.setEnabled(!busy && !running); clone.setAlpha(busy || running ? .45f : 1f); add(item, clone, 8);
         }
-        if (selectedView == Z8GitHub.View.ISSUE) add(item, button("이 이슈로 작업 시작", () -> startIssue(entry)), 10);
+        if (selectedView == Z8GitHub.View.ISSUE) add(item, button(Z8Text.text("Start work on this issue", "이 이슈로 작업 시작"), () -> startIssue(entry)), 10);
         if (selectedView == Z8GitHub.View.PULL && !entry.sha.isEmpty()) {
             LinearLayout pullTools = row();
-            equal(pullTools, button("변경 파일 · diff", () -> load(Z8GitHub.View.PULL_FILES, entry.repository, Long.toString(entry.number), 1, false)));
-            equal(pullTools, button("리뷰 내역", () -> load(Z8GitHub.View.REVIEWS, entry.repository, Long.toString(entry.number), 1, false)));
+            equal(pullTools, button(Z8Text.text("Changed files · Diff", "변경 파일 · diff"), () -> load(Z8GitHub.View.PULL_FILES, entry.repository, Long.toString(entry.number), 1, false)));
+            equal(pullTools, button(Z8Text.text("Review history", "리뷰 내역"), () -> load(Z8GitHub.View.REVIEWS, entry.repository, Long.toString(entry.number), 1, false)));
             add(item, pullTools, 10);
-            add(item, button("이 HEAD에 리뷰 작성", () -> openReview(entry)), 8);
+            add(item, button(Z8Text.text("Review this HEAD", "이 HEAD에 리뷰 작성"), () -> openReview(entry)), 8);
             add(item, text("HEAD " + entry.sha.substring(0, 12), 12, palette.secondary), 12);
             LinearLayout checks = row();
-            equal(checks, button("체크 실행", () -> load(Z8GitHub.View.CHECKS, entry.repository, entry.sha, 1, false)));
-            equal(checks, button("커밋 상태", () -> load(Z8GitHub.View.STATUSES, entry.repository, entry.sha, 1, false))); add(item, checks, 8);
+            equal(checks, button(Z8Text.text("Check runs", "체크 실행"), () -> load(Z8GitHub.View.CHECKS, entry.repository, entry.sha, 1, false)));
+            equal(checks, button(Z8Text.text("Commit statuses", "커밋 상태"), () -> load(Z8GitHub.View.STATUSES, entry.repository, entry.sha, 1, false))); add(item, checks, 8);
         }
         add(content, item, 10);
     }
@@ -347,7 +347,7 @@ public final class Z8GitHubActivity extends Activity {
     }
 
     private void login() {
-        saveDrafts(); auth = "이 프로젝트 터미널에서 로그인합니다. GitHub를 다시 열면 인증을 자동 확인합니다.";
+        saveDrafts(); auth = Z8Text.text("Sign in from this project's terminal. Authentication is checked automatically when you reopen GitHub.", "이 프로젝트 터미널에서 로그인합니다. GitHub를 다시 열면 인증을 자동 확인합니다.");
         startActivity(new Intent(this, TermuxActivity.class)
             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP)
             .putExtra(EXTRA_AUTH_SESSION, project.id)
@@ -358,11 +358,11 @@ public final class Z8GitHubActivity extends Activity {
     private void confirmClone(String repository) {
         if (busy || client == null) return;
         job(() -> { client.checkCloneReady(repository); return true; }, ready -> {
-            Z8Ui.dialog(this).setTitle("이 프로젝트에 clone")
-                .setMessage("GitHub 저장소: " + repository + "\n대상 프로젝트: " + project.name
-                    + "\n소스 위치: /workspace\n\nHTTPS clone을 실행합니다. 공개 저장소는 로그인 없이 이용할 수 있고, 인증이 필요하면 이 프로젝트의 설정을 사용합니다. 숨김 파일을 포함해 기존 파일이 있으면 시작하지 않습니다. 복제 중에는 이 프로젝트의 파일 수정을 기다려 주세요. 중단되면 남은 파일을 직접 확인할 수 있습니다.")
-                .setNegativeButton("취소", null)
-                .setPositiveButton("clone 시작", (dialog, which) -> {
+            Z8Ui.dialog(this).setTitle(Z8Text.text("Clone into this project", "이 프로젝트에 clone"))
+                .setMessage(Z8Text.text("GitHub repository: ", "GitHub 저장소: ") + repository + Z8Text.text("\nTarget project: ", "\n대상 프로젝트: ") + project.name
+                    + Z8Text.text("\nSource location: /workspace\n\nClone over HTTPS. Public repositories do not require sign-in; when authentication is needed, this project's settings are used. The clone will not start if any files, including hidden files, already exist. Wait until cloning finishes before editing project files. If cloning stops, you can inspect any remaining files.", "\n소스 위치: /workspace\n\nHTTPS clone을 실행합니다. 공개 저장소는 로그인 없이 이용할 수 있고, 인증이 필요하면 이 프로젝트의 설정을 사용합니다. 숨김 파일을 포함해 기존 파일이 있으면 시작하지 않습니다. 복제 중에는 이 프로젝트의 파일 수정을 기다려 주세요. 중단되면 남은 파일을 직접 확인할 수 있습니다."))
+                .setNegativeButton(Z8Text.text("Cancel", "취소"), null)
+                .setPositiveButton(Z8Text.text("Start clone", "clone 시작"), (dialog, which) -> {
                     // Publish the lease now; an Activity read queue can be cancelled on rotation.
                     // The accepted operation's network/process work runs on the shared worker.
                     try { client.startClone(project.id, repository); error = ""; }
@@ -404,18 +404,18 @@ public final class Z8GitHubActivity extends Activity {
     private void showDraftForm() {
         if (draftContext == null || operationRunning() || (prDialog != null && prDialog.isShowing())) return;
         LinearLayout fields = column(); fields.setPadding(dp(20), dp(12), dp(20), dp(16)); fields.setBackgroundColor(palette.background);
-        fields.addView(text(draftContext.repository + "\nGitHub 계정: " + draftContext.account, 15, palette.foreground));
-        add(fields, text("원격에 이미 push한 head 브랜치로 Draft PR을 만듭니다.", 13, palette.secondary), 10);
-        prHeadInput = input("head · feature/name 또는 owner:branch", prHead, 300); add(fields, prHeadInput, 12);
-        prBaseInput = input("base 브랜치", prBase, 255); add(fields, prBaseInput, 6);
-        prTitleInput = input("PR 제목", prTitle, 256); add(fields, prTitleInput, 6);
-        prBodyInput = input("PR 본문 · 최대 16 KiB", prBody, 16384); prBodyInput.setSingleLine(false);
+        fields.addView(text(draftContext.repository + Z8Text.text("\nGitHub account: ", "\nGitHub 계정: ") + draftContext.account, 15, palette.foreground));
+        add(fields, text(Z8Text.text("Create a draft PR from a head branch you have already pushed to the remote.", "원격에 이미 push한 head 브랜치로 Draft PR을 만듭니다."), 13, palette.secondary), 10);
+        prHeadInput = input(Z8Text.text("head · feature/name or owner:branch", "head · feature/name 또는 owner:branch"), prHead, 300); add(fields, prHeadInput, 12);
+        prBaseInput = input(Z8Text.text("Base branch", "base 브랜치"), prBase, 255); add(fields, prBaseInput, 6);
+        prTitleInput = input(Z8Text.text("PR title", "PR 제목"), prTitle, 256); add(fields, prTitleInput, 6);
+        prBodyInput = input(Z8Text.text("PR body · Up to 16 KiB", "PR 본문 · 최대 16 KiB"), prBody, 16384); prBodyInput.setSingleLine(false);
         prBodyInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         prBodyInput.setMinLines(4); prBodyInput.setMaxLines(8); add(fields, prBodyInput, 6);
         ScrollView scroll = new ScrollView(this); scroll.addView(fields);
-        prDialog = Z8Ui.dialog(this).setTitle("Draft PR 작성").setView(scroll)
-            .setNegativeButton("닫기", (dialog, which) -> { draftInputs(); draftFormRequested = false; })
-            .setPositiveButton("내용 검토", null).create();
+        prDialog = Z8Ui.dialog(this).setTitle(Z8Text.text("Draft a PR", "Draft PR 작성")).setView(scroll)
+            .setNegativeButton(Z8Text.text("Close", "닫기"), (dialog, which) -> { draftInputs(); draftFormRequested = false; })
+            .setPositiveButton(Z8Text.text("Review details", "내용 검토"), null).create();
         prDialog.setOnCancelListener(dialog -> { draftInputs(); draftFormRequested = false; });
         prDialog.setOnShowListener(ignored -> prDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
             draftInputs();
@@ -429,14 +429,14 @@ public final class Z8GitHubActivity extends Activity {
     }
 
     private void previewDraft(Z8GitHub.DraftRequest request) {
-        TextView review = text("저장소: " + request.repository + "\n계정: " + request.account + "\n브랜치: " + request.head + " → " + request.base
-            + "\n상태: Draft\n\n제목\n" + request.title + "\n\n본문\n" + (request.body.isEmpty() ? "(비어 있음)" : request.body), 15, palette.foreground);
+        TextView review = text(Z8Text.text("Repository: ", "저장소: ") + request.repository + Z8Text.text("\nAccount: ", "\n계정: ") + request.account + Z8Text.text("\nBranch: ", "\n브랜치: ") + request.head + " → " + request.base
+            + Z8Text.text("\nStatus: Draft\n\nTitle\n", "\n상태: Draft\n\n제목\n") + request.title + Z8Text.text("\n\nBody\n", "\n\n본문\n") + (request.body.isEmpty() ? Z8Text.text("(empty)", "(비어 있음)") : request.body), 15, palette.foreground);
         review.setTextIsSelectable(true); review.setPadding(dp(20), dp(12), dp(20), dp(20)); review.setBackgroundColor(palette.background);
         ScrollView scroll = new ScrollView(this); scroll.addView(review);
-        prDialog = Z8Ui.dialog(this).setTitle("GitHub에 Draft PR 생성").setView(scroll)
-            .setNegativeButton("수정", (dialog, which) -> { prDialog = null; showDraftForm(); })
-            .setNeutralButton("취소", (dialog, which) -> draftFormRequested = false)
-            .setPositiveButton("검토한 Draft PR 생성", (dialog, which) -> {
+        prDialog = Z8Ui.dialog(this).setTitle(Z8Text.text("Create draft PR on GitHub", "GitHub에 Draft PR 생성")).setView(scroll)
+            .setNegativeButton(Z8Text.text("Edit", "수정"), (dialog, which) -> { prDialog = null; showDraftForm(); })
+            .setNeutralButton(Z8Text.text("Cancel", "취소"), (dialog, which) -> draftFormRequested = false)
+            .setPositiveButton(Z8Text.text("Create reviewed draft PR", "검토한 Draft PR 생성"), (dialog, which) -> {
                 draftFormRequested = false;
                 try {
                     // Acceptance is synchronous; all remote work belongs to the shared worker.
@@ -474,7 +474,7 @@ public final class Z8GitHubActivity extends Activity {
     }
     private void checkAuth() {
         if (authChecking || client == null || !client.available() || isFinishing() || isDestroyed()) return;
-        authChecking = true; auth = "github.com 계정 확인 중…";
+        authChecking = true; auth = Z8Text.text("Checking github.com account…", "github.com 계정 확인 중…");
         if (authLabel != null) authLabel.setText(auth);
         Z8GitHub selected = client;
         io.execute(() -> {
@@ -488,7 +488,7 @@ public final class Z8GitHubActivity extends Activity {
     private Z8Git projectGit() throws IOException {
         File rootfs = new File(getFilesDir(), "z8/environments/" + project.id + "/rootfs");
         File executable = new File(rootfs, "usr/bin/git").getCanonicalFile();
-        if (!executable.toPath().startsWith(rootfs.getCanonicalFile().toPath())) throw new IOException("프로젝트 Git 경로를 확인해 주세요.");
+        if (!executable.toPath().startsWith(rootfs.getCanonicalFile().toPath())) throw new IOException(Z8Text.text("Check the project's Git path.", "프로젝트 Git 경로를 확인해 주세요."));
         File temp = new File(getFilesDir(), "z8/environments/" + project.id + "/tmp");
         Z8Guest.Launch launch = Z8Guest.commandFor(this, project.id, "", new String[] { "/usr/bin/git" });
         Z8GuestGit runner = new Z8GuestGit(new File(launch.executable), project.source, executable,
@@ -497,20 +497,20 @@ public final class Z8GitHubActivity extends Activity {
     }
     private void startIssue(Z8GitHub.Row issue) {
         job(() -> {
-            if (!issue.repository.equalsIgnoreCase(client.projectRepository())) throw new IOException("이 이슈의 저장소와 프로젝트 origin이 다릅니다. 해당 저장소를 clone한 프로젝트에서 작업을 시작해 주세요.");
+            if (!issue.repository.equalsIgnoreCase(client.projectRepository())) throw new IOException(Z8Text.text("This issue's repository does not match the project's origin. Start work in a project cloned from that repository.", "이 이슈의 저장소와 프로젝트 origin이 다릅니다. 해당 저장소를 clone한 프로젝트에서 작업을 시작해 주세요."));
             Z8Git git = projectGit(); return new Object[] { git, git.status() };
         }, ready -> {
             Z8Git git = (Z8Git) ready[0]; Z8Git.Status expected = (Z8Git.Status) ready[1];
             LinearLayout fields = column(); fields.setPadding(dp(20), dp(12), dp(20), dp(16));
-            fields.addView(text(issue.repository + " #" + issue.number + "\n" + issue.title + "\n기준 브랜치 · " + expected.branch, 15, palette.foreground));
-            EditText branch = input("작업 브랜치", "issue/" + issue.number, 200); add(fields, branch, 12);
-            add(fields, text("현재 HEAD에서 로컬 브랜치를 만들고 전환합니다. 이슈 내용은 명령으로 실행하지 않습니다.", 13, palette.secondary), 12);
-            AlertDialog dialog = Z8Ui.dialog(this).setTitle("이슈 작업 시작").setView(fields).setNegativeButton("취소", null).setPositiveButton("브랜치 만들고 열기", null).create();
+            fields.addView(text(issue.repository + " #" + issue.number + "\n" + issue.title + Z8Text.text("\nBase branch · ", "\n기준 브랜치 · ") + expected.branch, 15, palette.foreground));
+            EditText branch = input(Z8Text.text("Working branch", "작업 브랜치"), "issue/" + issue.number, 200); add(fields, branch, 12);
+            add(fields, text(Z8Text.text("Create and switch to a local branch from the current HEAD. The issue content is not executed as a command.", "현재 HEAD에서 로컬 브랜치를 만들고 전환합니다. 이슈 내용은 명령으로 실행하지 않습니다."), 13, palette.secondary), 12);
+            AlertDialog dialog = Z8Ui.dialog(this).setTitle(Z8Text.text("Start issue work", "이슈 작업 시작")).setView(fields).setNegativeButton(Z8Text.text("Cancel", "취소"), null).setPositiveButton(Z8Text.text("Create and open branch", "브랜치 만들고 열기"), null).create();
             dialog.setOnShowListener(ignored -> dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
                 String name = branch.getText().toString();
-                if (name.trim().isEmpty()) { branch.setError("브랜치 이름을 입력해 주세요."); return; }
+                if (name.trim().isEmpty()) { branch.setError(Z8Text.text("Enter a branch name.", "브랜치 이름을 입력해 주세요.")); return; }
                 dialog.dismiss(); job(() -> {
-                    if (!issue.repository.equalsIgnoreCase(client.projectRepository())) throw new IOException("origin이 변경되었습니다. 저장소를 다시 확인해 주세요.");
+                    if (!issue.repository.equalsIgnoreCase(client.projectRepository())) throw new IOException(Z8Text.text("The origin has changed. Check the repository again.", "origin이 변경되었습니다. 저장소를 다시 확인해 주세요."));
                     git.switchBranch(expected, name, true); return true;
                 }, done -> startActivity(Z8GitActivity.intent(this, project.id)));
             }));
@@ -532,16 +532,16 @@ public final class Z8GitHubActivity extends Activity {
         LinearLayout fields = column(); fields.setPadding(dp(20), dp(12), dp(20), dp(16)); fields.setBackgroundColor(palette.background);
         fields.addView(text(pull.repository + " #" + pull.number + "\n@" + account + " · HEAD " + pull.sha.substring(0, 12), 15, palette.foreground));
         String[] events = { "COMMENT", "APPROVE", "REQUEST_CHANGES" };
-        String[] labels = { "의견 남기기", "승인", "변경 요청" };
+        String[] labels = { Z8Text.text("Comment", "의견 남기기"), Z8Text.text("Approve", "승인"), Z8Text.text("Request changes", "변경 요청") };
         int selected = Arrays.asList(events).indexOf(event);
         android.widget.Spinner type = new android.widget.Spinner(this); reviewType = type;
         android.widget.ArrayAdapter<String> options = new android.widget.ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, labels);
         type.setAdapter(options); type.setSelection(Math.max(0, selected)); add(fields, type, 12);
-        reviewBodyInput = input("리뷰 내용 · 최대 16 KiB", reviewBody, 16384); reviewBodyInput.setSingleLine(false);
+        reviewBodyInput = input(Z8Text.text("Review body · Up to 16 KiB", "리뷰 내용 · 최대 16 KiB"), reviewBody, 16384); reviewBodyInput.setSingleLine(false);
         reviewBodyInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         reviewBodyInput.setMinLines(4); reviewBodyInput.setMaxLines(8); add(fields, reviewBodyInput, 10);
         ScrollView scroll = new ScrollView(this); scroll.addView(fields);
-        reviewDialog = Z8Ui.dialog(this).setTitle("PR 리뷰 작성").setView(scroll).setNegativeButton("초안 저장 후 닫기", (d, w) -> saveDrafts()).setPositiveButton("제출 내용 검토", null).create();
+        reviewDialog = Z8Ui.dialog(this).setTitle(Z8Text.text("Write PR review", "PR 리뷰 작성")).setView(scroll).setNegativeButton(Z8Text.text("Save draft and close", "초안 저장 후 닫기"), (d, w) -> saveDrafts()).setPositiveButton(Z8Text.text("Review submission", "제출 내용 검토"), null).create();
         reviewDialog.setOnCancelListener(d -> saveDrafts());
         reviewDialog.setOnShowListener(d -> reviewDialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
             saveDrafts();
@@ -557,9 +557,9 @@ public final class Z8GitHubActivity extends Activity {
             + "\n" + request.event + "\n\n" + request.body, 15, palette.foreground);
         preview.setTextIsSelectable(true); preview.setPadding(dp(20), dp(12), dp(20), dp(20)); preview.setBackgroundColor(palette.background);
         ScrollView scroll = new ScrollView(this); scroll.addView(preview);
-        reviewDialog = Z8Ui.dialog(this).setTitle("GitHub에 리뷰 제출").setView(scroll)
-            .setNegativeButton("수정", (d, w) -> showReviewForm(pull, request.account, request.event))
-            .setPositiveButton("검토한 리뷰 제출", (d, w) -> {
+        reviewDialog = Z8Ui.dialog(this).setTitle(Z8Text.text("Submit review to GitHub", "GitHub에 리뷰 제출")).setView(scroll)
+            .setNegativeButton(Z8Text.text("Edit", "수정"), (d, w) -> showReviewForm(pull, request.account, request.event))
+            .setPositiveButton(Z8Text.text("Submit reviewed response", "검토한 리뷰 제출"), (d, w) -> {
                 saveDrafts();
                 try { client.startReview(project.id, request); error = ""; } catch (IOException invalid) { error = message(invalid); }
                 observeOperation();
@@ -589,12 +589,12 @@ public final class Z8GitHubActivity extends Activity {
     private static Object decode(String text) throws IOException {
         try {
             JSONTokener parser = new JSONTokener(text); Object raw = parser.nextValue();
-            if (parser.nextClean() != 0) throw new IOException("GitHub 응답 뒤에 예상하지 못한 데이터가 있습니다.");
+            if (parser.nextClean() != 0) throw new IOException(Z8Text.text("The GitHub response contains unexpected trailing data.", "GitHub 응답 뒤에 예상하지 못한 데이터가 있습니다."));
             return plain(raw, 0, new int[] { 0 });
-        } catch (org.json.JSONException invalid) { throw new IOException("GitHub JSON 응답을 읽을 수 없습니다."); }
+        } catch (org.json.JSONException invalid) { throw new IOException(Z8Text.text("Could not read the GitHub JSON response.", "GitHub JSON 응답을 읽을 수 없습니다.")); }
     }
     private static Object plain(Object value, int depth, int[] nodes) throws IOException, org.json.JSONException {
-        if (depth > 32 || ++nodes[0] > 50000) throw new IOException("GitHub JSON 응답이 너무 복잡합니다.");
+        if (depth > 32 || ++nodes[0] > 50000) throw new IOException(Z8Text.text("The GitHub JSON response is too complex.", "GitHub JSON 응답이 너무 복잡합니다."));
         if (value == JSONObject.NULL) return null;
         if (value instanceof JSONObject) {
             JSONObject object = (JSONObject) value; Map<String, Object> result = new HashMap<>();
@@ -611,7 +611,7 @@ public final class Z8GitHubActivity extends Activity {
     }
 
     private static String message(Exception failure) {
-        String text = failure.getMessage(); return text == null || text.isEmpty() ? "요청을 완료하지 못했습니다. 환경과 네트워크를 확인해 주세요." : text;
+        String text = failure.getMessage(); return text == null || text.isEmpty() ? Z8Text.text("Could not complete the request. Check the environment and network.", "요청을 완료하지 못했습니다. 환경과 네트워크를 확인해 주세요.") : text;
     }
     private void inputs() {
         if (repositoryInput != null) draftRepository = repositoryInput.getText().toString();

@@ -37,7 +37,7 @@ final class Z8PanelUi {
         toolbar = row(); toolbar.setGravity(Gravity.CENTER_VERTICAL);
         ImageView back = icon(R.drawable.z8_ic_chevron_right, 22, style.text); back.setRotation(180);
         back.setPadding(dp(13), dp(13), dp(13), dp(13));
-        back.setContentDescription("돌아가기"); back.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
+        back.setContentDescription(Z8Text.text("Back", "돌아가기")); back.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_YES);
         control(back); back.setOnClickListener(view -> activity.finish());
         toolbar.addView(back, new LinearLayout.LayoutParams(dp(48), dp(48)));
         TextView heading = text(title, 21, style.text, true); heading.setPadding(dp(4), 0, 0, 0);

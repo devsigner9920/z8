@@ -89,7 +89,7 @@ class TerminalInputBehavior(unittest.TestCase):
             }
         }''')
         actual = ROOT / 'overlay/terminal-view/src/main/java/com/termux/view/Z8TerminalInput.java'
-        result = subprocess.run([str(jdk / 'javac'), '-encoding', 'UTF-8', '-d', str(cls.directory), str(actual), str(source)], capture_output=True, text=True)
+        result = subprocess.run([str(jdk / 'javac'), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(cls.directory), str(actual), str(source)], capture_output=True, text=True)
         if result.returncode:
             raise AssertionError(result.stderr)
 
@@ -113,6 +113,7 @@ class TerminalInputBehavior(unittest.TestCase):
             attach = view.split('public boolean attachSession(', 1)[1].split('public InputConnection', 1)[0]
             self.assertLess(attach.index('forceStopTextSelectionMode();'), attach.index('mTermSession = session;'))
             self.assertIn('mZ8PasteDialog.dismiss()', attach)
+            self.assertNotIn('com.termux.app.Z8Text', view)  # Library cannot depend on its host app.
             self.assertLess(attach.index('updateSize();'), attach.index('z8RefreshAccessibilityText();'))
             self.assertNotIn('onScreenUpdated(', attach) # Preserve scroll state while updating a11y text.
             self.assertNotIn('mAccessibilityEnabled', view)
@@ -232,7 +233,7 @@ class TerminalInputBehavior(unittest.TestCase):
                 }
             }''')
             javac = ROOT / '.local/jdk/Contents/Home/bin/javac'
-            compiled = subprocess.run([str(javac), '-d', str(tree), str(source)], capture_output=True, text=True, timeout=15)
+            compiled = subprocess.run([str(javac), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-d', str(tree), str(source)], capture_output=True, text=True, timeout=15)
             self.assertEqual(compiled.returncode, 0, compiled.stderr)
             executed = subprocess.run([self.java, '-cp', str(tree), 'AutofillProbe'], capture_output=True, text=True, timeout=10)
             self.assertEqual(executed.returncode, 0, executed.stderr)
@@ -319,7 +320,7 @@ class TerminalInputBehavior(unittest.TestCase):
                 }
             }''')
         javac = ROOT / '.local/jdk/Contents/Home/bin/javac'
-        compiled = subprocess.run([str(javac), '-d', str(tree), str(source)], capture_output=True, text=True, timeout=15)
+        compiled = subprocess.run([str(javac), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-d', str(tree), str(source)], capture_output=True, text=True, timeout=15)
         self.assertEqual(compiled.returncode, 0, compiled.stderr)
         executed = subprocess.run([self.java, '-cp', str(tree), 'ScrollRouteProbe'], capture_output=True, text=True, timeout=10)
         self.assertEqual(executed.returncode, 0, executed.stderr)
@@ -384,7 +385,7 @@ class TerminalInputBehavior(unittest.TestCase):
             }''')
         actual = ROOT / 'overlay/terminal-view/src/main/java/com/termux/view/Z8TerminalInput.java'
         javac = ROOT / '.local/jdk/Contents/Home/bin/javac'
-        compiled = subprocess.run([str(javac), '-encoding', 'UTF-8', '-d', str(tree), str(actual), str(source)], capture_output=True, text=True, timeout=15)
+        compiled = subprocess.run([str(javac), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(tree), str(actual), str(source)], capture_output=True, text=True, timeout=15)
         self.assertEqual(compiled.returncode, 0, compiled.stderr)
         executed = subprocess.run([self.java, '-cp', str(tree), 'ScrollProbe'], capture_output=True, text=True, timeout=10)
         self.assertEqual(executed.returncode, 0, executed.stderr)
@@ -462,7 +463,7 @@ class TerminalInputBehavior(unittest.TestCase):
             }''')
         actual = ROOT / 'overlay/terminal-view/src/main/java/com/termux/view/Z8TerminalInput.java'
         javac = ROOT / '.local/jdk/Contents/Home/bin/javac'
-        compiled = subprocess.run([str(javac), '-encoding', 'UTF-8', '-d', str(tree), str(actual), str(source)], capture_output=True, text=True, timeout=15)
+        compiled = subprocess.run([str(javac), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(tree), str(actual), str(source)], capture_output=True, text=True, timeout=15)
         self.assertEqual(compiled.returncode, 0, compiled.stderr)
         executed = subprocess.run([self.java, '-cp', str(tree), 'ShortcutProbe'], capture_output=True, text=True, timeout=10)
         self.assertEqual(executed.returncode, 0, executed.stderr)

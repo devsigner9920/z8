@@ -34,7 +34,7 @@ public final class Z8SessionCatalog {
             handle = session.mHandle;
             Z8SessionOrigin origin = Z8SessionOrigin.of(session);
             projectId = origin == null || origin.projectId == null ? "" : origin.projectId;
-            projectName = origin == null ? "기기 셸" : displayText(origin.projectName, 80, "프로젝트");
+            projectName = origin == null ? Z8Text.text("Device shell", "기기 셸") : displayText(origin.projectName, 80, Z8Text.text("Project", "프로젝트"));
             tool = origin == null ? "Terminal" : actionLabel(origin.action);
             title = sessionTitle(service, session, origin, tool);
             running = session.isRunning();
@@ -74,13 +74,43 @@ public final class Z8SessionCatalog {
         switch (action) {
             case "claude": return "Claude Code";
             case "codex": return "Codex";
+            case "setup-tools": return Z8Text.text("Install development tools", "개발 도구 설치");
+            case "setup-codex": return Z8Text.text("Install Codex", "Codex 설치");
+            case "setup-claude": return Z8Text.text("Install Claude", "Claude 설치");
+            case "github-auth": return Z8Text.text("GitHub sign-in", "GitHub 로그인");
+            case "hooks-codex": return Z8Text.text("Codex notifications", "Codex 알림");
+            case "hooks-claude": return Z8Text.text("Claude notifications", "Claude 알림");
+            default: return "Terminal";
+        }
+    }
+
+    /** English generated-name tokens are stable even when the display language changes. */
+    private static String englishActionLabel(String action) {
+        if (action == null || "remote-shell".equals(action)) return "Terminal";
+        switch (action) {
+            case "claude": return "Claude Code";
+            case "codex": return "Codex";
+            case "setup-tools": return "Install development tools";
+            case "setup-codex": return "Install Codex";
+            case "setup-claude": return "Install Claude";
+            case "github-auth": return "GitHub sign-in";
+            case "hooks-codex": return "Codex notifications";
+            case "hooks-claude": return "Claude notifications";
+            default: return "Terminal";
+        }
+    }
+
+    /** Exact historical generated-name tokens; never rewrite stored user names. */
+    private static String historicalActionLabel(String action) {
+        if (action == null || "remote-shell".equals(action)) return "Terminal";
+        switch (action) {
             case "setup-tools": return "개발 도구 설치";
             case "setup-codex": return "Codex 설치";
             case "setup-claude": return "Claude 설치";
             case "github-auth": return "GitHub 로그인";
             case "hooks-codex": return "Codex 알림";
             case "hooks-claude": return "Claude 알림";
-            default: return "Terminal";
+            default: return actionLabel(action);
         }
     }
 
@@ -139,11 +169,14 @@ public final class Z8SessionCatalog {
         String name = session.mSessionName;
         boolean terminal = origin == null || origin.action == null || "remote-shell".equals(origin.action);
         if (origin != null) {
+            // The Korean fallback belongs to the old stored-name format, not UI text.
             String project = origin.projectName == null ? "프로젝트" : origin.projectName;
-            String generatedLabel = terminal ? "Linux" : tool;
+            String generatedLabel = terminal ? "Linux" : englishActionLabel(origin.action);
+            String historicalLabel = terminal ? "Linux" : historicalActionLabel(origin.action);
             // Only the exact historical generated label is normalized. A user rename
             // containing the project name (or literally "Shell") remains user text.
             if ((project + " · " + generatedLabel).equals(name)
+                    || (project + " · " + historicalLabel).equals(name)
                     || terminal && (project + " · Shell").equals(name))
                 return terminal ? defaultName(service, session, origin) : tool;
         }

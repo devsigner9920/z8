@@ -55,7 +55,7 @@ public final class Z8SetupDownloadProxy implements AutoCloseable {
     private final Map<String, String> environment;
 
     public static Z8SetupDownloadProxy open(Context context, Network selected) throws IOException {
-        if (selected == null) throw new IOException("설치에 사용할 네트워크가 없습니다.");
+        if (selected == null) throw new IOException(Z8Text.text("No network is available for installation.", "설치에 사용할 네트워크가 없습니다."));
         // Both name resolution and sockets belong to the selected network. A lost
         // network fails instead of transparently falling back to mobile data.
         return new Z8SetupDownloadProxy(selected.getSocketFactory(), selected::getAllByName);

@@ -48,11 +48,11 @@ final class Z8PreparationProcess implements AutoCloseable {
     /** All arguments remain argv data. No project path or command text is interpolated into sh. */
     static synchronized Z8PreparationProcess start(Context context, String projectId, List<String> argv,
                                                     File directory, Map<String, String> environment) throws IOException {
-        if (argv == null || argv.isEmpty() || projectId == null) throw new IOException("초기 설치 실행 정보가 없습니다.");
+        if (argv == null || argv.isEmpty() || projectId == null) throw new IOException(Z8Text.text("Initial setup launch information is missing.", "초기 설치 실행 정보가 없습니다."));
         List<Z8PreparationProcess> previous;
         synchronized (OUTSTANDING) { previous = new ArrayList<>(OUTSTANDING.values()); }
         for (Z8PreparationProcess pending : previous) {
-            if (!pending.closeAttempted) throw new IOException("다른 초기 설치 프로세스가 아직 실행 중입니다.");
+            if (!pending.closeAttempted) throw new IOException(Z8Text.text("Another initial setup process is still running.", "다른 초기 설치 프로세스가 아직 실행 중입니다."));
             pending.close(); // Any failed cleanup blocks the whole serial installation queue.
         }
         String marker = "z8-setup-" + UUID.randomUUID();
@@ -80,7 +80,7 @@ final class Z8PreparationProcess implements AutoCloseable {
             return child;
         } catch (Exception error) {
             if (error instanceof InterruptedException) Thread.currentThread().interrupt();
-            IOException failure = new IOException("초기 설치 프로세스를 시작하지 못했습니다.", error);
+            IOException failure = new IOException(Z8Text.text("Could not start the initial setup process.", "초기 설치 프로세스를 시작하지 못했습니다."), error);
             try { child.close(); } catch (IOException cleanup) { failure.addSuppressed(cleanup); }
             throw failure;
         } finally { handshake.cancel(true); }
@@ -91,19 +91,19 @@ final class Z8PreparationProcess implements AutoCloseable {
         ByteArrayOutputStream line = new ByteArrayOutputStream();
         while (line.size() < 160) {
             int value = input.read();
-            if (value < 0) throw new IOException("초기 설치 프로세스가 시작 전에 종료되었습니다.");
+            if (value < 0) throw new IOException(Z8Text.text("The initial setup process exited before startup.", "초기 설치 프로세스가 시작 전에 종료되었습니다."));
             if (value == '\n') {
                 String text = line.toString(StandardCharsets.UTF_8.name());
                 String prefix = marker + " ";
-                if (!text.startsWith(prefix)) throw new IOException("초기 설치 프로세스의 응답을 확인하지 못했습니다.");
+                if (!text.startsWith(prefix)) throw new IOException(Z8Text.text("Could not verify the initial setup process response.", "초기 설치 프로세스의 응답을 확인하지 못했습니다."));
                 String pid = text.substring(prefix.length());
-                if (!pid.matches("[1-9][0-9]{0,9}")) throw new IOException("잘못된 설치 프로세스 ID입니다.");
+                if (!pid.matches("[1-9][0-9]{0,9}")) throw new IOException(Z8Text.text("Invalid installation process ID.", "잘못된 설치 프로세스 ID입니다."));
                 try { return Integer.parseInt(pid); }
-                catch (NumberFormatException invalid) { throw new IOException("잘못된 설치 프로세스 ID입니다.", invalid); }
+                catch (NumberFormatException invalid) { throw new IOException(Z8Text.text("Invalid installation process ID.", "잘못된 설치 프로세스 ID입니다."), invalid); }
             }
             line.write(value);
         }
-        throw new IOException("초기 설치 프로세스 응답이 너무 큽니다.");
+        throw new IOException(Z8Text.text("The initial setup process response is too large.", "초기 설치 프로세스 응답이 너무 큽니다."));
     }
 
     InputStream output() { return output; }
@@ -117,10 +117,10 @@ final class Z8PreparationProcess implements AutoCloseable {
         if (observation != null) observation.cancel(false);
         try {
             if (acknowledged) {
-                if (target == null) throw new IOException("설치 프로세스의 식별 정보가 없어 종료를 확인하지 못했습니다.");
+                if (target == null) throw new IOException(Z8Text.text("The installation process identity is missing, so its exit could not be verified.", "설치 프로세스의 식별 정보가 없어 종료를 확인하지 못했습니다."));
                 try { Z8ProjectProcesses.stopPreparation(target); }
                 catch (Exception failure) {
-                    IOException error = new IOException("초기 설치 종료를 확인하지 못했습니다. 파일을 보존했으며 새 설치를 시작하지 않습니다.", failure);
+                    IOException error = new IOException(Z8Text.text("Could not verify that initial setup stopped. Files have been preserved; a new installation will not start.", "초기 설치 종료를 확인하지 못했습니다. 파일을 보존했으며 새 설치를 시작하지 않습니다."), failure);
                     if (observationFailure != null) error.addSuppressed(observationFailure);
                     throw error;
                 } finally { interrupted |= Thread.interrupted(); }
@@ -136,7 +136,7 @@ final class Z8PreparationProcess implements AutoCloseable {
                 try { exited = process.waitFor(100, TimeUnit.MILLISECONDS); }
                 catch (InterruptedException stopped) { interrupted = true; }
             }
-            if (!exited) throw new IOException("초기 설치 실행기의 종료를 확인하지 못했습니다. 새 설치를 시작하지 않습니다.");
+            if (!exited) throw new IOException(Z8Text.text("Could not verify that the initial setup launcher stopped. A new installation will not start.", "초기 설치 실행기의 종료를 확인하지 못했습니다. 새 설치를 시작하지 않습니다."));
             closed = true;
             synchronized (OUTSTANDING) { if (OUTSTANDING.get(projectId) == this) OUTSTANDING.remove(projectId); }
             try { output.close(); } catch (IOException ignored) { }

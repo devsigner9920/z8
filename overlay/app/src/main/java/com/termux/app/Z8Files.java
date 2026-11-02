@@ -44,7 +44,7 @@ public final class Z8Files {
     }
 
     public static final class ConflictException extends IOException {
-        ConflictException() { super("파일이 다른 작업에서 변경되었습니다. 최신 파일을 확인한 뒤 다시 저장하세요."); }
+        ConflictException() { super(Z8Text.text("This file was changed by another operation. Review the latest version, then save again.", "파일이 다른 작업에서 변경되었습니다. 최신 파일을 확인한 뒤 다시 저장하세요.")); }
     }
 
     private Z8Files() {}
@@ -52,9 +52,9 @@ public final class Z8Files {
     public static String name(String name) throws IOException {
         if (name == null || name.trim().isEmpty() || name.length() > 120
                 || name.equals(".") || name.equals("..") || name.indexOf('/') >= 0
-                || name.indexOf('\\') >= 0) throw new IOException("이름은 1~120자이며 / 또는 \\를 포함할 수 없습니다.");
+                || name.indexOf('\\') >= 0) throw new IOException(Z8Text.text("Names must be 1–120 characters and cannot contain / or \\.", "이름은 1~120자이며 / 또는 \\를 포함할 수 없습니다."));
         for (int i = 0; i < name.length(); i++) {
-            if (Character.isISOControl(name.charAt(i))) throw new IOException("이름에 제어 문자를 사용할 수 없습니다.");
+            if (Character.isISOControl(name.charAt(i))) throw new IOException(Z8Text.text("Names cannot contain control characters.", "이름에 제어 문자를 사용할 수 없습니다."));
         }
         return name;
     }
@@ -71,27 +71,27 @@ public final class Z8Files {
         Path cursor = root.getRoot();
         for (Path component : root) {
             cursor = cursor.resolve(component);
-            if (Files.isSymbolicLink(cursor)) throw new IOException("심볼릭 링크 경로는 열 수 없습니다.");
+            if (Files.isSymbolicLink(cursor)) throw new IOException(Z8Text.text("Symbolic link paths cannot be opened.", "심볼릭 링크 경로는 열 수 없습니다."));
         }
-        if (!Files.isDirectory(root, LinkOption.NOFOLLOW_LINKS)) throw new IOException("프로젝트 폴더가 없습니다.");
+        if (!Files.isDirectory(root, LinkOption.NOFOLLOW_LINKS)) throw new IOException(Z8Text.text("The project folder is missing.", "프로젝트 폴더가 없습니다."));
         if (relative == null || relative.startsWith("/") || relative.indexOf('\\') >= 0)
-            throw new IOException("잘못된 프로젝트 경로입니다.");
+            throw new IOException(Z8Text.text("Invalid project path.", "잘못된 프로젝트 경로입니다."));
         cursor = root;
         if (!relative.isEmpty()) for (String component : relative.split("/", -1)) {
             name(component);
             cursor = cursor.resolve(component);
-            if (Files.isSymbolicLink(cursor)) throw new IOException("심볼릭 링크는 열거나 변경할 수 없습니다.");
+            if (Files.isSymbolicLink(cursor)) throw new IOException(Z8Text.text("Symbolic links cannot be opened or changed.", "심볼릭 링크는 열거나 변경할 수 없습니다."));
         }
         if (!cursor.normalize().startsWith(root)
                 || !cursor.toFile().getCanonicalFile().toPath().startsWith(root.toFile().getCanonicalFile().toPath()))
-            throw new IOException("프로젝트 밖의 경로에 접근할 수 없습니다.");
-        if (mustExist && !Files.exists(cursor, LinkOption.NOFOLLOW_LINKS)) throw new IOException("파일 또는 폴더가 없어졌습니다.");
+            throw new IOException(Z8Text.text("Paths outside the project cannot be accessed.", "프로젝트 밖의 경로에 접근할 수 없습니다."));
+        if (mustExist && !Files.exists(cursor, LinkOption.NOFOLLOW_LINKS)) throw new IOException(Z8Text.text("The file or folder no longer exists.", "파일 또는 폴더가 없어졌습니다."));
         return cursor;
     }
 
     public static File directory(File source, String relative) throws IOException {
         Path path = checked(source, relative, true);
-        if (!Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) throw new IOException("폴더가 아닙니다.");
+        if (!Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) throw new IOException(Z8Text.text("This is not a folder.", "폴더가 아닙니다."));
         return path.toFile();
     }
 
@@ -100,7 +100,7 @@ public final class Z8Files {
         List<Entry> entries = new ArrayList<>();
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(path)) {
             for (Path item : stream) {
-                if (entries.size() >= MAX_ENTRIES) throw new IOException("이 폴더에는 2,000개 넘는 항목이 있습니다. 터미널에서 확인해 주세요.");
+                if (entries.size() >= MAX_ENTRIES) throw new IOException(Z8Text.text("This folder has more than 2,000 items. Open it in the terminal.", "이 폴더에는 2,000개 넘는 항목이 있습니다. 터미널에서 확인해 주세요."));
                 entries.add(new Entry(item.getFileName().toString(),
                     Files.isDirectory(item, LinkOption.NOFOLLOW_LINKS), Files.isSymbolicLink(item)));
             }
@@ -118,7 +118,7 @@ public final class Z8Files {
     }
 
     public static void rename(File source, String relative, String newName) throws IOException {
-        if (relative.isEmpty()) throw new IOException("프로젝트 루트의 이름은 바꿀 수 없습니다.");
+        if (relative.isEmpty()) throw new IOException(Z8Text.text("The project root cannot be renamed.", "프로젝트 루트의 이름은 바꿀 수 없습니다."));
         Path original = checked(source, relative, true);
         int slash = relative.lastIndexOf('/');
         Path target = checked(source, child(slash < 0 ? "" : relative.substring(0, slash), newName), false);
@@ -128,22 +128,22 @@ public final class Z8Files {
     }
 
     public static void delete(File source, String relative) throws IOException {
-        if (relative.isEmpty()) throw new IOException("프로젝트 루트는 여기서 삭제할 수 없습니다.");
+        if (relative.isEmpty()) throw new IOException(Z8Text.text("The project root cannot be deleted here.", "프로젝트 루트는 여기서 삭제할 수 없습니다."));
         // Only files and empty directories. A recursive delete is deliberately not implicit.
         Files.delete(checked(source, relative, true));
     }
 
     public static Document read(File source, String relative) throws IOException {
         Path path = checked(source, relative, true);
-        if (!Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) throw new IOException("일반 텍스트 파일만 편집할 수 있습니다.");
+        if (!Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) throw new IOException(Z8Text.text("Only regular text files can be edited.", "일반 텍스트 파일만 편집할 수 있습니다."));
         BasicFileAttributes before = Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
-        if (before.size() > MAX_TEXT_BYTES) throw new IOException("편집기는 최대 128 KiB 파일을 지원합니다.");
+        if (before.size() > MAX_TEXT_BYTES) throw new IOException(Z8Text.text("The editor supports files up to 128 KiB.", "편집기는 최대 128 KiB 파일을 지원합니다."));
         ByteArrayOutputStream output = new ByteArrayOutputStream();
         try (FileChannel input = FileChannel.open(path, StandardOpenOption.READ, LinkOption.NOFOLLOW_LINKS)) {
             ByteBuffer buffer = ByteBuffer.allocate(8192);
             while (input.read(buffer) != -1) {
                 buffer.flip();
-                if (output.size() + buffer.remaining() > MAX_TEXT_BYTES) throw new IOException("파일이 편집 제한 크기를 초과했습니다.");
+                if (output.size() + buffer.remaining() > MAX_TEXT_BYTES) throw new IOException(Z8Text.text("The file exceeds the editor's size limit.", "파일이 편집 제한 크기를 초과했습니다."));
                 output.write(buffer.array(), 0, buffer.remaining());
                 buffer.clear();
             }
@@ -152,13 +152,13 @@ public final class Z8Files {
         BasicFileAttributes after = Files.readAttributes(path, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
         if (!identity(before).equals(identity(after))) throw new ConflictException();
         byte[] bytes = output.toByteArray();
-        for (byte value : bytes) if (value == 0) throw new IOException("바이너리 파일은 편집할 수 없습니다.");
+        for (byte value : bytes) if (value == 0) throw new IOException(Z8Text.text("Binary files cannot be edited.", "바이너리 파일은 편집할 수 없습니다."));
         String text;
         try {
             text = StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
                 .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString();
         } catch (CharacterCodingException exception) {
-            throw new IOException("UTF-8 텍스트 파일만 편집할 수 있습니다.", exception);
+            throw new IOException(Z8Text.text("Only UTF-8 text files can be edited.", "UTF-8 텍스트 파일만 편집할 수 있습니다."), exception);
         }
         return new Document(text, identity(after) + ":" + digest(bytes));
     }
@@ -166,8 +166,8 @@ public final class Z8Files {
     /** Compare content and disk identity immediately before atomic replacement. */
     public static Document save(File source, String relative, String expectedVersion, String text) throws IOException {
         byte[] bytes = text.getBytes(StandardCharsets.UTF_8);
-        if (bytes.length > MAX_TEXT_BYTES) throw new IOException("저장할 내용이 128 KiB 제한을 초과했습니다.");
-        if (text.indexOf('\0') >= 0) throw new IOException("NUL 문자는 저장할 수 없습니다.");
+        if (bytes.length > MAX_TEXT_BYTES) throw new IOException(Z8Text.text("The content exceeds the 128 KiB save limit.", "저장할 내용이 128 KiB 제한을 초과했습니다."));
+        if (text.indexOf('\0') >= 0) throw new IOException(Z8Text.text("NUL characters cannot be saved.", "NUL 문자는 저장할 수 없습니다."));
         Path target = checked(source, relative, true);
         if (!read(source, relative).version.equals(expectedVersion)) throw new ConflictException();
         Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(target, LinkOption.NOFOLLOW_LINKS);

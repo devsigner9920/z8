@@ -30,7 +30,7 @@ class ProjectRemovalTests(unittest.TestCase):
             path.write_text(code)
             sources.append(str(path))
         actual = ROOT / 'overlay/app/src/main/java/com/termux/app/Z8ProjectRemoval.java'
-        result = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(cls.directory), str(actual), *sources],
+        result = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(cls.directory), str(actual), *sources],
                                 capture_output=True, text=True, timeout=30)
         if result.returncode:
             raise AssertionError(result.stdout + result.stderr)
@@ -272,7 +272,7 @@ STUBS = {
                             TerminalSession live=session(service,"owned-target");Z8ProjectRemoval.begin(service,"owned-target",result);Handler.next();
                             Handler.advance(9999);check(result.calls==0&&Z8ProjectRemoval.hasWork(),"Keep waiting before deadline");
                             Handler.advance(100);
-                            check(result.calls==1&&result.error!=null&&result.error.contains("보존"),"Timeout explicitly reports preservation");
+                            check(result.calls==1&&result.error!=null&&result.error.contains("files were kept"),"Timeout explicitly reports preservation");
                             check(exists(service,"owned-target")&&Z8Guest.calls==0&&service.removed==0&&live.running,"Timeout never touches files/removes a live PTY");
                             check(!Z8ProjectRemoval.hasWork()&&service.notifications==1,"Timeout releases lease");
                             Result stopped=new Result();Z8ProjectRemoval.begin(service,"owned-target",stopped);Handler.next();service.stopped=true;Handler.advance(100);
@@ -282,7 +282,7 @@ STUBS = {
                         case "duplicate": {
                             TerminalSession live=session(service,"owned-target");Z8ProjectRemoval.begin(service,"owned-target",result);Handler.next();
                             Result duplicate=new Result();Z8ProjectRemoval.begin(service,"owned-target",duplicate);
-                            check(duplicate.calls==1&&duplicate.error.contains("이미")&&live.signals==1,"Duplicate rejected without second stop");
+                            check(duplicate.calls==1&&duplicate.error.contains("already")&&live.signals==1,"Duplicate rejected without second stop");
                             check(service.acquisitionCount==1,"Rejected duplicate deletion must not acquire execution again");
                             Result pending=new Result();Z8GuestSessionLauncher.pending=true;Z8ProjectRemoval.begin(service,"owned-other",pending);
                             check(pending.calls==1&&pending.error!=null&&!Z8ProjectRemoval.isDeleting("owned-other"),"In-flight preparation blocks deletion");
@@ -359,7 +359,7 @@ STUBS = {
                             check(Z8ProjectProcesses.calls==1&&Z8ProjectProcesses.captured==0,"Empty target verified with no captured PTYs");
                             check(Z8ProjectRemoval.hasWork()&&result.calls==0&&Z8Guest.calls==0,"Hold lease between verifier and main handoff");
                             service.stopped=true;verified.run();
-                            check(result.calls==1&&result.error!=null&&result.error.contains("보존"),"Late service stop must report preservation");
+                            check(result.calls==1&&result.error!=null&&result.error.contains("files were kept"),"Late service stop must report preservation");
                             check(Z8Guest.calls==0&&service.removed==0&&exists(service,"owned-target")&&exists(service,"owned-other"),"No filesystem call after late service stop even with no PTY to await");
                             check(!Z8ProjectRemoval.hasWork()&&service.notifications==1,"Main handoff cancellation releases lease and notifies service");
                             break;

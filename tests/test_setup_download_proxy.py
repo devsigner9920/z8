@@ -26,7 +26,7 @@ class SetupDownloadProxyTests(unittest.TestCase):
             probe = directory / 'ProxyProbe.java'
             probe.write_text(PROBE)
             source = ROOT / 'overlay/app/src/main/java/com/termux/app/Z8SetupDownloadProxy.java'
-            built = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(directory), str(source), str(probe), *files],
+            built = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(directory), str(source), str(probe), *files],
                                    text=True, capture_output=True, timeout=45)
             self.assertEqual(0, built.returncode, built.stdout + built.stderr)
             run = subprocess.run([java, '-cp', str(directory), 'com.termux.app.ProxyProbe'],

@@ -24,7 +24,7 @@ class WorkspaceStorageTests(unittest.TestCase):
             test = directory / "WorkspaceStorageProbe.java"
             test.write_text(JAVA_PROBE)
             sources = ROOT / "overlay/app/src/main/java/com/termux/app"
-            compiled = subprocess.run([javac, "-encoding", "UTF-8", "-d", str(directory),
+            compiled = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), "-encoding", "UTF-8", "-d", str(directory),
                 str(context), str(sources / "Z8Files.java"), str(sources / "Z8Projects.java"), str(test)],
                 capture_output=True, text=True, timeout=45)
             self.assertEqual(0, compiled.returncode, compiled.stdout + compiled.stderr)

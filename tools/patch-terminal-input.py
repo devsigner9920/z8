@@ -39,7 +39,12 @@ def patch(tree, replace):
     private boolean mZ8InputSuspended;
     private TerminalSession mZ8AutofillSession;
     private final Runnable mZ8ShowSoftKeyboard = this::z8ShowSoftKeyboardAfterFocus;
-    private android.app.AlertDialog mZ8PasteDialog;''')
+    private android.app.AlertDialog mZ8PasteDialog;
+
+    private static String z8Text(String english, String korean) {
+        // The host sets the app locale; this library must not depend on the app module.
+        return "ko".equals(java.util.Locale.getDefault().getLanguage()) ? korean : english;
+    }''')
     s = replace(s, '        if (session == mTermSession) return false;\n\n        mTermSession = session;', '''        if (session == mTermSession) return false;
 
         cancelRequestAutoFill();
@@ -721,11 +726,11 @@ HELPERS = r'''    /** Allow a held grip to scroll before the finger reaches syst
             .replaceAll("[\\p{Cc}&&[^\\n\\t]]", "");
         android.app.AlertDialog dialog = new android.app.AlertDialog.Builder(
                 new android.view.ContextThemeWrapper(getContext(), android.R.style.Theme_Material_Dialog_Alert))
-            .setTitle("여러 줄 붙여넣기")
-            .setMessage(lines + "줄을 붙여넣습니다. 줄바꿈이 명령을 실행할 수 있습니다.\n\n" + preview
+            .setTitle(z8Text("Paste multiple lines", "여러 줄 붙여넣기"))
+            .setMessage(lines + z8Text(" lines will be pasted. Line breaks may execute commands.\n\n", "줄을 붙여넣습니다. 줄바꿈이 명령을 실행할 수 있습니다.\n\n") + preview
                 + (text.length() > 600 ? "\n…" : ""))
-            .setNegativeButton("취소", null)
-            .setPositiveButton("붙여넣기", (unused, which) -> {
+            .setNegativeButton(z8Text("Cancel", "취소"), null)
+            .setPositiveButton(z8Text("Paste", "붙여넣기"), (unused, which) -> {
                 // A response to a dialog belongs only to the original still-attached live PTY.
                 if (mTermSession == target && mEmulator == emulator && target.isRunning() && !mZ8InputSuspended) {
                     z8FollowInput();

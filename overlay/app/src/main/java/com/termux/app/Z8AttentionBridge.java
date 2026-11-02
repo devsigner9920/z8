@@ -347,8 +347,8 @@ public final class Z8AttentionBridge {
         if ("finished".equals(item.optString("kind"))) { put(item, "deliveryState", "SUPPRESSED"); return; }
         NotificationManager manager = context.getSystemService(NotificationManager.class);
         try {
-            NotificationChannel channel = new NotificationChannel(CHANNEL, "응답 확인", NotificationManager.IMPORTANCE_DEFAULT);
-            channel.setDescription("CLI 권한 요청이나 질문이 발생하면 원래 세션으로 돌아갑니다.");
+            NotificationChannel channel = new NotificationChannel(CHANNEL, Z8Text.text("Response requests", "응답 확인"), NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription(Z8Text.text("Return to the original session for CLI permission requests and questions.", "CLI 권한 요청이나 질문이 발생하면 원래 세션으로 돌아갑니다."));
             channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
             manager.createNotificationChannel(channel);
             if (!manager.areNotificationsEnabled() || manager.getNotificationChannel(CHANNEL).getImportance() == NotificationManager.IMPORTANCE_NONE) {
@@ -359,11 +359,11 @@ public final class Z8AttentionBridge {
                 .setData(Uri.parse("z8-attention://event/" + itemId));
             PendingIntent pending = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
             Notification publicNotice = new Notification.Builder(context, CHANNEL).setSmallIcon(android.R.drawable.ic_dialog_info)
-                .setContentTitle("z8 · 확인이 필요합니다").build();
+                .setContentTitle(Z8Text.text("z8 · Response needed", "z8 · 확인이 필요합니다")).build();
             Notification notice = new Notification.Builder(context, CHANNEL).setSmallIcon(android.R.drawable.ic_dialog_info)
-                .setContentTitle("z8 · 확인 요청이 발생했습니다")
-                .setContentText(Z8SessionCatalog.displayText(item.optString("projectName"), 80, "프로젝트")
-                    + " / " + Z8SessionCatalog.displayText(item.optString("sessionName"), 96, "세션"))
+                .setContentTitle(Z8Text.text("z8 · Response requested", "z8 · 확인 요청이 발생했습니다"))
+                .setContentText(Z8SessionCatalog.displayText(item.optString("projectName"), 80, Z8Text.text("Project", "프로젝트"))
+                    + " / " + Z8SessionCatalog.displayText(item.optString("sessionName"), 96, Z8Text.text("Session", "세션")))
                 .setContentIntent(pending).setAutoCancel(true).setOnlyAlertOnce(true)
                 .setVisibility(Notification.VISIBILITY_PRIVATE).setPublicVersion(publicNotice).build();
             manager.notify(itemId, 1, notice);
@@ -472,7 +472,7 @@ public final class Z8AttentionBridge {
 
     public static String diagnosticStatus(Context context) {
         return context.getSharedPreferences("z8_attention_diagnostics", Context.MODE_PRIVATE)
-            .getString("last_result", "아직 진단을 실행하지 않았습니다.");
+            .getString("last_result", Z8Text.text("No diagnostic has run yet.", "아직 진단을 실행하지 않았습니다."));
     }
 
     private static void recordDiagnostic(Context context, String status) {
@@ -496,11 +496,11 @@ public final class Z8AttentionBridge {
             }
         }
         if (event.length() == 0) {
-            recordDiagnostic(activity, "먼저 터미널 세션을 열어 주세요");
-            callback.completed("먼저 터미널 세션을 열어 주세요");
+            recordDiagnostic(activity, Z8Text.text("Open a terminal session first", "먼저 터미널 세션을 열어 주세요"));
+            callback.completed(Z8Text.text("Open a terminal session first", "먼저 터미널 세션을 열어 주세요"));
             return;
         }
-        recordDiagnostic(activity, "진단 이벤트 전송 중");
+        recordDiagnostic(activity, Z8Text.text("Sending diagnostic event", "진단 이벤트 전송 중"));
         new Thread(() -> {
             String status;
             String stage = "client-create";
@@ -516,13 +516,13 @@ public final class Z8AttentionBridge {
                 stage = "client-ack";
                 String answer = new JSONObject(new String(readFrame(socket, 5000), StandardCharsets.UTF_8)).optString("status", "failed");
                 status = java.util.Arrays.asList("accepted", "duplicate").contains(answer)
-                    ? bridge.diagnosticReceipt(event, "수신 확인")
-                    : "수신 거절 · " + (java.util.Arrays.asList("invalid", "unauthorized", "stale", "full", "storage-failed").contains(answer) ? answer : "invalid-response");
+                    ? bridge.diagnosticReceipt(event, Z8Text.text("Receipt confirmed", "수신 확인"))
+                    : Z8Text.text("Receipt rejected · ", "수신 거절 · ") + (java.util.Arrays.asList("invalid", "unauthorized", "stale", "full", "storage-failed").contains(answer) ? answer : "invalid-response");
             } catch (IOException | JSONException e) {
                 bridge.logFailure(stage, e);
                 // A durable receipt is authoritative even if the local ACK was lost.
                 // Match this exact nonce; an unrelated POSTED event cannot turn failure into success.
-                status = bridge.diagnosticReceipt(event, "응답을 확인하지 못했습니다. 다시 진단해 주세요.");
+                status = bridge.diagnosticReceipt(event, Z8Text.text("Could not confirm a response. Run the diagnostic again.", "응답을 확인하지 못했습니다. 다시 진단해 주세요."));
             }
             recordDiagnostic(activity.getApplicationContext(), status);
             final String result = status;
@@ -533,7 +533,7 @@ public final class Z8AttentionBridge {
     private static void attachSessionLabels(JSONObject item, TerminalSession session) {
         Z8SessionOrigin origin = Z8SessionOrigin.of(session);
         put(item, "projectId", origin == null || origin.projectId == null ? "" : origin.projectId);
-        put(item, "projectName", Z8SessionCatalog.displayText(origin == null ? null : origin.projectName, 80, "기기 셸"));
+        put(item, "projectName", Z8SessionCatalog.displayText(origin == null ? null : origin.projectName, 80, Z8Text.text("Device shell", "기기 셸")));
         put(item, "sessionName", Z8SessionCatalog.title(session));
     }
 
@@ -543,16 +543,16 @@ public final class Z8AttentionBridge {
             if (event.optString("launchId").equals(item.optString("launchId"))
                     && event.optString("eventId").equals(item.optString("eventId"))) {
                 String delivery = item.optString("deliveryState");
-                return "수신 확인 · " + ("POSTED".equals(delivery) ? "알림 게시됨"
-                    : "BLOCKED".equals(delivery) ? "알림 차단됨 · 알림 설정 확인"
-                    : "FAILED".equals(delivery) ? "알림 게시 실패 · 앱 기록에서 확인"
-                    : "알림 게시 중");
+                return Z8Text.text("Receipt confirmed · ", "수신 확인 · ") + ("POSTED".equals(delivery) ? Z8Text.text("Notification posted", "알림 게시됨")
+                    : "BLOCKED".equals(delivery) ? Z8Text.text("Notification blocked · Check notification settings", "알림 차단됨 · 알림 설정 확인")
+                    : "FAILED".equals(delivery) ? Z8Text.text("Notification failed · Check the in-app history", "알림 게시 실패 · 앱 기록에서 확인")
+                    : Z8Text.text("Posting notification", "알림 게시 중"));
             }
         }
         return absent;
     }
 
-    public static String availability() { return active == null ? "수신기 중지됨" : "로컬 훅 수신 중"; }
+    public static String availability() { return active == null ? Z8Text.text("Receiver stopped", "수신기 중지됨") : Z8Text.text("Listening for local hooks", "로컬 훅 수신 중"); }
 
     public static Intent sessionIntent(Context context, String itemId) {
         return new Intent(context, TermuxActivity.class).putExtra(EXTRA_EVENT, itemId);
@@ -579,7 +579,7 @@ public final class Z8AttentionBridge {
         }
         if (session != null && activity.getTermuxService() != null) activity.getTermuxTerminalSessionClient().setCurrentSession(session);
         else {
-            Toast.makeText(activity, "이 세션은 종료되었거나 다시 연결할 수 없습니다.", Toast.LENGTH_LONG).show();
+            Toast.makeText(activity, Z8Text.text("This session has ended or cannot be reconnected.", "이 세션은 종료되었거나 다시 연결할 수 없습니다."), Toast.LENGTH_LONG).show();
             activity.startActivity(new Intent(activity, Z8AttentionActivity.class));
             activity.finish();
         }

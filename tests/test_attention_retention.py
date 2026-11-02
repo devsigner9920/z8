@@ -36,7 +36,7 @@ class AttentionRetentionTests(unittest.TestCase):
         cls.directory = Path(cls.temporary.name)
         path = cls.directory / 'RetentionProbe.java'
         path.write_text(PREFIX + actual + SUFFIX)
-        result = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(cls.directory), str(path)],
+        result = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(cls.directory), str(path)],
                                 capture_output=True, text=True, timeout=30)
         if result.returncode:
             raise AssertionError(result.stdout + result.stderr)

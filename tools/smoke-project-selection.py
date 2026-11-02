@@ -18,6 +18,7 @@ spec = importlib.util.spec_from_file_location('z8_project_selection', ROOT / 'to
 n = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(n)
 d, c, r = n.d, n.c, n.r
+ui = n.ui
 
 
 def bash_pids():
@@ -77,7 +78,7 @@ def main():
         deadline = time.monotonic() + 20
         while time.monotonic() < deadline:
             tree = d.observe()
-            assert not any(x.get('text') in ('새 세션의 프로젝트', '이 프로젝트에서 사용할 도구를 선택하세요.')
+            assert not any(x.get('text') in ui.labels('chooser') + ui.labels('tool_chooser')
                            or x.get('resource-id') == 'android:id/alertTitle' for x in tree.iter('node')), 'Unexpected session modal'
             if len(bash_pids()) > len(before):
                 break
@@ -115,28 +116,28 @@ def main():
         second = direct_shell('tab-add', args.project, args.name,
                               **{'resource-id': d.PACKAGE + ':id/z8_new_session'})
         first_other = direct_shell('first-session', args.other_project, args.other_name,
-                                   **{'content-desc': args.other_name + '의 첫 세션 시작'})
+                                   **{'content-desc': ui.labels('new_session', project=args.other_name)})
         all_before = bash_pids()
-        n.press(**{'content-desc': '프로젝트 선택: ' + args.name})
+        n.press(**{'content-desc': ui.labels('select_project', project=args.name)})
         n.wait_selected(args.name)
         assert proof('project-title-return', args.project) == second
         unchanged('project-title-no-launch', all_before)
         n.hide_keyboard()
         last_other = direct_shell('project-add', args.other_project, args.other_name,
-                                  **{'content-desc': args.other_name + '에 새 세션'})
+                                  **{'content-desc': ui.labels('new_session', project=args.other_name)})
         d.command('clear'); time.sleep(.3); n.hide_keyboard()
         report['screenshots']['result'] = c.capture('direct-session-opened.png', 0)
-        n.press(**{'content-desc': '프로젝트 세션 목록: ' + args.name + ' · 펼침'})
+        n.press(**{'content-desc': ui.labels('expanded_project', project=args.name)})
         unchanged('collapse-no-launch', sorted(baseline + [second, first_other, last_other]))
-        n.press(**{'content-desc': '프로젝트 선택: ' + args.name})
+        n.press(**{'content-desc': ui.labels('select_project', project=args.name)})
         n.wait_selected(args.name)
         assert proof('collapsed-project-return', args.project) == second
         n.hide_keyboard()
         c.fold(states['CLOSED']); time.sleep(2); c.wake()
         n.wait_selected(args.name)
         n.hide_keyboard()
-        n.press(**{'content-desc': '프로젝트와 세션 목록'})
-        n.press(**{'content-desc': '프로젝트 선택: ' + args.other_name})
+        n.press(**{'content-desc': ui.labels('projects')})
+        n.press(**{'content-desc': ui.labels('select_project', project=args.other_name)})
         n.wait_selected(args.other_name)
         assert proof('folded-project-return', args.other_project) == last_other
         unchanged('folded-no-launch', sorted(baseline + [second, first_other, last_other]))

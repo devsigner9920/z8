@@ -60,10 +60,10 @@ public final class Z8BrowserPane extends LinearLayout {
         setOrientation(VERTICAL);
         style = Z8ChromeStyle.from(Z8Theme.selected(activity));
         LinearLayout toolbar = new LinearLayout(activity); toolbar.setGravity(Gravity.CENTER_VERTICAL);
-        back = icon(R.drawable.z8_ic_chevron_right, "브라우저 뒤로", () -> { if (web != null && web.canGoBack()) web.goBack(); });
+        back = icon(R.drawable.z8_ic_chevron_right, Z8Text.text("Browser back", "브라우저 뒤로"), () -> { if (web != null && web.canGoBack()) web.goBack(); });
         back.setRotation(180); toolbar.addView(back, new LayoutParams(dp(48), dp(48)));
         address = new EditText(activity); address.setSingleLine(true); address.setTextSize(13);
-        address.setHint("localhost:3000"); address.setContentDescription("브라우저 주소");
+        address.setHint("localhost:3000"); address.setContentDescription(Z8Text.text("Browser address", "브라우저 주소"));
         address.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_URI);
         address.setImeOptions(EditorInfo.IME_ACTION_GO); address.setSelectAllOnFocus(true);
         address.setSaveEnabled(false); // OAuth URLs must not enter saved instance state.
@@ -77,14 +77,14 @@ public final class Z8BrowserPane extends LinearLayout {
             return false;
         });
         toolbar.addView(address, new LayoutParams(0, dp(48), 1));
-        reload = icon(R.drawable.z8_ic_reload, "페이지 새로고침", () -> { if (web != null) web.reload(); });
+        reload = icon(R.drawable.z8_ic_reload, Z8Text.text("Refresh page", "페이지 새로고침"), () -> { if (web != null) web.reload(); });
         toolbar.addView(reload, new LayoutParams(dp(48), dp(48)));
-        toolbar.addView(icon(R.drawable.z8_ic_open_browser, "브라우저 창에서 열기", () -> {
+        toolbar.addView(icon(R.drawable.z8_ic_open_browser, Z8Text.text("Open in browser", "브라우저 창에서 열기"), () -> {
             String target = externalUrl != null ? externalUrl : previewUrl;
             if (target != null) launchExternal(target);
             else navigate(address.getText().toString());
         }), new LayoutParams(dp(48), dp(48)));
-        toolbar.addView(icon(R.drawable.z8_ic_close, "브라우저 탭 닫기", close), new LayoutParams(dp(48), dp(48)));
+        toolbar.addView(icon(R.drawable.z8_ic_close, Z8Text.text("Close browser tab", "브라우저 탭 닫기"), close), new LayoutParams(dp(48), dp(48)));
         addView(toolbar, new LayoutParams(-1, dp(48)));
         progress = new ProgressBar(activity, null, android.R.attr.progressBarStyleHorizontal);
         progress.setMax(100); progress.setVisibility(INVISIBLE); addView(progress, new LayoutParams(-1, dp(2)));
@@ -92,11 +92,11 @@ public final class Z8BrowserPane extends LinearLayout {
         placeholder.setPadding(dp(24), dp(24), dp(24), dp(24));
         message = new TextView(activity); message.setTextSize(14); message.setGravity(Gravity.CENTER); message.setLineSpacing(dp(6), 1);
         message.setAccessibilityLiveRegion(ACCESSIBILITY_LIVE_REGION_POLITE); placeholder.addView(message);
-        openExternal = link("브라우저 창 다시 열기", () -> { if (externalUrl != null) launchExternal(externalUrl); });
+        openExternal = link(Z8Text.text("Reopen browser", "브라우저 창 다시 열기"), () -> { if (externalUrl != null) launchExternal(externalUrl); });
         placeholder.addView(openExternal, new LayoutParams(-1, dp(48)));
-        placeholder.addView(link("터미널로 돌아가기", returnToTerminal), new LayoutParams(-1, dp(48)));
+        placeholder.addView(link(Z8Text.text("Back to terminal", "터미널로 돌아가기"), returnToTerminal), new LayoutParams(-1, dp(48)));
         addView(placeholder, new LayoutParams(-1, 0, 1));
-        showMessage("개발 서버를 여기서 확인하세요.\nlocalhost 주소를 입력하면 이 탭에서 열립니다.\n로그인과 외부 사이트는 브라우저 창에서 이어집니다.");
+        showMessage(Z8Text.text("Preview your development server here.\nEnter a localhost address to open it in this tab.\nSign-in and external sites open in your browser.", "개발 서버를 여기서 확인하세요.\nlocalhost 주소를 입력하면 이 탭에서 열립니다.\n로그인과 외부 사이트는 브라우저 창에서 이어집니다."));
         applyTheme();
         panes.add(this);
     }
@@ -122,7 +122,7 @@ public final class Z8BrowserPane extends LinearLayout {
     public void navigate(String raw) {
         if (Z8BrowserUrls.isBlank(raw)) { showBlank(); return; }
         String url = Z8BrowserUrls.normalize(raw);
-        if (url == null) { address.setError("http 또는 https 주소를 입력해 주세요"); return; }
+        if (url == null) { address.setError(Z8Text.text("Enter an http or https address", "http 또는 https 주소를 입력해 주세요")); return; }
         address.clearFocus();
         InputMethodManager keyboard = (InputMethodManager) activity.getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
         if (keyboard != null) keyboard.hideSoftInputFromWindow(address.getWindowToken(), 0);
@@ -130,7 +130,7 @@ public final class Z8BrowserPane extends LinearLayout {
         if (Z8BrowserData.running()) {
             externalUrl = null; previewUrl = null; address.setText("");
             dataDeletionNotice = true;
-            showMessage("미리보기 데이터를 삭제하고 있어요.\n완료 후 주소를 다시 열어 주세요.");
+            showMessage(Z8Text.text("Clearing preview data.\nReopen the address when it finishes.", "미리보기 데이터를 삭제하고 있어요.\n완료 후 주소를 다시 열어 주세요."));
             return;
         }
         dataDeletionNotice = false;
@@ -153,7 +153,7 @@ public final class Z8BrowserPane extends LinearLayout {
         dataDeletionNotice = false;
         externalUrl = null; previewUrl = null;
         destroyWeb(); address.setText(""); address.setError(null);
-        showMessage("개발 서버를 여기서 확인하세요.\nlocalhost 주소를 입력하면 이 탭에서 열립니다.\n로그인과 외부 사이트는 브라우저 창에서 이어집니다.");
+        showMessage(Z8Text.text("Preview your development server here.\nEnter a localhost address to open it in this tab.\nSign-in and external sites open in your browser.", "개발 서버를 여기서 확인하세요.\nlocalhost 주소를 입력하면 이 탭에서 열립니다.\n로그인과 외부 사이트는 브라우저 창에서 이어집니다."));
         focusAddress();
     }
 
@@ -165,7 +165,7 @@ public final class Z8BrowserPane extends LinearLayout {
         destroyWeb(); previewUrl = null;
         // Keep the full single-use URL only in memory, never in an editable field or a label.
         address.setText(Z8BrowserUrls.host(externalUrl));
-        showMessage(Z8BrowserUrls.host(externalUrl) + "\n브라우저 창에서 계속하세요.\n완료 후 창의 ×를 누르면 원래 터미널로 돌아옵니다.");
+        showMessage(Z8BrowserUrls.host(externalUrl) + Z8Text.text("\nContinue in the browser window.\nWhen finished, close it with × to return to your terminal.", "\n브라우저 창에서 계속하세요.\n완료 후 창의 ×를 누르면 원래 터미널로 돌아옵니다."));
         return launch && launchExternal(externalUrl);
     }
 
@@ -226,9 +226,9 @@ public final class Z8BrowserPane extends LinearLayout {
             onExternalOpened.run();
             return true;
         } catch (ActivityNotFoundException missing) {
-            showMessage("기기에 설치된 브라우저가 없어요.\nChrome 등 브라우저를 설치한 뒤 다시 열어 주세요.");
+            showMessage(Z8Text.text("No browser is installed.\nInstall a browser such as Chrome, then try again.", "기기에 설치된 브라우저가 없어요.\nChrome 등 브라우저를 설치한 뒤 다시 열어 주세요."));
         } catch (SecurityException blocked) {
-            showMessage("브라우저 창을 열지 못했어요.\n브라우저 창 다시 열기를 눌러 주세요.");
+            showMessage(Z8Text.text("Could not open the browser.\nSelect Reopen browser to try again.", "브라우저 창을 열지 못했어요.\n브라우저 창 다시 열기를 눌러 주세요."));
         }
         return false;
     }
@@ -237,7 +237,7 @@ public final class Z8BrowserPane extends LinearLayout {
         if (Z8BrowserData.running()) return false;
         if (web != null) return true;
         try { web = new WebView(activity); }
-        catch (RuntimeException unavailable) { showMessage("Android System WebView를 사용할 수 없어요.\n기기 브라우저에서 개발 서버를 열어 주세요."); externalUrl = previewUrl; openExternal.setVisibility(VISIBLE); return false; }
+        catch (RuntimeException unavailable) { showMessage(Z8Text.text("Android System WebView is unavailable.\nOpen the development server in your device's browser.", "Android System WebView를 사용할 수 없어요.\n기기 브라우저에서 개발 서버를 열어 주세요.")); externalUrl = previewUrl; openExternal.setVisibility(VISIBLE); return false; }
         web.setSaveEnabled(false);
         WebSettings settings = web.getSettings();
         settings.setJavaScriptEnabled(true); settings.setDomStorageEnabled(true);
@@ -281,7 +281,7 @@ public final class Z8BrowserPane extends LinearLayout {
             }
             @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 if (view == web && request.isForMainFrame()) {
-                    showMessage("개발 서버에 연결할 수 없어요.\n터미널에서 서버를 실행한 뒤 새로고침해 주세요.");
+                    showMessage(Z8Text.text("Could not connect to the development server.\nStart the server in your terminal, then refresh.", "개발 서버에 연결할 수 없어요.\n터미널에서 서버를 실행한 뒤 새로고침해 주세요."));
                     progress.setVisibility(INVISIBLE);
                 }
             }
@@ -295,7 +295,7 @@ public final class Z8BrowserPane extends LinearLayout {
                 placeholder.setVisibility(GONE); view.setVisibility(VISIBLE);
             }
             @Override public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
-                if (view == web) { destroyWeb(); showMessage("미리보기가 중단됐어요.\n주소를 다시 열어 주세요. 터미널은 계속 실행 중입니다."); }
+                if (view == web) { destroyWeb(); showMessage(Z8Text.text("The preview stopped.\nReopen the address. Your terminal is still running.", "미리보기가 중단됐어요.\n주소를 다시 열어 주세요. 터미널은 계속 실행 중입니다.")); }
                 return true;
             }
         });
@@ -331,15 +331,15 @@ public final class Z8BrowserPane extends LinearLayout {
             if (pane.web == null && pane.previewUrl == null) continue;
             pane.destroyWeb(); pane.previewUrl = null; pane.externalUrl = null;
             pane.address.setText(""); pane.dataDeletionNotice = true;
-            pane.showMessage("미리보기 데이터를 삭제하고 있어요.\n터미널과 개발 서버는 계속 실행됩니다.");
+            pane.showMessage(Z8Text.text("Clearing preview data.\nYour terminal and development server keep running.", "미리보기 데이터를 삭제하고 있어요.\n터미널과 개발 서버는 계속 실행됩니다."));
         }
     }
     static void finishPreviewDataDeletion(boolean completed) {
         for (Z8BrowserPane pane : new ArrayList<>(panes)) {
             if (!pane.dataDeletionNotice) continue;
             pane.dataDeletionNotice = false;
-            pane.showMessage(completed ? "미리보기 데이터를 삭제했습니다.\nlocalhost 주소를 입력하면 새로 열립니다."
-                : "데이터 삭제 완료를 확인하지 못했습니다.\n설정에서 다시 시도할 수 있어요.");
+            pane.showMessage(completed ? Z8Text.text("Preview data cleared.\nEnter a localhost address to open a new preview.", "미리보기 데이터를 삭제했습니다.\nlocalhost 주소를 입력하면 새로 열립니다.")
+                : Z8Text.text("Could not confirm that data was cleared.\nYou can try again in Settings.", "데이터 삭제 완료를 확인하지 못했습니다.\n설정에서 다시 시도할 수 있어요."));
         }
     }
     private void destroyWeb() {

@@ -13,7 +13,7 @@ import zipfile
 from release_compliance import ROOT, GENERATED_NOTICES, atomic_write, bytes_sha, json_bytes, read_json, safe_relative, secret_path, sha256, zip_entry
 
 DIRECTORIES = ('tools', 'runtime', 'overlay', 'tests', 'docs', 'LICENSES', '.github')
-ROOT_FILES = ('README.md', 'BUILDING.md', 'THIRD_PARTY_NOTICES.md', '.gitignore',
+ROOT_FILES = ('README.md', 'README.ko.md', 'BUILDING.md', 'BUILDING.ko.md', 'THIRD_PARTY_NOTICES.md', '.gitignore',
               'LICENSE', 'CONTRIBUTING.md', 'SECURITY.md')
 RELEASE_FILES = ('config.json', 'decisions.example.json', 'qa.example.json')
 

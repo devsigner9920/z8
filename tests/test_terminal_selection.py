@@ -45,7 +45,7 @@ class TerminalSelectionBehavior(unittest.TestCase):
         path = self.tree / (name + '.java')
         path.write_text(source)
         jdk = ROOT / '.local/jdk/Contents/Home/bin'
-        result = subprocess.run([str(jdk / 'javac'), '-encoding', 'UTF-8', '-d', str(self.tree), str(path), *map(str, extra_sources)],
+        result = subprocess.run([str(jdk / 'javac'), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(self.tree), str(path), *map(str, extra_sources)],
                                 capture_output=True, text=True, timeout=15)
         self.assertEqual(result.returncode, 0, result.stderr)
         result = subprocess.run([str(jdk / 'java'), '-cp', str(self.tree), name],

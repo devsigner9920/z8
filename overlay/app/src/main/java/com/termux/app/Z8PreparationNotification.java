@@ -36,16 +36,16 @@ public final class Z8PreparationNotification {
         Progress(String stage, int percent, String message) {
             this.stage = stage;
             this.percent = "tools".equals(stage) || percent < 0 ? -1 : Math.min(100, percent);
-            this.message = label(message, "프로젝트 환경 준비");
+            this.message = label(message, Z8Text.text("Preparing project environment", "프로젝트 환경 준비"));
         }
     }
 
     private static final class Entry {
         final String projectId, name;
-        Progress progress = new Progress("bootstrap", -1, "실행 기반 준비");
+        Progress progress = new Progress("bootstrap", -1, Z8Text.text("Preparing runtime", "실행 기반 준비"));
         Entry(String projectId, String name) {
             this.projectId = projectId;
-            this.name = label(name, "프로젝트");
+            this.name = label(name, Z8Text.text("Project", "프로젝트"));
         }
     }
 
@@ -57,7 +57,7 @@ public final class Z8PreparationNotification {
             name = entry.name;
             percent = entry.progress.percent;
             text = entry.progress.message + (percent < 0 ? "" : " · " + percent + "%")
-                + (waiting == 0 ? "" : " · " + waiting + "개 프로젝트 대기");
+                + (waiting == 0 ? "" : " · " + waiting + Z8Text.text(" project(s) waiting", "개 프로젝트 대기"));
         }
     }
 
@@ -190,8 +190,8 @@ public final class Z8PreparationNotification {
         Snapshot snapshot = owner != null && owner.service.get() == service ? owner.snapshot : null;
         if (snapshot == null) return false;
         boolean initial = Z8InitialSetup.NOTIFICATION_ID.equals(snapshot.projectId);
-        String explanation = "처음 준비할 때는 시간이 걸릴 수 있습니다. 앱을 나가도 준비를 계속합니다.";
-        builder.setContentTitle(initial ? "z8 · 처음 준비" : snapshot.name + " · 첫 실행 준비")
+        String explanation = Z8Text.text("First-time setup may take a while. Preparation continues after you leave the app.", "처음 준비할 때는 시간이 걸릴 수 있습니다. 앱을 나가도 준비를 계속합니다.");
+        builder.setContentTitle(initial ? Z8Text.text("z8 · Initial setup", "z8 · 처음 준비") : snapshot.name + Z8Text.text(" · Preparing first launch", " · 첫 실행 준비"))
             .setContentText(snapshot.text)
             .setStyle(new Notification.BigTextStyle().bigText(snapshot.text + "\n" + explanation))
             .setContentIntent(projectIntent(service, snapshot.projectId))
@@ -217,15 +217,15 @@ public final class Z8PreparationNotification {
         NotificationManager notifications = context.getSystemService(NotificationManager.class);
         if (notifications == null || !notifications.areNotificationsEnabled()) return;
         notifications.createNotificationChannel(new NotificationChannel(RESULT_CHANNEL,
-            "개발 환경 준비", NotificationManager.IMPORTANCE_LOW));
+            Z8Text.text("Development environment setup", "개발 환경 준비"), NotificationManager.IMPORTANCE_LOW));
         boolean initial = Z8InitialSetup.NOTIFICATION_ID.equals(entry.projectId);
         Notification.Builder builder = new Notification.Builder(context, RESULT_CHANNEL)
             .setSmallIcon(R.drawable.ic_service_notification)
-            .setContentTitle((initial ? "z8" : entry.name) + (waiting ? " · 네트워크 대기" : success ? " · 준비 완료" : " · 준비를 완료하지 못했어요"))
-            .setContentText(waiting ? "다운로드를 멈췄어요. 눌러서 연결을 확인하고 이어서 준비하세요."
-                : success ? initial ? "개발 도구를 준비했어요. 눌러서 첫 프로젝트를 만드세요."
-                    : "터미널을 사용할 수 있습니다. 눌러서 프로젝트를 여세요."
-                : "눌러서 남은 준비 단계를 확인하세요.")
+            .setContentTitle((initial ? "z8" : entry.name) + (waiting ? Z8Text.text(" · Waiting for network", " · 네트워크 대기") : success ? Z8Text.text(" · Ready", " · 준비 완료") : Z8Text.text(" · Setup incomplete", " · 준비를 완료하지 못했어요")))
+            .setContentText(waiting ? Z8Text.text("Download paused. Tap to check the connection and resume setup.", "다운로드를 멈췄어요. 눌러서 연결을 확인하고 이어서 준비하세요.")
+                : success ? initial ? Z8Text.text("Developer tools are ready. Tap to create your first project.", "개발 도구를 준비했어요. 눌러서 첫 프로젝트를 만드세요.")
+                    : Z8Text.text("The terminal is ready. Tap to open the project.", "터미널을 사용할 수 있습니다. 눌러서 프로젝트를 여세요.")
+                : Z8Text.text("Tap to check the remaining setup steps.", "눌러서 남은 준비 단계를 확인하세요."))
             .setContentIntent(projectIntent(context, entry.projectId))
             .setOnlyAlertOnce(true).setAutoCancel(true)
             .setCategory(success || waiting ? Notification.CATEGORY_STATUS : Notification.CATEGORY_ERROR);

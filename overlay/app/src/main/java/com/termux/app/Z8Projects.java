@@ -68,12 +68,12 @@ public final class Z8Projects {
 
     private File root() throws IOException {
         File parent = storage.getParentFile();
-        if (parent == null) throw new IOException("프로젝트 저장 경로가 없습니다.");
+        if (parent == null) throw new IOException(Z8Text.text("The project storage path is missing.", "프로젝트 저장 경로가 없습니다."));
         // Check every existing ancestor before creating anything through it.
         Path current = storage.toPath().toAbsolutePath().getRoot();
         for (Path part : storage.toPath().toAbsolutePath()) {
             current = current.resolve(part);
-            if (Files.isSymbolicLink(current)) throw new IOException("프로젝트 저장 경로에 심볼릭 링크가 있습니다.");
+            if (Files.isSymbolicLink(current)) throw new IOException(Z8Text.text("The project storage path contains a symbolic link.", "프로젝트 저장 경로에 심볼릭 링크가 있습니다."));
         }
         Files.createDirectories(storage.toPath());
         return Z8Files.directory(storage, "");
@@ -83,7 +83,7 @@ public final class Z8Projects {
         try {
             if (value == null || !UUID.fromString(value).toString().equals(value)) throw new IllegalArgumentException();
             return value;
-        } catch (IllegalArgumentException exception) { throw new IOException("잘못된 프로젝트 ID입니다."); }
+        } catch (IllegalArgumentException exception) { throw new IOException(Z8Text.text("Invalid project ID.", "잘못된 프로젝트 ID입니다.")); }
     }
 
     public Project create(String displayName) throws IOException {
@@ -118,10 +118,10 @@ public final class Z8Projects {
     private static Properties readMetadata(File folder) throws IOException {
         Path meta = new File(folder, "project.properties").toPath();
         if (Files.isSymbolicLink(meta) || !Files.isRegularFile(meta, LinkOption.NOFOLLOW_LINKS)
-                || Files.size(meta) > 8192) throw new IOException("프로젝트 정보를 읽을 수 없습니다.");
+                || Files.size(meta) > 8192) throw new IOException(Z8Text.text("Could not read project information.", "프로젝트 정보를 읽을 수 없습니다."));
         Properties metadata = new Properties();
         try (Reader reader = Files.newBufferedReader(meta, StandardCharsets.UTF_8)) { metadata.load(reader); }
-        catch (IllegalArgumentException malformed) { throw new IOException("프로젝트 정보 형식이 올바르지 않습니다.", malformed); }
+        catch (IllegalArgumentException malformed) { throw new IOException(Z8Text.text("Invalid project information format.", "프로젝트 정보 형식이 올바르지 않습니다."), malformed); }
         return metadata;
     }
 
@@ -134,7 +134,7 @@ public final class Z8Projects {
 
     public List<Project> list() throws IOException {
         Listing listing = scan();
-        if (!listing.problems.isEmpty()) throw new IOException("일부 프로젝트 정보를 읽을 수 없습니다.");
+        if (!listing.problems.isEmpty()) throw new IOException(Z8Text.text("Some project information could not be read.", "일부 프로젝트 정보를 읽을 수 없습니다."));
         return new ArrayList<>(listing.projects);
     }
 
@@ -148,16 +148,16 @@ public final class Z8Projects {
             for (Path entry : entries) {
                 String key = entry.getFileName().toString();
                 try { id(key); } catch (IOException ignored) { continue; }
-                if (++records > 1000) throw new IOException("프로젝트가 1,000개를 초과했습니다.");
+                if (++records > 1000) throw new IOException(Z8Text.text("The project limit of 1,000 has been exceeded.", "프로젝트가 1,000개를 초과했습니다."));
                 try { result.add(open(key)); }
                 catch (IOException invalid) {
-                    String name = "프로젝트 " + key.substring(0, 8);
+                    String name = Z8Text.text("Project ", "프로젝트 ") + key.substring(0, 8);
                     // A missing source can still have a valid display name. Check the
                     // entire folder and metadata path again; never follow a linked record.
                     try { name = Z8Files.name(readMetadata(Z8Files.directory(projectRoot, key)).getProperty("name")); }
                     catch (IOException unreadable) { /* The UUID identifies the preserved record. */ }
                     problems.add(new Problem(key, name,
-                        "프로젝트 파일 또는 정보를 확인할 수 없습니다. 파일은 보존되어 있습니다."));
+                        Z8Text.text("Could not verify the project files or information. Files have been preserved.", "프로젝트 파일 또는 정보를 확인할 수 없습니다. 파일은 보존되어 있습니다.")));
                 }
             }
         }
@@ -215,22 +215,22 @@ public final class Z8Projects {
 
     private static void writableDirectory(Path directory) throws IOException {
         if (Files.isSymbolicLink(directory) || !Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS))
-            throw new IOException("삭제할 프로젝트 폴더를 확인할 수 없습니다.");
+            throw new IOException(Z8Text.text("Could not verify the project directory to delete.", "삭제할 프로젝트 폴더를 확인할 수 없습니다."));
         if ((!Files.isWritable(directory) && !directory.toFile().setWritable(true, true))
                 || (!Files.isReadable(directory) && !directory.toFile().setReadable(true, true))
                 || (!Files.isExecutable(directory) && !directory.toFile().setExecutable(true, true)))
-            throw new IOException("삭제할 프로젝트 폴더에 접근할 수 없습니다.");
+            throw new IOException(Z8Text.text("Could not access the project directory to delete.", "삭제할 프로젝트 폴더에 접근할 수 없습니다."));
     }
 
     private Path ownedSibling(String name, String projectId) throws IOException {
         Path parent = storage.getParentFile().toPath().resolve(name);
         if (!Files.exists(parent, LinkOption.NOFOLLOW_LINKS)) return null;
         if (Files.isSymbolicLink(parent) || !Files.isDirectory(parent, LinkOption.NOFOLLOW_LINKS))
-            throw new IOException("프로젝트 " + name + " 저장 경로를 확인할 수 없습니다.");
+            throw new IOException(Z8Text.text("Project ", "프로젝트 ") + name + Z8Text.text(" storage path could not be verified.", " 저장 경로를 확인할 수 없습니다."));
         Path target = parent.resolve(projectId);
         if (!Files.exists(target, LinkOption.NOFOLLOW_LINKS)) return null;
         if (Files.isSymbolicLink(target) || !Files.isDirectory(target, LinkOption.NOFOLLOW_LINKS))
-            throw new IOException("프로젝트 " + name + " 경로가 폴더가 아닙니다.");
+            throw new IOException(Z8Text.text("Project ", "프로젝트 ") + name + Z8Text.text(" path is not a directory.", " 경로가 폴더가 아닙니다."));
         return target;
     }
 
@@ -266,7 +266,7 @@ public final class Z8Projects {
                 values.store(writer, "Z8 project metadata; source is retained independently of runtime state");
             }
             Path target = new File(folder, "project.properties").toPath();
-            if (Files.isSymbolicLink(target)) throw new IOException("프로젝트 정보 파일이 링크로 변경되었습니다.");
+            if (Files.isSymbolicLink(target)) throw new IOException(Z8Text.text("The project metadata file was replaced by a link.", "프로젝트 정보 파일이 링크로 변경되었습니다."));
             Files.move(temporary, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
         } finally { Files.deleteIfExists(temporary); }
     }

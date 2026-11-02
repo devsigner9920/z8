@@ -34,7 +34,7 @@ public final class Z8FileSearchActivity extends Activity {
     private Future<?> pending;
     private Z8Theme.Palette palette;
     private String projectId;
-    private String projectName = "프로젝트";
+    private String projectName = "";
     private String query = "";
     private String searchedQuery = "";
     private String failure = "";
@@ -53,7 +53,7 @@ public final class Z8FileSearchActivity extends Activity {
         if (state != null) {
             query = state.getString("query", "");
             searchedQuery = state.getString("searchedQuery", "");
-            projectName = state.getString("projectName", "프로젝트");
+            projectName = state.getString("projectName", "");
             restoredSearch = !searchedQuery.isEmpty();
         }
         render();
@@ -90,7 +90,7 @@ public final class Z8FileSearchActivity extends Activity {
     private void search() {
         if (busy) return;
         rememberQuery();
-        if (query.trim().isEmpty()) { failure = "검색어를 입력해 주세요."; render(); return; }
+        if (query.trim().isEmpty()) { failure = Z8Text.text("Enter a search term.", "검색어를 입력해 주세요."); render(); return; }
         final String requestedQuery = query;
         final Context context = getApplicationContext();
         final String selectedId = projectId;
@@ -107,7 +107,7 @@ public final class Z8FileSearchActivity extends Activity {
                 });
             } catch (Exception error) {
                 if (cancelled.get()) return;
-                String message = error.getMessage() == null ? "프로젝트 파일을 검색하지 못했습니다." : error.getMessage();
+                String message = error.getMessage() == null ? Z8Text.text("Could not search the project files.", "프로젝트 파일을 검색하지 못했습니다.") : error.getMessage();
                 runOnUiThread(() -> {
                     if (isDestroyed() || cancelled.get()) return;
                     failure = message; busy = false; render();
@@ -119,7 +119,7 @@ public final class Z8FileSearchActivity extends Activity {
     private void render() {
         palette = Z8Theme.selected(this);
         Z8Theme.applyChrome(this, palette);
-        setTitle("z8 · 파일 검색");
+        setTitle(Z8Text.text("z8 · File search", "z8 · 파일 검색"));
         LinearLayout outer = column();
         outer.setGravity(Gravity.CENTER_HORIZONTAL);
         outer.setBackgroundColor(palette.background);
@@ -127,26 +127,27 @@ public final class Z8FileSearchActivity extends Activity {
         body.setPadding(dp(20), dp(18), dp(20), dp(12));
         int width = getResources().getConfiguration().screenWidthDp > 900 ? dp(900) : -1;
         outer.addView(body, new LinearLayout.LayoutParams(width, -1));
-        TextView heading = text(projectName + " / 파일 검색", 24, palette.foreground);
+        TextView heading = text((projectName.isEmpty() ? Z8Text.text("Project", "프로젝트") : projectName)
+            + Z8Text.text(" / File search", " / 파일 검색"), 24, palette.foreground);
         heading.setTypeface(Typeface.DEFAULT, Typeface.BOLD); body.addView(heading);
-        add(body, text("파일명·상대 경로에서 찾기 · 내용 검색 제외", 13, palette.accent), 8);
+        add(body, text(Z8Text.text("Search filenames and relative paths · File contents are not searched", "파일명·상대 경로에서 찾기 · 내용 검색 제외"), 13, palette.accent), 8);
         input = new EditText(this);
         input.setTextColor(palette.foreground); input.setHintTextColor(palette.secondary);
         input.setSingleLine(true); input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
         input.setFilters(new InputFilter[] { new InputFilter.LengthFilter(Z8FileSearch.MAX_QUERY) });
-        input.setHint("예: README · src/main · 설정"); input.setText(query);
+        input.setHint(Z8Text.text("Example: README · src/main · settings", "예: README · src/main · 설정")); input.setText(query);
         input.setSelection(input.length()); input.setEnabled(!busy);
         add(body, input, 18);
         LinearLayout actions = new LinearLayout(this); actions.setOrientation(LinearLayout.HORIZONTAL);
-        actions.addView(button("‹ 프로젝트로", this::finish), new LinearLayout.LayoutParams(0, dp(48), 1));
-        Button submit = button(result == null && !restoredSearch ? "검색" : "다시 검색", this::search);
+        actions.addView(button(Z8Text.text("‹ Back to project", "‹ 프로젝트로"), this::finish), new LinearLayout.LayoutParams(0, dp(48), 1));
+        Button submit = button(result == null && !restoredSearch ? Z8Text.text("Search", "검색") : Z8Text.text("Search again", "다시 검색"), this::search);
         submit.setEnabled(!busy); submit.setAlpha(busy ? .45f : 1f);
         LinearLayout.LayoutParams submitParams = new LinearLayout.LayoutParams(0, dp(48), 1);
         submitParams.leftMargin = dp(8); actions.addView(submit, submitParams); add(body, actions, 10);
-        add(body, text("제외 폴더: " + Z8FileSearch.EXCLUDED + "\n링크 제외 · 최대 200건 / 20,000항목 / 깊이 32 / 3초", 12, palette.secondary), 14);
-        String status = busy ? "검색 중…" : !failure.isEmpty() ? failure : result != null ? summary(result)
-            : restoredSearch ? "화면이 변경되었습니다. 다시 검색하면 최신 파일 목록을 확인할 수 있습니다."
-            : "검색어를 입력하고 검색을 누르세요.";
+        add(body, text(Z8Text.text("Excluded folders: ", "제외 폴더: ") + Z8FileSearch.EXCLUDED + Z8Text.text("\nLinks excluded · Limits: 200 results / 20,000 items / 32 levels / 3 seconds", "\n링크 제외 · 최대 200건 / 20,000항목 / 깊이 32 / 3초"), 12, palette.secondary), 14);
+        String status = busy ? Z8Text.text("Searching…", "검색 중…") : !failure.isEmpty() ? failure : result != null ? summary(result)
+            : restoredSearch ? Z8Text.text("The screen has changed. Search again to see the latest files.", "화면이 변경되었습니다. 다시 검색하면 최신 파일 목록을 확인할 수 있습니다.")
+            : Z8Text.text("Enter a search term and tap Search.", "검색어를 입력하고 검색을 누르세요.");
         add(body, text(status, 14, failure.isEmpty() ? palette.secondary : palette.accent), 12);
         if (result != null && result.incomplete()) add(body, text(incomplete(result), 13, palette.accent), 8);
         ListView list = new ListView(this); list.setDivider(null);
@@ -157,7 +158,7 @@ public final class Z8FileSearchActivity extends Activity {
             @Override public View getView(int position, View reused, ViewGroup parent) {
                 TextView view = reused instanceof TextView ? (TextView) reused : text("", 15, palette.foreground);
                 Z8FileSearch.Match match = result.matches.get(position);
-                view.setText((match.directory ? "폴더  " : "파일  ") + match.relative);
+                view.setText((match.directory ? Z8Text.text("Folder  ", "폴더  ") : Z8Text.text("File  ", "파일  ")) + match.relative);
                 view.setPadding(dp(4), dp(14), dp(4), dp(14)); view.setMinHeight(dp(54));
                 return view;
             }
@@ -175,25 +176,27 @@ public final class Z8FileSearchActivity extends Activity {
     }
 
     private String summary(Z8FileSearch.Result found) {
-        return "결과 " + found.matches.size() + "개 · 확인 " + found.visited + "항목 · " + found.elapsedMillis
-            + "ms\n제외 폴더 " + found.ignoredDirectories + "개 · 링크 " + found.ignoredLinks + "개";
+        return Z8Text.text("Results: " + found.matches.size() + " · Items checked: " + found.visited + " · " + found.elapsedMillis
+                + " ms\nExcluded folders: " + found.ignoredDirectories + " · Links: " + found.ignoredLinks,
+            "결과 " + found.matches.size() + "개 · 확인 " + found.visited + "항목 · " + found.elapsedMillis
+                + "ms\n제외 폴더 " + found.ignoredDirectories + "개 · 링크 " + found.ignoredLinks + "개");
     }
 
     private String incomplete(Z8FileSearch.Result found) {
-        StringBuilder text = new StringBuilder("일부 결과만 표시됩니다: ");
+        StringBuilder text = new StringBuilder(Z8Text.text("Only some results are shown: ", "일부 결과만 표시됩니다: "));
         for (Z8FileSearch.Limit limit : found.limits) {
             if (text.charAt(text.length() - 1) != ' ') text.append(" · ");
             switch (limit) {
-                case DEPTH: text.append("깊이 제한"); break;
-                case VISITED: text.append("항목 제한"); break;
-                case RESULTS: text.append("결과 제한"); break;
-                case TIME: text.append("시간 제한"); break;
-                case CANCELLED: text.append("검색 취소"); break;
-                case UNSUPPORTED_NAME: text.append("지원하지 않는 이름"); break;
-                case UNREADABLE: text.append("읽지 못한 경로"); break;
+                case DEPTH: text.append(Z8Text.text("depth limit", "깊이 제한")); break;
+                case VISITED: text.append(Z8Text.text("item limit", "항목 제한")); break;
+                case RESULTS: text.append(Z8Text.text("result limit", "결과 제한")); break;
+                case TIME: text.append(Z8Text.text("time limit", "시간 제한")); break;
+                case CANCELLED: text.append(Z8Text.text("search cancelled", "검색 취소")); break;
+                case UNSUPPORTED_NAME: text.append(Z8Text.text("unsupported names", "지원하지 않는 이름")); break;
+                case UNREADABLE: text.append(Z8Text.text("unreadable paths", "읽지 못한 경로")); break;
             }
         }
-        return text.append(". 검색어를 구체적으로 입력하거나 폴더를 직접 열어 주세요.").toString();
+        return text.append(Z8Text.text(". Refine your search or open the folder directly.", ". 검색어를 구체적으로 입력하거나 폴더를 직접 열어 주세요.")).toString();
     }
 
     private LinearLayout column() { LinearLayout view = new LinearLayout(this); view.setOrientation(LinearLayout.VERTICAL); return view; }

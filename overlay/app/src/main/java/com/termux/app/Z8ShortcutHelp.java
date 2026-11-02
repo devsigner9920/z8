@@ -44,7 +44,7 @@ public final class Z8ShortcutHelp {
         Z8ChromeStyle style = Z8ChromeStyle.from(palette);
         AlertDialog dialog = new AlertDialog.Builder(activity, palette.light
             ? android.R.style.Theme_Material_Light_Dialog_Alert : android.R.style.Theme_Material_Dialog_Alert)
-            .setView(content(activity, style, false)).setPositiveButton("확인", null).create();
+            .setView(content(activity, style, false)).setPositiveButton(Z8Text.text("OK", "확인"), null).create();
         dialog.show();
         if (dialog.getWindow() != null) {
             dialog.getWindow().setBackgroundDrawable(style.shape(activity, style.surface, style.border, 16));
@@ -84,24 +84,24 @@ public final class Z8ShortcutHelp {
         LinearLayout column = new LinearLayout(activity); column.setOrientation(LinearLayout.VERTICAL);
         column.setPadding(dp(activity, 20), dp(activity, 20), dp(activity, 20), dp(activity, 20));
         scroll.addView(column, new ScrollView.LayoutParams(-1, -2));
-        TextView title = text(activity, "단축키", 17, style.text, true); title.setAccessibilityHeading(true); column.addView(title);
-        TextView hint = text(activity, held ? "키를 놓으면 닫혀요" : "터미널과 브라우저에서 사용할 수 있어요", 12, style.muted, false);
+        TextView title = text(activity, Z8Text.text("Shortcuts", "단축키"), 17, style.text, true); title.setAccessibilityHeading(true); column.addView(title);
+        TextView hint = text(activity, held ? Z8Text.text("Release the keys to close", "키를 놓으면 닫혀요") : Z8Text.text("Available in the terminal and browser", "터미널과 브라우저에서 사용할 수 있어요"), 12, style.muted, false);
         hint.setPadding(0, dp(activity, 6), 0, dp(activity, 12)); column.addView(hint);
-        row(activity, column, style, "복사 / 붙여넣기", "Ctrl + Shift + C / V");
-        row(activity, column, style, "텍스트 선택", "드래그 · 길게 누르기");
-        row(activity, column, style, "명령 중단", "Ctrl + C");
-        row(activity, column, style, "새 터미널", "Ctrl + Shift + T");
-        row(activity, column, style, "다음 탭", "Ctrl + Tab");
-        row(activity, column, style, "이전 탭", "Ctrl + Shift + Tab");
-        row(activity, column, style, "브라우저 열기", "Ctrl + Shift + B");
-        row(activity, column, style, "브라우저 주소", "Ctrl + L");
-        row(activity, column, style, "브라우저 새로고침", "Ctrl + R");
-        row(activity, column, style, "브라우저에서 복귀", "Esc");
-        row(activity, column, style, "누르는 동안 안내", "Ctrl + Shift + /");
+        row(activity, column, style, Z8Text.text("Copy / Paste", "복사 / 붙여넣기"), "Ctrl + Shift + C / V");
+        row(activity, column, style, Z8Text.text("Select text", "텍스트 선택"), Z8Text.text("Drag · Long press", "드래그 · 길게 누르기"));
+        row(activity, column, style, Z8Text.text("Interrupt command", "명령 중단"), "Ctrl + C");
+        row(activity, column, style, Z8Text.text("New terminal", "새 터미널"), "Ctrl + Shift + T");
+        row(activity, column, style, Z8Text.text("Next tab", "다음 탭"), "Ctrl + Tab");
+        row(activity, column, style, Z8Text.text("Previous tab", "이전 탭"), "Ctrl + Shift + Tab");
+        row(activity, column, style, Z8Text.text("Open browser", "브라우저 열기"), "Ctrl + Shift + B");
+        row(activity, column, style, Z8Text.text("Browser address", "브라우저 주소"), "Ctrl + L");
+        row(activity, column, style, Z8Text.text("Refresh browser", "브라우저 새로고침"), "Ctrl + R");
+        row(activity, column, style, Z8Text.text("Return from browser", "브라우저에서 복귀"), "Esc");
+        row(activity, column, style, Z8Text.text("Hold to show shortcuts", "누르는 동안 안내"), "Ctrl + Shift + /");
         if (!held) {
-            TextView note = text(activity, "텍스트를 선택한 뒤 복사하세요. 터치에서는 길게 눌러 Copy / Paste를 선택하세요.\n\n"
-                + "Ctrl + L / R와 Esc는 브라우저 탭에서만 동작해요. 터미널의 기존 키 동작은 그대로 사용할 수 있어요.\n\n"
-                + "⌘C / ⌘V / ⌘H와 새 터미널의 ⌘T는 기기가 앱에 키를 전달하는 경우 지원합니다. 일부 Android 기기는 시스템 단축키로 사용합니다.",
+            TextView note = text(activity, Z8Text.text("Select text before copying. On touch screens, long press to choose Copy / Paste.\n\n", "텍스트를 선택한 뒤 복사하세요. 터치에서는 길게 눌러 Copy / Paste를 선택하세요.\n\n")
+                + Z8Text.text("Ctrl + L / R and Esc apply only to the browser tab. Existing terminal shortcuts are unchanged.\n\n", "Ctrl + L / R와 Esc는 브라우저 탭에서만 동작해요. 터미널의 기존 키 동작은 그대로 사용할 수 있어요.\n\n")
+                + Z8Text.text("⌘C / ⌘V / ⌘H and ⌘T for a new terminal work when the device passes those keys to the app. Some Android devices reserve them for system shortcuts.", "⌘C / ⌘V / ⌘H와 새 터미널의 ⌘T는 기기가 앱에 키를 전달하는 경우 지원합니다. 일부 Android 기기는 시스템 단축키로 사용합니다."),
                 12, style.muted, false);
             note.setPadding(0, dp(activity, 16), 0, 0); note.setLineSpacing(dp(activity, 3), 1); column.addView(note);
         }

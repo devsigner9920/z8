@@ -27,7 +27,7 @@ class PreparationNotificationTests(unittest.TestCase):
         probe = cls.directory / 'NotificationProbe.java'
         probe.write_text(PROBE)
         sources.extend([str(probe), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8PreparationNotification.java')])
-        result = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(cls.directory), *sources], capture_output=True, text=True, timeout=30)
+        result = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(cls.directory), *sources], capture_output=True, text=True, timeout=30)
         if result.returncode:
             raise AssertionError(result.stdout + result.stderr)
 
@@ -117,7 +117,7 @@ TermuxService s=new TermuxService(); Z8PreparationNotification.begin(s,"a","proj
 eq(true,s.power.lock.held);eq(false,s.power.lock.referenceCounted);eq(true,s.power.lock.timeout>0);
 switch(args[0]){
 case "progress": {
-Notification.Builder b=card(s);eq(true,b.ongoing);eq(true,b.indeterminate);eq("My project · 첫 실행 준비",b.title);
+Notification.Builder b=card(s);eq(true,b.ongoing);eq(true,b.indeterminate);eq("My project · Preparing first launch",b.title);
 eq(1,b.intent.intent.extras.size());eq("project-a",b.intent.intent.extras.get("focus"));eq(3,b.intent.flags);
 Z8PreparationNotification.progress(s,"a","rootfs",48,"환경 압축 해제"); Handler.tick(1000);b=card(s);eq(false,b.indeterminate);eq(48,b.progress);
 Z8PreparationNotification.finish(s,"a",true,"private");empty(s);eq(false,s.power.lock.held);eq(true,s.notifications.posted.get("project-a").source.autoCancel);
@@ -127,8 +127,8 @@ int before=s.updates;for(int i=0;i<100;i++)Z8PreparationNotification.progress(s,
 eq(before,s.updates);eq(2,Handler.queue.size()); Handler.tick(1000);eq(before+1,s.updates);eq(99,card(s).progress);
 Z8PreparationNotification.progress(s,"a","tools",75,"Node.js 설치");Handler.tick(1000);eq(true,card(s).indeterminate);break;}
 case "queue": {
-Z8PreparationNotification.begin(s,"b","project-b","Second");eq(1,s.power.lock.acquired);eq(true,card(s).text.contains("1개 프로젝트 대기"));
-Z8PreparationNotification.finish(s,"a",true,null);eq(true,s.power.lock.held);eq("Second · 첫 실행 준비",card(s).title);
+Z8PreparationNotification.begin(s,"b","project-b","Second");eq(1,s.power.lock.acquired);eq(true,card(s).text.contains("1 project(s) waiting"));
+Z8PreparationNotification.finish(s,"a",true,null);eq(true,s.power.lock.held);eq("Second · Preparing first launch",card(s).title);
 Z8PreparationNotification.finish(s,"b",false,"TOKEN_SECRET\nprivate log");eq(false,s.power.lock.held);eq(1,s.power.lock.released);empty(s);
 eq(false,s.notifications.posted.get("project-b").source.text.contains("TOKEN_SECRET"));eq(0,Handler.queue.size());break;}
 case "destroy": {
@@ -138,17 +138,17 @@ case "disabled": {
 s.notifications.enabled=false;Z8PreparationNotification.finish(s,"a",false,"error");eq(false,s.power.lock.held);eq(0,s.notifications.posted.size());empty(s);break;}
 case "generation": {
 TermuxService replacement=new TermuxService();Z8PreparationNotification.begin(replacement,"b","project-b","New owner");eq(false,s.power.lock.held);empty(s);
-Z8PreparationNotification.progress(s,"a","rootfs",77,"late");Handler.tick(1000);eq("New owner · 첫 실행 준비",card(replacement).title);
+Z8PreparationNotification.progress(s,"a","rootfs",77,"late");Handler.tick(1000);eq("New owner · Preparing first launch",card(replacement).title);
 Z8PreparationNotification.releaseOwner(s);eq(true,replacement.power.lock.held);Z8PreparationNotification.releaseOwner(replacement);eq(false,replacement.power.lock.held);break;}
 case "initial": {
 Z8PreparationNotification.releaseOwner(s);Z8PreparationNotification.begin(s,"initial",Z8InitialSetup.NOTIFICATION_ID,"template");
-Notification.Builder b=card(s);eq("z8 · 처음 준비",b.title);eq(Z8SetupActivity.class,b.intent.intent.target);eq(0,b.intent.intent.extras.size());
+Notification.Builder b=card(s);eq("z8 · Initial setup",b.title);eq(Z8SetupActivity.class,b.intent.intent.target);eq(0,b.intent.intent.extras.size());
 Z8PreparationNotification.finish(s,"initial",true,null);b=s.notifications.posted.get(Z8InitialSetup.NOTIFICATION_ID).source;
-eq(Z8SetupActivity.class,b.intent.intent.target);eq(true,b.text.contains("첫 프로젝트"));eq(false,s.power.lock.held);break;}
+eq(Z8SetupActivity.class,b.intent.intent.target);eq(true,b.text.contains("first project"));eq(false,s.power.lock.held);break;}
 case "waiting": {
 Z8PreparationNotification.releaseOwner(s);Z8PreparationNotification.begin(s,"initial",Z8InitialSetup.NOTIFICATION_ID,"template");
 Z8PreparationNotification.waiting(s,"initial");Notification.Builder b=s.notifications.posted.get(Z8InitialSetup.NOTIFICATION_ID).source;
-eq("z8 · 네트워크 대기",b.title);eq(Z8SetupActivity.class,b.intent.intent.target);eq(false,s.power.lock.held);empty(s);break;}
+eq("z8 · Waiting for network",b.title);eq(Z8SetupActivity.class,b.intent.intent.target);eq(false,s.power.lock.held);empty(s);break;}
 default:throw new AssertionError("Unknown case");
 }
 System.out.println("PASS "+args[0]);}

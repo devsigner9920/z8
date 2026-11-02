@@ -25,7 +25,7 @@ class ProjectListingTests(unittest.TestCase):
         probe = cls.build / 'ProjectListingProbe.java'
         probe.write_text(PROBE)
         source = ROOT / 'overlay/app/src/main/java/com/termux/app'
-        result = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(cls.build), str(context),
+        result = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(cls.build), str(context),
             str(source / 'Z8Files.java'), str(source / 'Z8Projects.java'), str(probe)],
             capture_output=True, text=True, timeout=30)
         if result.returncode:

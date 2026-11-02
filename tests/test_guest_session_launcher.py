@@ -24,7 +24,7 @@ class GuestSessionLauncherTests(unittest.TestCase):
                 path.write_text(code)
                 sources.append(str(path))
             real = ROOT / 'overlay/app/src/main/java/com/termux/app/Z8GuestSessionLauncher.java'
-            compile_result = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(directory), str(real), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8SessionCatalog.java'), *sources],
+            compile_result = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(directory), str(real), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8SessionCatalog.java'), *sources],
                                             capture_output=True, text=True, timeout=45)
             self.assertEqual(compile_result.returncode, 0, compile_result.stdout + compile_result.stderr)
             result = subprocess.run([java, '-cp', str(directory), 'com.termux.app.LauncherProbe'],

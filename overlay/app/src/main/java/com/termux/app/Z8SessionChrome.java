@@ -187,11 +187,11 @@ public final class Z8SessionChrome {
         tabRow = row(); tabRow.setPadding(dp(8), 0, 0, 0);
         tabs.addView(tabRow, new ViewGroup.LayoutParams(-2, -1));
         tabLine.addView(tabs, new LinearLayout.LayoutParams(-2, dp(48)));
-        addSession = iconAction(R.drawable.z8_ic_add, "현재 프로젝트에 새 터미널", this::createForCurrent);
+        addSession = iconAction(R.drawable.z8_ic_add, Z8Text.text("New terminal in this project", "현재 프로젝트에 새 터미널"), this::createForCurrent);
         addSession.setId(R.id.z8_new_session);
         focusTag(addSession, "new-session");
         tabLine.addView(addSession, new LinearLayout.LayoutParams(dp(48), dp(48)));
-        openBrowser = iconAction(R.drawable.z8_ic_browser, "브라우저 탭 열기", this::openBrowserTab);
+        openBrowser = iconAction(R.drawable.z8_ic_browser, Z8Text.text("Open browser tab", "브라우저 탭 열기"), this::openBrowserTab);
         focusTag(openBrowser, "open-browser");
         tabLine.addView(openBrowser, new LinearLayout.LayoutParams(dp(48), dp(48)));
         surface.addView(tabLine);
@@ -325,7 +325,7 @@ public final class Z8SessionChrome {
             catch (Exception exception) {
                 main.post(() -> {
                     if (disposed || loadGeneration != projectLoadGeneration) return;
-                    projectsLoaded = true; projectError = "프로젝트 목록을 읽지 못했습니다";
+                    projectsLoaded = true; projectError = Z8Text.text("Could not load projects", "프로젝트 목록을 읽지 못했습니다");
                     fingerprint = ""; refresh();
                 });
                 return;
@@ -411,7 +411,7 @@ public final class Z8SessionChrome {
         boolean launchPending = Z8GuestSessionLauncher.hasPending(activity.getTermuxService());
         Z8GuestSessionLauncher.Preparation preparation = Z8GuestSessionLauncher.preparation(activity, selectedProject);
         String preparationContent = preparation == null ? "" : preparation.toString();
-        StringBuilder signature = new StringBuilder(theme.id).append(projects.toString()).append(projectError).append(projectsLoaded)
+        StringBuilder signature = new StringBuilder(theme.id).append(Z8Text.language()).append(projects.toString()).append(projectError).append(projectsLoaded)
             .append(launchPending).append(selectedProject).append(preparation == null ? "none" : preparation.failed ? "failed" : "preparing")
             .append(browserSelected).append(browserProject);
         for (Z8SessionCatalog.Entry entry : next)
@@ -452,8 +452,8 @@ public final class Z8SessionChrome {
         // The full 48dp view remains the touch and accessibility target.
         add.setPadding(dp(15), dp(15), dp(15), dp(15));
         Z8SessionCatalog.Entry selected = current();
-        String addLabel = selectedProject == null || selectedProject.isEmpty() ? "프로젝트 목록에서 터미널 열기"
-            : projectName(selectedProject) + "에 새 터미널";
+        String addLabel = selectedProject == null || selectedProject.isEmpty() ? Z8Text.text("Open a terminal from the project list", "프로젝트 목록에서 터미널 열기")
+            : projectName(selectedProject) + Z8Text.text(": new terminal", "에 새 터미널");
         add.setContentDescription(addLabel); add.setTooltipText(addLabel);
         add.setEnabled(!launchPending && !projectProblems.containsKey(selectedProject));
         add.setAlpha(add.isEnabled() ? 1f : .5f);
@@ -469,10 +469,10 @@ public final class Z8SessionChrome {
         openBrowser.setImageTintList(ColorStateList.valueOf(style.muted));
         emptyTerminal.setTextColor(style.muted);
         emptyTerminal.setText(selectedProject == null || selectedProject.isEmpty()
-            ? "프로젝트를 선택해 시작하세요.\n목록의 +로 새 프로젝트를 만들 수 있어요."
+            ? Z8Text.text("Choose a project to get started.\nUse + in the list to create one.", "프로젝트를 선택해 시작하세요.\n목록의 +로 새 프로젝트를 만들 수 있어요.")
             : projectProblems.containsKey(selectedProject)
-            ? projectName(selectedProject) + "\n프로젝트 정보를 확인해야 합니다.\n목록에서 ‘프로젝트 정보 확인 필요’를 눌러 주세요."
-            : projectName(selectedProject) + "\n프로젝트 목록에서 이름 옆의 +로 첫 터미널을 여세요.");
+            ? projectName(selectedProject) + Z8Text.text("\nThis project needs attention.\nSelect “Check project info” in the list.", "\n프로젝트 정보를 확인해야 합니다.\n목록에서 ‘프로젝트 정보 확인 필요’를 눌러 주세요.")
+            : projectName(selectedProject) + Z8Text.text("\nUse + beside the project name to open your first terminal.", "\n프로젝트 목록에서 이름 옆의 +로 첫 터미널을 여세요."));
         renderHeader(); renderTabs();
         renderPanel(side); renderPanel(drawerContent);
         restoreChromeFocus(previousFocus);
@@ -502,11 +502,11 @@ public final class Z8SessionChrome {
         preparationProgress = new ProgressBar(activity, null, android.R.attr.progressBarStyleHorizontal);
         preparationProgress.setMax(100);
         card.addView(preparationProgress, new LinearLayout.LayoutParams(-1, dp(4)));
-        preparationRetry = text("다시 시도", 14, style.accent, true);
+        preparationRetry = text(Z8Text.text("Retry", "다시 시도"), 14, style.accent, true);
         preparationRetry.setGravity(Gravity.CENTER_VERTICAL); interactive(preparationRetry);
         preparationRetry.setOnClickListener(view -> createForCurrent());
         card.addView(preparationRetry, new LinearLayout.LayoutParams(-1, dp(48)));
-        preparationLog = text("상세 오류 보기", 13, style.muted, false);
+        preparationLog = text(Z8Text.text("View error details", "상세 오류 보기"), 13, style.muted, false);
         preparationLog.setGravity(Gravity.CENTER_VERTICAL); interactive(preparationLog);
         preparationLog.setOnClickListener(view -> {
             Z8GuestSessionLauncher.Preparation state = Z8GuestSessionLauncher.preparation(activity, selectedProject);
@@ -515,10 +515,10 @@ public final class Z8SessionChrome {
             details.setTypeface(Typeface.MONOSPACE); details.setTextIsSelectable(true);
             details.setPadding(dp(20), dp(16), dp(20), dp(16));
             ScrollView scroll = new ScrollView(activity); scroll.addView(details);
-            showDialog(dialogBuilder().setTitle("설치 오류").setView(scroll).setPositiveButton("닫기", null).create(), false);
+            showDialog(dialogBuilder().setTitle(Z8Text.text("Setup error", "설치 오류")).setView(scroll).setPositiveButton(Z8Text.text("Close", "닫기"), null).create(), false);
         });
         card.addView(preparationLog, new LinearLayout.LayoutParams(-1, dp(48)));
-        preparationNotifications = text("진행 알림 켜기", 13, style.accent, false);
+        preparationNotifications = text(Z8Text.text("Enable progress notifications", "진행 알림 켜기"), 13, style.accent, false);
         preparationNotifications.setGravity(Gravity.CENTER_VERTICAL); interactive(preparationNotifications);
         preparationNotifications.setOnClickListener(view -> activity.startActivity(new Intent(
             android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(
@@ -531,6 +531,9 @@ public final class Z8SessionChrome {
 
     private void renderPreparation(Z8GuestSessionLauncher.Preparation state) {
         preparationPanel.setVisibility(state == null ? View.GONE : View.VISIBLE);
+        preparationRetry.setText(Z8Text.text("Retry", "다시 시도"));
+        preparationLog.setText(Z8Text.text("View error details", "상세 오류 보기"));
+        preparationNotifications.setText(Z8Text.text("Enable progress notifications", "진행 알림 켜기"));
         if (state == null) return;
         preparationTitle.setTextColor(style.text); preparationDetail.setTextColor(style.muted);
         preparationRetry.setTextColor(style.accent); preparationLog.setTextColor(style.muted);
@@ -540,40 +543,40 @@ public final class Z8SessionChrome {
             && !notifications.areNotificationsEnabled() ? View.VISIBLE : View.GONE);
         preparationRetry.setBackground(style.interactive(activity, Color.TRANSPARENT, Color.TRANSPARENT, 6));
         preparationLog.setBackground(style.interactive(activity, Color.TRANSPARENT, Color.TRANSPARENT, 6));
-        preparationTitle.setText(state.failed ? "준비를 완료하지 못했어요"
-            : state.resuming ? "중단된 준비를 이어가고 있어요" : "처음 실행을 준비하고 있어요");
+        preparationTitle.setText(state.failed ? Z8Text.text("Setup could not finish", "준비를 완료하지 못했어요")
+            : state.resuming ? Z8Text.text("Resuming setup", "중단된 준비를 이어가고 있어요") : Z8Text.text("Getting ready for first use", "처음 실행을 준비하고 있어요"));
         int step = state.stage.equals("bootstrap") ? 1 : state.stage.equals("rootfs") ? 2 : 3;
-        preparationDetail.setText(state.failed ? "완료된 설치와 프로젝트 파일은 유지돼요.\n연결과 저장 공간을 확인한 뒤 다시 시도해 주세요."
+        preparationDetail.setText(state.failed ? Z8Text.text("Completed steps and project files are preserved.\nCheck your connection and storage, then retry.", "완료된 설치와 프로젝트 파일은 유지돼요.\n연결과 저장 공간을 확인한 뒤 다시 시도해 주세요.")
             : step + " / 3   " + state.message
-                + "\n\n이 프로젝트의 첫 준비는 몇 분 걸릴 수 있어요."
-                + "\n다른 앱을 사용해도 설치는 계속돼요."
-                + "\n강제 종료되면 앱을 다시 열 때 이어서 준비해요."
-                + "\n다음부터는 설치 없이 바로 시작해요.");
+                + Z8Text.text("\n\nThis project's first setup may take a few minutes.", "\n\n이 프로젝트의 첫 준비는 몇 분 걸릴 수 있어요.")
+                + Z8Text.text("\nSetup continues while you use other apps.", "\n다른 앱을 사용해도 설치는 계속돼요.")
+                + Z8Text.text("\nIf the app is stopped, reopen it to resume setup.", "\n강제 종료되면 앱을 다시 열 때 이어서 준비해요.")
+                + Z8Text.text("\nAfter that, you can start without reinstalling.", "\n다음부터는 설치 없이 바로 시작해요."));
         preparationProgress.setVisibility(state.failed ? View.GONE : View.VISIBLE);
         preparationProgress.setProgressTintList(ColorStateList.valueOf(style.accent));
         preparationProgress.setIndeterminateTintList(ColorStateList.valueOf(style.accent));
         preparationProgress.setIndeterminate(state.percent < 0);
         if (state.percent >= 0) preparationProgress.setProgress(state.percent);
-        preparationProgress.setContentDescription(state.message + (state.percent >= 0 ? " " + state.percent + "%" : " 진행 중"));
+        preparationProgress.setContentDescription(state.message + (state.percent >= 0 ? " " + state.percent + "%" : Z8Text.text(" in progress", " 진행 중")));
         preparationRetry.setVisibility(state.failed ? View.VISIBLE : View.GONE);
         preparationLog.setVisibility(state.failed ? View.VISIBLE : View.GONE);
     }
     private String projectName(String id) {
-        if (id.isEmpty()) return "기기 셸";
+        if (id.isEmpty()) return Z8Text.text("Device shell", "기기 셸");
         if (projects.containsKey(id)) return projects.get(id);
         if (projectProblems.containsKey(id)) return projectProblems.get(id).name;
         for (Z8SessionCatalog.Entry entry : entries) if (entry.projectId.equals(id)) return entry.projectName;
-        return "프로젝트";
+        return Z8Text.text("Project", "프로젝트");
     }
     private String name(Z8SessionCatalog.Entry entry) { return names.getOrDefault(entry.handle, entry.title); }
     private int count(Z8SessionCatalog.Entry entry) { return notices.getOrDefault(entry.handle, 0); }
     private String status(Z8SessionCatalog.Entry entry) {
-        return !entry.running ? "종료됨" : count(entry) > 0 ? "미확인 알림 " + count(entry) + "개" : "세션 열림";
+        return !entry.running ? Z8Text.text("Ended", "종료됨") : count(entry) > 0 ? Z8Text.text("Unread notifications: ", "미확인 알림 ") + count(entry) + Z8Text.text("", "개") : Z8Text.text("Session open", "세션 열림");
     }
 
     private void renderHeader() {
         header.removeAllViews();
-        ImageView menu = iconAction(R.drawable.z8_ic_menu, "프로젝트와 세션 목록", () -> {
+        ImageView menu = iconAction(R.drawable.z8_ic_menu, Z8Text.text("Projects and sessions", "프로젝트와 세션 목록"), () -> {
             if (wide && side.getVisibility() == View.VISIBLE) { side.setVisibility(View.GONE); divider.setVisibility(View.GONE); }
             else openSessions();
         });
@@ -587,8 +590,8 @@ public final class Z8SessionChrome {
         title.addView(primary);
 
         header.addView(title, new LinearLayout.LayoutParams(0, -1, 1));
-        headerResourceText = action("", Z8ResourceMonitor.SCOPE,
-            () -> Toast.makeText(activity, Z8ResourceMonitor.SCOPE, Toast.LENGTH_LONG).show());
+        headerResourceText = action("", Z8ResourceMonitor.scope(),
+            () -> Toast.makeText(activity, Z8ResourceMonitor.scope(), Toast.LENGTH_LONG).show());
         headerResourceText.setTextSize(11);
         headerResourceText.setTypeface(Typeface.create("sans-serif", Typeface.NORMAL));
         headerResourceText.setFontFeatureSettings("tnum");
@@ -600,10 +603,10 @@ public final class Z8SessionChrome {
         focusTag(headerResourceText, "resources");
         // Reserve the widest normal label; changing measurements never move the title.
         headerResourceWidth = (int) Math.ceil(headerResourceText.getPaint()
-            .measureText("앱  CPU 100%  RAM 99.9 GB")) + dp(20);
+            .measureText(Z8Text.text("App  CPU 100%  RAM 99.9 GB", "앱  CPU 100%  RAM 99.9 GB"))) + dp(20);
         header.addView(headerResourceText, new LinearLayout.LayoutParams(headerResourceWidth, dp(48)));
         renderResourceSample();
-        ImageView more = iconAction(R.drawable.z8_ic_settings, "환경설정",
+        ImageView more = iconAction(R.drawable.z8_ic_settings, Z8Text.text("Settings", "환경설정"),
             () -> activity.startActivity(Z8SettingsActivity.intent(activity, selectedProject)));
         focusTag(more, "settings");
         header.addView(more, new LinearLayout.LayoutParams(dp(48), dp(48)));
@@ -640,8 +643,8 @@ public final class Z8SessionChrome {
         String group = selectedProject;
         for (Z8SessionCatalog.Entry entry : entries) {
             if (!entry.projectId.equals(group)) continue;
-            TextView tab = action(name(entry) + (!entry.running ? " · 종료" : count(entry) > 0 ? "  " + count(entry) : ""),
-                "세션 전환: " + projectName(entry.projectId) + " / " + name(entry) + " / " + status(entry), () -> select(entry));
+            TextView tab = action(name(entry) + (!entry.running ? Z8Text.text(" · Ended", " · 종료") : count(entry) > 0 ? "  " + count(entry) : ""),
+                Z8Text.text("Switch session: ", "세션 전환: ") + projectName(entry.projectId) + " / " + name(entry) + " / " + status(entry), () -> select(entry));
             tab.setId(R.id.z8_session_tab); tab.setTextSize(12); tab.setMinWidth(dp(80)); tab.setMaxWidth(dp(180));
             focusTag(tab, "tab/" + entry.handle);
             tab.setSingleLine(true); tab.setEllipsize(TextUtils.TruncateAt.END);
@@ -667,7 +670,7 @@ public final class Z8SessionChrome {
             if ((entry.selected && !browserSelected)) scheduleRevealSelectedTab();
         }
         if (browserPane != null && group != null && group.equals(browserProject)) {
-            TextView tab = action("브라우저", "브라우저 탭 선택", this::openBrowserTab);
+            TextView tab = action(Z8Text.text("Browser", "브라우저"), Z8Text.text("Select browser tab", "브라우저 탭 선택"), this::openBrowserTab);
             tab.setTextSize(12); tab.setMinWidth(dp(96)); tab.setSelected(browserSelected);
             tab.setTextColor(browserSelected ? style.text : style.muted);
             tab.setPadding(dp(12), 0, dp(12), 0); focusTag(tab, "browser-tab");
@@ -739,7 +742,7 @@ public final class Z8SessionChrome {
         final int unreadCount = unread;
         android.widget.FrameLayout bell = new android.widget.FrameLayout(activity);
         ImageView attention = iconAction(R.drawable.z8_ic_notifications_none,
-            unreadCount > 0 ? "알림, 미확인 " + unreadCount + "개" : "알림",
+            unreadCount > 0 ? Z8Text.text("Notifications, unread: ", "알림, 미확인 ") + unreadCount + Z8Text.text("", "개") : Z8Text.text("Notifications", "알림"),
             () -> activity.startActivity(new Intent(activity, Z8AttentionActivity.class)));
         focusTag(attention, "attention");
         bell.addView(attention, new android.widget.FrameLayout.LayoutParams(dp(48), dp(48)));
@@ -755,9 +758,9 @@ public final class Z8SessionChrome {
         panel.addView(brand, new LinearLayout.LayoutParams(-1, dp(48)));
 
         LinearLayout caption = row(); caption.setGravity(Gravity.CENTER_VERTICAL);
-        TextView label = text("프로젝트", 11, style.muted, true); label.setPadding(dp(8), 0, 0, 0);
+        TextView label = text(Z8Text.text("Project", "프로젝트"), 11, style.muted, true); label.setPadding(dp(8), 0, 0, 0);
         caption.addView(label, new LinearLayout.LayoutParams(0, -2, 1));
-        ImageView projectAdd = iconAction(R.drawable.z8_ic_add, "프로젝트 만들기", this::createProject);
+        ImageView projectAdd = iconAction(R.drawable.z8_ic_add, Z8Text.text("Create project", "프로젝트 만들기"), this::createProject);
         focusTag(projectAdd, "project-create");
         caption.addView(projectAdd, new LinearLayout.LayoutParams(dp(48), dp(48)));
         add(panel, caption, compact ? 0 : 8);
@@ -771,9 +774,9 @@ public final class Z8SessionChrome {
         for (Map.Entry<String, String> project : all.entrySet()) group(groups, project.getKey(), project.getValue());
         boolean nativePresent = false;
         for (Z8SessionCatalog.Entry entry : entries) if (entry.projectId.isEmpty()) nativePresent = true;
-        if (nativePresent) group(groups, "", "기기 셸");
+        if (nativePresent) group(groups, "", Z8Text.text("Device shell", "기기 셸"));
         if (all.isEmpty() && !nativePresent) {
-            TextView empty = text(projectsLoaded ? "+로 첫 프로젝트를 만들어보세요." : "프로젝트 불러오는 중…", 13, style.muted, false);
+            TextView empty = text(projectsLoaded ? Z8Text.text("Use + to create your first project.", "+로 첫 프로젝트를 만들어보세요.") : Z8Text.text("Loading projects…", "프로젝트 불러오는 중…"), 13, style.muted, false);
             empty.setLineSpacing(dp(4), 1); empty.setPadding(dp(8), dp(16), dp(8), dp(16)); groups.addView(empty);
 
         }
@@ -790,13 +793,13 @@ public final class Z8SessionChrome {
         LinearLayout heading = row(); heading.setGravity(Gravity.CENTER_VERTICAL);
         boolean closed = collapsed.contains(id);
         ImageView toggle = iconAction(closed ? R.drawable.z8_ic_chevron_right : R.drawable.z8_ic_expand_more,
-            "프로젝트 세션 목록: " + title + (closed ? " · 접힘" : " · 펼침"), () -> {
+            Z8Text.text("Project sessions: ", "프로젝트 세션 목록: ") + title + (closed ? Z8Text.text(" · Collapsed", " · 접힘") : Z8Text.text(" · Expanded", " · 펼침")), () -> {
                 if (collapsed.contains(id)) collapsed.remove(id); else collapsed.add(id);
                 fingerprint = ""; refresh();
             });
         focusTag(toggle, "project/" + id + "/toggle");
         heading.addView(toggle, new LinearLayout.LayoutParams(dp(48), dp(48)));
-        TextView label = action(title, "프로젝트 선택: " + title, () -> selectProject(id));
+        TextView label = action(title, Z8Text.text("Select project: ", "프로젝트 선택: ") + title, () -> selectProject(id));
         label.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
         focusTag(label, "project/" + id + "/select");
         label.setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
@@ -810,7 +813,7 @@ public final class Z8SessionChrome {
         TextView total = text(Integer.toString(children.size() + (id.equals(browserProject) ? 1 : 0)), 11, style.faint, false);
         total.setGravity(Gravity.CENTER); heading.addView(total, new LinearLayout.LayoutParams(dp(20), dp(48)));
         if (!id.isEmpty() && !projectProblems.containsKey(id)) {
-            ImageView add = iconAction(R.drawable.z8_ic_add, title + "에 새 세션", () -> openShell(id, title));
+            ImageView add = iconAction(R.drawable.z8_ic_add, title + Z8Text.text(": new session", "에 새 세션"), () -> openShell(id, title));
             add.setEnabled(!Z8GuestSessionLauncher.hasPending(activity.getTermuxService()));
             add.setAlpha(add.isEnabled() ? 1f : .5f);
             focusTag(add, "project/" + id + "/add");
@@ -818,7 +821,7 @@ public final class Z8SessionChrome {
         }
         group.addView(heading);
         if (projectProblems.containsKey(id)) {
-            TextView problem = action("프로젝트 정보 확인 필요", title + ": 프로젝트 정보 확인 필요",
+            TextView problem = action(Z8Text.text("Check project info", "프로젝트 정보 확인 필요"), title + Z8Text.text(": check project info", ": 프로젝트 정보 확인 필요"),
                 () -> showProjectProblem(id));
             problem.setTextSize(12); problem.setTextColor(style.danger);
             problem.setPadding(dp(30), 0, dp(8), 0);
@@ -832,7 +835,7 @@ public final class Z8SessionChrome {
                 group.addView(sessionRow(entry), params);
             }
             if (id.equals(browserProject)) {
-                TextView browser = action("브라우저", "프로젝트 브라우저 선택", this::openBrowserTab);
+                TextView browser = action(Z8Text.text("Browser", "브라우저"), Z8Text.text("Select project browser", "프로젝트 브라우저 선택"), this::openBrowserTab);
                 browser.setTextSize(13); browser.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
                 browser.setPadding(dp(40), 0, dp(12), 0); browser.setSelected(browserSelected);
                 browser.setTextColor(browserSelected ? style.text : style.muted);
@@ -842,7 +845,7 @@ public final class Z8SessionChrome {
                 group.addView(browser, new LinearLayout.LayoutParams(-1, dp(48)));
             }
             if (children.isEmpty() && !id.equals(browserProject) && !projectProblems.containsKey(id)) {
-                TextView empty = text("아직 열린 세션이 없어요", 12, style.muted, false);
+                TextView empty = text(Z8Text.text("No open sessions yet", "아직 열린 세션이 없어요"), 12, style.muted, false);
                 empty.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
                 empty.setPadding(dp(30), 0, dp(8), 0);
                 group.addView(empty, new LinearLayout.LayoutParams(-1, dp(48)));
@@ -855,10 +858,10 @@ public final class Z8SessionChrome {
         Z8Projects.Problem problem = projectProblems.get(id);
         if (problem == null) return;
         showDialog(dialogBuilder().setTitle(problem.name)
-            .setMessage("이 프로젝트의 정보를 읽지 못했습니다. 파일은 삭제하지 않았으며 다른 프로젝트는 계속 사용할 수 있습니다.\n\n"
+            .setMessage(Z8Text.text("Could not read this project's information. No files were deleted. You can still use other projects.\n\n", "이 프로젝트의 정보를 읽지 못했습니다. 파일은 삭제하지 않았으며 다른 프로젝트는 계속 사용할 수 있습니다.\n\n")
                 + problem.detail)
-            .setNegativeButton("닫기", null)
-            .setPositiveButton("다시 확인", (dialog, which) -> loadProjects()).create(), false);
+            .setNegativeButton(Z8Text.text("Close", "닫기"), null)
+            .setPositiveButton(Z8Text.text("Check again", "다시 확인"), (dialog, which) -> loadProjects()).create(), false);
     }
 
     private View sessionRow(Z8SessionCatalog.Entry entry) {
@@ -868,7 +871,7 @@ public final class Z8SessionChrome {
         item.setBackground((entry.selected && !browserSelected) && style.prism ? style.selectedSurface(activity, 8)
             : style.interactive(activity, (entry.selected && !browserSelected) ? style.selected : Color.TRANSPARENT, Color.TRANSPARENT, 7));
         item.setSelected((entry.selected && !browserSelected)); interactive(item);
-        item.setContentDescription("세션 선택: " + projectName(entry.projectId) + " / " + name(entry) + " / " + status(entry));
+        item.setContentDescription(Z8Text.text("Select session: ", "세션 선택: ") + projectName(entry.projectId) + " / " + name(entry) + " / " + status(entry));
         item.setOnClickListener(view -> select(entry)); item.setOnLongClickListener(view -> { sessionMenu(entry); return true; });
         ImageView icon = icon(count(entry) > 0 ? R.drawable.z8_ic_notifications_none : toolIcon(entry.tool),
             count(entry) > 0 ? style.accent : style.prism ? toolColor(entry.tool) : (entry.selected && !browserSelected) ? style.accent : style.faint, 18);
@@ -968,7 +971,7 @@ public final class Z8SessionChrome {
 
     private void select(Z8SessionCatalog.Entry entry) {
         if (!Z8SessionCatalog.contains(activity.getTermuxService(), entry.session)) {
-            toast("이 세션은 더 이상 열려 있지 않습니다."); fingerprint = ""; refresh(); return;
+            toast(Z8Text.text("This session is no longer open.", "이 세션은 더 이상 열려 있지 않습니다.")); fingerprint = ""; refresh(); return;
         }
         browserSelected = false;
         activity.getTermuxTerminalSessionClient().setCurrentSession(entry.session);
@@ -1055,9 +1058,9 @@ public final class Z8SessionChrome {
         if (disposed || !requireConnectedService()) return;
         if (projectId.isEmpty()) { openSessions(); return; }
         if (projectProblems.containsKey(projectId)) { showProjectProblem(projectId); return; }
-        if (Z8ProjectRemoval.isDeleting(projectId)) { toast("프로젝트를 삭제하는 중입니다."); return; }
+        if (Z8ProjectRemoval.isDeleting(projectId)) { toast(Z8Text.text("Deleting the project.", "프로젝트를 삭제하는 중입니다.")); return; }
         selectProject(projectId, false);
-        if (entries.size() >= 8) { toast("터미널은 최대 8개까지 열 수 있습니다. 종료할 세션을 명시적으로 선택해 주세요."); return; }
+        if (entries.size() >= 8) { toast(Z8Text.text("You can open up to 8 terminals. Choose a session to close first.", "터미널은 최대 8개까지 열 수 있습니다. 종료할 세션을 명시적으로 선택해 주세요.")); return; }
         long now = SystemClock.elapsedRealtime();
         if (now - lastLaunchTap < 500 || Z8GuestSessionLauncher.hasPending(activity.getTermuxService())) return;
         lastLaunchTap = now;
@@ -1069,7 +1072,7 @@ public final class Z8SessionChrome {
 
     private void sessionMenu(Z8SessionCatalog.Entry entry) {
         choiceDialog(name(entry), projectName(entry.projectId) + "  /  " + entry.tool,
-            new String[]{"이름 변경", "최근 출력 복사", "알림", entry.running ? "터미널 종료…" : "목록에서 제거"},
+            new String[]{Z8Text.text("Rename", "이름 변경"), Z8Text.text("Copy recent output", "최근 출력 복사"), Z8Text.text("Notifications", "알림"), entry.running ? Z8Text.text("Close terminal…", "터미널 종료…") : Z8Text.text("Remove from list", "목록에서 제거")},
             null, new int[]{R.drawable.z8_ic_edit, R.drawable.z8_ic_copy, R.drawable.z8_ic_notifications_none, R.drawable.z8_ic_close}, true, which -> {
                 if (which == 0) rename(entry);
                 else if (which == 1) copyRecentOutput(entry);
@@ -1080,7 +1083,7 @@ public final class Z8SessionChrome {
 
     private void copyRecentOutput(Z8SessionCatalog.Entry entry) {
         if (!Z8SessionCatalog.contains(activity.getTermuxService(), entry.session)
-                || entry.session.getEmulator() == null) { toast("복사할 출력이 없습니다."); return; }
+                || entry.session.getEmulator() == null) { toast(Z8Text.text("There is no output to copy.", "복사할 출력이 없습니다.")); return; }
         com.termux.terminal.TerminalEmulator emulator = entry.session.getEmulator();
         com.termux.terminal.TerminalBuffer buffer = emulator.getScreen();
         // Bounded native copy; does not execute a CLI command or include other sessions.
@@ -1091,8 +1094,8 @@ public final class Z8SessionChrome {
             if (Character.isLowSurrogate(output.charAt(start))) start++;
             output = output.substring(start);
         }
-        if (output.isEmpty()) { toast("복사할 출력이 없습니다."); return; }
-        com.termux.shared.interact.ShareUtils.copyTextToClipboard(activity, output, "최근 터미널 출력을 복사했어요.");
+        if (output.isEmpty()) { toast(Z8Text.text("There is no output to copy.", "복사할 출력이 없습니다.")); return; }
+        com.termux.shared.interact.ShareUtils.copyTextToClipboard(activity, output, Z8Text.text("Recent terminal output copied.", "최근 터미널 출력을 복사했어요."));
     }
 
     private void rename(Z8SessionCatalog.Entry entry) {
@@ -1102,12 +1105,12 @@ public final class Z8SessionChrome {
         input.setFilters(new InputFilter[]{new InputFilter.LengthFilter(96)}); input.selectAll();
         LinearLayout field = column(); field.setPadding(dp(24), dp(8), dp(24), dp(8));
         field.addView(input, new LinearLayout.LayoutParams(-1, -2));
-        TextView error = text("세션 이름을 입력해 주세요.", 12, style.danger, false);
+        TextView error = text(Z8Text.text("Enter a session name.", "세션 이름을 입력해 주세요."), 12, style.danger, false);
         error.setPadding(0, dp(8), 0, 0);
         error.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         error.setVisibility(View.GONE); field.addView(error);
-        AlertDialog dialog = builder.setTitle("세션 이름 변경").setView(field)
-            .setNegativeButton("취소", null).setPositiveButton("저장", null).create();
+        AlertDialog dialog = builder.setTitle(Z8Text.text("Rename session", "세션 이름 변경")).setView(field)
+            .setNegativeButton(Z8Text.text("Cancel", "취소"), null).setPositiveButton(Z8Text.text("Save", "저장"), null).create();
         showDialog(dialog, false);
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
                 if (!Z8SessionCatalog.contains(activity.getTermuxService(), entry.session)) { dialog.dismiss(); return; }
@@ -1126,12 +1129,12 @@ public final class Z8SessionChrome {
     }
 
     private void end(Z8SessionCatalog.Entry entry) {
-        if (Z8ProjectRemoval.isDeleting(entry.projectId)) { toast("프로젝트를 삭제하는 중입니다."); return; }
-        if (Z8ProjectRemoval.isStopping(entry.session)) { toast("터미널 종료를 확인하는 중입니다."); return; }
-        showDialog(dialogBuilder().setTitle(entry.running ? "이 세션을 종료할까요?" : "종료된 세션을 제거할까요?")
+        if (Z8ProjectRemoval.isDeleting(entry.projectId)) { toast(Z8Text.text("Deleting the project.", "프로젝트를 삭제하는 중입니다.")); return; }
+        if (Z8ProjectRemoval.isStopping(entry.session)) { toast(Z8Text.text("Waiting for the terminal to close.", "터미널 종료를 확인하는 중입니다.")); return; }
+        showDialog(dialogBuilder().setTitle(entry.running ? Z8Text.text("Close this session?", "이 세션을 종료할까요?") : Z8Text.text("Remove this ended session?", "종료된 세션을 제거할까요?"))
             .setMessage(projectName(entry.projectId) + " / " + name(entry)
-                + (entry.running ? "\n\n실행 중인 프로그램이 중단됩니다. 다른 세션으로 전환하는 동작과는 다릅니다." : "\n프로젝트 파일은 유지됩니다."))
-            .setNegativeButton("취소", null).setPositiveButton(entry.running ? "세션 종료" : "제거", (dialog, which) -> {
+                + (entry.running ? Z8Text.text("\n\nThis stops running programs. Switching to another session keeps them running.", "\n\n실행 중인 프로그램이 중단됩니다. 다른 세션으로 전환하는 동작과는 다릅니다.") : Z8Text.text("\nProject files will be kept.", "\n프로젝트 파일은 유지됩니다.")))
+            .setNegativeButton(Z8Text.text("Cancel", "취소"), null).setPositiveButton(entry.running ? Z8Text.text("Close session", "세션 종료") : Z8Text.text("Remove", "제거"), (dialog, which) -> {
                 if (!Z8SessionCatalog.contains(activity.getTermuxService(), entry.session)) return;
                 Z8ProjectRemoval.stopSession(activity.getTermuxService(), entry.session, message -> {
                     if (disposed || activity.isFinishing()) return;
@@ -1150,15 +1153,15 @@ public final class Z8SessionChrome {
         TermuxService service = activity.getTermuxService();
         if (service != null && !service.wantsToStop() && !service.z8IsStopRequested()) return true;
         activity.z8RequestServiceConnection();
-        toast("실행 환경에 연결 중입니다. 잠시 후 다시 시도해 주세요.");
+        toast(Z8Text.text("Connecting to the runtime. Try again shortly.", "실행 환경에 연결 중입니다. 잠시 후 다시 시도해 주세요."));
         return false;
     }
 
     private boolean canDeleteProject(String projectId) {
         if (!requireConnectedService()) return false;
-        if (Z8ProjectRemoval.isDeleting(projectId)) { toast("프로젝트를 삭제하는 중입니다."); return false; }
+        if (Z8ProjectRemoval.isDeleting(projectId)) { toast(Z8Text.text("Deleting the project.", "프로젝트를 삭제하는 중입니다.")); return false; }
         if (Z8GuestSessionLauncher.hasPending(activity.getTermuxService())) {
-            toast("터미널 준비가 끝난 뒤 다시 시도해 주세요."); return false;
+            toast(Z8Text.text("Wait for terminal setup to finish, then try again.", "터미널 준비가 끝난 뒤 다시 시도해 주세요.")); return false;
         }
         return true;
     }
@@ -1168,15 +1171,15 @@ public final class Z8SessionChrome {
         int running = 0;
         for (Z8SessionCatalog.Entry entry : Z8SessionCatalog.snapshot(activity.getTermuxService(), null))
             if (projectId.equals(entry.projectId) && entry.running) running++;
-        String detail = (running > 0 ? "열린 터미널 " + running + "개를 함께 종료합니다.\n\n" : "")
-            + "소스 코드, Linux 환경, HOME 및 프로젝트 설정을 모두 삭제합니다. 되돌릴 수 없습니다.";
-        AlertDialog dialog = dialogBuilder().setTitle(name + " 삭제")
-            .setMessage(detail).setNegativeButton("취소", null).setPositiveButton(running > 0 ? "모두 종료하고 삭제" : "삭제", null).create();
+        String detail = (running > 0 ? Z8Text.text("Open terminals to close: ", "열린 터미널 ") + running + Z8Text.text(".\n\n", "개를 함께 종료합니다.\n\n") : "")
+            + Z8Text.text("This deletes the source code, Linux environment, HOME, and project settings. This cannot be undone.", "소스 코드, Linux 환경, HOME 및 프로젝트 설정을 모두 삭제합니다. 되돌릴 수 없습니다.");
+        AlertDialog dialog = dialogBuilder().setTitle(Z8Text.text("Delete " + name, name + " 삭제"))
+            .setMessage(detail).setNegativeButton(Z8Text.text("Cancel", "취소"), null).setPositiveButton(running > 0 ? Z8Text.text("Close all and delete", "모두 종료하고 삭제") : Z8Text.text("Delete", "삭제"), null).create();
         showDialog(dialog, true);
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
             if (!canDeleteProject(projectId)) { dialog.dismiss(); return; }
             dialog.setCancelable(false);
-            dialog.setMessage("터미널을 종료하고 프로젝트를 삭제하는 중…");
+            dialog.setMessage(Z8Text.text("Closing terminals and deleting the project…", "터미널을 종료하고 프로젝트를 삭제하는 중…"));
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(false);
             Z8ProjectRemoval.begin(activity.getTermuxService(), projectId, message -> {
@@ -1186,7 +1189,7 @@ public final class Z8SessionChrome {
                 projects.remove(projectId); lastSessions.remove(projectId); collapsed.remove(projectId);
                 if (projectId.equals(selectedProject)) { rememberProject(null); clearTerminal(); }
                 fingerprint = ""; refresh();
-                toast("프로젝트를 삭제했습니다.");
+                toast(Z8Text.text("Project deleted.", "프로젝트를 삭제했습니다."));
             });
         });
     }
@@ -1195,7 +1198,7 @@ public final class Z8SessionChrome {
         if (!requireConnectedService()) return;
         AlertDialog.Builder builder = dialogBuilder();
         EditText input = new EditText(builder.getContext());
-        input.setSingleLine(true); input.setHint("프로젝트 이름"); input.setTextColor(style.text);
+        input.setSingleLine(true); input.setHint(Z8Text.text("Project name", "프로젝트 이름")); input.setTextColor(style.text);
         input.setFilters(new InputFilter[]{new InputFilter.LengthFilter(96)});
         input.setBackgroundTintList(ColorStateList.valueOf(style.accent));
         LinearLayout field = column(); field.setPadding(dp(24), dp(8), dp(24), dp(8));
@@ -1203,13 +1206,13 @@ public final class Z8SessionChrome {
         TextView error = text("", 12, style.danger, false);
         error.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE);
         error.setPadding(0, dp(8), 0, 0); error.setVisibility(View.GONE); field.addView(error);
-        AlertDialog dialog = builder.setTitle("새 프로젝트").setView(field)
-            .setNegativeButton("취소", null).setPositiveButton("만들기", null).create();
+        AlertDialog dialog = builder.setTitle(Z8Text.text("New project", "새 프로젝트")).setView(field)
+            .setNegativeButton(Z8Text.text("Cancel", "취소"), null).setPositiveButton(Z8Text.text("Create", "만들기"), null).create();
         showDialog(dialog, false);
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(view -> {
             final String name;
             try { name = Z8Files.name(input.getText().toString().trim()); }
-            catch (Exception invalid) { error.setText("이름을 입력해 주세요. / 와 제어 문자는 사용할 수 없어요."); error.setVisibility(View.VISIBLE); return; }
+            catch (Exception invalid) { error.setText(Z8Text.text("Enter a name. Slashes and control characters are not allowed.", "이름을 입력해 주세요. / 와 제어 문자는 사용할 수 없어요.")); error.setVisibility(View.VISIBLE); return; }
             if (!requireConnectedService()) return;
             dialog.setCancelable(false); input.setEnabled(false);
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(false);
@@ -1232,7 +1235,7 @@ public final class Z8SessionChrome {
                         dialog.setCancelable(true); input.setEnabled(true);
                         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(true);
                         dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setEnabled(true);
-                        error.setText("프로젝트를 만들지 못했습니다. 저장 공간을 확인해 주세요."); error.setVisibility(View.VISIBLE);
+                        error.setText(Z8Text.text("Could not create the project. Check available storage.", "프로젝트를 만들지 못했습니다. 저장 공간을 확인해 주세요.")); error.setVisibility(View.VISIBLE);
                     });
                 }
             });
@@ -1303,7 +1306,7 @@ public final class Z8SessionChrome {
             option.setOnClickListener(view -> { dialog.dismiss(); selection.accept(selected); });
             options.addView(option, new LinearLayout.LayoutParams(-1, dp(rowHeight)));
         }
-        TextView cancel = action("취소", "취소", dialog::dismiss); cancel.setTextColor(style.muted);
+        TextView cancel = action(Z8Text.text("Cancel", "취소"), Z8Text.text("Cancel", "취소"), dialog::dismiss); cancel.setTextColor(style.muted);
         LinearLayout.LayoutParams cancelParams = new LinearLayout.LayoutParams(dp(88), dp(48));
         cancelParams.gravity = Gravity.END; cancelParams.topMargin = dp(8); content.addView(cancel, cancelParams);
         dialog.setView(content); showDialog(dialog, false);

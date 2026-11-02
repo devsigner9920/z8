@@ -20,11 +20,12 @@ spec = importlib.util.spec_from_file_location('z8_navigation_helpers', ROOT / 't
 c = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(c)
 d, r = c.device, c.runtime
+ui = c.ui
 
 
 def node(**attrs):
     tree = d.observe()
-    matches = [n for n in tree.iter('node') if all(n.get(k) == v for k, v in attrs.items())]
+    matches = [n for n in tree.iter('node') if all(ui.matches(n.get(k), v) for k, v in attrs.items())]
     if len(matches) != 1:
         raise RuntimeError('Expected one visible UI control: ' + str(attrs) + ', found ' + str(len(matches)))
     return matches[0]
@@ -60,7 +61,7 @@ def open_session_menu():
                and item.get('selected') == 'true' and item.get('clickable') == 'true'
                and item.get('enabled') != 'false' and item.get('long-clickable') != 'false'
                and item.get('visible-to-user') != 'false'
-               and item.get('content-desc', '').startswith('세션 전환: ')]
+               and item.get('content-desc', '').startswith(ui.labels('switch_prefix'))]
     if len(matches) != 1:
         raise RuntimeError('Expected one selected terminal tab for its session menu')
     bounds = re.fullmatch(r'\[(\d+),(\d+)\]\[(\d+),(\d+)\]', matches[0].get('bounds', ''))
@@ -75,7 +76,7 @@ def open_session_menu():
 
 def rename(title):
     open_session_menu()
-    press(text='이름 변경')
+    press(text=ui.labels('rename'))
     entry = node(**{'class': 'android.widget.EditText'})
     d.click(entry)
     # Wait for IME focus before injecting text. Fast ADB input immediately after
@@ -85,7 +86,7 @@ def rename(title):
     d.adb('shell', 'input', 'keyevent', *(['67'] * len(entry.get('text', ''))))
     d.adb('shell', 'input', 'text', title)
     assert node(**{'class': 'android.widget.EditText'}).get('text') == title, 'ADB did not enter the intended fixture title'
-    press(text='저장')
+    press(text=ui.labels('save'))
     time.sleep(.3)
     assert selected()[1] == title, 'Rename did not reach the selected tab'
 
@@ -101,7 +102,7 @@ def hide_keyboard():
 def create(project, via_group=False):
     if via_group:
         hide_keyboard()
-        press(**{'content-desc': project + '에 새 세션'})
+        press(**{'content-desc': ui.labels('new_session', project=project)})
     else:
         current = node(**{'resource-id': d.PACKAGE + ':id/z8_current_project'})
         if current.get('text') != project:
@@ -113,25 +114,25 @@ def create(project, via_group=False):
 def select(project, title, tab=False):
     if tab:
         tree = d.observe()
-        label = '세션 전환: ' + project + ' / ' + title + ' / '
+        label = ui.labels('switch_session', project=project, title=title)
         matches = [n for n in tree.iter('node')
                    if n.get('resource-id') == d.PACKAGE + ':id/z8_session_tab'
                    and n.get('content-desc', '').startswith(label)
                    and n.get('clickable') == 'true' and n.get('enabled') != 'false'
                    and n.get('visible-to-user') != 'false']
         if len(matches) != 1:
-            raise RuntimeError('Expected a unique actual session tab: ' + label)
+            raise RuntimeError('Expected a unique actual session tab: ' + str(label))
         d.click(matches[0])
     else:
         tree = d.observe()
-        label = '세션 선택: ' + project + ' / ' + title + ' / '
+        label = ui.labels('select_session', project=project, title=title)
         matches = [n for n in tree.iter('node') if n.get('content-desc', '').startswith(label)]
         if not matches:
-            press(**{'content-desc': '프로젝트와 세션 목록'})
+            press(**{'content-desc': ui.labels('projects')})
             tree = d.observe()
             matches = [n for n in tree.iter('node') if n.get('content-desc', '').startswith(label)]
         if len(matches) != 1:
-            raise RuntimeError('Expected a unique actual session row: ' + label)
+            raise RuntimeError('Expected a unique actual session row: ' + str(label))
         d.click(matches[0])
     wait_selected(project, title)
 
@@ -223,9 +224,9 @@ printf '%s\\n' "$$" "${_Z8_NAV_TOKEN:-}" "$HOME" "$PWD" > "/z8/home/@STEM@.$1"
 
         create(args.name); rename('Scratch')
         scratch = proof('scratch-created', expected_pid=original, fresh=True)
-        open_session_menu(); press(text='터미널 종료…'); press(text='취소')
+        open_session_menu(); press(text=ui.labels('close_terminal')); press(text=ui.labels('cancel'))
         assert proof('cancel-end', fresh=True) == scratch, 'Cancel replaced the Scratch session'
-        open_session_menu(); press(text='터미널 종료…'); press(text='세션 종료')
+        open_session_menu(); press(text=ui.labels('close_terminal')); press(text=ui.labels('close_session'))
         time.sleep(1)
         deadline = time.monotonic() + 8
         while r.run_as('/system/bin/kill', '-0', scratch, check=False).returncode == 0:
@@ -233,10 +234,10 @@ printf '%s\\n' "$$" "${_Z8_NAV_TOKEN:-}" "$HOME" "$PWD" > "/z8/home/@STEM@.$1"
                 raise RuntimeError('Explicit end left the probe guest shell alive')
             time.sleep(.25)
         tree = d.observe()
-        ended = next((n for n in tree.iter('node') if n.get('content-desc') == '세션 선택: ' + args.name + ' / Scratch / 종료됨'), None)
+        ended = next((n for n in tree.iter('node') if n.get('content-desc') in ui.labels('ended_session', project=args.name, title='Scratch')), None)
         if ended is not None:
             d.click(ended)
-            open_session_menu(); press(text='목록에서 제거'); press(text='제거')
+            open_session_menu(); press(text=ui.labels('remove_from_list')); press(text=ui.labels('remove'))
         select(args.name, 'Build'); proof('other-session-ended', expected_pid=original)
         tree = d.observe()
         assert not any(' / Scratch / ' in n.get('content-desc', '') for n in tree.iter('node'))
@@ -252,7 +253,7 @@ printf '%s\\n' "$$" "${_Z8_NAV_TOKEN:-}" "$HOME" "$PWD" > "/z8/home/@STEM@.$1"
             assert side_visible == (state == 'OPENED'), 'Sidebar did not adapt to real window width'
             proof('fold-' + state.lower(), expected_pid=original)
             if state == 'CLOSED':
-                press(**{'content-desc': '프로젝트와 세션 목록'})
+                press(**{'content-desc': ui.labels('projects')})
                 node(**{'resource-id': d.PACKAGE + ':id/z8_session_drawer'})
                 report['screenshots']['foldedDrawer'] = c.capture('session-navigation-folded-drawer.png', port)
                 select(args.name, 'Review'); assert proof('folded-select', fresh=True) == second

@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 public final class Z8ResourceMonitor implements AutoCloseable {
     static final long INTERVAL_SECONDS = 3;
     static final long MEMORY_INTERVAL_MILLIS = 15_000;
-    public static final String SCOPE = "z8 앱 프로세스의 사용량입니다. 터미널·Linux 하위 프로세스는 포함하지 않습니다.";
+    public static String scope() { return Z8Text.text("Usage for the z8 app process only. Terminal and Linux child processes are not included.", "z8 앱 프로세스의 사용량입니다. 터미널·Linux 하위 프로세스는 포함하지 않습니다."); }
     private final Handler main = new Handler(Looper.getMainLooper());
     private final ScheduledExecutorService worker = Executors.newSingleThreadScheduledExecutor(task -> {
         Thread thread = new Thread(task, "z8-resource-monitor");
@@ -49,12 +49,13 @@ public final class Z8ResourceMonitor implements AutoCloseable {
 
         public String label() {
             String cpu = Double.isNaN(cpuPercent) ? "—" : Long.toString(Math.round(cpuPercent));
-            return "앱  CPU " + cpu + "%  RAM " + memoryLabel(pssKb);
+            return Z8Text.text("App  CPU ", "앱  CPU ") + cpu + "%  RAM " + memoryLabel(pssKb);
         }
 
         public String description() {
-            return label() + ". " + SCOPE + " CPU는 사용 가능한 " + Math.max(1, cores)
-                + "개 코어 전체를 100%로 표시합니다. RAM은 공유 메모리를 비례 배분한 PSS이며 최대 15초 간격으로 갱신합니다.";
+            return label() + ". " + scope() + Z8Text.text(
+                " 100% CPU represents all " + Math.max(1, cores) + " available cores. RAM uses PSS, which apportions shared memory, and refreshes every 15 seconds.",
+                " CPU는 사용 가능한 " + Math.max(1, cores) + "개 코어 전체를 100%로 표시합니다. RAM은 공유 메모리를 비례 배분한 PSS이며 최대 15초 간격으로 갱신합니다.");
         }
     }
 

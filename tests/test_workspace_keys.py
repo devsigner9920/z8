@@ -26,7 +26,7 @@ class WorkspaceKeyTests(unittest.TestCase):
             path.write_text(code)
             sources.append(str(path))
         actual = ROOT / 'overlay/app/src/main/java/com/termux/app/Z8WorkspaceKeys.java'
-        result = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(cls.directory), str(actual), *sources],
+        result = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(cls.directory), str(actual), *sources],
                                 capture_output=True, text=True, timeout=30)
         if result.returncode:
             raise AssertionError(result.stdout + result.stderr)

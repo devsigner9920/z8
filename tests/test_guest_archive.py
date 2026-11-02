@@ -23,7 +23,7 @@ class GuestArchiveTests(unittest.TestCase):
             probe = directory / "GuestArchiveProbe.java"
             probe.write_text(JAVA_PROBE)
             source = ROOT / "overlay/app/src/main/java/com/termux/app/Z8GuestArchive.java"
-            compiled = subprocess.run([javac, "-encoding", "UTF-8", "-d", str(directory), str(source), str(probe)],
+            compiled = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), "-encoding", "UTF-8", "-d", str(directory), str(source), str(probe)],
                 capture_output=True, text=True, timeout=45)
             self.assertEqual(0, compiled.returncode, compiled.stdout + compiled.stderr)
             arguments = [java, "-cp", str(directory), "com.termux.app.GuestArchiveProbe", str(directory / "fixtures")]

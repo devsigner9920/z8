@@ -28,3 +28,7 @@ jobs:
           python3 -m unittest discover -s tests -p test_signing_identity.py -v
       - name: Prepare public source set without publishing
         run: python3 tools/prepare-public-repo.py
+      - name: Language preferences and CLI consent
+        run: |
+          python3 -m unittest discover -s tests -p test_language.py -v
+          python3 -m unittest discover -s tests -p test_codex_launch.py -v

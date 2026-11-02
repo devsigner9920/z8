@@ -27,7 +27,7 @@ class SessionCatalogTests(unittest.TestCase):
             sources.append(str(path))
         sources += [str(ROOT / 'overlay/app/src/main/java/com/termux/app' / name)
                     for name in ('Z8SessionOrigin.java', 'Z8SessionCatalog.java')]
-        result = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(cls.directory), *sources],
+        result = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(cls.directory), *sources],
                                 capture_output=True, text=True, timeout=45)
         if result.returncode:
             raise AssertionError(result.stdout + result.stderr)
@@ -123,7 +123,7 @@ STUBS = {
                         check(items.get(0).session==first && items.get(1).session==nativeShell && items.get(3).session==repeated,"Service order preserved");
                         check(items.get(0).projectId.equals(items.get(3).projectId),"Same project grouping key");
                         check(!items.get(0).projectId.equals(items.get(2).projectId),"Different project grouping keys");
-                        check(items.get(1).projectId.isEmpty() && items.get(1).projectName.equals("기기 셸"),"Native shell has explicit separate group");
+                        check(items.get(1).projectId.isEmpty() && items.get(1).projectName.equals("Device shell"),"Native shell has explicit separate group");
                         check(items.get(0).projectName.equals("web") && items.get(2).projectName.equals("scripts"),"Readable project labels");
                         break;
                     }
@@ -173,9 +173,9 @@ STUBS = {
                     }
                     case "tools": {
                         String[][] cases={{"claude","Claude Code"},{"codex","Codex"},
-                            {"setup-codex","Codex 설치"},{"setup-claude","Claude 설치"},
-                            {"setup-tools","개발 도구 설치"},{"github-auth","GitHub 로그인"},
-                            {"hooks-codex","Codex 알림"},{"hooks-claude","Claude 알림"},{"remote-shell","Terminal"},{"future-action","Terminal"}};
+                            {"setup-codex","Install Codex"},{"setup-claude","Install Claude"},
+                            {"setup-tools","Install development tools"},{"github-auth","GitHub sign-in"},
+                            {"hooks-codex","Codex notifications"},{"hooks-claude","Claude notifications"},{"remote-shell","Terminal"},{"future-action","Terminal"}};
                         for(String[] item:cases){TerminalSession session=add(service,item[0],"renamed");
                             Z8SessionOrigin.remember(session,"p","project",item[0]);
                             check(entry(service,session).tool.equals(item[1]),"Explicit launch purpose: "+item[0]);}

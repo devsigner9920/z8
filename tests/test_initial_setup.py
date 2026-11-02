@@ -28,7 +28,7 @@ class InitialSetupTests(unittest.TestCase):
         probe = cls.directory / 'InitialSetupProbe.java'
         probe.write_text(PROBE)
         sources += [str(probe), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8InitialSetup.java')]
-        result = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(cls.directory), *sources], capture_output=True, text=True, timeout=30)
+        result = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(cls.directory), *sources], capture_output=True, text=True, timeout=30)
         if result.returncode:
             raise AssertionError(result.stdout + result.stderr)
 

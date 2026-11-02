@@ -58,24 +58,24 @@ public final class Z8Bootstrap {
     public static synchronized void ensure(Context context, Progress listener) throws Exception {
         interrupted();
         Context app = context.getApplicationContext();
-        if (!BuildConfig.Z8_HAS_BOOTSTRAP) throw new IOException("이 APK에는 실행 기반이 포함되어 있지 않습니다.");
+        if (!BuildConfig.Z8_HAS_BOOTSTRAP) throw new IOException(Z8Text.text("This APK does not include the runtime.", "이 APK에는 실행 기반이 포함되어 있지 않습니다."));
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && !PackageUtils.isCurrentUserThePrimaryUser(app))
-            throw new IOException("이 실행 기반은 기기의 기본 Android 사용자에서 설치할 수 있습니다.");
+            throw new IOException(Z8Text.text("Install this runtime under the device's primary Android user.", "이 실행 기반은 기기의 기본 Android 사용자에서 설치할 수 있습니다."));
         Error accessible = TermuxFileUtils.isTermuxFilesDirectoryAccessible(app, true, true);
         if (accessible != null) throw new IOException(Error.getMinimalErrorString(accessible));
         Path prefix = TermuxConstants.TERMUX_PREFIX_DIR.toPath();
         // Android exposes /data/data and /data/user/0 aliases whose canonical
         // strings need not agree. Compare the actual directory inode instead.
         if (!Files.isSameFile(prefix.getParent(), app.getFilesDir().toPath()))
-            throw new IOException("앱 저장 경로와 실행 기반의 빌드 경로가 일치하지 않습니다.");
+            throw new IOException(Z8Text.text("The app storage path does not match the runtime build path.", "앱 저장 경로와 실행 기반의 빌드 경로가 일치하지 않습니다."));
         Z8RuntimeLauncher.ensureAppLibraries(app);
         recoverUpgrade(app, prefix);
         recoverEarlyPrefix(prefix);
         Z8InstallStaging.recover(prefix.getParent(), ".z8-bootstrap-", STAGE_OWNER);
-        progress(listener, 0, "실행 기반을 확인하고 있습니다.");
+        progress(listener, 0, Z8Text.text("Checking the runtime…", "실행 기반을 확인하고 있습니다."));
         boolean upgrading = false;
         if (Files.exists(prefix, LinkOption.NOFOLLOW_LINKS)) {
-            if (installed(prefix)) { progress(listener, 100, "실행 기반이 준비되었습니다."); return; }
+            if (installed(prefix)) { progress(listener, 100, Z8Text.text("The runtime is ready.", "실행 기반이 준비되었습니다.")); return; }
             try { earlyPrefix(prefix); }
             catch (IOException notEarlyPrefix) {
                 verifyUpgrade(app, prefix);
@@ -86,11 +86,11 @@ public final class Z8Bootstrap {
 
         byte[] archive = TermuxInstaller.loadZipBytes();
         if (archive == null || archive.length == 0 || archive.length > MAX_ARCHIVE)
-            throw new IOException("실행 기반 이미지 크기가 올바르지 않습니다.");
+            throw new IOException(Z8Text.text("The runtime image size is invalid.", "실행 기반 이미지 크기가 올바르지 않습니다."));
         String expected = BuildConfig.Z8_BOOTSTRAP_SHA256;
         if (expected == null || !expected.matches("[a-f0-9]{64}") || !expected.equals(hash(archive)))
-            throw new IOException("실행 기반 이미지의 SHA-256이 일치하지 않습니다.");
-        progress(listener, 8, "실행 기반 이미지 검증을 마쳤습니다.");
+            throw new IOException(Z8Text.text("The runtime image SHA-256 does not match.", "실행 기반 이미지의 SHA-256이 일치하지 않습니다."));
+        progress(listener, 8, Z8Text.text("Runtime image verified.", "실행 기반 이미지 검증을 마쳤습니다."));
 
         Path stage = Z8InstallStaging.create(prefix.getParent(), ".z8-bootstrap-", STAGE_OWNER);
         Path backup = null;
@@ -114,13 +114,13 @@ public final class Z8Bootstrap {
                     preserveEarlyFiles(backup, stage);
                 } else if (upgrading) throw Z8BootstrapUpgrade.preserved();
                 if (Files.exists(prefix, LinkOption.NOFOLLOW_LINKS))
-                    throw new IOException("설치 중 실행 기반 경로가 변경되었습니다. 기존 파일을 보존했습니다.");
+                    throw new IOException(Z8Text.text("The runtime path changed during installation. Existing files have been preserved.", "설치 중 실행 기반 경로가 변경되었습니다. 기존 파일을 보존했습니다."));
                 // Sibling rename publishes the verified image while all app launch paths are excluded.
                 Files.move(stage, prefix);
                 published = true;
             }
             TermuxShellEnvironment.writeEnvironmentToFile(app);
-            progress(listener, 100, "실행 기반이 준비되었습니다.");
+            progress(listener, 100, Z8Text.text("The runtime is ready.", "실행 기반이 준비되었습니다."));
         } finally {
             synchronized (Z8RuntimeLauncher.EXECUTION_LOCK) {
                 if (!published && backup != null && !Files.exists(prefix, LinkOption.NOFOLLOW_LINKS))
@@ -194,7 +194,7 @@ public final class Z8Bootstrap {
 
     private static boolean installed(Path prefix) throws IOException {
         if (!Files.isDirectory(prefix, LinkOption.NOFOLLOW_LINKS))
-            throw new IOException("기존 실행 기반 경로가 폴더가 아닙니다. 파일을 보존했습니다.");
+            throw new IOException(Z8Text.text("The existing runtime path is not a directory. Files have been preserved.", "기존 실행 기반 경로가 폴더가 아닙니다. 파일을 보존했습니다."));
         Path receipt = prefix.resolve(RECEIPT);
         if (!Files.isRegularFile(receipt, LinkOption.NOFOLLOW_LINKS) || Files.size(receipt) > 128) return false;
         String stored = new String(Files.readAllBytes(receipt), StandardCharsets.UTF_8).trim();
@@ -206,7 +206,7 @@ public final class Z8Bootstrap {
     private static void executable(Path root, String name) throws IOException {
         Path file = Z8GuestArchive.checked(root.toFile(), name);
         if (!Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS) || !Files.isExecutable(file))
-            throw new IOException("실행 기반의 " + name + " 실행 파일을 확인하지 못했습니다.");
+            throw new IOException(Z8Text.text("Cannot verify runtime executable ", "실행 기반의 ") + name + Z8Text.text(".", " 실행 파일을 확인하지 못했습니다."));
     }
 
     /** Only known startup-generated files and empty startup folders may precede bootstrap. */
@@ -224,7 +224,7 @@ public final class Z8Bootstrap {
         });
     }
     private static IOException preserved() {
-        return new IOException("기존 실행 기반이 불완전하거나 다른 버전입니다. 파일을 보존했으며 자동 덮어쓰기를 중단했습니다.");
+        return new IOException(Z8Text.text("The existing runtime is incomplete or uses a different version. Files have been preserved; automatic replacement has stopped.", "기존 실행 기반이 불완전하거나 다른 버전입니다. 파일을 보존했으며 자동 덮어쓰기를 중단했습니다."));
     }
 
     private static void preserveEarlyFiles(Path old, Path stage) throws IOException {
@@ -250,11 +250,11 @@ public final class Z8Bootstrap {
                 interrupted();
                 String name = Z8GuestArchive.path(entry.getName(), entry.isDirectory());
                 if (!names.add(name) || names.size() > MAX_ENTRIES || name.equals(RECEIPT) || name.startsWith(RECEIPT + "/"))
-                    throw new IOException("실행 기반 이미지에 중복되거나 예약된 경로가 있습니다.");
+                    throw new IOException(Z8Text.text("The runtime image contains duplicate or reserved paths.", "실행 기반 이미지에 중복되거나 예약된 경로가 있습니다."));
                 Path target = Z8GuestArchive.checked(stage.toFile(), name);
                 if (entry.isDirectory()) {
                     Files.createDirectories(target);
-                    if (zip.read() != -1) throw new IOException("폴더 항목에 예상하지 않은 내용이 있습니다.");
+                    if (zip.read() != -1) throw new IOException(Z8Text.text("A directory entry contains unexpected data.", "폴더 항목에 예상하지 않은 내용이 있습니다."));
                 } else {
                     Files.createDirectories(target.getParent());
                     ByteArrayOutputStream linkContent = name.equals("SYMLINKS.txt") ? new ByteArrayOutputStream() : null;
@@ -265,7 +265,7 @@ public final class Z8Bootstrap {
                         while ((count = zip.read(buffer)) != -1) {
                             interrupted(); expanded += count;
                             if (expanded > MAX_EXPANDED || linkContent != null && linkContent.size() + count > MAX_LINKS)
-                                throw new IOException("실행 기반 이미지의 압축 해제 크기가 너무 큽니다.");
+                                throw new IOException(Z8Text.text("The expanded runtime image is too large.", "실행 기반 이미지의 압축 해제 크기가 너무 큽니다."));
                             output.write(buffer, 0, count);
                         }
                     }
@@ -275,12 +275,12 @@ public final class Z8Bootstrap {
                 }
                 zip.closeEntry();
                 int value = 8 + (int) (77L * (archive.length - input.available()) / archive.length);
-                if (value != previousProgress) { progress(listener, value, "실행 기반 파일을 준비하고 있습니다."); previousProgress = value; }
+                if (value != previousProgress) { progress(listener, value, Z8Text.text("Preparing runtime files…", "실행 기반 파일을 준비하고 있습니다.")); previousProgress = value; }
             }
         }
-        if (links == null || links.length == 0) throw new IOException("실행 기반 이미지의 링크 목록이 없습니다.");
+        if (links == null || links.length == 0) throw new IOException(Z8Text.text("The runtime image has no link manifest.", "실행 기반 이미지의 링크 목록이 없습니다."));
         Map<String, String> mappings = links(links, names, prefix);
-        progress(listener, 90, "실행 기반 링크와 권한을 적용하고 있습니다.");
+        progress(listener, 90, Z8Text.text("Applying runtime links and permissions…", "실행 기반 링크와 권한을 적용하고 있습니다."));
         for (Map.Entry<String, String> link : mappings.entrySet()) {
             interrupted();
             Path target = Z8GuestArchive.checked(stage.toFile(), link.getKey());
@@ -293,19 +293,19 @@ public final class Z8Bootstrap {
         String contents;
         try { contents = StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
             .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString(); }
-        catch (Exception invalid) { throw new IOException("링크 목록의 문자 인코딩이 올바르지 않습니다.", invalid); }
+        catch (Exception invalid) { throw new IOException(Z8Text.text("The link manifest has an invalid character encoding.", "링크 목록의 문자 인코딩이 올바르지 않습니다."), invalid); }
         Map<String, String> result = new LinkedHashMap<>();
         for (String line : contents.split("\n", -1)) {
             if (line.isEmpty()) continue;
             int arrow = line.indexOf('←');
-            if (arrow <= 0 || arrow != line.lastIndexOf('←') || arrow == line.length() - 1) throw new IOException("링크 목록 형식이 올바르지 않습니다.");
+            if (arrow <= 0 || arrow != line.lastIndexOf('←') || arrow == line.length() - 1) throw new IOException(Z8Text.text("The link manifest format is invalid.", "링크 목록 형식이 올바르지 않습니다."));
             String destination = Z8GuestArchive.path(line.substring(arrow + 1), false);
             String target = line.substring(0, arrow);
-            if (target.length() > 4096 || target.indexOf('\\') >= 0) throw new IOException("잘못된 링크 경로입니다.");
-            for (int i = 0; i < target.length(); i++) if (Character.isISOControl(target.charAt(i))) throw new IOException("잘못된 링크 경로입니다.");
+            if (target.length() > 4096 || target.indexOf('\\') >= 0) throw new IOException(Z8Text.text("Invalid link path.", "잘못된 링크 경로입니다."));
+            for (int i = 0; i < target.length(); i++) if (Character.isISOControl(target.charAt(i))) throw new IOException(Z8Text.text("Invalid link path.", "잘못된 링크 경로입니다."));
             if (target.startsWith("/")) {
                 String root = prefix.toString() + "/";
-                if (!target.startsWith(root)) throw new IOException("실행 기반 밖으로 나가는 링크입니다.");
+                if (!target.startsWith(root)) throw new IOException(Z8Text.text("A link points outside the runtime.", "실행 기반 밖으로 나가는 링크입니다."));
                 // Preserve final-prefix semantics while allowing complete staging validation.
                 Path parent = java.nio.file.Paths.get(destination).getParent();
                 if (parent == null) parent = java.nio.file.Paths.get("");
@@ -313,13 +313,13 @@ public final class Z8Bootstrap {
             }
             if (destination.equals(RECEIPT) || destination.equals("SYMLINKS.txt") || names.contains(destination)
                     || result.put(destination, target) != null || result.size() + names.size() > MAX_ENTRIES)
-                throw new IOException("링크가 기존 이미지 항목과 겹칩니다.");
+                throw new IOException(Z8Text.text("A link overlaps an existing image entry.", "링크가 기존 이미지 항목과 겹칩니다."));
         }
         Set<String> ancestors = new HashSet<>();
         for (String path : names) ancestors(path, ancestors);
         for (String path : result.keySet()) ancestors(path, ancestors);
         for (String path : result.keySet()) {
-            if (ancestors.contains(path)) throw new IOException("링크 아래에 이미지 항목이 있습니다.");
+            if (ancestors.contains(path)) throw new IOException(Z8Text.text("An image entry is nested under a link.", "링크 아래에 이미지 항목이 있습니다."));
             resolve(path, result);
         }
         return result;
@@ -336,13 +336,13 @@ public final class Z8Bootstrap {
             String component = pending.removeFirst();
             if (component.isEmpty() || component.equals(".")) continue;
             if (component.equals("..")) {
-                if (resolved.isEmpty()) throw new IOException("실행 기반 밖으로 나가는 링크입니다.");
+                if (resolved.isEmpty()) throw new IOException(Z8Text.text("A link points outside the runtime.", "실행 기반 밖으로 나가는 링크입니다."));
                 resolved.removeLast(); continue;
             }
             resolved.addLast(component);
             String target = links.get(String.join("/", resolved));
             if (target != null) {
-                if (++followed > 128) throw new IOException("순환하는 실행 기반 링크입니다.");
+                if (++followed > 128) throw new IOException(Z8Text.text("A runtime link contains a cycle.", "순환하는 실행 기반 링크입니다."));
                 resolved.removeLast();
                 String[] parts = target.split("/", -1);
                 for (int i = parts.length - 1; i >= 0; i--) pending.addFirst(parts[i]);
@@ -360,7 +360,7 @@ public final class Z8Bootstrap {
         return result.toString();
     }
     private static void interrupted() throws InterruptedIOException {
-        if (Thread.currentThread().isInterrupted()) throw new InterruptedIOException("실행 기반 준비가 중단되었습니다.");
+        if (Thread.currentThread().isInterrupted()) throw new InterruptedIOException(Z8Text.text("Runtime preparation was interrupted.", "실행 기반 준비가 중단되었습니다."));
     }
     private static void progress(Progress listener, int percent, String message) throws InterruptedIOException {
         interrupted(); if (listener != null) listener.onProgress(percent, message);

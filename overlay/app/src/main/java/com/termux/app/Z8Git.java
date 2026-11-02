@@ -120,7 +120,7 @@ public final class Z8Git {
     }
 
     public void init() throws IOException {
-        if (repositoryExists()) throw new IOException("이미 Git 저장소입니다.");
+        if (repositoryExists()) throw new IOException(Z8Text.text("This is already a Git repository.", "이미 Git 저장소입니다."));
         require(run(null, "init", "--initial-branch=main", "--", source.getAbsolutePath()));
         repository();
     }
@@ -137,7 +137,7 @@ public final class Z8Git {
         else { require(branchResult); branch = ""; }
         String head = head();
         String after = token();
-        if (!before.equals(after)) throw new IOException("Git 상태를 읽는 동안 인덱스가 변경되었습니다. 새로고침해 주세요.");
+        if (!before.equals(after)) throw new IOException(Z8Text.text("The Git index changed while reading the status. Refresh and try again.", "Git 상태를 읽는 동안 인덱스가 변경되었습니다. 새로고침해 주세요."));
         return new Status(changes, branch, head, after);
     }
 
@@ -177,13 +177,13 @@ public final class Z8Git {
 
     public String commit(Status expected, String message, String authorName, String authorEmail) throws IOException {
         repository();
-        if (expected == null || expected.stagedCount() == 0) throw new IOException("먼저 커밋할 변경사항을 스테이지에 올려주세요.");
-        if (expected.conflicts()) throw new IOException("충돌을 해결하고 스테이지에 올린 뒤 커밋해 주세요.");
+        if (expected == null || expected.stagedCount() == 0) throw new IOException(Z8Text.text("Stage the changes you want to commit first.", "먼저 커밋할 변경사항을 스테이지에 올려주세요."));
+        if (expected.conflicts()) throw new IOException(Z8Text.text("Resolve the conflicts and stage the files before committing.", "충돌을 해결하고 스테이지에 올린 뒤 커밋해 주세요."));
         if (message == null || message.trim().isEmpty() || message.getBytes(StandardCharsets.UTF_8).length > 16 * 1024
-                || message.indexOf('\0') >= 0) throw new IOException("커밋 메시지는 1~16 KiB로 입력해 주세요.");
+                || message.indexOf('\0') >= 0) throw new IOException(Z8Text.text("Enter a nonempty commit message up to 16 KiB.", "커밋 메시지는 1~16 KiB로 입력해 주세요."));
         authorName = identity(authorName, false); authorEmail = identity(authorEmail, true);
         if (!expected.indexToken.equals(token()) || !expected.head.equals(head()))
-            throw new IOException("커밋을 준비하는 동안 스테이지 또는 HEAD가 변경되었습니다. 새로고침 후 다시 확인해 주세요.");
+            throw new IOException(Z8Text.text("The staging area or HEAD changed while preparing the commit. Refresh and review the changes again.", "커밋을 준비하는 동안 스테이지 또는 HEAD가 변경되었습니다. 새로고침 후 다시 확인해 주세요."));
         Result committed = require(run(message.getBytes(StandardCharsets.UTF_8),
             "-c", "user.name=" + authorName, "-c", "user.email=" + authorEmail,
             "commit", "--file=-", "--cleanup=strip"));
@@ -200,7 +200,7 @@ public final class Z8Git {
         String result = require(run(null, "for-each-ref", "--format=%(refname:short)", "refs/heads/")).output();
         List<String> values = new ArrayList<>();
         for (String line : result.split("\n")) if (!line.isEmpty()) {
-            if (values.size() == 500) throw new IOException("브랜치가 500개를 초과했습니다. 터미널에서 확인해 주세요.");
+            if (values.size() == 500) throw new IOException(Z8Text.text("There are more than 500 branches. View them in the terminal.", "브랜치가 500개를 초과했습니다. 터미널에서 확인해 주세요."));
             values.add(line);
         }
         return values;
@@ -214,7 +214,7 @@ public final class Z8Git {
 
     private void branchName(String name) throws IOException {
         if (name == null || name.isEmpty() || name.length() > 200 || name.startsWith("-") || name.contains("@{"))
-            throw new IOException("브랜치 이름을 확인해 주세요.");
+            throw new IOException(Z8Text.text("Check the branch name.", "브랜치 이름을 확인해 주세요."));
         require(run(null, "check-ref-format", "--branch", name));
     }
 
@@ -229,12 +229,12 @@ public final class Z8Git {
             if (value.contains("://")) {
                 try {
                     java.net.URI uri = new java.net.URI(value);
-                    return uri.getHost() == null ? "설정된 저장소" : uri.getHost() + (uri.getPath() == null ? "" : uri.getPath());
-                } catch (Exception ignored) { return "설정된 저장소"; }
+                    return uri.getHost() == null ? Z8Text.text("Configured repository", "설정된 저장소") : uri.getHost() + (uri.getPath() == null ? "" : uri.getPath());
+                } catch (Exception ignored) { return Z8Text.text("Configured repository", "설정된 저장소"); }
             }
             if (value.matches("[^ /]+@[^ /]+:.*")) value = value.substring(value.indexOf('@') + 1);
             int query = value.indexOf('?'); if (query >= 0) value = value.substring(0, query);
-            for (int i = 0; i < value.length(); i++) if (Character.isISOControl(value.charAt(i))) return "설정된 저장소";
+            for (int i = 0; i < value.length(); i++) if (Character.isISOControl(value.charAt(i))) return Z8Text.text("Configured repository", "설정된 저장소");
             return value.length() > 300 ? value.substring(0, 300) + "…" : value;
         }
     }
@@ -242,7 +242,7 @@ public final class Z8Git {
     public List<Remote> remotes() throws IOException {
         repository(); List<Remote> values = new ArrayList<>();
         for (String name : require(run(null, "remote")).output().split("\n")) if (!name.isEmpty()) {
-            if (values.size() == 50) throw new IOException("원격 저장소가 50개를 초과했습니다.");
+            if (values.size() == 50) throw new IOException(Z8Text.text("There are more than 50 remotes.", "원격 저장소가 50개를 초과했습니다."));
             if (!name.matches("[A-Za-z0-9][A-Za-z0-9._/-]{0,199}")) continue;
             String fetch = require(run(null, "remote", "get-url", "--all", name)).output().trim();
             String push = require(run(null, "remote", "get-url", "--push", "--all", name)).output().trim();
@@ -256,15 +256,15 @@ public final class Z8Git {
     public void network(Status expected, Remote remote, String action) throws IOException {
         repository();
         if (!Arrays.asList("fetch", "pull", "push").contains(action) || remote == null)
-            throw new IOException("지원하지 않는 원격 작업입니다.");
+            throw new IOException(Z8Text.text("Unsupported remote operation.", "지원하지 않는 원격 작업입니다."));
         boolean found = false;
         for (Remote current : remotes()) if (current.name.equals(remote.name)
                 && current.fetchUrl.equals(remote.fetchUrl) && current.pushUrl.equals(remote.pushUrl)) found = true;
-        if (!found) throw new IOException("원격 저장소 설정이 변경되었습니다. 새로 확인해 주세요.");
+        if (!found) throw new IOException(Z8Text.text("The remote settings have changed. Review them again.", "원격 저장소 설정이 변경되었습니다. 새로 확인해 주세요."));
         if (!"fetch".equals(action)) {
             checkExpected(expected, "pull".equals(action));
             if (expected.head.isEmpty() || expected.branch.equals("detached HEAD"))
-                throw new IOException("커밋된 로컬 브랜치를 선택해 주세요.");
+                throw new IOException(Z8Text.text("Select a local branch with at least one commit.", "커밋된 로컬 브랜치를 선택해 주세요."));
             branchName(expected.branch);
         }
         Result result;
@@ -273,17 +273,17 @@ public final class Z8Git {
             "pull", "--ff-only", "--no-rebase", "--", remote.name, "refs/heads/" + expected.branch);
         else result = run(null, "push", "--porcelain", "--", remote.name,
             "HEAD:refs/heads/" + expected.branch);
-        if (result.code != 0) throw new IOException("원격 " + action + " 작업이 완료되지 않았습니다 (종료 코드 " + result.code
-            + "). 인증·브랜치 상태를 터미널에서 확인한 뒤 새로고침해 주세요. 자동으로 재시도하지 않습니다.");
+        if (result.code != 0) throw new IOException(Z8Text.text("Remote ", "원격 ") + action + Z8Text.text(" did not complete (exit code ", " 작업이 완료되지 않았습니다 (종료 코드 ") + result.code
+            + Z8Text.text("). Check authentication and the branch status in the terminal, then refresh. This operation will not retry automatically.", "). 인증·브랜치 상태를 터미널에서 확인한 뒤 새로고침해 주세요. 자동으로 재시도하지 않습니다."));
     }
 
     private void checkExpected(Status expected, boolean clean) throws IOException {
-        if (expected == null) throw new IOException("Git 상태를 새로고침해 주세요.");
+        if (expected == null) throw new IOException(Z8Text.text("Refresh the Git status.", "Git 상태를 새로고침해 주세요."));
         Status current = status();
         if (!expected.branch.equals(current.branch) || !expected.head.equals(current.head)
                 || !expected.indexToken.equals(current.indexToken))
-            throw new IOException("브랜치 또는 스테이지가 변경되었습니다. 새로고침 후 다시 확인해 주세요.");
-        if (clean && !current.changes.isEmpty()) throw new IOException("변경 파일을 먼저 커밋하거나 터미널에서 정리해 주세요.");
+            throw new IOException(Z8Text.text("The branch or staging area has changed. Refresh and review it again.", "브랜치 또는 스테이지가 변경되었습니다. 새로고침 후 다시 확인해 주세요."));
+        if (clean && !current.changes.isEmpty()) throw new IOException(Z8Text.text("Commit the changed files first or resolve them in the terminal.", "변경 파일을 먼저 커밋하거나 터미널에서 정리해 주세요."));
     }
 
     private String config(String key) throws IOException {
@@ -295,10 +295,10 @@ public final class Z8Git {
     static String identity(String input, boolean email) throws IOException {
         String value = input == null ? "" : input.trim();
         if (value.isEmpty() || value.length() > 200 || value.indexOf('<') >= 0 || value.indexOf('>') >= 0)
-            throw new IOException("작성자 이름과 이메일을 확인해 주세요.");
+            throw new IOException(Z8Text.text("Check the author name and email address.", "작성자 이름과 이메일을 확인해 주세요."));
         for (int index = 0; index < value.length(); index++)
-            if (Character.isISOControl(value.charAt(index))) throw new IOException("작성자 정보에 제어 문자를 사용할 수 없습니다.");
-        if (email && (value.indexOf('@') < 1 || value.indexOf(' ') >= 0)) throw new IOException("작성자 이메일을 확인해 주세요.");
+            if (Character.isISOControl(value.charAt(index))) throw new IOException(Z8Text.text("Author details cannot contain control characters.", "작성자 정보에 제어 문자를 사용할 수 없습니다."));
+        if (email && (value.indexOf('@') < 1 || value.indexOf(' ') >= 0)) throw new IOException(Z8Text.text("Check the author email address.", "작성자 이메일을 확인해 주세요."));
         return value;
     }
 
@@ -313,7 +313,7 @@ public final class Z8Git {
         validatePath(source, ".git/index", true);
         if (!Files.exists(index, LinkOption.NOFOLLOW_LINKS)) return "unborn-index";
         if (!Files.isRegularFile(index, LinkOption.NOFOLLOW_LINKS) || Files.size(index) > MAX_INDEX)
-            throw new IOException("이 인덱스는 네이티브 Git 화면의 크기 제한을 초과했습니다.");
+            throw new IOException(Z8Text.text("This index exceeds the Git screen's size limit.", "이 인덱스는 네이티브 Git 화면의 크기 제한을 초과했습니다."));
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             long total = 0;
@@ -322,7 +322,7 @@ public final class Z8Git {
                 int count;
                 while ((count = input.read(buffer)) != -1) {
                     total += count;
-                    if (total > MAX_INDEX) throw new IOException("Git 인덱스가 크기 제한을 초과했습니다.");
+                    if (total > MAX_INDEX) throw new IOException(Z8Text.text("The Git index exceeds the size limit.", "Git 인덱스가 크기 제한을 초과했습니다."));
                     digest.update(buffer, 0, count);
                 }
             }
@@ -333,7 +333,7 @@ public final class Z8Git {
     }
 
     private void validateChange(Change change) throws IOException {
-        if (change == null) throw new IOException("변경 파일을 선택해 주세요.");
+        if (change == null) throw new IOException(Z8Text.text("Select a changed file.", "변경 파일을 선택해 주세요."));
         validatePath(source, change.path, false);
         if (change.oldPath != null) validatePath(source, change.oldPath, false);
     }
@@ -341,17 +341,17 @@ public final class Z8Git {
     static void validatePath(File source, String relative, boolean metadata) throws IOException {
         Z8Files.directory(source, "");
         if (relative == null || relative.isEmpty() || relative.startsWith("/") || relative.indexOf('\\') >= 0)
-            throw new IOException("잘못된 Git 파일 경로입니다.");
+            throw new IOException(Z8Text.text("Invalid Git file path.", "잘못된 Git 파일 경로입니다."));
         Path root = source.toPath().toAbsolutePath().normalize();
         Path cursor = root;
         for (String component : relative.split("/", -1)) {
             Z8Files.name(component);
-            if (!metadata && component.equalsIgnoreCase(".git")) throw new IOException("Git 내부 파일은 스테이지에 올릴 수 없습니다.");
+            if (!metadata && component.equalsIgnoreCase(".git")) throw new IOException(Z8Text.text("Internal Git files cannot be staged.", "Git 내부 파일은 스테이지에 올릴 수 없습니다."));
             cursor = cursor.resolve(component);
-            if (Files.isSymbolicLink(cursor)) throw new IOException("링크 경로의 Git 작업은 터미널에서 확인해 주세요.");
+            if (Files.isSymbolicLink(cursor)) throw new IOException(Z8Text.text("Use the terminal for Git operations on symbolic link paths.", "링크 경로의 Git 작업은 터미널에서 확인해 주세요."));
         }
         if (!cursor.toFile().getCanonicalFile().toPath().startsWith(root.toFile().getCanonicalFile().toPath()))
-            throw new IOException("프로젝트 밖의 Git 파일 경로입니다.");
+            throw new IOException(Z8Text.text("This Git file path is outside the project.", "프로젝트 밖의 Git 파일 경로입니다."));
     }
 
     static List<Change> parseStatus(byte[] bytes) throws IOException {
@@ -359,31 +359,31 @@ public final class Z8Git {
         try {
             raw = StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
                 .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(bytes)).toString();
-        } catch (Exception invalid) { throw new IOException("Git 파일 이름을 UTF-8로 읽을 수 없습니다.", invalid); }
+        } catch (Exception invalid) { throw new IOException(Z8Text.text("The Git filename could not be read as UTF-8.", "Git 파일 이름을 UTF-8로 읽을 수 없습니다."), invalid); }
         List<Change> result = new ArrayList<>();
         int offset = 0;
         while (offset < raw.length()) {
             int end = raw.indexOf('\0', offset);
-            if (end < offset + 4 || raw.charAt(offset + 2) != ' ') throw new IOException("Git 상태 응답 형식이 올바르지 않습니다.");
+            if (end < offset + 4 || raw.charAt(offset + 2) != ' ') throw new IOException(Z8Text.text("Invalid Git status response format.", "Git 상태 응답 형식이 올바르지 않습니다."));
             char index = raw.charAt(offset), worktree = raw.charAt(offset + 1);
             if (" MADRCU?!T".indexOf(index) < 0 || " MADRCU?!T".indexOf(worktree) < 0)
-                throw new IOException("지원하지 않는 Git 상태 코드입니다.");
+                throw new IOException(Z8Text.text("Unsupported Git status code.", "지원하지 않는 Git 상태 코드입니다."));
             String path = raw.substring(offset + 3, end);
             offset = end + 1;
             String old = null;
             if (index == 'R' || index == 'C' || worktree == 'R' || worktree == 'C') {
                 end = raw.indexOf('\0', offset);
-                if (end <= offset) throw new IOException("Git 이름 변경 응답이 완전하지 않습니다.");
+                if (end <= offset) throw new IOException(Z8Text.text("The Git rename response is incomplete.", "Git 이름 변경 응답이 완전하지 않습니다."));
                 old = raw.substring(offset, end); offset = end + 1;
             }
-            if (result.size() >= 2000) throw new IOException("변경 파일이 2,000개를 초과했습니다. 터미널에서 확인해 주세요.");
+            if (result.size() >= 2000) throw new IOException(Z8Text.text("There are more than 2,000 changed files. View them in the terminal.", "변경 파일이 2,000개를 초과했습니다. 터미널에서 확인해 주세요."));
             result.add(new Change(index, worktree, path, old));
         }
         return result;
     }
 
     private Result run(byte[] input, String... arguments) throws IOException {
-        if (!available()) throw new IOException(guestConfiguration ? "프로젝트 Linux 환경의 Git 또는 PRoot가 준비되지 않았습니다." : "z8 전용 Android Git 실행 파일이 설치되지 않았습니다.");
+        if (!available()) throw new IOException(guestConfiguration ? Z8Text.text("Git or PRoot is not ready in the project's Linux environment.", "프로젝트 Linux 환경의 Git 또는 PRoot가 준비되지 않았습니다.") : Z8Text.text("The z8 Android Git executable is not installed.", "z8 전용 Android Git 실행 파일이 설치되지 않았습니다."));
         Z8Files.directory(source, "");
         checkPrivateDirectory(home);
         checkPrivateDirectory(temp);
@@ -396,7 +396,7 @@ public final class Z8Git {
         if (!guestConfiguration) {
             env.put("GIT_CONFIG_NOSYSTEM", "1");
             File globalConfig = new File(home, ".gitconfig");
-            if (Files.isSymbolicLink(globalConfig.toPath())) throw new IOException("프로젝트 Git 설정 파일이 링크입니다.");
+            if (Files.isSymbolicLink(globalConfig.toPath())) throw new IOException(Z8Text.text("The project's Git configuration file is a symbolic link.", "프로젝트 Git 설정 파일이 링크입니다."));
             env.put("GIT_CONFIG_GLOBAL", globalConfig.getAbsolutePath());
         }
         // Explicit roots override core.worktree and prevent parent discovery.
@@ -415,7 +415,7 @@ public final class Z8Git {
         Path cursor = path.getRoot();
         for (Path component : path) {
             cursor = cursor.resolve(component);
-            if (Files.isSymbolicLink(cursor)) throw new IOException("Git 작업 디렉터리에 링크가 있습니다.");
+            if (Files.isSymbolicLink(cursor)) throw new IOException(Z8Text.text("The Git working directory contains a symbolic link.", "Git 작업 디렉터리에 링크가 있습니다."));
         }
         Files.createDirectories(path);
     }
@@ -424,7 +424,7 @@ public final class Z8Git {
         if (result.code == 0) return result;
         String message = new String(result.stderr.length > 0 ? result.stderr : result.stdout, StandardCharsets.UTF_8).trim();
         if (message.length() > 4000) message = message.substring(0, 4000) + "…";
-        throw new IOException("Git 종료 코드 " + result.code + (message.isEmpty() ? "" : "\n" + message));
+        throw new IOException(Z8Text.text("Git exit code ", "Git 종료 코드 ") + result.code + (message.isEmpty() ? "" : "\n" + message));
     }
 
     static final class ProcessRunner implements Runner {
@@ -451,15 +451,15 @@ public final class Z8Git {
                 if (!process.waitFor(timeout, TimeUnit.SECONDS)) {
                     process.destroy();
                     if (!process.waitFor(500, TimeUnit.MILLISECONDS)) process.destroyForcibly();
-                    throw new IOException("Git 작업의 30초 제한을 초과했습니다. 상태를 새로고침하고 터미널에서 확인해 주세요.");
+                    throw new IOException(Z8Text.text("The Git operation exceeded the 30-second limit. Refresh the status and check in the terminal.", "Git 작업의 30초 제한을 초과했습니다. 상태를 새로고침하고 터미널에서 확인해 주세요."));
                 }
                 out.join(1000); err.join(1000); writer.join(1000);
-                if (out.isAlive() || err.isAlive() || writer.isAlive()) throw new IOException("Git 하위 작업의 출력이 끝나지 않았습니다. 상태를 확인해 주세요.");
+                if (out.isAlive() || err.isAlive() || writer.isAlive()) throw new IOException(Z8Text.text("Output from a Git subprocess has not finished. Check the status.", "Git 하위 작업의 출력이 끝나지 않았습니다. 상태를 확인해 주세요."));
                 if (readFailure.get() != null) throw readFailure.get();
                 if (process.exitValue() == 0 && input.length > 0 && inputFailure.get() != null) throw inputFailure.get();
                 return new Result(process.exitValue(), stdout.toByteArray(), stderr.toByteArray());
             } catch (InterruptedException interrupted) {
-                Thread.currentThread().interrupt(); throw new IOException("Git 작업이 중단되었습니다.", interrupted);
+                Thread.currentThread().interrupt(); throw new IOException(Z8Text.text("The Git operation was interrupted.", "Git 작업이 중단되었습니다."), interrupted);
             } finally {
                 if (process.isAlive()) process.destroyForcibly();
                 try { process.getInputStream().close(); } catch (IOException ignored) {}
@@ -474,7 +474,7 @@ public final class Z8Git {
                 try {
                     byte[] buffer = new byte[8192]; int count;
                     while ((count = input.read(buffer)) != -1) {
-                        if (output.size() + count > limit) throw new IOException("Git 출력이 1 MiB 제한을 초과했습니다. 파일별로 확인하거나 터미널을 사용해 주세요.");
+                        if (output.size() + count > limit) throw new IOException(Z8Text.text("Git output exceeded the 1 MiB limit. View individual files or use the terminal.", "Git 출력이 1 MiB 제한을 초과했습니다. 파일별로 확인하거나 터미널을 사용해 주세요."));
                         output.write(buffer, 0, count);
                     }
                 } catch (IOException exception) {

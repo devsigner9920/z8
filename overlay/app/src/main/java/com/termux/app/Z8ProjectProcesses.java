@@ -89,9 +89,9 @@ public final class Z8ProjectProcesses {
         ProcessRecord process = access.read(pid);
         if (process == null || !process.alive() || process.uid != uid || process.parent != parentPid
                 || !access.isPreparationShell(pid, marker, script))
-            throw preserved("초기 설치 프로세스의 소유자를 확인하지 못했습니다.");
+            throw preserved(Z8Text.text("Could not verify the owner of the initial setup process.", "초기 설치 프로세스의 소유자를 확인하지 못했습니다."));
         // Re-read after executable/cmdline checks to reject a PID reused mid-check.
-        if (!process.same(access.read(pid))) throw preserved("초기 설치 프로세스가 확인 중 변경되었습니다.");
+        if (!process.same(access.read(pid))) throw preserved(Z8Text.text("The initial setup process changed during verification.", "초기 설치 프로세스가 확인 중 변경되었습니다."));
         return new PreparationTarget(process, projectId, marker, script);
     }
 
@@ -114,7 +114,7 @@ public final class Z8ProjectProcesses {
                 // or SIGTERM after acknowledgement can orphan traced apt children.
                 if (!access.isProot(current.pid, target.projectId)
                         && !access.isPreparationShell(current.pid, target.marker, target.script))
-                    throw preserved("초기 설치 실행 파일 또는 프로젝트를 확인하지 못했습니다.");
+                    throw preserved(Z8Text.text("Could not verify the initial setup executable or project.", "초기 설치 실행 파일 또는 프로젝트를 확인하지 못했습니다."));
                 if (target.root.same(access.read(current.pid))) access.quit(current.pid);
             }
             long deadline = access.now() + 10000;
@@ -128,7 +128,7 @@ public final class Z8ProjectProcesses {
                     if (expected.same(found) && found.alive()) { alive = true; break; }
                 }
                 if (!alive) return;
-                if (access.now() >= deadline) throw preserved("초기 설치의 하위 프로세스가 아직 종료되지 않았습니다.");
+                if (access.now() >= deadline) throw preserved(Z8Text.text("Child processes from initial setup are still running.", "초기 설치의 하위 프로세스가 아직 종료되지 않았습니다."));
                 // Cancellation must not interrupt verification halfway through and
                 // discard the retained identities. The outer close restores it.
                 try { access.pause(); }
@@ -163,12 +163,12 @@ public final class Z8ProjectProcesses {
             if (target.pid <= 0) continue;
             ProcessRecord process = before.get(target.pid);
             if (process == null) {
-                if (access.read(target.pid) != null) throw preserved("터미널 프로세스의 소유자를 확인하지 못했습니다.");
+                if (access.read(target.pid) != null) throw preserved(Z8Text.text("Could not verify the owner of the terminal process.", "터미널 프로세스의 소유자를 확인하지 못했습니다."));
                 continue;
             }
             if (!process.alive()) continue;
-            if (target.terminal.getPid() != target.pid) throw preserved("터미널 프로세스가 변경되었습니다.");
-            if (target.guest && !access.isProot(target.pid, target.projectId)) throw preserved("프로젝트 실행 프로세스를 확인하지 못했습니다.");
+            if (target.terminal.getPid() != target.pid) throw preserved(Z8Text.text("The terminal process has changed.", "터미널 프로세스가 변경되었습니다."));
+            if (target.guest && !access.isProot(target.pid, target.projectId)) throw preserved(Z8Text.text("Could not verify the project's running process.", "프로젝트 실행 프로세스를 확인하지 못했습니다."));
             roots.put(process.pid, process); tracked.put(process.pid, process); liveTargets.put(process.pid, target);
         }
         collect(before, roots, tracked);
@@ -200,7 +200,7 @@ public final class Z8ProjectProcesses {
                 }
                 return;
             }
-            if (access.now() >= deadline) throw preserved("프로젝트의 실행 중인 하위 프로세스가 남아 있습니다.");
+            if (access.now() >= deadline) throw preserved(Z8Text.text("The project still has running child processes.", "프로젝트의 실행 중인 하위 프로세스가 남아 있습니다."));
             access.pause();
         }
     }
@@ -217,7 +217,7 @@ public final class Z8ProjectProcesses {
                 // Never adopt children of a PID that has since been reused by another process.
                 if ((tracer != null && tracer.same(current.get(tracer.pid)))
                         || (parent != null && parent.same(current.get(parent.pid)))) {
-                    if (tracked.size() >= 32768) throw preserved("프로세스 확인 범위를 초과했습니다.");
+                    if (tracked.size() >= 32768) throw preserved(Z8Text.text("The process verification limit was exceeded.", "프로세스 확인 범위를 초과했습니다."));
                     tracked.put(process.pid, process); added = true;
                 }
             }
@@ -225,9 +225,9 @@ public final class Z8ProjectProcesses {
     }
 
     private static void checkCancelled(BooleanSupplier stopping) throws IOException {
-        if (Thread.currentThread().isInterrupted() || stopping.getAsBoolean()) throw preserved("실행 서비스가 중단되었습니다.");
+        if (Thread.currentThread().isInterrupted() || stopping.getAsBoolean()) throw preserved(Z8Text.text("The runtime service has stopped.", "실행 서비스가 중단되었습니다."));
     }
-    private static IOException preserved(String detail) { return new IOException(detail + " 파일을 보존했습니다. 다시 시도해 주세요."); }
+    private static IOException preserved(String detail) { return new IOException(detail + Z8Text.text(" Your files were kept. Try again.", " 파일을 보존했습니다. 다시 시도해 주세요.")); }
 
     /** Called with EXECUTION_LOCK held before replacing an app-owned host runtime. */
     static void requireRuntimeIdle() throws IOException {
@@ -237,10 +237,10 @@ public final class Z8ProjectProcesses {
         try {
             for (ProcessRecord process : access.scan().values()) {
                 if (process.pid != callerPid && process.alive())
-                    throw new IOException("실행 기반을 갱신하려면 열려 있는 터미널과 실행 작업을 먼저 종료해 주세요. 기존 파일은 보존했습니다.");
+                    throw new IOException(Z8Text.text("Close open terminals and stop running tasks before updating the runtime. Your existing files were kept.", "실행 기반을 갱신하려면 열려 있는 터미널과 실행 작업을 먼저 종료해 주세요. 기존 파일은 보존했습니다."));
             }
         } catch (IOException error) { throw error; }
-        catch (Exception error) { throw preserved("실행 중인 작업을 확인하지 못했습니다."); }
+        catch (Exception error) { throw preserved(Z8Text.text("Could not verify running tasks.", "실행 중인 작업을 확인하지 못했습니다.")); }
     }
 
     static final class ProcAccess implements Access {
@@ -261,12 +261,12 @@ public final class Z8ProjectProcesses {
                     try { if (Os.stat(path.toString()).st_uid != uid) continue; }
                     catch (ErrnoException error) {
                         if (error.errno == OsConstants.ENOENT || error.errno == OsConstants.ESRCH) continue;
-                        throw preserved("프로세스 소유 정보를 읽지 못했습니다.");
+                        throw preserved(Z8Text.text("Could not read process ownership information.", "프로세스 소유 정보를 읽지 못했습니다."));
                     }
                     ProcessRecord record = read(pid);
                     if (record != null && record.uid == uid) result.put(pid, record);
                 }
-            } catch (IOException error) { throw preserved("프로젝트 프로세스 목록을 확인하지 못했습니다."); }
+            } catch (IOException error) { throw preserved(Z8Text.text("Could not verify the project's process list.", "프로젝트 프로세스 목록을 확인하지 못했습니다.")); }
             return result;
         }
         @Override public ProcessRecord read(int pid) throws IOException {
@@ -277,10 +277,10 @@ public final class Z8ProjectProcesses {
                 String status = small(directory.resolve("status"));
                 String last = small(directory.resolve("stat"));
                 ProcessRecord one = parse(pid, first, status), two = parse(pid, last, status);
-                if (!one.same(two)) throw preserved("프로세스가 확인 중 변경되었습니다.");
+                if (!one.same(two)) throw preserved(Z8Text.text("The process changed during verification.", "프로세스가 확인 중 변경되었습니다."));
                 return two;
             } catch (java.nio.file.NoSuchFileException gone) { return null; }
-            catch (IOException error) { throw preserved("프로젝트 프로세스 상태를 읽지 못했습니다."); }
+            catch (IOException error) { throw preserved(Z8Text.text("Could not read the project process status.", "프로젝트 프로세스 상태를 읽지 못했습니다.")); }
         }
         @Override public boolean isProot(int pid, String projectId) throws IOException {
             Path prefix = Paths.get(TermuxConstants.TERMUX_PREFIX_DIR_PATH);
@@ -321,7 +321,7 @@ public final class Z8ProjectProcesses {
         }
         @Override public void quit(int pid) throws Exception {
             try { Os.kill(pid, OsConstants.SIGQUIT); }
-            catch (ErrnoException error) { if (error.errno != OsConstants.ESRCH) throw preserved("프로젝트 종료 신호를 보내지 못했습니다."); }
+            catch (ErrnoException error) { if (error.errno != OsConstants.ESRCH) throw preserved(Z8Text.text("Could not send a stop signal to the project.", "프로젝트 종료 신호를 보내지 못했습니다.")); }
         }
         @Override public long now() { return SystemClock.elapsedRealtime(); }
         @Override public void pause() throws InterruptedException { Thread.sleep(100); }
@@ -341,7 +341,7 @@ public final class Z8ProjectProcesses {
             }
             if (uid < 0 || tracer < 0 || started < 0 || parent < 0) throw new IllegalArgumentException();
             return new ProcessRecord(expectedPid, uid, parent, tracer, started, fields[0].charAt(0));
-        } catch (RuntimeException invalid) { throw preserved("프로세스 식별 정보를 확인하지 못했습니다."); }
+        } catch (RuntimeException invalid) { throw preserved(Z8Text.text("Could not verify the process identity.", "프로세스 식별 정보를 확인하지 못했습니다.")); }
     }
 
     private static String small(Path path) throws IOException {

@@ -22,7 +22,7 @@ class BrowserUrlTests(unittest.TestCase):
         probe = cls.directory / 'BrowserUrlProbe.java'
         probe.write_text(PROBE)
         actual = ROOT / 'overlay/app/src/main/java/com/termux/app/Z8BrowserUrls.java'
-        result = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(cls.directory), str(actual), str(probe)],
+        result = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(cls.directory), str(actual), str(probe)],
                                 capture_output=True, text=True, timeout=30)
         if result.returncode:
             raise AssertionError(result.stdout + result.stderr)
@@ -66,7 +66,7 @@ public final class BrowserUrlProbe {
         for (String value : values) {
             eq(null, Z8BrowserUrls.normalize(value));
             eq(false, Z8BrowserUrls.isPreview(value));
-            eq("브라우저", Z8BrowserUrls.host(value));
+            eq("Browser", Z8BrowserUrls.host(value));
         }
     }
     public static void main(String[] args) {

@@ -118,7 +118,7 @@ public class ConnectionProbe {
             guard = tree / 'android/app/KeyguardManager.java';guard.parent.mkdir(parents=True)
             guard.write_text('package android.app;public class KeyguardManager {public boolean locked;public boolean isKeyguardLocked(){return locked;}}')
             jdk = ROOT / '.local/jdk/Contents/Home/bin'
-            result = subprocess.run([str(jdk / 'javac'), '-d', str(tree), str(guard), str(tree / 'ConnectionProbe.java')], capture_output=True, text=True, timeout=20)
+            result = subprocess.run([str(jdk / 'javac'), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-d', str(tree), str(guard), str(tree / 'ConnectionProbe.java')], capture_output=True, text=True, timeout=20)
             self.assertEqual(result.returncode, 0, result.stderr)
             result = subprocess.run([str(jdk / 'java'), '-cp', str(tree), 'ConnectionProbe'], capture_output=True, text=True, timeout=10)
             self.assertEqual(result.returncode, 0, result.stderr)

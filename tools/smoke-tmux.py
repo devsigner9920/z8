@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location('z8_tmux_device', ROOT / 'tools/smoke-emulator.py')
 device = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(device)
+ui = device.ui
 PREFIX = '/data/data/' + device.PACKAGE + '/files/usr'
 NATIVE_HOME = '/data/data/' + device.PACKAGE + '/files/home'
 
@@ -68,7 +69,7 @@ def open_native_terminal():
     device.adb('shell', 'wm', 'dismiss-keyguard')
     tree = device.diagnostics()
     for attempt in range(8):
-        button = next((node for node in tree.iter('node') if node.get('text') == 'Linux 런타임 터미널 열기'), None)
+        button = next((node for node in tree.iter('node') if node.get('text') in ui.labels('open_runtime')), None)
         if button is not None:
             device.click(button)
             break

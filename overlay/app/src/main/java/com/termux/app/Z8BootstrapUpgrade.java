@@ -87,6 +87,6 @@ final class Z8BootstrapUpgrade {
     }
 
     static IOException preserved() {
-        return new IOException("기존 실행 기반이 확인된 이전 버전과 다르거나 사용자가 추가·수정한 파일이 있습니다. 모든 파일을 보존했으며 자동 갱신을 중단했습니다.");
+        return new IOException(Z8Text.text("The existing runtime differs from the verified previous version or contains user additions or changes. All files have been preserved; automatic updates have stopped.", "기존 실행 기반이 확인된 이전 버전과 다르거나 사용자가 추가·수정한 파일이 있습니다. 모든 파일을 보존했으며 자동 갱신을 중단했습니다."));
     }
 }

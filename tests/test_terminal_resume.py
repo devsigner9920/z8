@@ -149,7 +149,7 @@ public class ResumeProbe {
             manager.parent.mkdir(parents=True)
             manager.write_text('package android.view.inputmethod; public class InputMethodManager { public int restarts; public void restartInput(Object view){restarts++;} }')
             jdk = ROOT / '.local/jdk/Contents/Home/bin'
-            compiled = subprocess.run([str(jdk / 'javac'), '-encoding', 'UTF-8', '-d', str(tree), str(context), str(manager),
+            compiled = subprocess.run([str(jdk / 'javac'), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(tree), str(context), str(manager),
                 str(ROOT / 'overlay/terminal-view/src/main/java/com/termux/view/Z8TerminalInput.java'), str(tree / 'ResumeProbe.java')], capture_output=True, text=True, timeout=20)
             self.assertEqual(compiled.returncode, 0, compiled.stderr)
             result = subprocess.run([str(jdk / 'java'), '-cp', str(tree), 'ResumeProbe'], capture_output=True, text=True, timeout=10)
@@ -192,7 +192,7 @@ public class ResumeProbe {
                 'public void restartInput(Object view){restarts++;active=true;}'
                 'public boolean showSoftInput(Object view,int flags){shows++;visible=true;return true;}}')
             jdk = ROOT / '.local/jdk/Contents/Home/bin'
-            compiled = subprocess.run([str(jdk / 'javac'), '-encoding', 'UTF-8', '-d', str(tree), str(context),
+            compiled = subprocess.run([str(jdk / 'javac'), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(tree), str(context),
                 str(manager), str(source_path)], capture_output=True, text=True, timeout=20)
             self.assertEqual(compiled.returncode, 0, compiled.stderr)
             result = subprocess.run([str(jdk / 'java'), '-cp', str(tree), 'TouchImeProbe'], capture_output=True, text=True, timeout=10)
@@ -322,7 +322,7 @@ public class ResumeProbe {
 }'''
             (tree / 'SelectionProbe.java').write_text(source)
             jdk = ROOT / '.local/jdk/Contents/Home/bin'
-            compiled = subprocess.run([str(jdk / 'javac'), '-encoding', 'UTF-8', '-d', str(tree), str(tree / 'SelectionProbe.java')], capture_output=True, text=True, timeout=20)
+            compiled = subprocess.run([str(jdk / 'javac'), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(tree), str(tree / 'SelectionProbe.java')], capture_output=True, text=True, timeout=20)
             self.assertEqual(compiled.returncode, 0, compiled.stderr)
             result = subprocess.run([str(jdk / 'java'), '-cp', str(tree), 'SelectionProbe'], capture_output=True, text=True, timeout=10)
             self.assertEqual(result.returncode, 0, result.stderr)

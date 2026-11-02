@@ -1,43 +1,53 @@
-# 출시 상태와 검증 범위
+# Release status and validation scope
 
-2026-11-02 기준, Z8은 정식 배포·Play Store 출시 전의 개발 프로젝트입니다. 소스 공개 준비와 앱 제출·승인은 별도 절차입니다. 이 문서는 공개 가능한 검증 요약이며, 현재 소스로 만든 모든 빌드나 모든 기기의 호환성을 보증하지 않습니다.
+Documentation: [English](../README.md) | [한국어](../README.ko.md)
 
-## 현재 제공 범위
+As of November 2, 2026, Z8 is a development project that has not reached a stable app release or Play Store launch. Source publication and app submission or approval are separate procedures. This document is a public summary of validation, not a compatibility guarantee for every build from current sources or every device.
 
-프로젝트별 Linux 환경과 HOME·소스, 여러 터미널 세션, 로컬 웹 미리보기, 공개 개인정보·보관/삭제·환경·라이선스 안내를 제공합니다. 공식 AI CLI는 사용자가 명시적으로 설치·인증하며, Z8이 계정·모델 서비스나 사용량을 공급하지 않습니다. 앱의 SSH 호스트 관리·원격 세션 연결 기능은 아직 없습니다.
+## Current scope
 
-현재 빌드 설정은 `dev.devsigner.z8`, ARM64, minSdk 28, target/compile SDK 36입니다. Android 9 이상을 선언하지만, 모든 Android 버전·제조사·사용자 프로필에서 검증했다는 뜻은 아닙니다.
+Z8 provides project Linux environments with separate HOME and source directories, multiple terminal sessions, local web previews, and public privacy, retention/deletion, environment, and license information. Users explicitly install and authenticate official AI CLIs. Z8 does not supply accounts, model services, or usage. SSH host management and remote session connections are not yet provided by the app.
 
-## 검증한 후보
+The current build configuration uses `dev.devsigner.z8`, ARM64, minSdk 28, and target/compile SDK 36. Declaring Android 9 or later does not mean every Android version, manufacturer, or user profile has been tested.
 
-아래 결과는 2026-11-01의 특정 후보에만 해당합니다. 이후 소스·설정·의존성 변경은 필요한 재검증을 거쳐야 합니다.
+The current source revision is configured as `0.1.0-rc2`, versionCode `3`, with English as the initial app language and an explicit Korean option. See [app language](LOCALIZATION.md). Its source URL targets the `v0.1.0-rc2` source preview. This version setting does not establish that an app binary has been released or that the earlier device checks below have been repeated for rc2.
 
-- 버전: `0.1.0-rc1`, versionCode `2`
-- 후보 AAB SHA-256: `580f337c25429824e76bd5cdc8b318b956327e6d5ff8f8208ce0d7b10e6b2eb2`
-- 시험 APK SHA-256: `7f845a34e409daafe1e6dc9c4c75335c4b064956c8a9503e9af819de95631fac`
-- 시험 조건: 후보 AAB에서 변환한 non-debug universal APK, 로컬 개발 키 서명, 새 API 37 ARM64 에뮬레이터, 16 KiB 페이지, SELinux Enforcing
+## English-default update
 
-| 확인한 경로 | 결과와 범위 |
+The November 2 localization checks passed 411 host tests, seven additional bilingual smoke-selector tests, and 145 terminal-emulator unit tests. An rc2 candidate built and validated as a non-debuggable ARM64 AAB with 16 KiB native-library and APK alignment checks.
+
+On the dedicated API 37 emulator, an existing installation without a language preference opened in English. Switching English → Korean → English preserved the project names, terminal output and the same running shell process; terminal input continued to work. These checks cover the language change, not a repeat of every rc1 device test or real CLI authentication.
+
+## Earlier candidate device validation (rc1)
+
+The following results apply only to the specific candidate from November 1, 2026. Subsequent source, configuration, or dependency changes require the relevant checks to be repeated.
+
+- Version: `0.1.0-rc1`, versionCode `2`
+- Candidate AAB SHA-256: `580f337c25429824e76bd5cdc8b318b956327e6d5ff8f8208ce0d7b10e6b2eb2`
+- Test APK SHA-256: `7f845a34e409daafe1e6dc9c4c75335c4b064956c8a9503e9af819de95631fac`
+- Conditions: non-debug universal APK converted from the candidate AAB, signed with a local development key, on a fresh API 37 ARM64 emulator with 16 KiB pages and SELinux Enforcing
+
+| Path checked | Result and scope |
 | --- | --- |
-| 새 설치·초기 준비 | 실제 테마 선택과 다운로드 동의 후 기본 환경 준비, 프로젝트 두 개 생성, 터미널 실행 |
-| 미리보기 데이터 삭제 | 서로 다른 두 출처의 쿠키·localStorage·IndexedDB·Cache Storage·서비스 워커 제거와 HTTP 캐시 재요청 확인. 취소 시 보존, 삭제 시 활성 미리보기 중지 확인 |
-| 삭제 제외 범위 | 외부 Chrome의 웹 데이터, 프로젝트의 합성 인증 대체 파일·소스 파일 보존. 실제 CLI 자격 증명으로 시험한 결과는 아님 |
-| 공개 안내·고지 | release 설정에서 안내 접근, 5.22 MB 라이선스 고지의 페이지 표시·이동 |
-| 입력·탐색 | 브라우저 뒤로가기로 터미널 복귀, 넓은 창과 좁은 창의 키보드 입력 |
-| 알림 거부 | 알림이 처음부터 허용되지 않은 상태에서 새 터미널·Python·Node·Git 실행 및 앱 내 알림함 접근 |
+| Fresh installation and preparation | Actual theme selection and download consent, base environment preparation, creation of two projects, and terminal execution |
+| Preview data deletion | Cookies, localStorage, IndexedDB, Cache Storage, and service workers removed for two origins; HTTP cache refetched. Cancellation preserved data; deletion stopped active previews |
+| Data outside the deletion scope | External Chrome web data and synthetic credential substitute/source files in a project preserved. This was not a test with actual CLI credentials |
+| Public information and notices | Pages accessible from release Settings; display and navigation of the 5.22 MB license notices |
+| Input and navigation | Returning from the browser to the terminal with Back; keyboard input in wide and narrow windows |
+| Notifications denied | New terminal, Python, Node, and Git execution and access to the in-app inbox while notifications had never been allowed |
 
-이 요약에 해당하는 UI·삭제 시험에서는 실제 서비스 계정 로그인이나 모델 요청을 수행하지 않았습니다. 알림을 허용했다가 회수하는 경로, 실제 외장 입력 장치, 실기기 호환성은 이 결과로 입증되지 않습니다. 자동 검사는 [기여 안내](../CONTRIBUTING.md)의 진입점에서 별도로 실행할 수 있습니다.
+The UI and deletion tests summarized here did not sign in to real service accounts or make model requests. They do not establish behavior when previously granted notification permission is revoked, support for physical external input devices, or physical-device compatibility. Automated checks can be run separately using the entry points in [Contributing](../CONTRIBUTING.md).
 
-## 알려진 제한
+## Known limitations
 
-- PRoot는 Android 커널과 앱 UID를 공유합니다. 프로젝트별 파일 구분은 보안 VM이나 악성 코드 격리가 아닙니다.
-- Codex의 기본 Linux sandbox는 시험한 PRoot 환경에서 실행에 실패했습니다. 별도로 선택한 실행 모드의 성공을 sandbox 정상 동작으로 해석하면 안 됩니다. 앱이 승인·격리 정책을 몰래 변경하거나 실패한 명령을 자동 재실행하는 방식으로 우회하지 않습니다.
-- 공식 CLI의 시작·버전 출력만으로 로그인·파일 수정·도구 호출·훅의 호환성을 확인할 수 없습니다. 도구와 버전별로 실제 검증이 필요합니다.
-- 앱 프로세스가 종료된 뒤의 일반 셸·AI 대화 자동 복구는 보장하지 않습니다. 다운로드 준비의 재개와 사용자 명령의 재실행은 서로 다른 동작입니다.
-- Secure Folder·work profile·secondary user, 제조사별 백그라운드 제한과 장시간 작업은 추가 검증이 필요합니다.
+- PRoot shares the Android kernel and app UID. Separate project files do not provide a security VM or malicious-code isolation.
+- Codex's default Linux sandbox failed in the tested PRoot environment. Success in a separately selected execution mode must not be interpreted as a working sandbox. The app does not work around this by silently changing approval or isolation policies or replaying failed commands automatically.
+- Starting an official CLI or printing its version does not establish compatibility for login, file changes, tool calls, or hooks. Each tool and version needs actual validation.
+- Automatic recovery of ordinary shells or AI conversations after the app process ends is not guaranteed. Resuming download preparation and replaying user commands are different operations.
+- Secure Folder, work profiles, secondary users, manufacturer-specific background restrictions, and long-running work require further validation.
 
-## 배포 전 남은 단계
+## Remaining distribution steps
 
-실제 공개 연락처와 개인정보처리방침, 해당 바이너리의 대응 소스 배포, 외부 도구·패키지 조건 검토, 최종 후보의 필요한 기기 시험과 Play Console 신고·심사는 배포 준비 과정에서 확인해야 합니다. 공개 설정을 채우거나 후보 파일을 만드는 것만으로 스토어 승인을 받는 것은 아닙니다.
+Public contact information and the privacy policy, corresponding source distribution for the binary, external tool and package terms, the necessary tests of the final candidate, and Play Console declarations and review must be checked as part of distribution preparation. Filling in public settings or creating a candidate does not grant store approval.
 
-[빌드 안내](../BUILDING.md)와 [배포 고지·대응 소스 절차](RELEASE_LICENSES.md)를 따르세요. 개인정보처리방침 초안은 운영자의 실제 데이터 처리와 공개 주소가 확정된 정책을 대신하지 않습니다.
+Follow the [build guide](../BUILDING.md) and [release notices and corresponding source procedure](RELEASE_LICENSES.md). A draft privacy policy does not replace a finalized policy that matches the operator's actual data handling and public URL.

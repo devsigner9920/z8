@@ -51,7 +51,8 @@ class PreparationContracts(unittest.TestCase):
     def test_application_identity_does_not_rename_java_or_jni(self):
         gradle = self.read("app/build.gradle")
         self.assertIn('applicationId "dev.devsigner.z8"', gradle)
-        self.assertIn('versionCode 2\n        versionName "0.1.0-rc1"', gradle)
+        public = prepare.release_config.load()
+        self.assertIn(f'versionCode {public["versionCode"]}\n        versionName "{public["versionName"]}"', gradle)
         self.assertIn('namespace "com.termux"', gradle)
         constants = self.read("termux-shared/src/main/java/com/termux/shared/termux/TermuxConstants.java")
         self.assertIn('TERMUX_PACKAGE_NAME = "dev.devsigner.z8"', constants)
@@ -87,6 +88,19 @@ class PreparationContracts(unittest.TestCase):
         self.assertEqual(app.get(prepare.ANDROID + "enableOnBackInvokedCallback"), "true")
         self.assertEqual(activities["com.termux.app.Z8AboutActivity"].get(prepare.ANDROID + "exported"), "false")
 
+    def test_language_context_covers_primary_and_auxiliary_screens(self):
+        java = self.tree / 'app/src/main/java/com/termux/app'
+        screens = [java / 'TermuxApplication.java', java / 'TermuxActivity.java',
+                   java / 'activities/SettingsActivity.java', java / 'activities/HelpActivity.java',
+                   java / 'api/file/FileReceiverActivity.java', *java.glob('Z8*Activity.java')]
+        for path in screens:
+            with self.subTest(screen=path.name):
+                self.assertEqual(path.read_text().count('super.attachBaseContext(com.termux.app.Z8Language.wrap(base));'), 1)
+        self.assertIn('Z8Language.initialize(this);', (java / 'TermuxApplication.java').read_text())
+        report = self.read('termux-shared/src/main/java/com/termux/shared/activities/ReportActivity.java')
+        self.assertIn('configuration.setLocales(new android.os.LocaleList(java.util.Locale.getDefault()));', report)
+        self.assertNotIn('com.termux.app.Z8Language', report)
+
     def test_arm64_and_sdk_build_contracts(self):
         self.assertIn("minSdkVersion=28\n", self.read("gradle.properties"))
         self.assertIn("targetSdkVersion=36\n", self.read("gradle.properties"))
@@ -117,7 +131,7 @@ class PreparationContracts(unittest.TestCase):
         activity = self.read("app/src/main/java/com/termux/app/TermuxActivity.java")
         self.assertIn("import android.view.Gravity;", activity)
         self.assertIn('CONTEXT_MENU_Z8_SESSIONS = 14;', activity)
-        self.assertIn('menu.add(Menu.NONE, CONTEXT_MENU_Z8_SESSIONS, Menu.NONE, "세션 목록 / 새 세션");', activity)
+        self.assertIn('menu.add(Menu.NONE, CONTEXT_MENU_Z8_SESSIONS, Menu.NONE, com.termux.app.Z8Text.text("Sessions / New session", "세션 목록 / 새 세션"));', activity)
         self.assertIn('case CONTEXT_MENU_Z8_SESSIONS:\n                z8OpenSessions();\n                return true;', activity)
         self.assertLess(activity.index('menu.add(Menu.NONE, CONTEXT_MENU_Z8_SESSIONS'),
                         activity.index('menu.add(Menu.NONE, CONTEXT_MENU_SELECT_URL_ID'))
@@ -199,7 +213,7 @@ class PreparationContracts(unittest.TestCase):
         self.assertIn('emptyTerminal.setVisibility(hasSession || preparation != null || browserSelected ? View.GONE : View.VISIBLE);', chrome)
         for removed in ('openFiles', 'Z8WorkspaceActivity.class', 'Z8GitActivity.class', 'Z8GitHubActivity.class', '첫 세션 열기'):
             self.assertNotIn(removed, chrome)
-        self.assertIn('"프로젝트 만들기", this::createProject', chrome)
+        self.assertIn('Z8Text.text("Create project", "프로젝트 만들기"), this::createProject', chrome)
         self.assertNotIn('Z8EnvironmentActivity.intent(activity, created.id)', chrome)
         self.assertIn('Z8GuestSessionLauncher.request(service, request, created.id, null, created.name, null)', chrome)
         # File removal belongs to the service-backed coordinator, so rotating or

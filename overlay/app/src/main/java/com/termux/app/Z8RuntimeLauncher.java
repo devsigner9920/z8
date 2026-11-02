@@ -29,7 +29,7 @@ public final class Z8RuntimeLauncher {
         Path target = Paths.get(executable).toAbsolutePath().normalize();
         if (!Paths.get(executable).isAbsolute() || !target.startsWith(prefix)
                 || !target.toString().equals(executable))
-            throw new IOException("Android 실행 파일이 앱 실행 기반 밖에 있습니다.");
+            throw new IOException(Z8Text.text("The Android executable is outside the app runtime.", "Android 실행 파일이 앱 실행 기반 밖에 있습니다."));
         List<String> result = new ArrayList<>(arguments.size() + 1);
         if (requiresSystemLinker(apiLevel)) result.add(executable);
         result.addAll(arguments);
@@ -45,7 +45,7 @@ public final class Z8RuntimeLauncher {
     /** Refresh on every launch: Android changes nativeLibraryDir after an APK update. */
     static void ensureAppLibraries(Context context) throws IOException {
         String directory = context.getApplicationInfo().nativeLibraryDir;
-        if (directory == null) throw new IOException("앱에 포함된 실행 로더 경로가 없습니다.");
+        if (directory == null) throw new IOException(Z8Text.text("The bundled runtime loader path is missing.", "앱에 포함된 실행 로더 경로가 없습니다."));
         installAppLibraries(context.getFilesDir().toPath(), Paths.get(directory));
     }
 
@@ -53,11 +53,11 @@ public final class Z8RuntimeLauncher {
         Path loader = nativeDirectory.resolve(LOADER);
         if (!nativeDirectory.isAbsolute() || !Files.isDirectory(nativeDirectory)
                 || !Files.isRegularFile(loader, LinkOption.NOFOLLOW_LINKS) || !Files.isExecutable(loader))
-            throw new IOException("앱에 포함된 Linux 실행 로더를 확인하지 못했습니다.");
+            throw new IOException(Z8Text.text("Could not verify the bundled Linux runtime loader.", "앱에 포함된 Linux 실행 로더를 확인하지 못했습니다."));
         Path link = files.resolve("applib");
         if (Files.exists(link, LinkOption.NOFOLLOW_LINKS)) {
             if (!Files.isSymbolicLink(link))
-                throw new IOException("실행 로더 경로에 기존 파일이 있습니다. 파일을 보존했습니다.");
+                throw new IOException(Z8Text.text("A file already exists at the runtime loader path. It has been preserved.", "실행 로더 경로에 기존 파일이 있습니다. 파일을 보존했습니다."));
             if (Files.readSymbolicLink(link).equals(nativeDirectory)) return;
         }
         Path pending = files.resolve(".z8-applib-" + UUID.randomUUID());

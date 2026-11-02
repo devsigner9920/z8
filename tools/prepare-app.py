@@ -279,13 +279,13 @@ def patch_manifest(tree):
     ET.SubElement(application, "activity", {
         ANDROID + "name": "com.termux.app.Z8ThemeActivity",
         ANDROID + "exported": "false", ANDROID + "resizeableActivity": "true",
-        ANDROID + "label": "z8 · 테마 설정",
+        ANDROID + "label": "z8 · Theme",
     })
-    for name, label in (("Z8DiagnosticsActivity", "z8 · 실행 진단"), ("Z8AttentionActivity", "z8 · 알림"),
-                        ("Z8SetupActivity", "z8 · 처음 준비"),
-                        ("Z8SettingsActivity", "z8 · 환경설정"),
-                        ("Z8AboutActivity", "z8 · 앱 안내"),
-                        ("Z8EnvironmentActivity", "z8 · Linux 환경")):
+    for name, label in (("Z8DiagnosticsActivity", "z8 · Diagnostics"), ("Z8AttentionActivity", "z8 · Notifications"),
+                        ("Z8SetupActivity", "z8 · Setup"),
+                        ("Z8SettingsActivity", "z8 · Settings"),
+                        ("Z8AboutActivity", "z8 · About"),
+                        ("Z8EnvironmentActivity", "z8 · Linux environment")):
         ET.SubElement(application, "activity", {
             ANDROID + "name": "com.termux.app." + name,
             ANDROID + "exported": "false", ANDROID + "resizeableActivity": "true",
@@ -486,7 +486,7 @@ ACTIVITY_HELPERS = '''    private boolean mZ8ShowSessionsPending;
         }
         if (setupTools) toolAction = "setup-tools";
         if (toolAction != null && !Z8Guest.validAction(toolAction)) {
-            Toast.makeText(this, "등록되지 않은 터미널 작업입니다.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, com.termux.app.Z8Text.text("Unknown terminal action.", "등록되지 않은 터미널 작업입니다."), Toast.LENGTH_LONG).show();
             return;
         }
         final String requestedAction = toolAction;
@@ -502,7 +502,7 @@ ACTIVITY_HELPERS = '''    private boolean mZ8ShowSessionsPending;
                 projectDirectory = Z8Files.directory(project.source, relative == null ? "" : relative).getAbsolutePath();
                 projectName = project.name;
             } catch (Exception invalid) {
-                Toast.makeText(this, "프로젝트를 열 수 없습니다. 저장 위치를 확인해 주세요.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, com.termux.app.Z8Text.text("Could not open the project. Check its storage location.", "프로젝트를 열 수 없습니다. 저장 위치를 확인해 주세요."), Toast.LENGTH_LONG).show();
                 return;
             }
         }
@@ -511,12 +511,12 @@ ACTIVITY_HELPERS = '''    private boolean mZ8ShowSessionsPending;
         final String requestedProjectId = intent == null ? null : intent.getStringExtra(Z8WorkspaceActivity.EXTRA_PROJECT_ID);
         final String requestedGuestDirectory = intent == null ? null : intent.getStringExtra(Z8WorkspaceActivity.EXTRA_PROJECT_CWD);
         if (guest && requestedProjectId == null) {
-            Toast.makeText(this, "Linux 환경의 프로젝트를 선택해 주세요.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, com.termux.app.Z8Text.text("Select a project with a Linux environment.", "Linux 환경의 프로젝트를 선택해 주세요."), Toast.LENGTH_LONG).show();
             return;
         }
         java.io.File home = new java.io.File(TermuxConstants.TERMUX_HOME_DIR_PATH);
         if (!home.isDirectory() && !home.mkdirs()) {
-            Toast.makeText(this, "셸 HOME 디렉터리를 만들 수 없습니다.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, com.termux.app.Z8Text.text("Could not create the shell HOME directory.", "셸 HOME 디렉터리를 만들 수 없습니다."), Toast.LENGTH_LONG).show();
             return;
         }
         Runnable createSession = () -> {
@@ -527,7 +527,7 @@ ACTIVITY_HELPERS = '''    private boolean mZ8ShowSessionsPending;
                         Z8GuestSessionLauncher.requestId(intent));
                 } else if (requestedDirectory == null) {
                     mTermuxTerminalSessionActivityClient.addNewSession(diagnostic,
-                        diagnostic ? "Android 진단 셸" : null);
+                        diagnostic ? com.termux.app.Z8Text.text("Android diagnostic shell", "Android 진단 셸") : null);
                 } else {
                     mTermuxTerminalSessionActivityClient.addNewSessionInDirectory(diagnostic,
                         requestedName, requestedDirectory);
@@ -547,7 +547,7 @@ ACTIVITY_HELPERS = '''    private boolean mZ8ShowSessionsPending;
             } catch (Exception failure) {
                 runOnUiThread(() -> {
                     if (!isFinishing() && !isDestroyed())
-                        new android.app.AlertDialog.Builder(this).setTitle("실행 기반 준비 실패")
+                        new android.app.AlertDialog.Builder(this).setTitle(com.termux.app.Z8Text.text("Runtime setup failed", "실행 기반 준비 실패"))
                             .setMessage(failure.getMessage()).setPositiveButton(android.R.string.ok, null).show();
                 });
             }
@@ -693,12 +693,12 @@ def patch_sessions(tree):
     }''', '''    private void actionStopService() {
         if (mWantsToStop || mZ8StopRequested) return;
         if (!mShellManager.mTermuxTasks.isEmpty() || !mShellManager.mPendingPluginExecutionCommands.isEmpty()) {
-            mZ8StopMessage = "백그라운드 작업이 진행 중입니다. 완료 후 다시 종료해 주세요.";
+            mZ8StopMessage = com.termux.app.Z8Text.text("Background work is running. Try exiting after it finishes.", "백그라운드 작업이 진행 중입니다. 완료 후 다시 종료해 주세요.");
             updateNotification();
             return;
         }
         mZ8StopRequested = true;
-        mZ8StopMessage = "터미널 종료를 확인하는 중…";
+        mZ8StopMessage = com.termux.app.Z8Text.text("Waiting for terminals to close…", "터미널 종료를 확인하는 중…");
         Z8ProjectRemoval.stopAllSessions(this, error -> {
             mZ8StopRequested = false;
             if (error != null) {
@@ -829,16 +829,16 @@ def patch_sessions(tree):
         'R.string.action_create_named_session_confirm, text -> mTermuxTerminalSessionActivityClient.addProjectSession(text),')
     text = replace_exact(text,
         'menu.add(Menu.NONE, CONTEXT_MENU_STYLING_ID, Menu.NONE, R.string.action_style_terminal);',
-        'menu.add(Menu.NONE, CONTEXT_MENU_STYLING_ID, Menu.NONE, "테마 설정");')
+        'menu.add(Menu.NONE, CONTEXT_MENU_STYLING_ID, Menu.NONE, com.termux.app.Z8Text.text("Theme settings", "테마 설정"));')
     text = replace_exact(text, '                showStylingDialog();',
         '                startActivity(new Intent(this, Z8ThemeActivity.class));')
     text = replace_exact(text, '    private static final int CONTEXT_MENU_REPORT_ID = 9;',
         '    private static final int CONTEXT_MENU_REPORT_ID = 9;\n    private static final int CONTEXT_MENU_Z8_PROJECTS = 12;\n    private static final int CONTEXT_MENU_Z8_ATTENTION = 13;\n    private static final int CONTEXT_MENU_Z8_SESSIONS = 14;')
     text = replace_exact(text,
         '        menu.add(Menu.NONE, CONTEXT_MENU_SELECT_URL_ID, Menu.NONE, R.string.action_select_url);',
-        '        menu.add(Menu.NONE, CONTEXT_MENU_Z8_SESSIONS, Menu.NONE, "세션 목록 / 새 세션");\n        menu.add(Menu.NONE, CONTEXT_MENU_SELECT_URL_ID, Menu.NONE, R.string.action_select_url);')
-    text = replace_exact(text, '        menu.add(Menu.NONE, CONTEXT_MENU_STYLING_ID, Menu.NONE, "테마 설정");',
-        '        menu.add(Menu.NONE, CONTEXT_MENU_Z8_PROJECTS, Menu.NONE, "프로젝트");\n        menu.add(Menu.NONE, CONTEXT_MENU_Z8_ATTENTION, Menu.NONE, "응답 확인");\n        menu.add(Menu.NONE, CONTEXT_MENU_STYLING_ID, Menu.NONE, "테마 설정");')
+        '        menu.add(Menu.NONE, CONTEXT_MENU_Z8_SESSIONS, Menu.NONE, com.termux.app.Z8Text.text("Sessions / New session", "세션 목록 / 새 세션"));\n        menu.add(Menu.NONE, CONTEXT_MENU_SELECT_URL_ID, Menu.NONE, R.string.action_select_url);')
+    text = replace_exact(text, '        menu.add(Menu.NONE, CONTEXT_MENU_STYLING_ID, Menu.NONE, com.termux.app.Z8Text.text("Theme settings", "테마 설정"));',
+        '        menu.add(Menu.NONE, CONTEXT_MENU_Z8_PROJECTS, Menu.NONE, com.termux.app.Z8Text.text("Projects", "프로젝트"));\n        menu.add(Menu.NONE, CONTEXT_MENU_Z8_ATTENTION, Menu.NONE, com.termux.app.Z8Text.text("Notifications", "응답 확인"));\n        menu.add(Menu.NONE, CONTEXT_MENU_STYLING_ID, Menu.NONE, com.termux.app.Z8Text.text("Theme settings", "테마 설정"));')
     text = replace_exact(text, '        switch (item.getItemId()) {',
         '        switch (item.getItemId()) {\n            case CONTEXT_MENU_Z8_SESSIONS:\n                z8OpenSessions();\n                return true;\n            case CONTEXT_MENU_Z8_PROJECTS:\n                z8OpenSessions();\n                return true;\n            case CONTEXT_MENU_Z8_ATTENTION:\n                startActivity(new Intent(this, Z8AttentionActivity.class));\n                return true;')
     path.write_text(text)
@@ -948,8 +948,8 @@ def patch_installer(tree):
     text = replace_exact(path.read_text(), "import com.termux.R;", "import com.termux.R;\nimport com.termux.BuildConfig;")
     text = replace_exact(text, "    static void setupBootstrapIfNeeded(final Activity activity, final Runnable whenDone) {\n", '''    static void setupBootstrapIfNeeded(final Activity activity, final Runnable whenDone) {
         if (!BuildConfig.Z8_HAS_BOOTSTRAP) {
-            new AlertDialog.Builder(activity).setTitle("Linux 런타임 미포함")
-                .setMessage("이 APK에는 z8용 Linux bootstrap이 없습니다. Android 진단 셸만 사용할 수 있습니다.")
+            new AlertDialog.Builder(activity).setTitle(com.termux.app.Z8Text.text("Linux runtime not included", "Linux 런타임 미포함"))
+                .setMessage(com.termux.app.Z8Text.text("This APK does not include a Z8 Linux bootstrap. Only the Android diagnostic shell is available.", "이 APK에는 z8용 Linux bootstrap이 없습니다. Android 진단 셸만 사용할 수 있습니다."))
                 .setPositiveButton(android.R.string.ok, null).show();
             return;
         }
@@ -965,11 +965,11 @@ def patch_installer(tree):
                     String installedHash = marker.isFile() ? new String(java.nio.file.Files.readAllBytes(marker.toPath()),
                         java.nio.charset.StandardCharsets.UTF_8).trim() : "";
                     if (!bash.isFile() || !bash.canExecute() || !BuildConfig.Z8_BOOTSTRAP_SHA256.equals(installedHash)) {
-                        throw new IllegalStateException("기존 Linux prefix가 불완전하거나 다른 bootstrap입니다. 파일을 보존했으며 자동 덮어쓰기를 중단했습니다.");
+                        throw new IllegalStateException(com.termux.app.Z8Text.text("The existing Linux prefix is incomplete or uses a different bootstrap. Files have been preserved; automatic replacement has stopped.", "기존 Linux prefix가 불완전하거나 다른 bootstrap입니다. 파일을 보존했으며 자동 덮어쓰기를 중단했습니다."));
                     }
                     whenDone.run();
                 } catch (Exception e) {
-                    new AlertDialog.Builder(activity).setTitle("Linux 런타임 확인 실패")
+                    new AlertDialog.Builder(activity).setTitle(com.termux.app.Z8Text.text("Linux runtime verification failed", "Linux 런타임 확인 실패"))
                         .setMessage(e.getMessage()).setPositiveButton(android.R.string.ok, null).show();
                 }
                 return;
@@ -1004,6 +1004,46 @@ def copy_overlay(root, tree):
         shutil.copy2(source, managed / name)
     if not (tree / "app/src/main/java/com/termux/app/Z8DiagnosticsActivity.java").is_file():
         raise PrepareError("Diagnostic Activity overlay is missing")
+    patch_language(tree)
+
+
+def patch_language(tree):
+    java = tree / "app/src/main/java/com/termux/app"
+    wrapper = '''    @Override protected void attachBaseContext(android.content.Context base) {
+        super.attachBaseContext(com.termux.app.Z8Language.wrap(base));
+    }
+
+'''
+    activities = [java / "TermuxApplication.java", java / "TermuxActivity.java",
+                  java / "activities/SettingsActivity.java", java / "activities/HelpActivity.java",
+                  java / "api/file/FileReceiverActivity.java", *sorted(java.glob("Z8*Activity.java"))]
+    for path in activities:
+        text = path.read_text()
+        if "attachBaseContext(" in text:
+            raise PrepareError("Language context anchor changed: " + path.name)
+        match = re.search(r"public (?:final )?class \w+ extends [^{]+\{\n", text)
+        if not match:
+            raise PrepareError("Activity declaration missing: " + path.name)
+        text = text[:match.end()] + "\n" + wrapper + text[match.end():]
+        if path.name == "TermuxApplication.java":
+            text = replace_exact(text, "        super.onCreate();", "        super.onCreate();\n        Z8Language.initialize(this);")
+        path.write_text(text)
+
+    # The shared module cannot depend on app classes. Its report screen follows the
+    # application locale established by Z8Language, without changing shared APIs.
+    report = tree / "termux-shared/src/main/java/com/termux/shared/activities/ReportActivity.java"
+    text = report.read_text()
+    marker = re.search(r"public (?:final )?class ReportActivity extends [^{]+\{\n", text)
+    if not marker or "attachBaseContext(" in text:
+        raise PrepareError("Report activity locale anchor changed")
+    report_wrapper = '''
+    @Override protected void attachBaseContext(android.content.Context base) {
+        android.content.res.Configuration configuration = new android.content.res.Configuration(base.getResources().getConfiguration());
+        configuration.setLocales(new android.os.LocaleList(java.util.Locale.getDefault()));
+        super.attachBaseContext(base.createConfigurationContext(configuration));
+    }
+'''
+    report.write_text(text[:marker.end()] + report_wrapper + text[marker.end():])
 
 
 def apply_patches(tree, lock, mode, bootstrap_sha="", bootstrap=None, manifest=None, config=None):

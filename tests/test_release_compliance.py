@@ -174,6 +174,37 @@ class ComplianceTests(unittest.TestCase):
         self.assertEqual(report['status'], 'INCOMPLETE')
         self.assertEqual(sha256(self.root / 'assets/third-party-notices.txt'), report['noticeSha256'])
 
+    def test_notices_recognize_both_project_build_roots_without_exempting_maven(self):
+        cache = self.root / '.local/gradle/caches/modules-2/files-2.1'
+        locations = {
+            'source-module': self.root / '.local/build-src/terminal-view/build/library.jar',
+            'candidate-module': self.root / '.local/build-candidate/terminal-emulator/build/library.jar',
+            'external-library': cache / 'example/external-library/1/hash/library.jar',
+            'similar-prefix': self.root / '.local/build-candidate-cache/library.jar',
+        }
+        components = []
+        original_notice = 'Copyright fixture owner\nOriginal dependency notice\n'
+        for name, path in locations.items():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with zipfile.ZipFile(path, 'w') as archive:
+                archive.writestr('META-INF/NOTICE', original_notice)
+            components.append({'group': 'example', 'name': name, 'version': '1',
+                               'file': str(path), 'sha256': sha256(path)})
+        evidence = self.root / 'dependencies.json'
+        evidence.write_bytes(json_bytes({'kind': 'z8-gradle-runtime-artifacts',
+            'configuration': 'releaseRuntimeClasspath', 'components': components}))
+        args = types.SimpleNamespace(root=self.root, output=self.root / 'assets', source_manifest=None,
+            package_sources=None, gradle_artifacts=evidence, gradle_cache=cache, review=None)
+        report = notices.generate(args)
+        scopes = {item['name']: item['scope'] for item in report['components']}
+        for name in ('source-module', 'candidate-module'):
+            self.assertEqual(scopes['example:' + name + ':1'], 'application-project-module')
+        for name in ('external-library', 'similar-prefix'):
+            self.assertEqual(scopes['example:' + name + ':1'], 'bundled-maven')
+        unresolved = {item['component'] for item in report['unresolved'] if item['code'] == 'LICENSE_UNRESOLVED'}
+        self.assertEqual(unresolved, {'example:external-library:1', 'example:similar-prefix:1'})
+        self.assertIn(original_notice, (self.root / 'assets/third-party-notices.txt').read_text())
+
     def test_runtime_effective_sources_require_recorded_hashes(self):
         fingerprint = 'a' * 64
         tree = self.root / '.local/runtime' / fingerprint[:20] / 'termux-packages'

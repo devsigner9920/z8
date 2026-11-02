@@ -1,20 +1,22 @@
-# 보안 문제 신고
+# Reporting security issues
 
-취약점이나 개인정보 노출 가능성을 발견했다면 **[ethsy2462@gmail.com](mailto:ethsy2462@gmail.com)** 으로 비공개 신고해 주세요. 공개 이슈·PR·댓글에 악용 가능한 상세 내용이나 기밀정보를 올리지 마세요.
+Documentation: [English](README.md) | [한국어](README.ko.md)
 
-## 신고에 필요한 정보
+If you find a vulnerability or possible exposure of private information, report it privately to **[ethsy2462@gmail.com](mailto:ethsy2462@gmail.com)**. Do not post exploitable details or confidential information in public issues, PRs, or comments.
 
-- 영향을 받는 소스 커밋 또는 앱 버전·APK SHA-256
-- Android 버전·CPU 종류와 관련 설정
-- 합성 데이터로 재현하는 최소 단계, 예상 동작과 실제 동작
-- 예상 영향과 민감정보를 제거한 최소 로그·화면
+## What to include
 
-**비밀번호, API 키, 로그인 토큰·쿠키, 서명키, 실제 CLI 인증 파일, 사용자 소스 전체를 보내지 마세요.** 최초 신고에는 문제를 설명할 수 있는 최소 정보만 포함해 주세요. 노출된 자격 증명 자체를 전달하지 말고 해당 서비스에서 폐기·교체하세요.
+- The affected source commit, or app version and APK SHA-256
+- Android version, CPU architecture, and relevant settings
+- Minimal reproduction steps using synthetic data, with expected and actual behavior
+- Expected impact and minimal logs or screenshots with sensitive information removed
 
-다른 사람의 계정·기기·프로젝트를 대상으로 시험하거나 데이터를 열람·변경하지 마세요. 가능하면 전용 에뮬레이터와 합성 자료로 재현하세요. 공개 시점과 필요한 추가 자료는 신고 내용을 확인한 뒤 조율합니다.
+**Do not send passwords, API keys, sign-in tokens or cookies, signing keys, actual CLI credential files, or entire user source trees.** Include only the minimum information needed to explain the issue in your initial report. Revoke or replace exposed credentials with the relevant service rather than sending the credentials themselves.
 
-## 지원 범위
+Do not test against other people's accounts, devices, or projects, or access or modify their data. Use a dedicated emulator and synthetic materials where possible. Disclosure timing and any additional information needed will be coordinated after reviewing the report.
 
-현재 정식 출시 전이며, 지원 중인 안정 버전 목록이나 장기 보안 지원 기간은 아직 정하지 않았습니다. 신고는 현재 개발 소스를 기준으로 검토합니다. 특정 응답·수정 기한이나 과거 시험 APK에 대한 패치 제공을 보장하지 않습니다. 이 문서는 버그 바운티나 보상 약속을 의미하지 않습니다.
+## Support scope
 
-PRoot는 프로젝트 간 보안 격리 수단이 아닙니다. 같은 앱 UID의 코드가 접근할 수 있는 범위와 알려진 실행 제약은 [출시 상태](docs/RELEASE_STATUS.md)를 참고하세요. 외부 CLI·패키지 자체의 취약점은 해당 공급자의 신고 절차도 확인해 주세요. Z8의 설치·실행·미리보기·데이터 처리와 연관된 문제가 있다면 위 연락처로 알려 주세요.
+Z8 has not reached a stable release. A list of supported stable versions and a long-term security support period have not yet been established. Reports are reviewed against current development sources. There is no guaranteed response or fix deadline, or promise of patches for previous test APKs. This document does not establish a bug bounty or promise compensation.
+
+PRoot is not a security isolation mechanism between projects. See [release status](docs/RELEASE_STATUS.md) for access available to code running under the same app UID and known execution limitations. For vulnerabilities in an external CLI or package itself, also check that provider's reporting procedure. Contact us at the address above if the issue involves Z8's installation, execution, preview, or data handling.

@@ -32,7 +32,7 @@ class ProjectProcessTests(unittest.TestCase):
         probe = cls.directory / 'ProcessProbe.java'
         probe.write_text(PROBE)
         actual = ROOT / 'overlay/app/src/main/java/com/termux/app/Z8ProjectProcesses.java'
-        compiled = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(cls.directory),
+        compiled = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(cls.directory),
                                    str(actual), str(probe), *sources], capture_output=True, text=True, timeout=30)
         if compiled.returncode:
             raise AssertionError(compiled.stdout + compiled.stderr)
@@ -176,7 +176,7 @@ public class ProcessProbe {
                 Z8ProjectProcesses.requireRuntimeIdle(idle,55);
                 check(idle.quit.isEmpty(),"Idle check never signals a process");
                 Fake live=new Fake(frame(p(55,1,0),p(100,55,0)));
-                fails(()->Z8ProjectProcesses.requireRuntimeIdle(live,55),"종료");
+                fails(()->Z8ProjectProcesses.requireRuntimeIdle(live,55),"stop running tasks");
                 check(live.quit.isEmpty(),"Active host shell or PRoot is preserved");
                 Fake unreadable=new Fake(frame()); unreadable.failScan=1;
                 fails(()->Z8ProjectProcesses.requireRuntimeIdle(unreadable,55),"unreadable");break;
@@ -185,10 +185,10 @@ public class ProcessProbe {
                 Fake fake=new Fake(frame(p(100,55,0)));fake.current=fake.frames.get(0);fake.shell=true;
                 var handle=Z8ProjectProcesses.capturePreparation(100,"owned","marker","script",10001,55,fake);
                 check(handle.root.pid==100&&handle.root.started==100,"Capture stable child identity before exec");
-                fails(()->Z8ProjectProcesses.capturePreparation(100,"owned","marker","script",20000,55,fake),"소유자");
-                fails(()->Z8ProjectProcesses.capturePreparation(100,"owned","marker","script",10001,99,fake),"소유자");
+                fails(()->Z8ProjectProcesses.capturePreparation(100,"owned","marker","script",20000,55,fake),"owner");
+                fails(()->Z8ProjectProcesses.capturePreparation(100,"owned","marker","script",10001,99,fake),"owner");
                 fake.shell=false;
-                fails(()->Z8ProjectProcesses.capturePreparation(100,"owned","marker","script",10001,55,fake),"소유자");
+                fails(()->Z8ProjectProcesses.capturePreparation(100,"owned","marker","script",10001,55,fake),"owner");
                 break;
             }
             case "preparation-stop": {
@@ -198,7 +198,7 @@ public class ProcessProbe {
                 Z8ProjectProcesses.stopPreparation(handle,fake);
                 check(fake.quit.equals(Arrays.asList(100))&&fake.pauses==1,"Quit only verified PRoot then verify tracee exit");
                 Fake invalid=new Fake(frame(root));invalid.invalid.add(100);
-                fails(()->Z8ProjectProcesses.stopPreparation(handle,invalid),"실행 파일");
+                fails(()->Z8ProjectProcesses.stopPreparation(handle,invalid),"executable");
                 check(invalid.quit.isEmpty(),"No signal to unexpected exec target");
                 break;
             }
@@ -215,10 +215,10 @@ public class ProcessProbe {
                 var root=p(100,55,0);var child=p(200,1,100);
                 var handle=new Z8ProjectProcesses.PreparationTarget(root,"owned","marker","script");
                 Fake failure=new Fake(frame(root,child),frame(child));
-                fails(()->Z8ProjectProcesses.stopPreparation(handle,failure),"보존");
+                fails(()->Z8ProjectProcesses.stopPreparation(handle,failure),"files were kept");
                 check(failure.quit.equals(Arrays.asList(100)),"No forced signal after timeout");
                 Fake retry=new Fake(frame(p(200,1,0)));
-                fails(()->Z8ProjectProcesses.stopPreparation(handle,retry),"보존");
+                fails(()->Z8ProjectProcesses.stopPreparation(handle,retry),"files were kept");
                 check(retry.quit.isEmpty(),"Retried cleanup preserves remembered identity");
                 Z8ProjectProcesses.stopPreparation(handle,new Fake(frame()));
                 break;
@@ -258,23 +258,23 @@ public class ProcessProbe {
             case "timeout": {
                 var root=p(100,1,0);var child=p(200,1,100);
                 Fake fake=new Fake(frame(root,child),frame(child));
-                fails(()->stop(fake,target(100,"owned-project")),"보존");
+                fails(()->stop(fake,target(100,"owned-project")),"files were kept");
                 check(fake.quit.equals(Arrays.asList(100))&&fake.pauses==10,"Bounded wait; no SIGKILL fallback");break;
             }
             case "retry": {
                 var root=p(100,1,0);var child=p(200,1,100);var terminal=new TerminalSession(100);
                 var first=new Z8ProjectProcesses.Target(terminal,100,"owned");
                 Fake failure=new Fake(frame(root,child),frame(child));
-                fails(()->stop(failure,first),"보존");
+                fails(()->stop(failure,first),"files were kept");
                 check(Z8ProjectProcesses.hasUnverified(terminal),"Retain identity evidence after failed stop");
                 terminal.pid=-1;
                 var retry=new Z8ProjectProcesses.Target(terminal,-1,"owned");
                 var orphan=p(200,1,0);var grandchild=p(210,200,0);
                 Fake stillAlive=new Fake(frame(orphan,grandchild));
-                fails(()->stop(stillAlive,retry),"보존");
+                fails(()->stop(stillAlive,retry),"files were kept");
                 check(stillAlive.quit.isEmpty()&&Z8ProjectProcesses.hasUnverified(terminal),"Finished PTY cannot bypass its surviving untraced child; never signal reused or absent root");
                 Fake childExited=new Fake(frame(grandchild));
-                fails(()->stop(childExited,retry),"보존");
+                fails(()->stop(childExited,retry),"files were kept");
                 check(Z8ProjectProcesses.hasUnverified(terminal),"Retry also remembers a descendant discovered after the tracer exited");
                 stop(new Fake(frame()),retry);
                 check(!Z8ProjectProcesses.hasUnverified(terminal),"Release wrapper protection only after all remembered identities exit");
@@ -282,21 +282,21 @@ public class ProcessProbe {
             }
             case "validation": {
                 Fake fake=new Fake(frame(p(100,1,0),p(110,1,0)));fake.invalid.add(110);
-                fails(()->stop(fake,target(100,"owned"),target(110,"other")),"보존");
+                fails(()->stop(fake,target(100,"owned"),target(110,"other")),"files were kept");
                 check(fake.quit.isEmpty(),"Validate all project executable and rootfs identities before stopping any");
                 var moved=target(100,"owned");moved.terminal.pid=999;
-                fails(()->stop(new Fake(frame(p(100,1,0))),moved),"변경");
+                fails(()->stop(new Fake(frame(p(100,1,0))),moved),"has changed");
                 Fake foreign=new Fake(frame());foreign.replaceOnRead=p(100,1,0);
-                fails(()->stop(foreign,target(100,"owned")),"소유자");break;
+                fails(()->stop(foreign,target(100,"owned")),"owner");break;
             }
             case "cancel": {
                 Fake fake=new Fake(frame(p(100,1,0)));AtomicBoolean cancelled=new AtomicBoolean(true);
-                fails(()->Z8ProjectProcesses.stopAndVerify(Collections.emptyList(),cancelled::get,fake),"보존");
+                fails(()->Z8ProjectProcesses.stopAndVerify(Collections.emptyList(),cancelled::get,fake),"files were kept");
                 check(fake.scans==0&&fake.quit.isEmpty(),"Service stop is observed even without PTYs");
                 cancelled.set(false);fake.cancel=cancelled;
-                fails(()->Z8ProjectProcesses.stopAndVerify(Arrays.asList(target(100,"owned")),cancelled::get,fake),"보존");
+                fails(()->Z8ProjectProcesses.stopAndVerify(Arrays.asList(target(100,"owned")),cancelled::get,fake),"files were kept");
                 check(fake.quit.size()==1&&fake.pauses==1,"Cancel bounded wait without fallback kill");
-                try{Thread.currentThread().interrupt();fails(()->stop(fake,target(100,"owned")),"보존");}
+                try{Thread.currentThread().interrupt();fails(()->stop(fake,target(100,"owned")),"files were kept");}
                 finally{Thread.interrupted();}break;
             }
             case "errors": {
@@ -317,11 +317,11 @@ public class ProcessProbe {
                 var record=Z8ProjectProcesses.parse(123,stat(123,1,987654321,"sh ) tricky ( name"),status(456));
                 check(record.pid==123&&record.parent==1&&record.tracer==456&&record.uid==10001&&record.started==987654321,"Parse final comm delimiter and exact starttime field");
                 check(record.alive()&&record.same(p(123,9,0,987654321,'Z')),"Identity is uid + pid + starttime, independent of parent/state");
-                fails(()->Z8ProjectProcesses.parse(124,stat(123,1,1,"sh"),status(0)),"보존");
-                fails(()->Z8ProjectProcesses.parse(123,"123 (sh) S 1",status(0)),"보존");
-                fails(()->Z8ProjectProcesses.parse(123,stat(123,1,1,"sh"),"Uid: 10001\n"),"보존");
-                fails(()->Z8ProjectProcesses.parse(123,stat(123,-1,1,"sh"),status(0)),"보존");
-                fails(()->Z8ProjectProcesses.parse(123,stat(123,1,-1,"sh"),status(0)),"보존");break;
+                fails(()->Z8ProjectProcesses.parse(124,stat(123,1,1,"sh"),status(0)),"files were kept");
+                fails(()->Z8ProjectProcesses.parse(123,"123 (sh) S 1",status(0)),"files were kept");
+                fails(()->Z8ProjectProcesses.parse(123,stat(123,1,1,"sh"),"Uid: 10001\n"),"files were kept");
+                fails(()->Z8ProjectProcesses.parse(123,stat(123,-1,1,"sh"),status(0)),"files were kept");
+                fails(()->Z8ProjectProcesses.parse(123,stat(123,1,-1,"sh"),status(0)),"files were kept");break;
             }
             case "filesystem": {
                 Path fixture=Paths.get(args[1]);Path files=fixture.resolve("files");Path prefix=files.resolve("usr");
@@ -354,8 +354,8 @@ public class ProcessProbe {
                 Files.writeString(process.resolve("maps"),"1000-2000 r-xp 00000000 00:00 1 "+linker+"\n");
                 check(!linked.isProot(100,"owned"),"Other linker clients cannot impersonate PRoot with argv");
                 Files.writeString(process.resolve("status"),"Uid: 10001\n");
-                fails(()->access.scan(),"보존");
-                Files.write(process.resolve("stat"),new byte[65537]);fails(()->access.read(100),"보존");break;
+                fails(()->access.scan(),"files were kept");
+                Files.write(process.resolve("stat"),new byte[65537]);fails(()->access.read(100),"files were kept");break;
             }
             default:throw new AssertionError(scenario);
         }

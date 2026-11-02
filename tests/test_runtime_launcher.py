@@ -22,7 +22,7 @@ class RuntimeLauncherTests(unittest.TestCase):
                 sources.append(str(file))
             probe = folder / "LauncherProbe.java"
             probe.write_text(PROBE)
-            result = subprocess.run([str(jdk / "javac"), "-d", str(folder), *sources,
+            result = subprocess.run([str(jdk / "javac"), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), "-d", str(folder), *sources,
                 str(ROOT / "overlay/app/src/main/java/com/termux/app/Z8RuntimeLauncher.java"), str(probe)],
                 capture_output=True, text=True, timeout=30)
             self.assertEqual(result.returncode, 0, result.stderr)

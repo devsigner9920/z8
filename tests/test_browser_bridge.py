@@ -111,7 +111,7 @@ class BrowserQueueTests(unittest.TestCase):
             path.parent.mkdir(parents=True, exist_ok=True); path.write_text(source); sources.append(str(path))
         sources += [str(ROOT / 'overlay/app/src/main/java/com/termux/app' / name)
                     for name in ('Z8BrowserBridge.java', 'Z8BrowserUrls.java', 'Z8SessionOrigin.java')]
-        result = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(cls.directory), *sources], capture_output=True, text=True, timeout=30)
+        result = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(cls.directory), *sources], capture_output=True, text=True, timeout=30)
         if result.returncode: raise AssertionError(result.stdout + result.stderr)
 
     def probe(self, scenario):

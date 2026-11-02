@@ -55,7 +55,7 @@ class BrowserReturn(unittest.TestCase):
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(content)
             paths.append(str(path))
-        result = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(cls.directory), *paths],
+        result = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(cls.directory), *paths],
                                 capture_output=True, text=True, timeout=20)
         if result.returncode:
             raise AssertionError(result.stdout + result.stderr)
@@ -79,6 +79,7 @@ class BrowserReturn(unittest.TestCase):
 
 
 HARNESS = r'''import java.util.*;
+import com.termux.app.Z8Text;
 public class BrowserReturnProbe {
     static final String NAVIGATION_PREFS="navigation";
     static class Context { static final int MODE_PRIVATE=0;static final String INPUT_METHOD_SERVICE="keyboard"; }

@@ -29,7 +29,7 @@ class ProjectPreparationTests(unittest.TestCase):
                 path.write_text(code)
                 sources.append(str(path))
             real = ROOT / 'overlay/app/src/main/java/com/termux/app/Z8ProjectPreparation.java'
-            compiled = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(directory), str(real), *sources],
+            compiled = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(directory), str(real), *sources],
                                       capture_output=True, text=True, timeout=45)
             self.assertEqual(compiled.returncode, 0, compiled.stdout + compiled.stderr)
             environment = os.environ.copy()
@@ -160,7 +160,7 @@ STUBS = {
                 check(Files.readString(path("tmp")).equals(context.getCacheDir().getAbsolutePath()),"PRoot cache is explicit");
                 check(Z8Guest.invalidations==1,"Successful receipt invalidates cached readiness");
                 List<String> toolMessages=new ArrayList<>();for(String message:messages)if(message.startsWith("tools:"))toolMessages.add(message);
-                check(toolMessages.equals(List.of("tools:-1:개발 도구 설치","tools:-1:Python · Git · 개발 도구 설치","tools:-1:Node.js · npm 설치","tools:-1:설치 확인")),"Only known exact stage markers produce progress: "+toolMessages);
+                check(toolMessages.equals(List.of("tools:-1:Install developer tools","tools:-1:Installing Python, Git and developer tools","tools:-1:Installing Node.js and npm","tools:-1:Verifying installation")),"Only known exact stage markers produce progress: "+toolMessages);
 
                 reset();script("printf z8-tools-v2 > \"$1/receipt\"\nprintf 'failure detail\\n' >&2\nexit 7\n");
                 IOException exitError=failure();
@@ -178,8 +178,8 @@ STUBS = {
                     +"printf 'Z8_SETUP:verify\\nZ8_SETUP:node\\nLONG-END'\nexit 9\n");
                 detail=failure().getMessage();
                 check(detail.length()<=16400&&detail.endsWith("LONG-END"),"Long unterminated output is bounded and retains its final bytes");
-                check(messages.stream().noneMatch(m->m.equals("tools:-1:설치 확인")),"Overflowed lines cannot impersonate a stage marker");
-                check(messages.stream().anyMatch(m->m.equals("tools:-1:Node.js · npm 설치")),"Stage recognition recovers at the next newline");
+                check(messages.stream().noneMatch(m->m.equals("tools:-1:Verifying installation")),"Overflowed lines cannot impersonate a stage marker");
+                check(messages.stream().anyMatch(m->m.equals("tools:-1:Installing Node.js and npm")),"Stage recognition recovers at the next newline");
 
                 reset();script("printf '%s' \"$https_proxy\" > \"$1/proxy\"\nprintf z8-tools-v2 > \"$1/receipt\"\n");
                 String proxy="http://z8:literal$(touch forbidden)@127.0.0.1:3128";
@@ -187,10 +187,10 @@ STUBS = {
                 check(Files.readString(path("proxy")).equals(proxy)&&!Files.exists(path("forbidden")),"Proxy assignments reach guest env literally without shell expansion");
                 reset();script("printf '%s' \"$https_proxy\"\nexit 1\n");
                 try {Z8ProjectPreparation.run(context,"project",(s,p,m)->{},Map.of("https_proxy",proxy));throw new AssertionError("Expected failure");}
-                catch(IOException expected){check(!expected.getMessage().contains(proxy)&&expected.getMessage().contains("[설치 연결]"),"Proxy credentials are redacted from diagnostics");}
+                catch(IOException expected){check(!expected.getMessage().contains(proxy)&&expected.getMessage().contains("[installation connection]"),"Proxy credentials are redacted from diagnostics");}
                 reset();script("exit 1\n");
                 try {Z8ProjectPreparation.run(context,"project",(s,p,m)->{},Map.of("BASH_ENV","payload"));throw new AssertionError("Unexpected environment key");}
-                catch(IOException expected){check(expected.getMessage().contains("연결 설정"),"Only managed proxy keys are accepted");}
+                catch(IOException expected){check(expected.getMessage().contains("connection settings"),"Only managed proxy keys are accepted");}
 
                 reset();script("printf '%s' \"$$\" > \"$1/pid\"\ntrap 'printf \"Z8_SETUP:verify\\n\"; printf stopped > \"$1/terminated\"; exit 0' TERM\nwhile :; do :; done\n");
                 AtomicReference<Throwable> caught=new AtomicReference<>();
@@ -209,7 +209,7 @@ STUBS = {
                     do {reader=Thread.getAllStackTraces().keySet().stream().anyMatch(t->t.isAlive()&&t.getName().equals("z8-setup-output"));if(reader)Thread.sleep(10);}
                     while(reader&&System.nanoTime()<until);
                     check(!reader,"Output reader exits after cancellation");
-                    check(messages.stream().noneMatch(m->m.equals("tools:-1:설치 확인")),"Cancellation suppresses late progress from process cleanup");
+                    check(messages.stream().noneMatch(m->m.equals("tools:-1:Verifying installation")),"Cancellation suppresses late progress from process cleanup");
                 } finally {ProcessHandle.of(pid).ifPresent(process->{process.destroyForcibly();});runner.interrupt();}
                 System.out.println("PASS: preparation subprocess lifecycle");
             }

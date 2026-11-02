@@ -64,7 +64,7 @@ public final class Z8InitialSetup {
         Job(TermuxService service, boolean allowMetered, Network network) {
             this.service = service; this.allowMetered = allowMetered; this.network = network;
             connectivity = service.getSystemService(ConnectivityManager.class);
-            progress = new State(Phase.RUNNING, "bootstrap", -1, "완료된 준비 단계 확인", allowMetered);
+            progress = new State(Phase.RUNNING, "bootstrap", -1, Z8Text.text("Checking completed setup steps", "완료된 준비 단계 확인"), allowMetered);
         }
     }
     private Z8InitialSetup() {}
@@ -77,17 +77,17 @@ public final class Z8InitialSetup {
         return "ready".equals(preferences(context).getString("status", "")) && Z8EnvironmentTemplate.isReady(context);
     }
     public static State state(Context context) {
-        if (isReady(context)) return new State(Phase.READY, "ready", 100, "개발 환경 준비 완료", false);
+        if (isReady(context)) return new State(Phase.READY, "ready", 100, Z8Text.text("Development environment ready", "개발 환경 준비 완료"), false);
         Job job = active;
         if (job != null && !job.abandoned) return job.progress;
         if (latest != null && latest.phase != Phase.READY) return latest;
         SharedPreferences prefs = preferences(context);
         String status = prefs.getString("status", "");
         boolean metered = prefs.getBoolean("allowMetered", false);
-        if ("failed".equals(status)) return new State(Phase.FAILED, "error", -1, "남은 설치 단계를 다시 시도해 주세요.", metered);
+        if ("failed".equals(status)) return new State(Phase.FAILED, "error", -1, Z8Text.text("Retry the remaining installation steps.", "남은 설치 단계를 다시 시도해 주세요."), metered);
         if ("running".equals(status) || "waiting".equals(status))
             return new State(Phase.WAITING_NETWORK, prefs.getString("stage", "bootstrap"), -1,
-                "연결을 확인한 뒤 완료된 단계부터 이어서 준비합니다.", metered);
+                Z8Text.text("Check the connection to resume from completed setup steps.", "연결을 확인한 뒤 완료된 단계부터 이어서 준비합니다."), metered);
         return new State(Phase.CONSENT, "", -1, "", false);
     }
     public static void addListener(Runnable listener) { mainThread(); LISTENERS.add(listener); }
@@ -101,7 +101,7 @@ public final class Z8InitialSetup {
         if (isReady(service) || active != null || service.wantsToStop() || service.z8IsStopRequested()) return;
         if (!preferences(service).edit().putBoolean("consent", true).putBoolean("allowMetered", allowMetered)
                 .putString("status", "running").putString("stage", "bootstrap").commit()) {
-            latest = new State(Phase.FAILED, "error", -1, "설치 동의를 저장하지 못했습니다. 저장 공간을 확인해 주세요.", allowMetered);
+            latest = new State(Phase.FAILED, "error", -1, Z8Text.text("Could not save installation consent. Check available storage.", "설치 동의를 저장하지 못했습니다. 저장 공간을 확인해 주세요."), allowMetered);
             changed(); return;
         }
         start(service, allowMetered);
@@ -127,7 +127,7 @@ public final class Z8InitialSetup {
         if (network == null) {
             preferences(service).edit().putString("status", "waiting").commit();
             latest = new State(Phase.WAITING_NETWORK, "network", -1,
-                allowMetered ? "인터넷에 연결한 뒤 계속해 주세요." : "Wi-Fi에 연결하거나 모바일 데이터 사용에 동의해 주세요.", allowMetered);
+                allowMetered ? Z8Text.text("Connect to the internet to continue.", "인터넷에 연결한 뒤 계속해 주세요.") : Z8Text.text("Connect to Wi-Fi or allow mobile data.", "Wi-Fi에 연결하거나 모바일 데이터 사용에 동의해 주세요."), allowMetered);
             changed(); return;
         }
         Job job = new Job(service, allowMetered, network);
@@ -137,7 +137,7 @@ public final class Z8InitialSetup {
         try {
             manager.registerDefaultNetworkCallback(job.callback); job.callbackRegistered = true;
         } catch (RuntimeException error) {
-            finish(job, new IOException("네트워크 상태를 확인할 수 없습니다.")); return;
+            finish(job, new IOException(Z8Text.text("Could not check the network status.", "네트워크 상태를 확인할 수 없습니다."))); return;
         }
         changed();
         WORKER.execute(() -> run(job));
@@ -183,10 +183,10 @@ public final class Z8InitialSetup {
             final String[] stage = {""};
             Z8ProjectPreparation.run(job.service.getApplicationContext(), Z8EnvironmentTemplate.ID, (name, percent, message) -> {
                 if (job.abandoned || job.networkStopped || Thread.currentThread().isInterrupted())
-                    throw new java.util.concurrent.CancellationException("설치를 일시 중단했습니다.");
+                    throw new java.util.concurrent.CancellationException(Z8Text.text("Installation paused.", "설치를 일시 중단했습니다."));
                 if (!name.equals(stage[0])) {
                     if (!preferences(job.service).edit().putString("status", "running").putString("stage", name).commit())
-                        throw new IllegalStateException("설치 상태를 저장하지 못했습니다.");
+                        throw new IllegalStateException(Z8Text.text("Could not save the installation status.", "설치 상태를 저장하지 못했습니다."));
                     stage[0] = name;
                 }
                 job.progress = new State(Phase.RUNNING, name, percent, message, job.allowMetered);
@@ -196,9 +196,9 @@ public final class Z8InitialSetup {
                 }, 250);
             }, job.proxy.environment());
             if (job.abandoned || job.networkStopped || Thread.currentThread().isInterrupted()) throw new InterruptedException();
-            if (!Z8EnvironmentTemplate.isReady(job.service)) throw new IOException("설치한 개발 환경을 확인하지 못했습니다.");
+            if (!Z8EnvironmentTemplate.isReady(job.service)) throw new IOException(Z8Text.text("Could not verify the installed development environment.", "설치한 개발 환경을 확인하지 못했습니다."));
             if (!preferences(job.service).edit().putString("status", "ready").putString("stage", "ready").commit())
-                throw new IOException("설치 완료 상태를 저장하지 못했습니다.");
+                throw new IOException(Z8Text.text("Could not save the completed installation status.", "설치 완료 상태를 저장하지 못했습니다."));
         } catch (Exception error) { failure = error; }
         finally {
             Z8SetupDownloadProxy proxy = job.proxy; if (proxy != null) proxy.close();
@@ -218,8 +218,8 @@ public final class Z8InitialSetup {
         preferences(job.service).edit().putString("status", status).commit();
         latest = new State(success ? Phase.READY : waiting ? Phase.WAITING_NETWORK : Phase.FAILED,
             success ? "ready" : job.progress.stage, success ? 100 : -1,
-            success ? "개발 환경 준비 완료" : waiting ? "네트워크가 변경되어 다운로드를 멈췄어요. 연결을 확인하고 계속해 주세요."
-                : error.getMessage() == null ? "개발 환경을 준비하지 못했습니다." : error.getMessage(), job.allowMetered);
+            success ? Z8Text.text("Development environment ready", "개발 환경 준비 완료") : waiting ? Z8Text.text("The network changed, so the download was paused. Check the connection to continue.", "네트워크가 변경되어 다운로드를 멈췄어요. 연결을 확인하고 계속해 주세요.")
+                : error.getMessage() == null ? Z8Text.text("Could not prepare the development environment.", "개발 환경을 준비하지 못했습니다.") : error.getMessage(), job.allowMetered);
         active = null;
         if (waiting) Z8PreparationNotification.waiting(job.service, job.id);
         else Z8PreparationNotification.finish(job.service, job.id, success, null);

@@ -55,22 +55,22 @@ public final class Z8TerminalLinks {
                 MAIN.post(() -> {
                     synchronized (BUSY) { BUSY.remove(session); }
                     if (!current(activity, session)) return;
-                    if (!matches.complete) { message(activity, "검색 범위가 커서 파일을 확정하지 못했습니다. 전체 HTML 경로를 사용해 주세요."); return; }
-                    if (matches.paths.isEmpty()) { message(activity, "이 프로젝트에서 HTML 파일을 찾지 못했습니다."); return; }
+                    if (!matches.complete) { message(activity, Z8Text.text("The search is too broad to identify a file. Use the full HTML path.", "검색 범위가 커서 파일을 확정하지 못했습니다. 전체 HTML 경로를 사용해 주세요.")); return; }
+                    if (matches.paths.isEmpty()) { message(activity, Z8Text.text("No HTML file was found in this project.", "이 프로젝트에서 HTML 파일을 찾지 못했습니다.")); return; }
                     if (matches.paths.size() == 1) { launch(activity, session, origin.projectId, matches.paths.get(0), home, source); return; }
                     String[] choices = matches.paths.toArray(new String[0]);
-                    new AlertDialog.Builder(activity).setTitle("미리볼 HTML 파일")
+                    new AlertDialog.Builder(activity).setTitle(Z8Text.text("Choose an HTML file to preview", "미리볼 HTML 파일"))
                         .setItems(choices, (dialog, which) -> {
                             dialog.dismiss();
                             // Let the dialog release window focus before validating the terminal again.
                             MAIN.postDelayed(() -> {
                                 if (current(activity, session)) launch(activity, session, origin.projectId, choices[which], home, source);
                             }, 100);
-                        }).setNegativeButton("취소", null).show();
+                        }).setNegativeButton(Z8Text.text("Cancel", "취소"), null).show();
                 });
             } catch (Exception unavailable) {
                 MAIN.post(() -> { synchronized (BUSY) { BUSY.remove(session); }
-                    if (current(activity, session)) message(activity, "이 프로젝트의 HTML 파일을 확인하지 못했습니다."); });
+                    if (current(activity, session)) message(activity, Z8Text.text("Could not verify this project's HTML file.", "이 프로젝트의 HTML 파일을 확인하지 못했습니다.")); });
             }
         });
         return true;
@@ -137,7 +137,7 @@ public final class Z8TerminalLinks {
                 if (!ok && process != null) process.destroyForcibly();
                 final boolean success = ok;
                 MAIN.post(() -> { synchronized (BUSY) { BUSY.remove(session); }
-                    if (!success && current(activity, session)) message(activity, "미리보기를 열지 못했습니다. 터미널이 실행 중인지 확인해 주세요."); });
+                    if (!success && current(activity, session)) message(activity, Z8Text.text("Could not open the preview. Check that the terminal is running.", "미리보기를 열지 못했습니다. 터미널이 실행 중인지 확인해 주세요.")); });
             }
         });
     }

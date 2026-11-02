@@ -72,7 +72,7 @@ public class LinksProbe {
         } else throw new AssertionError(scenario);
     }
 }''')
-        compiled = subprocess.run([str(JDK/'javac'), '-d', str(cls.directory),
+        compiled = subprocess.run([str(JDK/'javac'), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-d', str(cls.directory),
             str(ROOT/'overlay/app/src/main/java/com/termux/app/Z8TerminalPath.java'),str(harness)],capture_output=True,text=True)
         if compiled.returncode: raise AssertionError(compiled.stderr)
 
@@ -108,7 +108,7 @@ public class GestureProbe {
  }
 }''')
         source=ROOT/'overlay/terminal-view/src/main/java/com/termux/view/Z8FileLinkGesture.java'
-        result=subprocess.run([str(JDK/'javac'),'-d',str(self.directory),str(source),str(probe)],capture_output=True,text=True)
+        result=subprocess.run([str(JDK/'javac'), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'),'-d',str(self.directory),str(source),str(probe)],capture_output=True,text=True)
         self.assertEqual(result.returncode,0,result.stderr)
         result=subprocess.run([str(JDK/'java'),'-cp',str(self.directory),'GestureProbe'],capture_output=True,text=True)
         self.assertEqual(result.returncode,0,result.stderr)

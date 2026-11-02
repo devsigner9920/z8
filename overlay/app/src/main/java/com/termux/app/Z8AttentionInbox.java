@@ -19,11 +19,11 @@ final class Z8AttentionInbox {
         Item(JSONObject source, Predicate<String> canOpen) {
             id = source.optString("id");
             String kind = source.optString("kind");
-            title = "permission".equals(kind) ? "권한 요청" : "question".equals(kind) ? "답변 요청"
-                : "plan".equals(kind) ? "계획 검토 요청" : "finished".equals(kind) ? "작업 완료 알림" : "알림";
+            title = "permission".equals(kind) ? Z8Text.text("Permission request", "권한 요청") : "question".equals(kind) ? Z8Text.text("Question", "답변 요청")
+                : "plan".equals(kind) ? Z8Text.text("Plan review request", "계획 검토 요청") : "finished".equals(kind) ? Z8Text.text("Completion notification", "작업 완료 알림") : Z8Text.text("Notification", "알림");
             String origin = source.optString("provider");
             provider = "claude".equals(origin) ? "Claude Code" : "codex".equals(origin) ? "Codex"
-                : "diagnostic".equals(origin) ? "진단 테스트" : "CLI";
+                : "diagnostic".equals(origin) ? Z8Text.text("Diagnostic test", "진단 테스트") : "CLI";
             observedAt = Math.max(0, source.optLong("observedAt"));
             seenAt = Math.max(0, source.optLong("seenAt"));
             finished = "finished".equals(kind);
@@ -37,7 +37,7 @@ final class Z8AttentionInbox {
         }
 
         String status() {
-            return !openable ? "세션 종료" : unseenRequest ? "미확인" : seenAt > 0 ? "읽음" : finished ? "완료 기록" : "알림";
+            return !openable ? Z8Text.text("Session ended", "세션 종료") : unseenRequest ? Z8Text.text("Unread", "미확인") : seenAt > 0 ? Z8Text.text("Read", "읽음") : finished ? Z8Text.text("Completion record", "완료 기록") : Z8Text.text("Notification", "알림");
         }
     }
 
@@ -62,7 +62,7 @@ final class Z8AttentionInbox {
         for (JSONObject record : sorted) {
             Item item = new Item(record, canOpen);
             if (item.id.isEmpty()) continue;
-            String name = Z8SessionCatalog.displayText(record.optString("projectName"), 80, "이전 프로젝트");
+            String name = Z8SessionCatalog.displayText(record.optString("projectName"), 80, Z8Text.text("Previous project", "이전 프로젝트"));
             String id = record.optString("projectId");
             // Old persisted records have no project ID. Keep them separate from current IDs.
             String key = record.has("projectId") ? (id.isEmpty() ? "device" : "project:" + id) : "history:" + name;
@@ -70,7 +70,7 @@ final class Z8AttentionInbox {
             if (project == null) { project = new Project(key, name); projects.put(key, project); }
             Session session = project.sessionsByKey.get(item.sessionKey);
             if (session == null) {
-                session = new Session(item.sessionKey, Z8SessionCatalog.displayText(record.optString("sessionName"), 96, "이전 터미널"));
+                session = new Session(item.sessionKey, Z8SessionCatalog.displayText(record.optString("sessionName"), 96, Z8Text.text("Previous terminal", "이전 터미널")));
                 project.sessionsByKey.put(item.sessionKey, session);
                 project.sessions.add(session);
             }

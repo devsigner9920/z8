@@ -123,7 +123,7 @@ public final class Z8SetupActivity extends Activity implements ServiceConnection
         Z8Theme.Palette palette = Z8Theme.selected(this);
         Z8Theme.applyChrome(this, palette);
         style = Z8ChromeStyle.from(palette);
-        setTitle("z8 · 처음 준비");
+        setTitle(Z8Text.text("z8 · First setup", "z8 · 처음 준비"));
         ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true); scroll.setBackgroundColor(style.canvas);
         LinearLayout frame = column(); frame.setGravity(Gravity.CENTER);
@@ -150,11 +150,11 @@ public final class Z8SetupActivity extends Activity implements ServiceConnection
         consent = column(); consent.setPadding(dp(18), dp(18), dp(18), dp(18));
         consent.setBackground(style.shape(this, style.surface, style.border, 14));
         TextView tools = text("Python · Node.js · Git · GitHub CLI", 14, style.text, true); consent.addView(tools);
-        TextView downloads = text("Linux 환경을 구성하고 개발 도구를 내려받아요.\n수백 MB 이상의 데이터가 사용될 수 있어요.\n데이터 요금이 발생할 수 있으니 Wi-Fi를 권장해요.", 13, style.muted, false);
+        TextView downloads = text(Z8Text.text("Set up Linux and download development tools.\nThis may use hundreds of MB or more.\nWi-Fi is recommended to avoid data charges.", "Linux 환경을 구성하고 개발 도구를 내려받아요.\n수백 MB 이상의 데이터가 사용될 수 있어요.\n데이터 요금이 발생할 수 있으니 Wi-Fi를 권장해요."), 13, style.muted, false);
         downloads.setLineSpacing(dp(4), 1); add(consent, downloads, 10);
         networkStatus = text("", 13, style.text, false); add(consent, networkStatus, 18);
         meteredConsent = new CheckBox(this);
-        meteredConsent.setText("모바일 데이터 또는 유료 네트워크 사용에 동의합니다.");
+        meteredConsent.setText(Z8Text.text("I agree to use mobile data or a metered network.", "모바일 데이터 또는 유료 네트워크 사용에 동의합니다."));
         meteredConsent.setTextSize(13); meteredConsent.setTextColor(style.text);
         meteredConsent.setButtonTintList(ColorStateList.valueOf(style.accent));
         meteredConsent.setMinHeight(dp(48));
@@ -173,12 +173,12 @@ public final class Z8SetupActivity extends Activity implements ServiceConnection
         LinearLayout.LayoutParams track = new LinearLayout.LayoutParams(-1, dp(4)); track.topMargin = dp(12);
         progressArea.addView(progress, track); add(content, progressArea, 28);
 
-        install = button("설치 시작", true);
+        install = button(Z8Text.text("Start setup", "설치 시작"), true);
         install.setOnClickListener(view -> request()); add(content, install, 28);
-        later = button("나중에", false);
+        later = button(Z8Text.text("Later", "나중에"), false);
         later.setOnClickListener(view -> leaveSetup());
         add(content, later, 8);
-        notifications = text("진행 알림 켜기", 13, style.accent, false);
+        notifications = text(Z8Text.text("Enable progress notifications", "진행 알림 켜기"), 13, style.accent, false);
         notifications.setGravity(Gravity.CENTER); notifications.setMinimumHeight(dp(48));
         notifications.setFocusable(true); notifications.setOnClickListener(view -> startActivity(new Intent(
             Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, getPackageName())));
@@ -206,16 +206,16 @@ public final class Z8SetupActivity extends Activity implements ServiceConnection
         boolean running = state.phase == Z8InitialSetup.Phase.RUNNING;
         boolean waiting = state.phase == Z8InitialSetup.Phase.WAITING_NETWORK;
         boolean failed = state.phase == Z8InitialSetup.Phase.FAILED;
-        title.setText(running ? "작업 공간을 준비하고 있어요" : waiting ? "네트워크를 기다리고 있어요"
-            : failed ? "준비를 완료하지 못했어요" : "개발 도구를 준비할게요");
-        description.setText(running ? "처음 한 번은 몇 분 걸릴 수 있어요. 다른 앱을 사용해도 준비는 계속돼요.\n강제 종료되면 앱을 다시 열 때 완료된 단계부터 확인하고 이어가요."
-            : waiting ? "완료한 단계는 보관했어요. Wi-Fi에 연결하면 이어서 준비할 수 있어요."
-            : failed ? "완료한 단계와 프로젝트 파일은 유지돼요. 연결과 저장 공간을 확인하고 다시 시도해 주세요."
-            : "프로젝트를 만들기 전에 필요한 도구를 준비해요.\n처음 한 번 설치하면 다음 프로젝트부터 재사용해요.");
+        title.setText(running ? Z8Text.text("Preparing your workspace", "작업 공간을 준비하고 있어요") : waiting ? Z8Text.text("Waiting for a connection", "네트워크를 기다리고 있어요")
+            : failed ? Z8Text.text("Setup could not finish", "준비를 완료하지 못했어요") : Z8Text.text("Set up development tools", "개발 도구를 준비할게요"));
+        description.setText(running ? Z8Text.text("First setup may take a few minutes. It continues while you use other apps.\nIf the app is stopped, reopen it to check completed steps and resume.", "처음 한 번은 몇 분 걸릴 수 있어요. 다른 앱을 사용해도 준비는 계속돼요.\n강제 종료되면 앱을 다시 열 때 완료된 단계부터 확인하고 이어가요.")
+            : waiting ? Z8Text.text("Completed steps are saved. Connect to Wi-Fi to continue.", "완료한 단계는 보관했어요. Wi-Fi에 연결하면 이어서 준비할 수 있어요.")
+            : failed ? Z8Text.text("Completed steps and project files are preserved. Check your connection and storage, then retry.", "완료한 단계와 프로젝트 파일은 유지돼요. 연결과 저장 공간을 확인하고 다시 시도해 주세요.")
+            : Z8Text.text("Prepare the tools needed to create projects.\nInstall them once and reuse them for future projects.", "프로젝트를 만들기 전에 필요한 도구를 준비해요.\n처음 한 번 설치하면 다음 프로젝트부터 재사용해요."));
         consent.setVisibility(running ? View.GONE : View.VISIBLE);
-        networkStatus.setText(!network.online ? "인터넷에 연결되지 않았어요. Wi-Fi에 연결해 주세요."
-            : network.metered ? "현재 모바일 데이터 또는 유료 네트워크에 연결되어 있어요."
-            : "현재 데이터 사용량 제한이 없는 네트워크에 연결되어 있어요.");
+        networkStatus.setText(!network.online ? Z8Text.text("No internet connection. Connect to Wi-Fi.", "인터넷에 연결되지 않았어요. Wi-Fi에 연결해 주세요.")
+            : network.metered ? Z8Text.text("You are using mobile data or a metered network.", "현재 모바일 데이터 또는 유료 네트워크에 연결되어 있어요.")
+            : Z8Text.text("You are using an unmetered network.", "현재 데이터 사용량 제한이 없는 네트워크에 연결되어 있어요."));
         meteredConsent.setVisibility(network.online && network.metered ? View.VISIBLE : View.GONE);
         progressArea.setVisibility(running || waiting || failed ? View.VISIBLE : View.GONE);
         String message = state.message == null ? "" : state.message;
@@ -226,8 +226,8 @@ public final class Z8SetupActivity extends Activity implements ServiceConnection
         progress.setVisibility(running ? View.VISIBLE : View.GONE);
         progress.setIndeterminate(state.percent < 0); if (state.percent >= 0) progress.setProgress(state.percent);
         install.setVisibility(running ? View.GONE : View.VISIBLE);
-        install.setText(failed ? "다시 시도" : waiting ? "이 연결로 계속" : "설치 시작");
-        later.setText(running ? "백그라운드에서 계속" : "나중에");
+        install.setText(failed ? Z8Text.text("Retry", "다시 시도") : waiting ? Z8Text.text("Continue on this connection", "이 연결로 계속") : Z8Text.text("Start setup", "설치 시작"));
+        later.setText(running ? Z8Text.text("Continue in background", "백그라운드에서 계속") : Z8Text.text("Later", "나중에"));
         NotificationManager manager = getSystemService(NotificationManager.class);
         notifications.setVisibility(manager != null && !manager.areNotificationsEnabled() ? View.VISIBLE : View.GONE);
         updateInstallEnabled();

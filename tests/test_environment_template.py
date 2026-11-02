@@ -26,7 +26,7 @@ class EnvironmentTemplateTests(unittest.TestCase):
             sources.append(str(path))
         actual = ROOT / 'overlay/app/src/main/java/com/termux/app'
         sources += [str(actual / name) for name in ('Z8Files.java', 'Z8Projects.java', 'Z8GuestArchive.java', 'Z8EnvironmentTemplate.java')]
-        result = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(cls.directory), *sources], capture_output=True, text=True, timeout=30)
+        result = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(cls.directory), *sources], capture_output=True, text=True, timeout=30)
         if result.returncode:
             raise AssertionError(result.stdout + result.stderr)
 

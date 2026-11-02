@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Exercise the diagnostic APK on the dedicated z8 emulator, never a physical device."""
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
 import re
@@ -15,6 +16,9 @@ ADB = ROOT / '.local/android-sdk/platform-tools/adb'
 SERIAL = 'emulator-5580'
 PACKAGE = 'dev.devsigner.z8'
 REPORTS = ROOT / 'reports/compatibility'
+_UI_SPEC = importlib.util.spec_from_file_location('z8_smoke_ui', Path(__file__).with_name('smoke_ui.py'))
+ui = importlib.util.module_from_spec(_UI_SPEC)
+_UI_SPEC.loader.exec_module(ui)
 
 
 def adb(*args):
@@ -54,7 +58,10 @@ def observe():
 
 
 def terminal_action(label):
-    """Follow the observed terminal menu without inventing a project or session."""
+    """Follow observed Settings controls without inventing a project or session."""
+    # Preserve the historical helper API while following the current settings UI.
+    key = {'실행 진단': 'diagnostics', '개발 환경': 'environment'}.get(label, label)
+    labels = ui.labels(key) if key in ui.LABELS else (label,)
     tree = observe()
     if any(node.get('resource-id', '').endswith(':id/z8_session_drawer')
            and node.get('visible-to-user') != 'false' for node in tree.iter('node')):
@@ -62,16 +69,35 @@ def terminal_action(label):
         tree = observe()
     def matches(attribute, value):
         return [node for node in tree.iter('node')
-                if node.get(attribute) == value and node.get('enabled') != 'false'
+                if ui.matches(node.get(attribute), value) and node.get('enabled') != 'false'
                 and node.get('visible-to-user') != 'false']
-    actions = matches('text', label)
+    actions = matches('text', labels)
     if not actions:
-        menus = matches('content-desc', '터미널 메뉴')
+        menus = matches('content-desc', ui.labels('settings'))
         if len(menus) != 1:
             raise RuntimeError('Expected one observed terminal menu before ' + label)
         click(menus[0])
         tree = observe()
-        actions = matches('text', label)
+        actions = matches('text', labels)
+        # Developer settings can be below the fold. Scroll only observed bounds.
+        for _ in range(7):
+            if actions:
+                break
+            scroll = [node for node in tree.iter('node') if node.get('scrollable') == 'true'
+                      and node.get('visible-to-user') != 'false']
+            if len(scroll) != 1:
+                break
+            bounds = re.fullmatch(r'\[(\d+),(\d+)\]\[(\d+),(\d+)\]', scroll[0].get('bounds', ''))
+            if bounds is None:
+                break
+            left, top, right, bottom = map(int, bounds.groups())
+            if right <= left or bottom <= top:
+                break
+            x = str((left + right) // 2)
+            adb('shell', 'input', 'swipe', x, str(top + (bottom - top) * 4 // 5),
+                x, str(top + (bottom - top) // 5), '300')
+            tree = observe()
+            actions = matches('text', labels)
     if len(actions) != 1:
         raise RuntimeError('Expected one observed terminal action: ' + label)
     click(actions[0])
@@ -91,7 +117,7 @@ def resume(project_id=None, show_sessions=False):
         arguments.extend(['--ez', PACKAGE + '.SHOW_SESSIONS', 'true'])
     adb(*arguments)
     tree = observe()
-    setup = next((n for n in tree.iter('node') if n.get('text') == '이 테마로 시작'), None)
+    setup = next((n for n in tree.iter('node') if n.get('text') in ui.labels('start_theme')), None)
     if setup is not None:
         click(setup)
         tree = observe()
@@ -132,15 +158,15 @@ def prepared_guest(project_id, project_name):
         nodes = list(tree.iter('node'))
         if any(node.get('resource-id', '').endswith(':id/terminal_view') for node in nodes):
             raise RuntimeError('Unexpected terminal during environment check; refusing a possible installer PTY')
-        if any(node.get('text') == '개발 환경 준비' for node in nodes):
+        if any(node.get('text') in ui.labels('setup_environment') for node in nodes):
             raise RuntimeError('Fixture is not prepared; complete the visible setup before this shell probe')
-        ready = any(node.get('text') == 'Linux 설치됨 · 개발 도구 준비됨' for node in nodes)
-        buttons = [node for node in nodes if node.get('text') == '새 터미널 열기'
+        ready = any(node.get('text') in ui.labels('tools_ready') for node in nodes)
+        buttons = [node for node in nodes if node.get('text') in ui.labels('open_terminal')
                    and node.get('enabled') != 'false' and node.get('visible-to-user') != 'false']
         if ready and len(buttons) == 1:
             click(buttons[0])
             return
-        if any(node.get('text') in ('Linux 설치됨 · 개발 도구 준비 필요', 'Linux 설치됨 · 일부 도구 확인 지연') for node in nodes):
+        if any(node.get('text') in ui.labels('tools_needed') + ui.labels('tools_delayed') for node in nodes):
             raise RuntimeError('Actual standard-tool verification is incomplete; prepare/recheck it before this shell probe')
         time.sleep(.3)
     raise RuntimeError('Prepared development profile did not become ready; no Shell or installer was selected')
@@ -173,7 +199,7 @@ def main():
     REPORTS.mkdir(exist_ok=True)
     print(adb('install', '-r', str(apk)), flush=True)
     tree = diagnostics()
-    diagnostic = [node for node in tree.iter('node') if node.get('text') == '새 Android 진단 셸 만들기']
+    diagnostic = [node for node in tree.iter('node') if node.get('text') in ui.labels('diagnostic_shell')]
     if len(diagnostic) != 1:
         raise RuntimeError('Explicit Android diagnostic Shell control is not visible')
     # Android aliases /data/data and /data/user/0 with mounts, not necessarily symlinks.

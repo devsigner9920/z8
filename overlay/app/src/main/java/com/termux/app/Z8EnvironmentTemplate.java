@@ -32,7 +32,7 @@ public final class Z8EnvironmentTemplate {
     public static Z8Projects.Project project(Context context, String id) throws IOException {
         if (!isTemplate(id)) return new Z8Projects(context).open(id);
         File source = Z8Guest.privateDirectory(context, "z8/template/source");
-        return new Z8Projects.Project(ID, "초기 설정", source, 0);
+        return new Z8Projects.Project(ID, Z8Text.text("Initial setup", "초기 설정"), source, 0);
     }
 
     static File rootfs(Context context) throws IOException {
@@ -71,22 +71,22 @@ public final class Z8EnvironmentTemplate {
     static void copyRootfs(File prepared, File staging, Z8GuestArchive.Progress progress) throws IOException {
         final Path source = Z8Files.directory(prepared, "").toPath();
         final Path target = Z8Files.directory(staging, "").toPath();
-        if (source.startsWith(target) || target.startsWith(source)) throw new IOException("환경 복사 경로가 겹칩니다.");
+        if (source.startsWith(target) || target.startsWith(source)) throw new IOException(Z8Text.text("The environment copy paths overlap.", "환경 복사 경로가 겹칩니다."));
         try (java.nio.file.DirectoryStream<Path> children = Files.newDirectoryStream(target)) {
-            if (children.iterator().hasNext()) throw new IOException("환경 복사 대상이 비어 있지 않습니다.");
+            if (children.iterator().hasNext()) throw new IOException(Z8Text.text("The destination for the environment copy is not empty.", "환경 복사 대상이 비어 있지 않습니다."));
         }
-        progress.update(-1, "설치된 개발 환경의 크기를 확인하고 있습니다.");
+        progress.update(-1, Z8Text.text("Checking the installed environment size…", "설치된 개발 환경의 크기를 확인하고 있습니다."));
         final List<Entry> entries = new ArrayList<>();
         final long[] total = {0};
         Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
             private void add(Path path, BasicFileAttributes attrs) throws IOException {
                 interrupted();
                 if (!attrs.isDirectory() && !attrs.isRegularFile() && !attrs.isSymbolicLink())
-                    throw new IOException("개발 환경에 복사할 수 없는 특수 파일이 있습니다.");
+                    throw new IOException(Z8Text.text("The environment contains special files that cannot be copied.", "개발 환경에 복사할 수 없는 특수 파일이 있습니다."));
                 Entry entry = new Entry(source.relativize(path), attrs, path);
                 entries.add(entry); total[0] += entry.size;
                 if (entries.size() > MAX_ITEMS || total[0] > MAX_BYTES)
-                    throw new IOException("준비된 개발 환경이 복사 크기 제한을 초과했습니다.");
+                    throw new IOException(Z8Text.text("The prepared environment exceeds the copy size limit.", "준비된 개발 환경이 복사 크기 제한을 초과했습니다."));
             }
             @Override public FileVisitResult preVisitDirectory(Path path, BasicFileAttributes attrs) throws IOException {
                 if (path.equals(source)) return FileVisitResult.CONTINUE;
@@ -99,7 +99,7 @@ public final class Z8EnvironmentTemplate {
             }
         });
         if (staging.getUsableSpace() < total[0] + 128L * 1024 * 1024)
-            throw new IOException("프로젝트 환경을 복사할 저장 공간이 부족합니다.");
+            throw new IOException(Z8Text.text("There is not enough storage to copy the project environment.", "프로젝트 환경을 복사할 저장 공간이 부족합니다."));
         long copied = 0; int count = 0, lastProgress = -1;
         byte[] buffer = new byte[65536];
         for (Entry entry : entries) {
@@ -118,16 +118,16 @@ public final class Z8EnvironmentTemplate {
                     int size;
                     while ((size = input.read(buffer)) != -1) {
                         interrupted(); fileBytes += size; copied += size;
-                        if (fileBytes > entry.size) throw new IOException("복사 중 원본 환경이 변경되었습니다.");
+                        if (fileBytes > entry.size) throw new IOException(Z8Text.text("The source environment changed during copying.", "복사 중 원본 환경이 변경되었습니다."));
                         output.write(buffer, 0, size);
                         int percent = total[0] == 0 ? 0 : (int) (copied * 90 / total[0]);
                         if (percent != lastProgress) {
                             lastProgress = percent;
-                            progress.update(percent, "개발 환경 복사 · " + count + " / " + entries.size() + " 파일");
+                            progress.update(percent, Z8Text.text("Copying environment · ", "개발 환경 복사 · ") + count + " / " + entries.size() + Z8Text.text(" files", " 파일"));
                         }
                     }
                 }
-                if (fileBytes != entry.size) throw new IOException("원본 환경의 파일 크기가 변경되었습니다.");
+                if (fileBytes != entry.size) throw new IOException(Z8Text.text("A source file changed size.", "원본 환경의 파일 크기가 변경되었습니다."));
                 Files.setPosixFilePermissions(destination, entry.permissions);
             }
             count++;
@@ -137,7 +137,7 @@ public final class Z8EnvironmentTemplate {
             Entry entry = entries.get(index);
             if (entry.directory) Files.setPosixFilePermissions(target.resolve(entry.relative), entry.permissions);
         }
-        progress.update(90, "개발 환경 복사 · " + count + " / " + entries.size() + " 파일");
+        progress.update(90, Z8Text.text("Copying environment · ", "개발 환경 복사 · ") + count + " / " + entries.size() + Z8Text.text(" files", " 파일"));
     }
 
     private static boolean emptyMount(String relative) {
@@ -151,15 +151,15 @@ public final class Z8EnvironmentTemplate {
             // Relocate it within this copy rather than retaining a shared target.
             if (normalized.startsWith(root)) return original.getParent().relativize(normalized);
             if (normalized.startsWith("/data") || normalized.startsWith("/storage") || normalized.startsWith("/sdcard"))
-                throw new IOException("기본 환경의 링크가 앱 외부 저장소를 가리킵니다.");
+                throw new IOException(Z8Text.text("A base environment link points outside app storage.", "기본 환경의 링크가 앱 외부 저장소를 가리킵니다."));
             return link; // Guest-absolute links such as /etc/alternatives are preserved.
         }
         if (!original.getParent().resolve(link).normalize().startsWith(root))
-            throw new IOException("기본 환경 밖을 가리키는 상대 링크가 있습니다.");
+            throw new IOException(Z8Text.text("A relative link points outside the base environment.", "기본 환경 밖을 가리키는 상대 링크가 있습니다."));
         return link;
     }
 
     private static void interrupted() throws IOException {
-        if (Thread.currentThread().isInterrupted()) throw new IOException("환경 복사가 중단되었습니다.");
+        if (Thread.currentThread().isInterrupted()) throw new IOException(Z8Text.text("Environment copying was interrupted.", "환경 복사가 중단되었습니다."));
     }
 }

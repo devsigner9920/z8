@@ -34,7 +34,7 @@ class AttentionInboxTests(unittest.TestCase):
             sources.append(str(path))
         sources += [str(ROOT / 'overlay/app/src/main/java/com/termux/app' / name)
                     for name in ('Z8SessionOrigin.java', 'Z8SessionCatalog.java', 'Z8AttentionInbox.java')]
-        result = subprocess.run([javac, '-encoding', 'UTF-8', '-d', str(cls.directory), *sources],
+        result = subprocess.run([javac, str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-encoding', 'UTF-8', '-d', str(cls.directory), *sources],
                                 capture_output=True, text=True, timeout=45)
         if result.returncode:
             raise AssertionError(result.stdout + result.stderr)
@@ -121,11 +121,11 @@ STUBS = {
                     Z8AttentionInbox.Project project=Z8AttentionInbox.group(records,id->!id.equals("gone")).get(0);
                     List<Z8AttentionInbox.Item> items=project.sessions.get(0).items;
                     check(project.unseen==1,"Only live unread observed requests count toward badge");
-                    check(items.get(0).status().equals("미확인"),"Request status states unread, not waiting or approved");
-                    check(items.get(1).finished&&!items.get(1).unseenRequest&&items.get(1).status().equals("완료 기록"),"Completion is a record, not an approval request");
-                    check(items.get(2).status().equals("읽음"),"Seen is not resolved");
+                    check(items.get(0).status().equals("Unread"),"Request status states unread, not waiting or approved");
+                    check(items.get(1).finished&&!items.get(1).unseenRequest&&items.get(1).status().equals("Completion record"),"Completion is a record, not an approval request");
+                    check(items.get(2).status().equals("Read"),"Seen is not resolved");
                     check(!items.get(3).openable&&!items.get(4).openable,"Stale and vanished sessions are disabled");
-                    check(items.get(5).status().equals("알림")&&!items.get(5).finished,"Unknown event cannot claim completion");
+                    check(items.get(5).status().equals("Notification")&&!items.get(5).finished,"Unknown event cannot claim completion");
                     check(records.get(0).optLong("seenAt")==0,"Rendering never marks a request as seen");
                 } else if(scenario.equals("route")) {
                     TerminalSession original=new TerminalSession("t1","Shell");
@@ -166,7 +166,7 @@ STUBS = {
                     Z8AttentionInbox.Project project=Z8AttentionInbox.group(List.of(record),id->true).get(0);
                     check(project.name.equals("Demo")&&project.sessions.get(0).name.equals("Shell"),"Display labels strip controls");
                     Z8AttentionInbox.Item item=project.sessions.get(0).items.get(0);
-                    check(item.observedAt==0&&item.provider.equals("진단 테스트"),"Invalid time stays unknown and diagnostics are explicit");
+                    check(item.observedAt==0&&item.provider.equals("Diagnostic test"),"Invalid time stays unknown and diagnostics are explicit");
                     check(Z8AttentionInbox.group(List.of(new JSONObject().put("kind","permission")),id->true).isEmpty(),"Unroutable empty ID is omitted");
                 } else throw new AssertionError(scenario);
                 System.out.println("PASS: "+scenario);

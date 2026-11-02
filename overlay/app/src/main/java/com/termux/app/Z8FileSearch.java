@@ -62,7 +62,7 @@ public final class Z8FileSearch {
         Bounds(int depth, int visited, int results, long millis) {
             if (depth < 1 || depth > MAX_DEPTH || visited < 1 || visited > MAX_VISITED
                     || results < 1 || results > MAX_RESULTS || millis < 1 || millis > MAX_MILLIS)
-                throw new IllegalArgumentException("검색 제한값이 잘못되었습니다.");
+                throw new IllegalArgumentException(Z8Text.text("Invalid search limits.", "검색 제한값이 잘못되었습니다."));
             this.depth = depth; this.visited = visited; this.results = results;
             nanos = millis * 1000000L;
         }
@@ -77,16 +77,16 @@ public final class Z8FileSearch {
 
     static Result search(File source, String query, Cancellation cancellation, Bounds bounds, Clock clock) throws IOException {
         if (source == null || query == null || query.trim().isEmpty() || query.length() > MAX_QUERY)
-            throw new IOException("검색어를 1~120자로 입력해 주세요.");
+            throw new IOException(Z8Text.text("Enter a search term of 1–120 characters.", "검색어를 1~120자로 입력해 주세요."));
         for (int index = 0; index < query.length(); index++)
-            if (Character.isISOControl(query.charAt(index))) throw new IOException("검색어에 제어 문자를 사용할 수 없습니다.");
+            if (Character.isISOControl(query.charAt(index))) throw new IOException(Z8Text.text("Search terms cannot contain control characters.", "검색어에 제어 문자를 사용할 수 없습니다."));
         Path root = source.toPath().toAbsolutePath().normalize();
         Path cursor = root.getRoot();
         for (Path component : root) {
             cursor = cursor.resolve(component);
-            if (Files.isSymbolicLink(cursor)) throw new IOException("링크를 통해 프로젝트를 검색할 수 없습니다.");
+            if (Files.isSymbolicLink(cursor)) throw new IOException(Z8Text.text("Projects cannot be searched through symbolic links.", "링크를 통해 프로젝트를 검색할 수 없습니다."));
         }
-        if (!Files.isDirectory(root, LinkOption.NOFOLLOW_LINKS)) throw new IOException("프로젝트 폴더가 없습니다.");
+        if (!Files.isDirectory(root, LinkOption.NOFOLLOW_LINKS)) throw new IOException(Z8Text.text("The project folder is missing.", "프로젝트 폴더가 없습니다."));
         root = root.toFile().getCanonicalFile().toPath();
         Search search = new Search(root, query.trim().toLowerCase(Locale.ROOT), cancellation, bounds, clock);
         search.walk(root, 0, true);
@@ -135,12 +135,12 @@ public final class Z8FileSearch {
             if (stop()) return;
             try {
                 if (!contained(directory) || !Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)) {
-                    if (initial) throw new IOException("프로젝트 경로가 변경되었습니다.");
+                    if (initial) throw new IOException(Z8Text.text("The project path has changed.", "프로젝트 경로가 변경되었습니다."));
                     limits.add(Limit.UNREADABLE); return;
                 }
                 try (DirectoryStream<Path> entries = Files.newDirectoryStream(directory)) {
                     if (!contained(directory)) {
-                        if (initial) throw new IOException("프로젝트 경로가 변경되었습니다.");
+                        if (initial) throw new IOException(Z8Text.text("The project path has changed.", "프로젝트 경로가 변경되었습니다."));
                         limits.add(Limit.UNREADABLE); return;
                     }
                     for (Path entry : entries) {

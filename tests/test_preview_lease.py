@@ -66,7 +66,7 @@ public class LeaseProbe {
             path = Path(directory)
             (path / 'LeaseProbe.java').write_text(source)
             jdk = ROOT / '.local/jdk/Contents/Home/bin'
-            result = subprocess.run([str(jdk / 'javac'), '-d', str(path), str(path / 'LeaseProbe.java')], capture_output=True, text=True)
+            result = subprocess.run([str(jdk / 'javac'), str(ROOT / 'overlay/app/src/main/java/com/termux/app/Z8Text.java'), '-d', str(path), str(path / 'LeaseProbe.java')], capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
             result = subprocess.run([str(jdk / 'java'), '-cp', str(path), 'LeaseProbe'], capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)

@@ -57,8 +57,8 @@ raise SystemExit(module.main(sys.argv[1:]))
     def calls(self):
         return [json.loads(line) for line in self.log.read_text().splitlines()] if self.log.exists() else []
 
-    def run_wrapper(self, args=(), answer=None, tty=True, help_mode='normal', interrupt=False):
-        env = dict(os.environ, FAKE_CALLS=str(self.log), FAKE_HELP=help_mode)
+    def run_wrapper(self, args=(), answer=None, tty=True, help_mode='normal', interrupt=False, language='en'):
+        env = dict(os.environ, FAKE_CALLS=str(self.log), FAKE_HELP=help_mode, Z8_UI_LANGUAGE=language)
         command = [sys.executable, str(self.runner), str(self.binary), *args]
         if not tty:
             result = subprocess.run(command, input='', capture_output=True, text=True, env=env, timeout=6)
@@ -74,7 +74,7 @@ raise SystemExit(module.main(sys.argv[1:]))
                     except OSError: break
                     if not chunk: break
                     output.extend(chunk)
-                if not sent and '선택: '.encode() in output:
+                if not sent and ('선택: ' if language == 'ko' else 'Choice: ').encode() in output:
                     sent = True
                     if interrupt: process.send_signal(signal.SIGINT)
                     else: os.write(master, answer if answer is not None else b'\n')
@@ -93,9 +93,9 @@ raise SystemExit(module.main(sys.argv[1:]))
         args = ['--model', 'model name', 'make this work; $(literal)']
         status, output = self.run_wrapper(args, b'yes\n')
         self.assertEqual(status, 37, output)
-        self.assertIn('추가 승인 없이', output)
-        self.assertIn('다른 z8 프로젝트', output)
-        self.assertIn('Codex sandbox 꺼짐', output)
+        self.assertIn('without further approval', output)
+        self.assertIn('other Z8 projects', output)
+        self.assertIn('Codex sandbox OFF', output)
         self.assertEqual(self.calls()[-1], ['--no-daemon', '--sandbox', 'danger-full-access', *args])
         state = self.home / '.config/z8/codex-local.json'
         self.assertEqual(stat.S_IMODE(state.stat().st_mode), 0o600)
@@ -104,12 +104,15 @@ raise SystemExit(module.main(sys.argv[1:]))
         self.assertEqual(json.loads(state.read_text()), {'schemaVersion': 1, 'projectId': PROJECT, 'choice': launcher.CHOICE})
         for args in (['resume', '--last'], ['fork', 'session-id', 'continue here']):
             status, output = self.run_wrapper(args)
-            self.assertEqual(status, 37, output);self.assertNotIn('선택:', output)
+            self.assertEqual(status, 37, output);self.assertNotIn('Choice:', output)
             self.assertEqual(self.calls()[-1], ['--no-daemon', '--sandbox', 'danger-full-access', *args])
         before = self.calls();status, output = self.run_wrapper([launcher.RESET], tty=False)
         self.assertEqual(status, 0, output);self.assertFalse(state.exists());self.assertEqual(self.calls(), before)
-        status, output = self.run_wrapper(answer='동의\n'.encode())
+        status, output = self.run_wrapper(answer='동의\n'.encode(), language='ko')
         self.assertEqual(status, 37, output)
+        self.assertIn('추가 승인 없이', output)
+        self.assertIn('다른 z8 프로젝트', output)
+        self.assertIn('Codex sandbox 꺼짐', output)
 
     def test_inherited_sgid_directory_keeps_private_store_usable(self):
         config = self.home / '.config';config.mkdir(mode=0o700);config.chmod(0o2700)
@@ -148,7 +151,7 @@ raise SystemExit(module.main(sys.argv[1:]))
                 status, output = self.run_wrapper(args, tty=bool(args))
                 self.assertEqual(status, 0 if args == ['--help'] else 37, output)
                 self.assertEqual(self.calls(), [args])
-                self.assertNotIn('선택:', output)
+                self.assertNotIn('Choice:', output)
         self.assertFalse((self.home / '.config').exists())
 
     def test_unsupported_and_bounded_capability_probe_never_changes_argv(self):
@@ -160,7 +163,7 @@ raise SystemExit(module.main(sys.argv[1:]))
                 self.assertLess(time.monotonic() - begin, 5)
                 self.assertEqual(status, 37, output)
                 self.assertEqual(self.calls(), [['--help'], ['hello']])
-                self.assertNotIn('선택:', output)
+                self.assertNotIn('Choice:', output)
         self.assertFalse((self.home / '.config').exists())
 
     def test_corrupt_cross_project_or_public_receipt_fails_without_unsandboxed_exec(self):
