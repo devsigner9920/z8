@@ -1,6 +1,6 @@
 # Release sources and license evidence
 
-2026-11-01. These tools prepare and verify evidence. They do not accept provider
+Updated 2026-11-04. These tools prepare and verify evidence. They do not accept provider
 terms, approve Ubuntu branding, publish files, or give legal approval. A generated
 inventory is not a claim that every license obligation has been satisfied.
 
@@ -41,6 +41,30 @@ inventory is not a claim that every license obligation has been satisfied.
 
 3. Create the source ZIP, including verified package source payloads:
 
+   Collect the exact bundled Maven libraries' published source JARs and POMs first:
+
+   ```sh
+   python3 tools/collect-maven-sources.py \
+     --gradle-artifacts artifacts/compliance/gradle-artifacts.json \
+     --output artifacts/compliance/maven-sources --fetch --allow-incomplete
+   ```
+
+   This uses Google Maven and Maven Central for the resolved runtime coordinates,
+   rather than every artifact in the local cache. Source archives, original notices,
+   POM metadata and content indexes are retained with hashes. A published source JAR
+   may omit resources or original build scripts: collection does not establish
+   complete corresponding source. Review these omissions against the actual AAR/JAR
+   and its upstream build tree. Verified empty compatibility artifacts are recorded
+   separately; missing source is not treated as empty.
+
+   Where a published source JAR is unavailable, `--source-mappings FILE` can
+   supply an explicitly reviewed upstream source ZIP. Each mapping must name the
+   exact runtime binary hashes, upstream repository, tag, full commit, version
+   evidence and source ZIP checksum. It does not substitute a newer version or
+   approve source closure. The mapping and archive are preserved in the source
+   package. The rc3 collection retains `jsr305:1.3.9` as unresolved rather than
+   assigning an inexact historical source tree to it.
+
    Set `release/config.json` first, including a version-specific public source URL
    whose filename is chosen in advance, such as `/releases/2/z8-source.zip` on
    your real HTTPS host. The config itself is part of the source snapshot: putting
@@ -52,6 +76,7 @@ inventory is not a claim that every license obligation has been satisfied.
    ```sh
    python3 tools/package-release-source.py \
      --package-sources artifacts/compliance/package-sources/package-sources.json \
+     --maven-sources artifacts/compliance/maven-sources/maven-sources.json \
      --output artifacts/compliance/source
    ```
 
@@ -82,6 +107,7 @@ inventory is not a claim that every license obligation has been satisfied.
      --source-manifest artifacts/compliance/source/source-manifest.json \
      --package-sources artifacts/compliance/package-sources/package-sources.json \
      --gradle-artifacts artifacts/compliance/gradle-artifacts.json \
+     --maven-sources artifacts/compliance/maven-sources/maven-sources.json \
      --allow-incomplete
    ```
 
@@ -102,6 +128,7 @@ inventory is not a claim that every license obligation has been satisfied.
      --package-sources artifacts/compliance/package-sources/package-sources.json \
      --notices overlay/app/src/main/assets/z8-licenses/release-notices.json \
      --gradle-artifacts artifacts/compliance/gradle-artifacts.json \
+     --maven-sources artifacts/compliance/maven-sources/maven-sources.json \
      --runtime-manifest artifacts/runtime/PROFILE/manifest.json \
      --guest-manifest artifacts/guest/IMAGE/manifest.json \
      --source-url https://YOUR-REAL-DOMAIN/EXACT-SOURCE-ARCHIVE.zip \
@@ -118,6 +145,14 @@ inventory is not a claim that every license obligation has been satisfied.
    `--allow-incomplete`, but retain the `BLOCKED` status and blocker list.
 
 ## Human review record
+
+Since the November 4 review, `prepare-app.py` marks changed upstream text files
+with a dated Z8 modification notice while preserving existing license and
+copyright text. It also writes `Z8-MODIFICATIONS.json` in the generated source
+root, including replaced binary artwork and original/prepared hashes. This is a
+change index, not a new license for third-party files. The original pristine
+upstream export remains unchanged in the source archive; running the included
+preparer recreates the marked files.
 
 The notice generator accepts `--review` only for a real, recorded review of exact
 inputs. It must contain `schemaVersion: 1`, `noticesInputs` exactly matching the
@@ -178,3 +213,92 @@ The work is validated with `python3 -m unittest discover -s tests -p
 test_release_compliance.py -v`. Tests cover credential exclusion, deterministic
 archives, symlink refusal, source/member tampering, exact Ubuntu version matching,
 nonexecution of recipe substitutions, and incomplete notice reports.
+
+## Reconstructing the retained guest image
+
+The rc2 candidate embeds the historical guest archive with SHA-256
+`38463da28ca71e6be8ef36c0ff0f5a4da558eee3577cfd7b30e14c0ce6d4ef54`.
+Its Z8-managed scripts predate some current files in `runtime/guest/`. The app
+also bundles current managed scripts separately and refreshes them before guest
+commands. Rebuilding the guest with current defaults therefore creates a different
+image; do not substitute it silently for the image identified by the candidate.
+Notice generation and release verification explicitly require retained inputs for
+this known archive hash, even if both source and notice manifests omit the option.
+This guard does not classify unknown future images; review their managed-source
+inputs separately.
+
+The retained-input manifest and its `files/` directory preserve 19 exact Z8-owned
+source files from that historical archive. Keep them together. The manifest binds
+the pinned Ubuntu Base source, file contents and modes, the seven later file or
+directory additions to omit, and the expected guest ZIP and guest manifest hashes.
+It does not replace Ubuntu package sources or supply a compiled native runtime.
+
+From a source distribution containing the retained inputs, restore the image with:
+
+```sh
+python3 tools/prepare-guest.py --build \
+  --historical-managed-inputs third-party-sources/historical-guest/manifest.json
+```
+
+The source packager's `--historical-guest-inputs` option retains the manifest and
+files at this archive path. Pass the same input to notice generation and release
+verification so their evidence remains bound to the selected guest. The command obtains the
+hash-pinned Ubuntu Base input through the normal guest cache/download procedure,
+normalizes it, and reads retained scripts as data without executing them. It
+accepts only the fixed Z8-owned paths, rejects symlinks and changed input hashes,
+and refuses to publish unless both the regenerated ZIP and manifest exactly match
+the recorded hashes. It does not overwrite an existing different guest image.
+Omitting the option preserves the normal current-source build behavior.
+
+The independent reconstruction performed on November 4, 2026 reproduced the exact
+historical guest ZIP from these inputs. This result concerns guest normalization
+and packaging only: Ubuntu packages were not recompiled, and it is not a claim of
+full APK/native binary reproducibility, license approval, or Google Play approval.
+Preserve the dated evidence separately, and rerun reconstruction for any changed
+source distribution. Focused tests are in `tests/test_historical_guest_inputs.py`.
+
+## Assembling Debian package sources and historical native inputs
+
+Collected Ubuntu source files live in separate hash directories. Before using
+`dpkg-source`, assemble every `sourceFiles` entry for the selected component into
+one directory, decode the URL filename (`%2B` becomes `+`), and verify each file's
+recorded SHA-256 and size, including the `.dsc`. For example, from the source ZIP
+root, this copies the retained `hostname` inputs without running package code:
+
+```sh
+python3 - <<'PY'
+import hashlib, json
+from pathlib import Path
+from urllib.parse import unquote
+base = Path('third-party-sources').resolve()
+inventory = json.loads((base / 'package-sources.json').read_text())
+component = next(item for item in inventory['components'] if item['id'] == 'guest:hostname')
+out = Path('source-work/hostname')
+out.mkdir(parents=True, exist_ok=False)
+for record in component['sourceFiles']:
+    source = (base / record['path']).resolve()
+    name = unquote(source.name)
+    if not source.is_relative_to(base) or '/' in name or '\\' in name or name in ('.', '..'):
+        raise SystemExit('Unsafe source path')
+    data = source.read_bytes()
+    if len(data) != record['bytes'] or hashlib.sha256(data).hexdigest() != record['sha256']:
+        raise SystemExit('Source hash or size mismatch')
+    (out / name).write_bytes(data)
+PY
+# On a system with Debian source tools, after reviewing the inputs:
+dpkg-source -x source-work/hostname/hostname_3.23+nmu2ubuntu2.dsc
+```
+
+The `.dsc` also declares the expected sibling payload names and checksums. Hash
+matching does not authenticate an OpenPGP signer; the collector records signature
+verification separately. Do not automatically execute downloaded build scripts or
+build arbitrary package sources on your development host.
+
+The source distribution also retains the original and later native build-input
+sets under `third-party-sources/build-inputs/`. A preserved finalization script can
+calculate a different cache fingerprint from the historical compiler invocation,
+even when its prepared recipe files match the recorded build inputs exactly.
+Use the directory returned by the preparer and verify the recorded effective-file
+hashes; do not hardcode an earlier developer cache path such as
+`.local/runtime/f287ff4424e3f68b65da/`. Matching prepared inputs alone does not
+establish a byte-for-byte native binary rebuild.

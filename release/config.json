@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "versionCode": 3,
-  "versionName": "0.1.0-rc2",
+  "versionCode": 4,
+  "versionName": "0.1.0-rc3",
   "developerName": "romi",
   "supportEmail": "ethsy2462@gmail.com",
   "privacyUrl": "https://devsigner9920.github.io/z8/privacy.html",
-  "sourceUrl": "https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc2/z8-source.zip",
+  "sourceUrl": "https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc3/z8-source.zip",
   "policyDate": "2026-11-02"
 }

@@ -110,6 +110,8 @@ public final class Z8AboutActivity extends Activity {
 
     private void licenses() {
         paragraph(Z8Text.text("License and copyright notices for this app and its included software. Long notices are split into pages.", "이 앱과 포함된 소프트웨어의 라이선스·저작권 고지입니다. 긴 고지는 페이지를 나누어 표시합니다."));
+        paragraph(Z8Text.text("Z8 is a modified Termux application distributed under GNU GPL version 3 only. You may use, modify and redistribute it under that license. Individual components retain their own licenses and original copyright notices below.", "Z8는 GNU GPL 버전 3 전용 조건으로 배포하는 Termux 수정 앱입니다. 해당 라이선스에 따라 사용·수정·재배포할 수 있습니다. 개별 구성요소의 라이선스와 원저작권 고지는 아래에 유지됩니다."));
+        paragraph(Z8Text.text("This software is provided without warranty to the extent permitted by applicable law. The full license terms and original notices follow; corresponding sources and build instructions are available from the link below.", "관계 법령이 허용하는 범위에서 이 소프트웨어에는 보증이 제공되지 않습니다. 전체 라이선스와 원문 고지는 아래에서, 대응 소스와 빌드 안내는 다음 링크에서 확인할 수 있습니다."));
         webLink(Z8Text.text("Corresponding source and build information", "대응 소스와 빌드 안내"), BuildConfig.Z8_SOURCE_URL);
         licensePosition = paragraph(Z8Text.text("Loading notices…", "고지를 불러오는 중…"));
         licenseText = paragraph("");

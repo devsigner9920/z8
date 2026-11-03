@@ -77,6 +77,16 @@ respective licenses. Their presence does not relabel every component as GPL.
 Release notices and source inventories describe the dependencies actually used
 by that release.
 
+The Android build uses NDK `29.0.14206865`; the upstream shared module selects
+`c++_static` for `liblocal-socket.so`. The NDK's original [NOTICE](LICENSES/Android-NDK-29.NOTICE.txt)
+and [NOTICE.toolchain](LICENSES/Android-NDK-29.NOTICE.toolchain.txt) are preserved
+verbatim from that installed release as of 2026-11-04. They include LLVM runtime
+terms and exceptions, as well as notices for toolchain components that are not
+necessarily shipped in the app. The LLVM embedded-object exception can waive
+specified redistribution conditions; copying these notices does not imply
+that every listed toolchain component is part of Z8. Official NDK distribution
+information is at <https://developer.android.com/ndk/downloads>.
+
 The optional guest image is normalized from the pinned official Ubuntu Base
 ARM64 archive. Original package copyright/license files remain in the image,
 and its manifest records the upstream URL and SHA-256. Runtime builds also embed

@@ -55,7 +55,7 @@ The privacy policy is maintained in [privacy.html](privacy.html), with a [Korean
 
 The app's `sourceUrl` must directly download the complete corresponding source ZIP for that version. Once the real repository and tag are fixed, choose a filename such as `releases/download/<tag>/z8-source.zip` in advance. Putting the source ZIP's own hash in the source configuration creates a circular dependency. Attach the locally generated ZIP, whose filename contains a hash, to the Release under the fixed name `z8-source.zip`.
 
-The current configuration targets `v0.1.0-rc2` and the source asset `z8-source.zip`. Verify the public download after publishing it. Publishing a source preview does not mean an APK/AAB has been distributed or that final corresponding source review is complete. The earlier `v0.1.0-rc1` source preview and its device validation records remain historical references.
+The current configuration targets `v0.1.0-rc3` and the source asset `z8-source.zip`. Verify the public download after publishing it. Publishing a source preview does not mean an APK/AAB has been distributed or that final corresponding source review is complete. The earlier `v0.1.0-rc1` source preview and its device validation records remain historical references.
 
 ## Before publishing app binaries
 

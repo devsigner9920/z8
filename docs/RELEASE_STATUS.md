@@ -2,7 +2,7 @@
 
 Documentation: [English](../README.md) | [한국어](../README.ko.md)
 
-As of November 2, 2026, Z8 is a development project that has not reached a stable app release or Play Store launch. Source publication and app submission or approval are separate procedures. This document is a public summary of validation, not a compatibility guarantee for every build from current sources or every device.
+As of November 4, 2026, Z8 is a development project that has not reached a stable app release or Play Store launch. Source publication and app submission or approval are separate procedures. This document is a public summary of validation, not a compatibility guarantee for every build from current sources or every device.
 
 ## Current scope
 
@@ -10,7 +10,17 @@ Z8 provides project Linux environments with separate HOME and source directories
 
 The current build configuration uses `dev.devsigner.z8`, ARM64, minSdk 28, and target/compile SDK 36. Declaring Android 9 or later does not mean every Android version, manufacturer, or user profile has been tested.
 
-The current source revision is configured as `0.1.0-rc2`, versionCode `3`, with English as the initial app language and an explicit Korean option. See [app language](LOCALIZATION.md). Its source URL targets the `v0.1.0-rc2` source preview. This version setting does not establish that an app binary has been released or that the earlier device checks below have been repeated for rc2.
+The current source revision is configured as `0.1.0-rc3`, versionCode `4`, with English as the initial app language and an explicit Korean option. See [app language](LOCALIZATION.md). Its source URL targets the `v0.1.0-rc3` source preview. This version setting does not establish that an app binary has been released or that the earlier device checks below have been repeated for rc3.
+
+## November 4 source-distribution review
+
+The source preparation now records dated modification notices for changed upstream files while preserving their original licenses. Runtime Maven source artifacts and version-matched upstream evidence can be collected and included in the public source package; source JAR availability alone does not prove all required resources and build scripts are present.
+
+The rc3 source collection covers 85 resolved Maven coordinates with 265 evidence files: 80 published source JARs, three pinned upstream source mappings, and one verified empty compatibility artifact. Exact source for `jsr305:1.3.9` remains unavailable. Its annotation classes were absent from the optimized local rc3 candidate inspected during this review; the unresolved input is retained for a source-scope decision rather than represented as a proven missing shipped-code source. Applicable NDK and file-specific source notices are also preserved.
+
+Nineteen retained Z8 guest source files allow reconstruction of the exact historical guest ZIP and manifest. Current guest defaults produce a different image and must not be substituted silently. The source package and verifier now bind these retained inputs explicitly. See [the reconstruction procedure](RELEASE_LICENSES.md).
+
+The [distribution review](DISTRIBUTION_REVIEW.md) records remaining Play execution-policy, Ubuntu redistribution and Claude Code operator-terms questions, with unsent inquiry drafts. This source work is not a completed human license review or an authorization to distribute app binaries.
 
 ## English-default update
 

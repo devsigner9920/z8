@@ -10,7 +10,7 @@ import subprocess
 import tarfile
 import tempfile
 import zipfile
-from release_compliance import ROOT, GENERATED_NOTICES, atomic_write, bytes_sha, json_bytes, read_json, safe_relative, secret_path, sha256, zip_entry
+from release_compliance import ROOT, GENERATED_NOTICES, atomic_write, bytes_sha, json_bytes, read_json, safe_relative, secret_path, sha256, zip_entry, maven_source_inventory, historical_guest_inventory
 
 DIRECTORIES = ('tools', 'runtime', 'overlay', 'tests', 'docs', 'LICENSES', '.github')
 ROOT_FILES = ('README.md', 'README.ko.md', 'BUILDING.md', 'BUILDING.ko.md', 'THIRD_PARTY_NOTICES.md', '.gitignore',
@@ -43,7 +43,7 @@ def own_sources(root):
                 yield relative, path
 
 
-def package(root, output, package_sources=None):
+def package(root, output, package_sources=None, maven_sources=None, historical_guest_inputs=None):
     root, output = Path(root), Path(output)
     lock = read_json(root / 'tools/sources.lock.json')
     records, omitted, payload, streamed = [], [], {}, {}
@@ -103,6 +103,29 @@ def package(root, output, package_sources=None):
             if path.is_symlink() or sha256(path) != record['sha256']:
                 raise ValueError('Package copyright notice changed before archiving')
             streamed['third-party-sources/' + relative] = path
+    maven_inventory_sha = None
+    if maven_sources:
+        maven_sources = Path(maven_sources)
+        inventory = maven_source_inventory(maven_sources)
+        maven_inventory_sha = sha256(maven_sources)
+        streamed['third-party-sources/maven/maven-sources.json'] = maven_sources
+        for record in inventory['files']:
+            relative = safe_relative(record['path'])
+            streamed['third-party-sources/maven/' + relative] = maven_sources.parent / relative
+    historical_guest_sha = None
+    if historical_guest_inputs:
+        historical_guest_inputs = Path(historical_guest_inputs)
+        inventory = historical_guest_inventory(historical_guest_inputs, root)
+        if package_sources:
+            selected_guest = read_json(package_sources)['inputs']
+            if (inventory['guestArchiveSha256'] != selected_guest.get('guestArchiveSha256')
+                    or inventory['guestManifestSha256'] != selected_guest.get('guestManifestSha256')):
+                raise ValueError('Historical managed sources describe a different guest archive or manifest')
+        historical_guest_sha = sha256(historical_guest_inputs)
+        streamed['third-party-sources/historical-guest/manifest.json'] = historical_guest_inputs
+        for item in inventory['files']:
+            relative = safe_relative(item['path'])
+            streamed['third-party-sources/historical-guest/' + relative] = historical_guest_inputs.parent / relative
     for name, (data, mode, kind) in sorted(payload.items()):
         records.append({'path': name, 'sha256': bytes_sha(data), 'bytes': len(data), 'mode': mode,
                         'type': 'symlink' if kind == 0o120000 else 'file'})
@@ -112,6 +135,8 @@ def package(root, output, package_sources=None):
     manifest = {'schemaVersion': 1, 'kind': 'z8-release-source', 'sourceLock': lock,
                 'sourceInputSha256': bytes_sha(json_bytes(records)), 'files': records, 'omitted': omitted,
                 'packageSourcesSha256': package_inventory_sha,
+                'mavenSourcesSha256': maven_inventory_sha,
+                'historicalGuestInputsSha256': historical_guest_sha,
                 'claims': {'sourceInputsPreserved': True, 'binaryReproducibility': 'NOT_TESTED',
                            'completeCorrespondingSource': False},
                 'limitations': ['Package source payloads and runtime dependency licenses are verified separately.',
@@ -150,8 +175,10 @@ def main():
     p.add_argument('--root', type=Path, default=ROOT)
     p.add_argument('--output', type=Path, required=True)
     p.add_argument('--package-sources', type=Path, help='Include verified source payloads and installed copyright files')
+    p.add_argument('--maven-sources', type=Path, help='Include collected runtime-library source JARs and POM evidence')
+    p.add_argument('--historical-guest-inputs', type=Path, help='Preserve exact managed scripts for the selected historical guest')
     args = p.parse_args()
-    result = package(args.root, args.output, args.package_sources)
+    result = package(args.root, args.output, args.package_sources, args.maven_sources, args.historical_guest_inputs)
     print(json_bytes({k: result[k] for k in ('archive', 'archiveSha256', 'sourceInputSha256')}).decode(), end='')
 
 

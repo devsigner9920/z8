@@ -68,6 +68,21 @@ selection. No new copyright-owner name has been inserted into these texts.
 
 ## Release-specific dependencies
 
+`Android-NDK-29.NOTICE.txt` and `Android-NDK-29.NOTICE.toolchain.txt` are verbatim
+copies of `NOTICE` and `NOTICE.toolchain` from Android NDK `29.0.14206865`,
+preserved on 2026-11-04. The Termux shared-module build selects `c++_static`.
+These broader distribution notices preserve the LLVM runtime terms and their
+embedded-object exception without claiming that all NDK tools are bundled.
+The NDK is distributed at <https://developer.android.com/ndk/downloads>.
+
+`Maven-source-header-notices.txt` preserves file-specific notices found in the
+collected Checker Framework 2.0.0 and animal-sniffer 1.14 source artifacts.
+These include a Creative Commons Attribution 2.5 source-header notice and an
+MIT copyright notice; a POM-level license summary does not override them.
+Their inclusion does not assert that every resolved annotation class survives
+optimization into the app binary. Full collected source files retain their
+original headers independently of this supplementary index.
+
 Bundled native packages, the Ubuntu guest, Maven dependencies and independently
 installed CLI tools have their own notices and terms. This directory is not a
 claim that all of them use the application's GPL license. The release source

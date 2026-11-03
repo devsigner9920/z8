@@ -5,7 +5,8 @@ import importlib.util
 from pathlib import Path
 import urllib.parse
 import zipfile
-from release_compliance import ROOT, atomic_write, bytes_sha, checked_asset, download, issue, json_bytes, read_json, safe_relative, secret_path, sha256
+from release_compliance import ROOT, atomic_write, bytes_sha, checked_asset, download, issue, json_bytes, read_json, safe_relative, secret_path, sha256, maven_source_inventory, historical_guest_inventory
+from release_compliance import HISTORICAL_GUEST_ARCHIVES_REQUIRING_SOURCES
 
 
 def verify_source(manifest_path, root):
@@ -82,6 +83,33 @@ def verify(args):
             blockers.append(issue('RUNTIME_BUILD_INPUT_MISSING', 'host', item['path']))
         if archive_records.get('third-party-sources/' + item['path'], {}).get('sha256') != item['sha256']:
             blockers.append(issue('RUNTIME_BUILD_INPUT_NOT_DISTRIBUTED', 'host', item['path']))
+    if getattr(args, 'maven_sources', None):
+        maven = maven_source_inventory(args.maven_sources, args.gradle_artifacts)
+        digest = sha256(args.maven_sources)
+        if source.get('mavenSourcesSha256') != digest or notices['inputs'].get('mavenSourcesSha256') != digest:
+            blockers.append(issue('MAVEN_SOURCE_INVENTORY_MISMATCH', 'application', 'Sources and notices must use the same runtime-library source inventory'))
+        if archive_records.get('third-party-sources/maven/maven-sources.json', {}).get('sha256') != digest:
+            blockers.append(issue('MAVEN_SOURCE_INVENTORY_NOT_DISTRIBUTED', 'application', 'The Maven source inventory is missing from the public source ZIP'))
+        for item in maven['files']:
+            if archive_records.get('third-party-sources/maven/' + item['path'], {}).get('sha256') != item['sha256']:
+                blockers.append(issue('MAVEN_SOURCE_PAYLOAD_NOT_DISTRIBUTED', 'application', item['path']))
+        blockers += maven.get('unresolved', [])
+    elif any(c.get('scope') == 'bundled-maven' for c in notices.get('components', [])):
+        blockers.append(issue('MAVEN_SOURCES_MISSING', 'application', 'Supply the source inventory for actual bundled runtime libraries'))
+    if getattr(args, 'historical_guest_inputs', None):
+        historical = historical_guest_inventory(args.historical_guest_inputs, args.root)
+        digest = sha256(args.historical_guest_inputs)
+        if (source.get('historicalGuestInputsSha256') != digest or notices['inputs'].get('historicalGuestInputsSha256') != digest
+                or historical['guestArchiveSha256'] != packages['inputs'].get('guestArchiveSha256')
+                or historical['guestManifestSha256'] != packages['inputs'].get('guestManifestSha256')):
+            blockers.append(issue('HISTORICAL_GUEST_MISMATCH', 'guest', 'Source snapshot, notices and historical managed scripts must describe the same guest'))
+        expected = [{'path': 'manifest.json', 'sha256': digest}] + historical['files']
+        for item in expected:
+            if archive_records.get('third-party-sources/historical-guest/' + item['path'], {}).get('sha256') != item['sha256']:
+                blockers.append(issue('HISTORICAL_GUEST_SOURCE_NOT_DISTRIBUTED', 'guest', item['path']))
+    elif (source.get('historicalGuestInputsSha256') or notices['inputs'].get('historicalGuestInputsSha256')
+            or packages['inputs'].get('guestArchiveSha256') in HISTORICAL_GUEST_ARCHIVES_REQUIRING_SOURCES):
+        blockers.append(issue('HISTORICAL_GUEST_INPUTS_REQUIRED', 'guest', 'Supply the exact retained managed-source inventory used by this release'))
     # The binary inputs in the package inventory must be those selected for this build.
     for option, key in [('runtime_manifest', 'runtimeManifestSha256'), ('guest_manifest', 'guestManifestSha256')]:
         path = getattr(args, option, None)
@@ -150,7 +178,7 @@ def main():
     p.add_argument('--root', type=Path, default=ROOT)
     for name in ('source-manifest', 'package-sources', 'notices'):
         p.add_argument('--' + name, type=Path, required=True)
-    for name in ('runtime-manifest', 'guest-manifest', 'gradle-artifacts', 'artifact', 'review', 'output'):
+    for name in ('runtime-manifest', 'guest-manifest', 'gradle-artifacts', 'maven-sources', 'historical-guest-inputs', 'artifact', 'review', 'output'):
         p.add_argument('--' + name, type=Path)
     p.add_argument('--source-url', default='')
     p.add_argument('--check-source-url', action='store_true')

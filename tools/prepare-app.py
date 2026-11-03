@@ -20,6 +20,7 @@ import zipfile
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import release_config
+import source_modifications
 
 ROOT = Path(__file__).resolve().parents[1]
 ANDROID = "{http://schemas.android.com/apk/res/android}"
@@ -1270,6 +1271,7 @@ def prepare(root, mode, runtime_manifest=None, guest_manifest=None, release_conf
         copy_overlay(root, staging)
         if guest_manifest:
             copy_guest(root, staging, guest_manifest)
+        source_modifications.mark_modified(source, staging, names, lock["termuxApp"]["commit"])
         (staging / "z8-prepared.json").write_text(json.dumps({
             "schemaVersion": 1, "applicationId": lock["applicationId"],
             "upstreamCommit": lock["termuxApp"]["commit"], "mode": mode,

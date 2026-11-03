@@ -6,10 +6,11 @@ from pathlib import Path
 import re
 import xml.etree.ElementTree as ET
 import zipfile
-from release_compliance import ROOT, atomic_write, bytes_sha, issue, json_bytes, read_json, sha256
+from release_compliance import ROOT, atomic_write, bytes_sha, issue, json_bytes, read_json, sha256, maven_source_inventory, historical_guest_inventory
+from release_compliance import HISTORICAL_GUEST_ARCHIVES_REQUIRING_SOURCES
 
 
-def pom_licenses(path, cache, visited=None):
+def pom_licenses(path, cache=None, visited=None):
     visited = set() if visited is None else visited
     if path in visited:
         return []
@@ -23,12 +24,23 @@ def pom_licenses(path, cache, visited=None):
     if found:
         return found
     parent = tree.find('parent')
-    if parent is not None:
+    if parent is not None and cache is not None:
         group, name, version = (parent.findtext(x, '') for x in ('groupId', 'artifactId', 'version'))
         candidates = list((cache / group / name / version).glob('*/*.pom'))
         if len(candidates) == 1:
             return pom_licenses(candidates[0], cache, visited)
     return []
+
+
+def preserved_pom_licenses(component, directory):
+    """Read the verified child-first POM chain, not its summarized license label."""
+    records = component['metadataFiles']
+    child_sha = records[0]['sha256'] if records else None
+    for record in records:
+        found = pom_licenses(directory / record['path'])
+        if found:
+            return found, child_sha
+    return [], child_sha
 
 
 def embedded_notices(path):
@@ -86,6 +98,14 @@ def generate(args):
             unresolved.append(issue('GPL_TEXT_MISSING', 'application', 'Include the full GPLv3 license text with this release'))
     else:
         unresolved.append(issue('PACKAGE_INVENTORY_MISSING', 'bundled-runtime', 'Supply shipped package inventory and preserved notices'))
+    maven = None
+    maven_components = {}
+    if getattr(args, 'maven_sources', None):
+        maven = maven_source_inventory(args.maven_sources, args.gradle_artifacts)
+        inputs['mavenSourcesSha256'] = sha256(args.maven_sources)
+        unresolved += maven.get('unresolved', [])
+        maven_components = {':'.join(component[key] for key in ('group', 'name', 'version')): component
+                            for component in maven['components']}
     if args.gradle_artifacts:
         evidence = read_json(args.gradle_artifacts)
         if evidence.get('kind') != 'z8-gradle-runtime-artifacts' or evidence.get('configuration') != 'releaseRuntimeClasspath':
@@ -96,6 +116,8 @@ def generate(args):
         for item in evidence['components']:
             coordinate = ':'.join(item[x] for x in ('group', 'name', 'version'))
             path = Path(item['file'])
+            if not path.is_absolute():
+                path = root / path
             if not path.is_file() or path.is_symlink() or sha256(path) != item['sha256']:
                 raise ValueError('Resolved dependency artifact changed: ' + coordinate)
             # Project modules are already included in the full modified application source.
@@ -103,19 +125,33 @@ def generate(args):
                 components.append(dict(id='project:' + coordinate, name=coordinate, version=item['version'],
                     scope='application-project-module', licenseDeclared='See Termux module/per-file notices', artifactSha256=item['sha256']))
                 continue
-            candidates = list((cache / item['group'] / item['name'] / item['version']).glob('*/*.pom'))
-            licenses = pom_licenses(candidates[0], cache) if len(candidates) == 1 else []
+            if maven is not None:
+                licenses, child_pom_sha = preserved_pom_licenses(maven_components[coordinate], args.maven_sources.parent)
+            else:
+                candidates = list((cache / item['group'] / item['name'] / item['version']).glob('*/*.pom'))
+                licenses = pom_licenses(candidates[0], cache) if len(candidates) == 1 else []
+                child_pom_sha = sha256(candidates[0]) if len(candidates) == 1 else None
             component = {'id': 'maven:' + coordinate, 'name': coordinate, 'version': item['version'],
                          'scope': 'bundled-maven', 'artifactSha256': item['sha256'], 'licenses': licenses}
             if not licenses or any(not x['name'] for x in licenses):
                 unresolved.append(issue('LICENSE_UNRESOLVED', coordinate, 'No unambiguous license declaration in artifact/POM hierarchy'))
-            if candidates:
-                component['pomSha256'] = sha256(candidates[0])
+            if child_pom_sha:
+                component['pomSha256'] = child_pom_sha
             components.append(component)
             sections.append((coordinate, '\n'.join(x['name'] + ' — ' + x['url'] for x in licenses) or 'LICENSE REQUIRES REVIEW'))
             sections.extend((coordinate + '/' + name, text) for name, text in embedded_notices(path))
     else:
         unresolved.append(issue('GRADLE_INVENTORY_MISSING', 'application', 'Resolve releaseRuntimeClasspath with release-license.init.gradle'))
+    if maven is None and any(c.get('scope') == 'bundled-maven' for c in components):
+        unresolved.append(issue('MAVEN_SOURCES_MISSING', 'application', 'Collect and publish sources for the actual bundled runtime libraries; POM license labels alone do not establish source closure'))
+    if getattr(args, 'historical_guest_inputs', None):
+        historical = historical_guest_inventory(args.historical_guest_inputs, root)
+        inputs['historicalGuestInputsSha256'] = sha256(args.historical_guest_inputs)
+        if (historical['guestArchiveSha256'] != inputs.get('guestArchiveSha256')
+                or historical['guestManifestSha256'] != inputs.get('guestManifestSha256')):
+            unresolved.append(issue('HISTORICAL_GUEST_MISMATCH', 'guest', 'Managed script sources describe another bundled guest'))
+    elif inputs.get('guestArchiveSha256') in HISTORICAL_GUEST_ARCHIVES_REQUIRING_SOURCES:
+        unresolved.append(issue('HISTORICAL_GUEST_INPUTS_REQUIRED', 'guest', 'This known guest archive requires its retained managed-source inventory'))
     # Metadata discovery is not a substitute for review of source/header notices and copyleft scope.
     review_required = issue('RELEASE_LICENSE_REVIEW_REQUIRED', 'release',
         'A reviewer must confirm notice completeness, package source closure and any per-file/copyleft exceptions for these exact hashes')
@@ -151,6 +187,8 @@ def main():
     p.add_argument('--source-manifest', type=Path)
     p.add_argument('--package-sources', type=Path)
     p.add_argument('--gradle-artifacts', type=Path)
+    p.add_argument('--maven-sources', type=Path)
+    p.add_argument('--historical-guest-inputs', type=Path)
     p.add_argument('--review', type=Path, help='Maintainer review of exact input hashes; never generated automatically')
     p.add_argument('--gradle-cache', type=Path, default=ROOT / '.local/gradle/caches/modules-2/files-2.1')
     p.add_argument('--allow-incomplete', action='store_true')

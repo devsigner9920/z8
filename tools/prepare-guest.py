@@ -27,6 +27,19 @@ MAX_EXPANDED = 1024 * 1024 * 1024
 MAX_ENTRIES = 30_000
 NORMALIZATION_VERSION = 1
 
+# Retained inputs can replace only these Z8-owned sources, never Ubuntu files.
+HISTORICAL_MANAGED_FILES = frozenset((
+    "etc/profile.d/z8.sh", "etc/z8/guest-target", "etc/z8/shellrc", "etc/z8/welcome.sh",
+    *("opt/z8/hooks/" + name for name in ("claude.hooks.json", "codex.hooks.json", "enable.py", "z8_event.py")),
+    *("usr/local/lib/z8/" + name for name in ("ai-tools.lock.json", "debian-base-packages.txt", "guest-task.sh",
+        "install-ai.sh", "install-node.py", "node.lock.json", "probe-tools.sh", "provision.sh", "setup-tools.sh", "shellrc", "welcome.sh")),
+))
+HISTORICAL_LATER_ADDITIONS = frozenset((
+    "etc/profile.d/z8-browser.sh", "etc/profile.d/z8-cli.sh", "usr/local/lib/z8/browser-open.py",
+    "usr/local/lib/z8/html-preview.py", "usr/local/lib/z8/browser/bin/xdg-open",
+    "usr/local/lib/z8/browser/bin/", "usr/local/lib/z8/browser/",
+))
+
 # Exact block from the hash-pinned Ubuntu Base /etc/bash.bashrc. Keep the
 # upstream non-root behavior and fail closed if Ubuntu changes this block.
 UBUNTU_SUDO_HINT = (
@@ -66,6 +79,82 @@ def sha256(path):
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _historical_regular_file(path, maximum):
+    path = Path(path).absolute()
+    if any(part.is_symlink() for part in (path, *path.parents)):
+        raise GuestError("Historical input path contains a symlink")
+    if not path.is_file() or not 0 < path.stat().st_size <= maximum:
+        raise GuestError("Missing or oversized historical source input")
+    return path
+
+
+def _historical_unique_object(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise GuestError("Duplicate historical manifest key")
+        result[key] = value
+    return result
+
+
+def read_historical_managed_inputs(path, lock):
+    """Read retained source as data; no captured script is executed."""
+    path = _historical_regular_file(path, 256 * 1024)
+    data = json.loads(path.read_text(), object_pairs_hook=_historical_unique_object)
+    if not isinstance(data, dict) or type(data.get("schemaVersion")) is not int or data["schemaVersion"] != 1 or data.get("kind") != "z8-historical-guest-managed-source":
+        raise GuestError("Unsupported historical managed-input manifest")
+    for key in ("guestArchiveSha256", "guestManifestSha256", "referenceCurrentSourceInputSha256"):
+        if not isinstance(data.get(key), str) or not re.fullmatch(r"[a-f0-9]{64}", data[key]):
+            raise GuestError("Historical input digest is not a full SHA-256")
+    if data.get("guestSource") != lock["source"]:
+        raise GuestError("Historical inputs do not match the pinned Ubuntu source")
+    records = data.get("files")
+    absent = data.get("absentFromHistoricalGuest")
+    if (not isinstance(records, list) or len(records) != len(HISTORICAL_MANAGED_FILES)
+            or not isinstance(absent, list) or any(not isinstance(name, str) for name in absent)
+            or len(absent) != len(HISTORICAL_LATER_ADDITIONS) or set(absent) != HISTORICAL_LATER_ADDITIONS):
+        raise GuestError("Historical input path set is incomplete or outside the fixed scope")
+    entries = {}
+    for record in records:
+        if not isinstance(record, dict):
+            raise GuestError("Invalid historical source record")
+        name = record.get("guestPath")
+        if not isinstance(name, str) or name not in HISTORICAL_MANAGED_FILES or name in entries or record.get("path") != "files/" + name:
+            raise GuestError("Historical source path is duplicated or outside the fixed scope")
+        if (type(record.get("guestMode")) is not int or record["guestMode"] != 0o644
+                or type(record.get("bytes")) is not int or not 0 < record["bytes"] <= 1024 * 1024
+                or not isinstance(record.get("sha256"), str) or not re.fullmatch(r"[a-f0-9]{64}", record["sha256"])):
+            raise GuestError("Invalid historical source size, mode or digest")
+        source = _historical_regular_file(path.parent / record["path"], 1024 * 1024)
+        content = source.read_bytes()
+        if len(content) != record["bytes"] or hashlib.sha256(content).hexdigest() != record["sha256"]:
+            raise GuestError("Historical source bytes do not match the manifest")
+        try:
+            content.decode("utf-8")
+        except UnicodeDecodeError as error:
+            raise GuestError("Historical managed source is not UTF-8 text") from error
+        entries[name] = {"type": "file", "mode": record["guestMode"], "data": content}
+    return {"manifest": data, "manifestSha256": sha256(path), "entries": entries}
+
+
+def apply_historical_managed_inputs(files, historical):
+    """Replace captured managed files and omit only the known later additions."""
+    result = dict(files)
+    for name in sorted(HISTORICAL_LATER_ADDITIONS, key=len, reverse=True):
+        entry = result.get(name)
+        expected_type = "directory" if name.endswith("/") else "file"
+        if entry is None or entry["type"] != expected_type:
+            raise GuestError("Current normalizer changed a historical reconstruction path")
+        if name.endswith("/") and any(other != name and other.startswith(name) for other in result):
+            raise GuestError("Refusing to remove a nonempty historical reconstruction directory")
+        del result[name]
+    for name, entry in historical["entries"].items():
+        if name not in result or result[name]["type"] != "file":
+            raise GuestError("Historical managed source target is not a regular file")
+        result[name] = entry
+    return result
 
 
 def checked_name(name, directory=False):
@@ -354,8 +443,9 @@ def verify_manifest(manifest_path):
     return archive_path.resolve(), manifest
 
 
-def build():
+def build(historical_managed_inputs=None):
     lock = read_lock()
+    historical = read_historical_managed_inputs(historical_managed_inputs, lock) if historical_managed_inputs else None
     cache = ROOT / ".local/guest-cache"
     output_root = ROOT / "artifacts/guest" / ("ubuntu-" + lock["release"] + "-arm64")
     for directory in (ROOT / ".local", cache, ROOT / "artifacts", ROOT / "artifacts/guest", output_root):
@@ -370,6 +460,8 @@ def build():
         raise GuestError("Pinned checksum list does not contain expected image")
     download(lock["source"]["url"], source, lock["source"]["sha256"], MAX_ARCHIVE)
     files = normalize(source)
+    if historical:
+        files = apply_historical_managed_inputs(files, historical)
     with tempfile.TemporaryDirectory(prefix=".guest-", dir=output_root) as temporary:
         staging = Path(temporary)
         archive_path = staging / "rootfs.zip"
@@ -384,11 +476,15 @@ def build():
                     info.external_attr |= 0x10
                 archive.writestr(info, entry["data"], compress_type=zipfile.ZIP_DEFLATED, compresslevel=9)
                 records.append({"path": name, "type": entry["type"], "mode": entry["mode"], "size": len(entry["data"])})
+        if historical and sha256(archive_path) != historical["manifest"]["guestArchiveSha256"]:
+            raise GuestError("Historical reconstruction differs from the exact recorded guest archive; nothing published")
         manifest = dict(lock, type="z8-guest-rootfs", normalizationVersion=NORMALIZATION_VERSION,
                         archive="rootfs.zip", archiveSha256=sha256(archive_path), archiveBytes=archive_path.stat().st_size,
                         entryCount=len(records), totalUncompressedBytes=sum(record["size"] for record in records), files=records)
         manifest_path = staging / "manifest.json"
         manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
+        if historical and sha256(manifest_path) != historical["manifest"]["guestManifestSha256"]:
+            raise GuestError("Historical reconstruction manifest differs from the recorded guest; nothing published")
         verify_manifest(manifest_path)
         destination = output_root / manifest["archiveSha256"]
         if destination.exists():
@@ -398,10 +494,14 @@ def build():
         else:
             # Publish the fully validated archive+manifest pair together.
             os.rename(staging, destination)
-        return {"manifest": str(destination / "manifest.json"), "archiveSha256": manifest["archiveSha256"],
+        result = {"manifest": str(destination / "manifest.json"), "archiveSha256": manifest["archiveSha256"],
                 "archiveBytes": manifest["archiveBytes"], "entryCount": manifest["entryCount"],
                 "totalUncompressedBytes": manifest["totalUncompressedBytes"], "deviceExecution": "NOT_TESTED",
                 "packagesProvisioned": False}
+        if historical:
+            result["historicalManagedInputsSha256"] = historical["manifestSha256"]
+            result["exactHistoricalGuestReconstruction"] = True
+        return result
 
 
 def main():
@@ -409,10 +509,14 @@ def main():
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--build", action="store_true")
     group.add_argument("--verify", metavar="MANIFEST")
+    parser.add_argument("--historical-managed-inputs", type=Path, metavar="MANIFEST",
+                        help="With --build, reconstruct the exact recorded guest using retained Z8-owned source inputs")
     arguments = parser.parse_args()
+    if arguments.historical_managed_inputs and not arguments.build:
+        parser.error("--historical-managed-inputs requires --build")
     try:
         if arguments.build:
-            result = build()
+            result = build(arguments.historical_managed_inputs)
         elif arguments.verify:
             archive, manifest = verify_manifest(arguments.verify)
             result = {"state": "VERIFIED_ARTIFACT", "archive": str(archive), "archiveSha256": manifest["archiveSha256"], "deviceExecution": "NOT_TESTED"}
