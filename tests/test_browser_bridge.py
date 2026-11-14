@@ -23,6 +23,17 @@ SPEC.loader.exec_module(helper)
 
 
 class BrowserHelperTests(unittest.TestCase):
+    def test_minimal_base_reports_missing_browser_dependency_without_echoing_url(self):
+        with tempfile.TemporaryDirectory() as directory:
+            shim = Path(directory) / 'xdg-open'
+            missing = str(Path(directory) / 'missing-python')
+            shim.write_text((ROOT / 'runtime/guest/xdg-open').read_text().replace('/usr/bin/python3', missing))
+            result = subprocess.run(['/bin/sh', str(shim), 'https://example.test/?code=PRIVATE_CODE'],
+                capture_output=True, text=True, timeout=3)
+            self.assertEqual(result.returncode, 127)
+            self.assertIn('Install Python from Tools', result.stderr)
+            self.assertNotIn('PRIVATE_CODE', result.stdout + result.stderr)
+
     def test_http_urls_preserve_auth_state_without_interpretation(self):
         url = 'https://example.test/oauth?state=a%2Bb%26c&redirect_uri=http%3A%2F%2Flocalhost%3A8080%2Fcallback#f'
         event = helper.envelope(url, {'Z8_LAUNCH_ID': 'launch-1', 'Z8_EVENT_TOKEN': 'a' * 64})

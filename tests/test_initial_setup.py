@@ -37,22 +37,19 @@ class InitialSetupTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(result.stdout.strip(), 'PASS ' + case)
 
+    def test_foreground_start_failure_does_not_leave_queued_setup(self): self.probe('foreground_failure')
+
     def test_no_consent_never_resumes_and_binding_does_not_install(self): self.probe('consent')
-    def test_wifi_explicit_consent_creates_one_service_job_and_ready_template(self): self.probe('wifi')
-    def test_metered_or_cellular_network_requires_explicit_permission(self): self.probe('cellular')
-    def test_offline_and_unvalidated_networks_do_not_begin_download(self): self.probe('offline')
-    def test_network_replacement_closes_bound_proxy_before_worker_interrupt(self): self.probe('network')
-    def test_same_network_losing_unmetered_status_stops_download(self): self.probe('metered_change')
-    def test_supplied_capabilities_stop_download_before_manager_snapshot_catches_up(self): self.probe('caps_event')
-    def test_lost_bound_network_event_stops_download_before_default_snapshot_changes(self): self.probe('lost_event')
-    def test_process_replacement_resumes_journal_only_after_old_cleanup(self): self.probe('replacement')
-    def test_ready_template_and_receipt_bypass_download(self): self.probe('ready')
-    def test_clean_failure_does_not_auto_retry_until_explicit_request(self): self.probe('failure')
-    def test_listener_disposal_and_progress_burst_coalescing(self): self.probe('listeners')
-    def test_consent_write_failure_has_no_network_or_installer_side_effect(self): self.probe('journal')
-    def test_callback_registration_failure_releases_service_work(self): self.probe('callback_failure')
-    def test_network_loss_after_verified_completion_keeps_ready_notification(self): self.probe('late_network')
-    def test_offline_completed_template_repairs_interrupted_journal_without_network(self): self.probe('offline_ready')
+    def test_explicit_start_creates_one_local_service_job(self): self.probe('wifi')
+    def test_metered_cellular_does_not_gate_local_preparation(self): self.probe('cellular')
+    def test_first_terminal_is_prepared_offline_without_a_proxy(self): self.probe('offline')
+    def test_network_loss_does_not_interrupt_local_preparation(self): self.probe('network')
+    def test_replacement_waits_for_old_process_cleanup(self): self.probe('replacement')
+    def test_ready_template_bypasses_preparation(self): self.probe('ready')
+    def test_clean_failure_requires_explicit_retry(self): self.probe('failure')
+    def test_listener_disposal_and_progress_coalescing(self): self.probe('listeners')
+    def test_journal_failure_has_no_execution_side_effect(self): self.probe('journal')
+    def test_offline_completed_template_repairs_journal(self): self.probe('offline_ready')
 
 
 STUBS = {
@@ -106,7 +103,7 @@ public static class NetworkCallback{public void onAvailable(Network n){}public v
 }
 ''',
 'com/termux/app/TermuxService.java': r'''package com.termux.app; public class TermuxService extends android.content.Context {
-public int acquired,updates;public boolean stopping;public void z8AcquireExecution(){acquired++;}public boolean wantsToStop(){return stopping;}
+public int acquired,updates;public boolean stopping,failAcquire;public void z8AcquireExecution(){if(failAcquire)throw new IllegalStateException("background start denied");acquired++;}public boolean wantsToStop(){return stopping;}
 public boolean z8IsStopRequested(){return stopping;}public void updateNotification(){updates++;}}
 ''',
 'com/termux/app/Z8EnvironmentTemplate.java': r'''package com.termux.app; public class Z8EnvironmentTemplate {
@@ -132,7 +129,7 @@ public interface Progress{void update(String stage,int percent,String message);}
 public static volatile CountDownLatch entered=new CountDownLatch(1),release=new CountDownLatch(1),interrupted=new CountDownLatch(1),cleanupEntered=new CountDownLatch(1),cleanupRelease=new CountDownLatch(0);
 public static final AtomicInteger calls=new AtomicInteger();public static volatile boolean fail;public static volatile int bursts=1;public static String project;
 public static void run(android.content.Context c,String id,Progress p,Map<String,String> environment)throws Exception {
- calls.incrementAndGet();project=id;if(!"bound".equals(environment.get("proxy")))throw new AssertionError("missing proxy");
+ calls.incrementAndGet();project=id;if(!environment.isEmpty())throw new AssertionError("Local preparation must not use a network proxy");
  CountDownLatch completion=release;
  for(int i=0;i<bursts;i++)p.update("tools",i,"step "+i);
  entered.countDown();
@@ -150,43 +147,30 @@ public class InitialSetupProbe {
 static void eq(Object a,Object b){if(!Objects.equals(a,b))throw new AssertionError(a+" != "+b);}
 static void await(CountDownLatch latch)throws Exception{if(!latch.await(3,TimeUnit.SECONDS))throw new AssertionError("Timed out");}
 static void complete(TermuxService s)throws Exception{Z8ProjectPreparation.release.countDown();while(Z8InitialSetup.hasWork(s))Handler.next();Handler.flush();}
-static void blocked(TermuxService s){eq(0,Z8ProjectPreparation.calls.get());eq(false,Z8InitialSetup.hasWork(s));eq(0,s.acquired);eq(Z8InitialSetup.Phase.WAITING_NETWORK,Z8InitialSetup.state(s).phase);}
 public static void main(String[] args){try{run(args);}catch(Throwable failure){failure.printStackTrace();System.exit(1);}}
 static void run(String[] args)throws Exception{
 TermuxService service=new TermuxService();ConnectivityManager network=Context.NETWORK;SharedPreferences journal=Context.PREFS;
 switch(args[0]){
+case "foreground_failure":{
+ service.failAcquire=true;Z8InitialSetup.request(service,false);eq(false,Z8InitialSetup.hasWork(service));eq(0,Z8ProjectPreparation.calls.get());eq(Z8InitialSetup.Phase.FAILED,Z8InitialSetup.state(service).phase);break;}
 case "consent":{
- journal.edit().putString("status","running").commit();Z8InitialSetup.resume(service);eq(0,Z8ProjectPreparation.calls.get());eq(false,Z8InitialSetup.hasConsent(service));eq(0,network.registrations);break;}
-case "wifi":{
- eq(Z8InitialSetup.Phase.CONSENT,Z8InitialSetup.state(service).phase);Z8InitialSetup.request(service,false);await(Z8ProjectPreparation.entered);
- eq(true,Z8InitialSetup.hasConsent(service));eq(true,Z8InitialSetup.hasWork(service));eq(1,service.acquired);eq(1,Z8PreparationNotification.begins);
- eq(network.network,Z8SetupDownloadProxy.last.network);eq("template",Z8ProjectPreparation.project);eq("running",journal.getString("status",""));
- Z8InitialSetup.request(service,true);Z8InitialSetup.resume(service);eq(1,Z8ProjectPreparation.calls.get());
- complete(service);eq(true,Z8InitialSetup.isReady(service));eq(Z8InitialSetup.Phase.READY,Z8InitialSetup.state(service).phase);eq(1,network.unregistered);break;}
-case "cellular":{
- network.caps.cellular=true;network.metered=false;Z8InitialSetup.request(service,false);blocked(service);
- Z8InitialSetup.request(service,true);await(Z8ProjectPreparation.entered);eq(true,Z8InitialSetup.state(service).allowMetered);complete(service);break;}
-case "offline":{
- network.network=null;Z8InitialSetup.request(service,false);blocked(service);network.network=new Network("wifi");network.caps.validated=false;
- Z8InitialSetup.request(service,false);blocked(service);network.caps.validated=true;network.caps.notMetered=false;
- Z8InitialSetup.request(service,false);blocked(service);break;}
-case "network":case "metered_change":case "caps_event":case "lost_event":{
+ journal.edit().putString("status","running").commit();Z8InitialSetup.resume(service);eq(0,Z8ProjectPreparation.calls.get());eq(false,Z8InitialSetup.hasConsent(service));break;}
+case "wifi":case "cellular":case "offline":case "network":{
+ if(args[0].equals("offline"))network.network=null;
+ if(args[0].equals("cellular")){network.caps.cellular=true;network.caps.notMetered=false;}
  Z8InitialSetup.request(service,false);await(Z8ProjectPreparation.entered);
- if(args[0].equals("network")){network.network=new Network("cellular");network.callback.onAvailable(network.network);}
- else if(args[0].equals("caps_event")){NetworkCapabilities supplied=new NetworkCapabilities();supplied.notMetered=false;network.callback.onCapabilitiesChanged(network.network,supplied);}
- else if(args[0].equals("lost_event"))network.callback.onLost(network.network);
- else {network.caps.notMetered=false;network.changed();}
- await(Z8ProjectPreparation.interrupted);while(Z8InitialSetup.hasWork(service))Handler.next();
- eq(true,Z8SetupDownloadProxy.events.indexOf("close")<Z8SetupDownloadProxy.events.indexOf("interrupt"));
- eq(Z8InitialSetup.Phase.WAITING_NETWORK,Z8InitialSetup.state(service).phase);eq("waiting",journal.getString("status",""));
- eq(false,Z8EnvironmentTemplate.ready);eq(1,Z8PreparationNotification.waits);break;}
+ eq(true,Z8InitialSetup.hasConsent(service));eq(true,Z8InitialSetup.hasWork(service));eq(1,service.acquired);eq(1,Z8PreparationNotification.begins);
+ eq("template",Z8ProjectPreparation.project);eq("running",journal.getString("status",""));
+ Z8InitialSetup.request(service,true);Z8InitialSetup.resume(service);eq(1,Z8ProjectPreparation.calls.get());
+ network.network=null;eq(0,network.registrations);eq(null,Z8SetupDownloadProxy.last);
+ complete(service);eq(true,Z8InitialSetup.isReady(service));eq(Z8InitialSetup.Phase.READY,Z8InitialSetup.state(service).phase);eq(0,network.unregistered);break;}
 case "replacement":{
  Z8ProjectPreparation.cleanupRelease=new CountDownLatch(1);Z8InitialSetup.request(service,false);await(Z8ProjectPreparation.entered);
  Z8InitialSetup.stop(service);await(Z8ProjectPreparation.cleanupEntered);eq(false,Z8InitialSetup.hasWork(service));eq("running",journal.getString("status",""));
  TermuxService replacement=new TermuxService();Z8ProjectPreparation.entered=new CountDownLatch(1);Z8ProjectPreparation.release=new CountDownLatch(1);
  Z8InitialSetup.resume(replacement);eq(true,Z8InitialSetup.hasWork(replacement));eq(1,Z8ProjectPreparation.calls.get());
  Z8ProjectPreparation.cleanupRelease.countDown();await(Z8ProjectPreparation.entered);eq(2,Z8ProjectPreparation.calls.get());complete(replacement);
- eq(true,Z8InitialSetup.isReady(replacement));eq("template",Z8ProjectPreparation.project);eq(1,Z8PreparationNotification.releases);break;}
+ eq(true,Z8InitialSetup.isReady(replacement));eq(1,Z8PreparationNotification.releases);break;}
 case "ready":{
  journal.edit().putBoolean("consent",true).putString("status","ready").commit();Z8EnvironmentTemplate.ready=true;
  Z8InitialSetup.request(service,true);Z8InitialSetup.resume(service);eq(0,Z8ProjectPreparation.calls.get());eq(true,Z8InitialSetup.isReady(service));break;}
@@ -202,19 +186,12 @@ case "listeners":{
 case "journal":{
  SharedPreferences.failWrites=true;Z8InitialSetup.request(service,false);eq(0,Z8ProjectPreparation.calls.get());eq(0,network.registrations);eq(0,service.acquired);
  eq(Z8InitialSetup.Phase.FAILED,Z8InitialSetup.state(service).phase);eq(false,Z8InitialSetup.hasConsent(service));break;}
-case "callback_failure":{
- network.failRegistration=true;Z8InitialSetup.request(service,false);eq(false,Z8InitialSetup.hasWork(service));eq(0,Z8ProjectPreparation.calls.get());
- eq(Z8InitialSetup.Phase.FAILED,Z8InitialSetup.state(service).phase);eq(1,Z8PreparationNotification.finishes);break;}
-case "late_network":{
- Z8InitialSetup.request(service,false);await(Z8ProjectPreparation.entered);Z8ProjectPreparation.release.countDown();Handler.awaitPost();
- eq(true,Z8InitialSetup.isReady(service));eq(true,Z8InitialSetup.hasWork(service));network.callback.onLost(network.network);
- while(Z8InitialSetup.hasWork(service))Handler.next();eq("ready",journal.getString("status",""));eq(Z8InitialSetup.Phase.READY,Z8InitialSetup.state(service).phase);
- eq(0,Z8PreparationNotification.waits);eq(1,Z8PreparationNotification.finishes);break;}
 case "offline_ready":{
  journal.edit().putBoolean("consent",true).putString("status","running").putString("stage","tools").commit();
  Z8EnvironmentTemplate.ready=true;network.network=null;Z8InitialSetup.resume(service);eq("ready",journal.getString("status",""));
- eq(Z8InitialSetup.Phase.READY,Z8InitialSetup.state(service).phase);eq(0,Z8ProjectPreparation.calls.get());eq(0,network.registrations);eq(0,service.acquired);break;}
+ eq(Z8InitialSetup.Phase.READY,Z8InitialSetup.state(service).phase);eq(0,Z8ProjectPreparation.calls.get());eq(0,service.acquired);break;}
 default:throw new AssertionError("Unknown case");}
+eq(0,network.registrations);eq(null,Z8SetupDownloadProxy.last);
 System.out.println("PASS "+args[0]);System.exit(0);
 }}
 '''

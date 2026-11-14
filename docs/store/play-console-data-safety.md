@@ -105,6 +105,28 @@ is enabled later, account verification, list queries, clone and each POST
 must receive their own entries. Its account check actually sends a request;
 it is not just reading a local login flag.
 
+## Tools changes pending rc6 validation
+
+The Tools catalog separates offline base preparation from user-selected package
+and CLI downloads. Daily version checks are off by default. Enabling them makes
+public HTTPS metadata requests to GitHub, Anthropic and Node.js services when
+Z8 opens, at most once per 24 hours. Check now is a one-time user action even
+when daily checks are off. The requests do not contain project names, files,
+credentials, installation inventories or app-generated identifiers. Recipients
+still receive IP addresses and ordinary connection information. Results and
+times remain in local app preferences. Account for that metadata flow and
+provider retention/classification when finalizing Data Safety; do not infer
+“no collection” from the absence of a Z8 server. The English/Korean web and
+in-app privacy text disclose this behavior. Turning the setting off cancels
+pending metadata work; there is no scheduled background version service.
+
+Installed distribution packages are checked locally. Repository refresh and
+package updates require an explicit tool action; automatic metadata checks do
+not run apt, install dependencies, or update installed code. New official
+versions are upstream availability, not tested compatibility. Managed Claude
+launches disable its native auto-updater; user-issued commands and custom
+startup configuration remain under the user's control.
+
 ## Collection, sharing, purposes and choice
 
 Do not submit **No data collected** merely because Z8 has no server. Equally,

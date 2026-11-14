@@ -1,9 +1,9 @@
 {
   "status": "PASS",
   "scope": "Local metadata consistency and store text limits only",
-  "versionCode": 6,
-  "versionName": "0.1.0-rc5",
-  "releaseTag": "v0.1.0-rc5",
+  "versionCode": 7,
+  "versionName": "0.1.0-rc6",
+  "releaseTag": "v0.1.0-rc6",
   "storeText": {
     "en-US": {
       "title.txt": {
@@ -15,11 +15,11 @@
         "limit": 80
       },
       "full-description.txt": {
-        "characters": 2289,
+        "characters": 2661,
         "limit": 4000
       },
       "release-notes.txt": {
-        "characters": 263,
+        "characters": 289,
         "limit": 500
       }
     },
@@ -33,11 +33,11 @@
         "limit": 80
       },
       "full-description.txt": {
-        "characters": 1268,
+        "characters": 1475,
         "limit": 4000
       },
       "release-notes.txt": {
-        "characters": 134,
+        "characters": 155,
         "limit": 500
       }
     }

@@ -186,21 +186,19 @@ class PreparationContracts(unittest.TestCase):
         self.assertIn('if (firstSetup) startActivity(new Intent(this, Z8SetupActivity.class)', theme)
         self.assertNotIn('Z8WorkspaceActivity.class', theme)
 
-    def test_initial_download_is_gated_before_any_project_or_command_launch(self):
+    def test_offline_base_preparation_precedes_project_launch_and_downloads_stay_explicit(self):
         activity = self.read('app/src/main/java/com/termux/app/TermuxActivity.java')
         create = activity.split('public void onCreate(Bundle savedInstanceState)', 1)[1].split('protected void onStart()', 1)[0]
         self.assertLess(create.index('!Z8Theme.isSetupComplete(this)'), create.index('!Z8InitialSetup.isReady(this)'))
         self.assertLess(create.index('!Z8InitialSetup.isReady(this)'), create.index('Z8GuestSessionLauncher.restoreIntent'))
         setup = self.read('app/src/main/java/com/termux/app/Z8SetupActivity.java')
-        self.assertIn('meteredConsent.setChecked(false)', setup)
-        self.assertIn('NET_CAPABILITY_VALIDATED', setup)
-        self.assertIn('NET_CAPABILITY_NOT_METERED', setup)
-        self.assertIn('NetworkCapabilities.TRANSPORT_CELLULAR', setup)
-        self.assertIn('if (!network.online || network.metered && !meteredConsent.isChecked()) return;', setup)
-        self.assertIn('if (!network.key.equals(previousNetwork)) { refresh(); return; }', setup)
         self.assertIn('foreground && service != null && Z8InitialSetup.hasConsent(this)', setup)
         request = setup.split('private void request() {', 1)[1].split('private void updateInstallEnabled()', 1)[0]
-        self.assertIn('Z8InitialSetup.request(service, network.metered && meteredConsent.isChecked())', request)
+        self.assertIn('Z8InitialSetup.request(service, false)', request)
+        self.assertNotIn('network()', request)
+        self.assertNotIn('Z8ToolManager.start', setup)
+        self.assertIn('Z8ToolUpdateLifecycle.install(this);', self.read('app/src/main/java/com/termux/app/TermuxApplication.java'))
+        self.assertIn('Z8ToolManager.stop(this);', self.read('app/src/main/java/com/termux/app/TermuxService.java'))
         for destructive in ('stopService(', 'Z8Projects(', 'addGuestSession', 'EXTRA_GUEST_SESSION'):
             self.assertNotIn(destructive, setup)
 
@@ -248,7 +246,9 @@ class PreparationContracts(unittest.TestCase):
         normal, developer = settings.split('if (BuildConfig.DEBUG)', 1)
         self.assertIn('Z8ThemeActivity.class', normal)
         self.assertIn('Settings.ACTION_APP_NOTIFICATION_SETTINGS', normal)
-        for diagnostic_route in ('Z8DiagnosticsActivity.class', 'Z8EnvironmentActivity.intent', 'Z8AttentionBridge.sendDiagnostic'):
+        self.assertIn('Z8EnvironmentActivity.intent', normal)
+        self.assertIn('Z8EnvironmentActivity.intent(activity, toolsProject)', chrome)
+        for diagnostic_route in ('Z8DiagnosticsActivity.class', 'Z8AttentionBridge.sendDiagnostic'):
             self.assertNotIn(diagnostic_route, normal)
             self.assertIn(diagnostic_route, developer)
 

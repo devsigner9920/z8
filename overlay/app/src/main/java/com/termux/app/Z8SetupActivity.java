@@ -9,16 +9,12 @@ import android.content.ServiceConnection;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.Settings;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -27,27 +23,17 @@ import android.widget.TextView;
 
 import com.termux.R;
 
-/** The first download always follows visible network disclosure and explicit consent. */
+/** Prepare the embedded terminal offline; optional downloads are chosen in Tools. */
 public final class Z8SetupActivity extends Activity implements ServiceConnection {
     private Z8BackNavigation backNavigation;
     private TermuxService service;
-    private boolean bound, foreground, navigating, registeringNetwork;
-    private String previousNetwork;
+    private boolean bound, foreground, navigating;
     private Z8ChromeStyle style;
-    private TextView title, description, networkStatus, progressLabel, notifications;
+    private TextView title, description, progressLabel, notifications;
     private LinearLayout consent, progressArea;
     private ProgressBar progress;
-    private CheckBox meteredConsent;
     private Button install, later;
-    private ConnectivityManager connectivity;
     private final Runnable stateListener = this::refresh;
-    private final ConnectivityManager.NetworkCallback networkListener = new ConnectivityManager.NetworkCallback() {
-        @Override public void onAvailable(Network network) { changed(); }
-        @Override public void onLost(Network network) { changed(); }
-        @Override public void onCapabilitiesChanged(Network network, NetworkCapabilities capabilities) { changed(); }
-        private void changed() { runOnUiThread(() -> { if (foreground) refresh(); }); }
-    };
-
     @Override protected void onCreate(Bundle saved) {
         super.onCreate(saved);
         backNavigation = Z8BackNavigation.install(this, this::leaveSetup);
@@ -55,7 +41,6 @@ public final class Z8SetupActivity extends Activity implements ServiceConnection
             startActivity(new Intent(this, Z8ThemeActivity.class).putExtra(Z8ThemeActivity.EXTRA_FIRST_SETUP, true));
             finish(); return;
         }
-        connectivity = getSystemService(ConnectivityManager.class);
         render();
     }
 
@@ -70,10 +55,6 @@ public final class Z8SetupActivity extends Activity implements ServiceConnection
         if (isFinishing()) return;
         foreground = true;
         Z8InitialSetup.addListener(stateListener);
-        if (connectivity != null) {
-            try { connectivity.registerDefaultNetworkCallback(networkListener); registeringNetwork = true; }
-            catch (SecurityException ignored) { /* The offline state remains conservative. */ }
-        }
         resumeAcceptedWork();
         refresh();
     }
@@ -81,9 +62,6 @@ public final class Z8SetupActivity extends Activity implements ServiceConnection
     @Override protected void onPause() {
         foreground = false;
         Z8InitialSetup.removeListener(stateListener);
-        if (registeringNetwork && connectivity != null) {
-            connectivity.unregisterNetworkCallback(networkListener); registeringNetwork = false;
-        }
         super.onPause();
     }
 
@@ -149,20 +127,11 @@ public final class Z8SetupActivity extends Activity implements ServiceConnection
 
         consent = column(); consent.setPadding(dp(18), dp(18), dp(18), dp(18));
         consent.setBackground(style.shape(this, style.surface, style.border, 14));
-        TextView tools = text("Python · Node.js · Git · GitHub CLI", 14, style.text, true); consent.addView(tools);
-        TextView downloads = text(Z8Text.text("Set up Linux and download development tools.\nThis may use hundreds of MB or more.\nWi-Fi is recommended to avoid data charges.", "Linux 환경을 구성하고 개발 도구를 내려받아요.\n수백 MB 이상의 데이터가 사용될 수 있어요.\n데이터 요금이 발생할 수 있으니 Wi-Fi를 권장해요."), 13, style.muted, false);
+        TextView tools = text(Z8Text.text("Local terminal · Included", "로컬 터미널 · 포함됨"), 14, style.text, true); consent.addView(tools);
+        TextView downloads = text(Z8Text.text("Prepare the Linux terminal already included with Z8. No internet connection is needed.\nChoose Python, Git and other optional tools later in Tools.", "Z8에 포함된 Linux 터미널을 준비합니다. 인터넷 연결은 필요하지 않습니다.\nPython, Git 등 선택 도구는 나중에 도구 화면에서 설치하세요."), 13, style.muted, false);
         downloads.setLineSpacing(dp(4), 1); add(consent, downloads, 10);
         TextView openSource = text(Z8Text.text("Z8 is open-source software under GPL-3.0-only, with separately licensed components.", "Z8는 GPL-3.0-only 오픈소스 앱이며, 포함된 구성요소에는 별도 라이선스가 적용됩니다."), 13, style.muted, false);
         openSource.setLineSpacing(dp(4), 1); add(consent, openSource, 10);
-        networkStatus = text("", 13, style.text, false); add(consent, networkStatus, 18);
-        meteredConsent = new CheckBox(this);
-        meteredConsent.setText(Z8Text.text("I agree to use mobile data or a metered network.", "모바일 데이터 또는 유료 네트워크 사용에 동의합니다."));
-        meteredConsent.setTextSize(13); meteredConsent.setTextColor(style.text);
-        meteredConsent.setButtonTintList(ColorStateList.valueOf(style.accent));
-        meteredConsent.setMinHeight(dp(48));
-        meteredConsent.setChecked(false);
-        meteredConsent.setOnCheckedChangeListener((view, checked) -> updateInstallEnabled());
-        add(consent, meteredConsent, 10);
         Button privacy = button(Z8Text.text("Privacy policy", "개인정보처리방침"), false);
         privacy.setTextColor(style.accent);
         privacy.setOnClickListener(view -> startActivity(Z8AboutActivity.intent(this, Z8AboutActivity.Page.PRIVACY)));
@@ -212,25 +181,16 @@ public final class Z8SetupActivity extends Activity implements ServiceConnection
             }
             return;
         }
-        NetworkState network = network();
-        if (!network.key.equals(previousNetwork)) {
-            previousNetwork = network.key;
-            meteredConsent.setChecked(false);
-        }
         boolean running = state.phase == Z8InitialSetup.Phase.RUNNING;
         boolean waiting = state.phase == Z8InitialSetup.Phase.WAITING_NETWORK;
         boolean failed = state.phase == Z8InitialSetup.Phase.FAILED;
-        title.setText(running ? Z8Text.text("Preparing your workspace", "작업 공간을 준비하고 있어요") : waiting ? Z8Text.text("Waiting for a connection", "네트워크를 기다리고 있어요")
-            : failed ? Z8Text.text("Setup could not finish", "준비를 완료하지 못했어요") : Z8Text.text("Set up development tools", "개발 도구를 준비할게요"));
+        title.setText(running ? Z8Text.text("Preparing your workspace", "작업 공간을 준비하고 있어요") : waiting ? Z8Text.text("Continue setup", "준비 계속하기")
+            : failed ? Z8Text.text("Setup could not finish", "준비를 완료하지 못했어요") : Z8Text.text("Prepare your terminal", "터미널 준비하기"));
         description.setText(running ? Z8Text.text("First setup may take a few minutes. It continues while you use other apps.\nIf the app is stopped, reopen it to check completed steps and resume.", "처음 한 번은 몇 분 걸릴 수 있어요. 다른 앱을 사용해도 준비는 계속돼요.\n강제 종료되면 앱을 다시 열 때 완료된 단계부터 확인하고 이어가요.")
-            : waiting ? Z8Text.text("Completed steps are saved. Connect to Wi-Fi to continue.", "완료한 단계는 보관했어요. Wi-Fi에 연결하면 이어서 준비할 수 있어요.")
-            : failed ? Z8Text.text("Completed steps and project files are preserved. Check your connection and storage, then retry.", "완료한 단계와 프로젝트 파일은 유지돼요. 연결과 저장 공간을 확인하고 다시 시도해 주세요.")
-            : Z8Text.text("Prepare the tools needed to create projects.\nInstall them once and reuse them for future projects.", "프로젝트를 만들기 전에 필요한 도구를 준비해요.\n처음 한 번 설치하면 다음 프로젝트부터 재사용해요."));
+            : waiting ? Z8Text.text("Completed steps are saved. Continue offline from where setup stopped.", "완료한 단계는 보관했어요. 인터넷 없이 중단된 준비를 이어갈 수 있어요.")
+            : failed ? Z8Text.text("Completed steps and project files are preserved. Check available storage, then retry.", "완료한 단계와 프로젝트 파일은 유지돼요. 저장 공간을 확인하고 다시 시도해 주세요.")
+            : Z8Text.text("Start with the embedded Linux shell.\nDevelopment tools are optional and can be installed per project.", "내장 Linux 셸로 시작해요.\n개발 도구는 프로젝트마다 필요한 것만 설치할 수 있어요."));
         consent.setVisibility(running ? View.GONE : View.VISIBLE);
-        networkStatus.setText(!network.online ? Z8Text.text("No internet connection. Connect to Wi-Fi.", "인터넷에 연결되지 않았어요. Wi-Fi에 연결해 주세요.")
-            : network.metered ? Z8Text.text("You are using mobile data or a metered network.", "현재 모바일 데이터 또는 유료 네트워크에 연결되어 있어요.")
-            : Z8Text.text("You are using an unmetered network.", "현재 데이터 사용량 제한이 없는 네트워크에 연결되어 있어요."));
-        meteredConsent.setVisibility(network.online && network.metered ? View.VISIBLE : View.GONE);
         progressArea.setVisibility(running || waiting || failed ? View.VISIBLE : View.GONE);
         String message = state.message == null ? "" : state.message;
         // Full installer logs belong in a diagnostic view, not this primary flow.
@@ -240,7 +200,7 @@ public final class Z8SetupActivity extends Activity implements ServiceConnection
         progress.setVisibility(running ? View.VISIBLE : View.GONE);
         progress.setIndeterminate(state.percent < 0); if (state.percent >= 0) progress.setProgress(state.percent);
         install.setVisibility(running ? View.GONE : View.VISIBLE);
-        install.setText(failed ? Z8Text.text("Retry", "다시 시도") : waiting ? Z8Text.text("Continue on this connection", "이 연결로 계속") : Z8Text.text("Start setup", "설치 시작"));
+        install.setText(failed ? Z8Text.text("Retry", "다시 시도") : waiting ? Z8Text.text("Continue setup", "준비 계속하기") : Z8Text.text("Start setup", "설치 시작"));
         later.setText(running ? Z8Text.text("Continue in background", "백그라운드에서 계속") : Z8Text.text("Later", "나중에"));
         NotificationManager manager = getSystemService(NotificationManager.class);
         notifications.setVisibility(manager != null && !manager.areNotificationsEnabled() ? View.VISIBLE : View.GONE);
@@ -249,37 +209,14 @@ public final class Z8SetupActivity extends Activity implements ServiceConnection
 
     private void request() {
         if (!foreground || service == null || service.wantsToStop()) return;
-        NetworkState network = network();
-        if (!network.key.equals(previousNetwork)) { refresh(); return; }
-        if (!network.online || network.metered && !meteredConsent.isChecked()) return;
-        Z8InitialSetup.request(service, network.metered && meteredConsent.isChecked());
+        Z8InitialSetup.request(service, false);
         refresh();
     }
 
     private void updateInstallEnabled() {
         if (install == null) return;
-        NetworkState network = network();
-        boolean enabled = foreground && service != null && !service.wantsToStop()
-            && network.online && (!network.metered || meteredConsent.isChecked());
+        boolean enabled = foreground && service != null && !service.wantsToStop();
         install.setEnabled(enabled); install.setAlpha(enabled ? 1f : .45f);
-    }
-
-    private NetworkState network() {
-        try {
-            Network network = connectivity == null ? null : connectivity.getActiveNetwork();
-            NetworkCapabilities capabilities = network == null ? null : connectivity.getNetworkCapabilities(network);
-            boolean online = capabilities != null && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
-            boolean metered = capabilities == null
-                || !capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
-                || capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR);
-            return new NetworkState(online, metered, String.valueOf(network) + ":" + online + ":" + metered);
-        } catch (SecurityException unavailable) { return new NetworkState(false, true, "unavailable"); }
-    }
-
-    private static final class NetworkState {
-        final boolean online, metered; final String key;
-        NetworkState(boolean online, boolean metered, String key) { this.online = online; this.metered = metered; this.key = key; }
     }
 
     private LinearLayout column() { LinearLayout view = new LinearLayout(this); view.setOrientation(LinearLayout.VERTICAL); return view; }

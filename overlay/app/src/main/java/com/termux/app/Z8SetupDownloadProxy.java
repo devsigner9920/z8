@@ -38,7 +38,8 @@ import javax.net.ssl.SSLSocketFactory;
 public final class Z8SetupDownloadProxy implements AutoCloseable {
     interface Resolver { InetAddress[] resolve(String host) throws IOException; }
     private static final Set<String> HOSTS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-        "deb.debian.org", "ports.ubuntu.com", "archive.ubuntu.com", "security.ubuntu.com", "nodejs.org")));
+        "deb.debian.org", "ports.ubuntu.com", "archive.ubuntu.com", "security.ubuntu.com", "nodejs.org",
+        "api.github.com", "github.com", "release-assets.githubusercontent.com", "objects.githubusercontent.com", "downloads.claude.ai")));
     private static final Set<String> HOP_HEADERS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
         "connection", "proxy-connection", "proxy-authorization", "proxy-authenticate", "keep-alive",
         "te", "trailer", "transfer-encoding", "upgrade", "host")));

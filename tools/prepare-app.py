@@ -258,7 +258,7 @@ def patch_manifest(tree):
             node.set(ANDROID + "foregroundServiceType", "specialUse")
             ET.SubElement(node, "property", {
                 ANDROID + "name": "android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE",
-                ANDROID + "value": "User-started local terminal sessions and Linux development environment preparation. "
+                ANDROID + "value": "User-started local terminal sessions, Linux development environment preparation and selected development tool installation. "
                     "Commands and child processes continue while the user switches apps with an ongoing notification. "
                     "Users can stop terminals in the app or notification and stop preparation using Android app controls. "
                     "The service stops when idle.",
@@ -292,7 +292,7 @@ def patch_manifest(tree):
                         ("Z8SetupActivity", "z8 · Setup"),
                         ("Z8SettingsActivity", "z8 · Settings"),
                         ("Z8AboutActivity", "z8 · About"),
-                        ("Z8EnvironmentActivity", "z8 · Linux environment")):
+                        ("Z8EnvironmentActivity", "z8 · Tools")):
         ET.SubElement(application, "activity", {
             ANDROID + "name": "com.termux.app." + name,
             ANDROID + "exported": "false", ANDROID + "resizeableActivity": "true",
@@ -657,7 +657,7 @@ def patch_sessions(tree):
     edit(service, "        SystemEventReceiver.registerPackageUpdateEvents(this);",
         "        Z8AttentionBridge.start(this);\n        Z8GuestSessionLauncher.start(this);\n        SystemEventReceiver.registerPackageUpdateEvents(this);")
     edit(service, '    public void onDestroy() {\n        Logger.logVerbose(LOG_TAG, "onDestroy");',
-        '    public void onDestroy() {\n        Z8InitialSetup.stop(this);\n        Z8GuestSessionLauncher.stop(this);\n        Z8AttentionBridge.stop();\n        Logger.logVerbose(LOG_TAG, "onDestroy");')
+        '    public void onDestroy() {\n        Z8InitialSetup.stop(this);\n        Z8ToolManager.stop(this);\n        Z8GuestSessionLauncher.stop(this);\n        Z8AttentionBridge.stop();\n        Logger.logVerbose(LOG_TAG, "onDestroy");')
     edit(service, '    private void requestStopService() {',
         '''    /** Hold started/foreground lifetime only while execution owns work. */
     public synchronized void z8AcquireExecution() {
@@ -1003,7 +1003,7 @@ def copy_overlay(root, tree):
     # Managed guest scripts ship with every APK, including upgrades of existing guests.
     managed = tree / "app/src/main/assets/z8/guest-managed"
     managed.mkdir(parents=True, exist_ok=True)
-    for name in ("provision.sh", "debian-base-packages.txt", "shellrc", "welcome.sh", "setup-tools.sh",
+    for name in ("provision.sh", "debian-base-packages.txt", "shellrc", "welcome.sh", "setup-tools.sh", "tool-manager.sh",
                  "guest-task.sh", "install-ai.sh", "ai-tools.lock.json", "install-node.py", "node.lock.json", "probe-tools.sh", "browser-open.py", "html-preview.py", "xdg-open", "browser-profile.sh", "cli-profile.sh", "codex-launch.py"):
         source = root / "runtime/guest" / name
         if source.is_symlink() or not source.is_file():
@@ -1033,7 +1033,7 @@ def patch_language(tree):
             raise PrepareError("Activity declaration missing: " + path.name)
         text = text[:match.end()] + "\n" + wrapper + text[match.end():]
         if path.name == "TermuxApplication.java":
-            text = replace_exact(text, "        super.onCreate();", "        super.onCreate();\n        Z8Language.initialize(this);")
+            text = replace_exact(text, "        super.onCreate();", "        super.onCreate();\n        Z8Language.initialize(this);\n        Z8ToolUpdateLifecycle.install(this);")
         path.write_text(text)
 
     # The shared module cannot depend on app classes. Its report screen follows the

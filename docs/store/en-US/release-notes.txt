@@ -1,7 +1,4 @@
-Initial test release of Z8.
-
-- Project workspaces and multiple terminal sessions
-- Local Linux development tools and web previews
-- Optional official CLI installation
-- English and Korean interfaces
-- Privacy, data deletion and open-source information in Settings
+Start with the included terminal and install development tools when needed.
+Choose required, recommended and optional tools per project.
+Optionally check official tool versions once a day when opening Z8; install updates yourself.
+English is the default, with Korean available in Settings.

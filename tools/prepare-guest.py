@@ -40,6 +40,7 @@ HISTORICAL_LATER_ADDITIONS = frozenset((
     "etc/profile.d/z8-browser.sh", "etc/profile.d/z8-cli.sh", "usr/local/lib/z8/browser-open.py",
     "usr/local/lib/z8/html-preview.py", "usr/local/lib/z8/browser/bin/xdg-open",
     "usr/local/lib/z8/browser/bin/", "usr/local/lib/z8/browser/",
+    "usr/local/lib/z8/tool-manager.sh",
 ))
 
 # Exact block from the hash-pinned Ubuntu Base /etc/bash.bashrc. Keep the
@@ -442,7 +443,7 @@ def add_managed_files(files, links):
         "etc/profile.d/z8-browser.sh": (ROOT / "runtime/guest/browser-profile.sh").read_bytes(),
         "etc/profile.d/z8-cli.sh": (ROOT / "runtime/guest/cli-profile.sh").read_bytes(),
     }
-    for name in ("provision.sh", "debian-base-packages.txt", "shellrc", "welcome.sh", "setup-tools.sh",
+    for name in ("provision.sh", "debian-base-packages.txt", "shellrc", "welcome.sh", "setup-tools.sh", "tool-manager.sh",
                  "guest-task.sh", "install-ai.sh", "ai-tools.lock.json", "install-node.py", "node.lock.json", "probe-tools.sh", "browser-open.py", "html-preview.py"):
         managed["usr/local/lib/z8/" + name] = (ROOT / "runtime/guest" / name).read_bytes()
     managed["usr/local/lib/z8/browser/bin/xdg-open"] = (ROOT / "runtime/guest/xdg-open").read_bytes()

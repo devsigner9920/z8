@@ -128,8 +128,13 @@ class ProjectRemovalTests(unittest.TestCase):
     def test_empty_all_stop_still_holds_service_lease_through_async_completion(self):
         self.probe('all-empty')
 
+    def test_selected_tool_queue_and_failed_cleanup_preserve_files_across_service_replacement(self):
+        self.probe('tool-owned')
+
 
 STUBS = {
+    'com/termux/app/Z8ToolManager.java': 'package com.termux.app;public class Z8ToolManager {static String owned;public static boolean busy(String id){return id!=null&&id.equals(owned);}}',
+    'com/termux/app/Z8PreparationProcess.java': 'package com.termux.app;public class Z8PreparationProcess {static String owned;static boolean hasOutstanding(String id){return id!=null&&id.equals(owned);}}',
     'android/content/Context.java': '''package android.content;import java.nio.file.*;import java.util.concurrent.*;
         public class Context {public final Path fixture;private final ConcurrentHashMap<String,SharedPreferences> preferences=new ConcurrentHashMap<>();
             public Context(Path fixture){this.fixture=fixture;}
@@ -244,6 +249,20 @@ STUBS = {
                 String scenario=args[1];Result result=new Result();
                 try {
                     switch(scenario) {
+                        case "tool-owned": {
+                            TerminalSession target=session(service,"owned-target");Z8ToolManager.owned="owned-target";
+                            Z8ProjectRemoval.begin(service,"owned-target",result);
+                            check(result.calls==1&&result.error!=null&&Z8Guest.calls==0&&target.signals==0,"Queued tool blocks deletion before any PTY signal or IO");
+                            check(service.acquisitionCount==0&&exists(service,"owned-target"),"Rejection preserves files without new execution");
+                            Z8ToolManager.owned=null;Z8PreparationProcess.owned="owned-target";
+                            TermuxService replacement=new TermuxService(root);Result retained=new Result();
+                            Z8ProjectRemoval.begin(replacement,"owned-target",retained);
+                            check(retained.calls==1&&retained.error!=null&&Z8Guest.calls==0&&exists(replacement,"owned-target"),"Failed non-PTY cleanup blocks a replacement service even without a manager job");
+                            Z8PreparationProcess.owned=null;Result verified=new Result();
+                            Z8ProjectRemoval.begin(replacement,"owned-target",verified);Handler.next();Handler.next();
+                            check(verified.calls==1&&verified.error==null&&!exists(replacement,"owned-target")&&exists(replacement,"owned-other"),"Normal deletion resumes only after outstanding cleanup is cleared");
+                            break;
+                        }
                         case "ordered": {
                             TerminalSession a=session(service,"owned-target"),b=session(service,"owned-target"),other=session(service,"owned-other");
                             SharedPreferences nav=service.getSharedPreferences("z8.terminal-navigation",0);

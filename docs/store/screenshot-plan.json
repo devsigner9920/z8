@@ -1,9 +1,12 @@
 {
   "schemaVersion": 1,
-  "preparedDate": "2026-11-14",
+  "preparedDate": "2026-11-15",
   "status": "capture-plan-only",
   "primaryLocale": "en-US",
-  "preferredPhoneSize": {"width": 1080, "height": 1920},
+  "preferredPhoneSize": {
+    "width": 1080,
+    "height": 1920
+  },
   "format": "RGB PNG without alpha",
   "screens": [
     {
@@ -33,6 +36,13 @@
       "screen": "English Settings showing language and app information entries",
       "altText": "Z8 Settings with language, privacy, data deletion and open-source information.",
       "captureRule": "Capture the final app. Confirm the developer information uses Romi Ethsy before finalizing the pack."
+    },
+    {
+      "order": 5,
+      "suggestedFilename": "05-tools.png",
+      "screen": "Project Tools catalog with required, recommended and optional groups and real installation status",
+      "altText": "Z8 Tools lets users install development tools when needed for each project.",
+      "captureRule": "Show actual local package/receipt status from the matching candidate. Do not mark missing tools installed or an upstream release as compatibility tested."
     }
   ],
   "optionalCaptures": [

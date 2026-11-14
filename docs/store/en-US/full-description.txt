@@ -4,7 +4,9 @@ Keep your work organized
 Create separate project workspaces for source files, home directories and development environments. Open multiple terminal sessions and move between projects without mixing their working folders.
 
 Use familiar development tools
-Prepare a Linux environment and work with Python, Node.js, Git, GitHub CLI, tmux and build tools. Run commands, edit files with terminal tools and work on your repositories from your Android device.
+Start with the included Linux terminal, then choose the tools you need for each project. Tools groups the included essentials, recommended Python and Git, and optional Node.js, GitHub CLI, tmux and build tools. Run commands, edit files with terminal tools and work on your repositories from your Android device.
+
+Optional daily checks show official Codex, Claude Code and Node.js version information when you open Z8. Installation and updates start only when you choose them. An available version is not a guarantee of compatibility.
 
 Preview local web projects
 Open a development server running on your device in the built-in preview. External websites and sign-in pages open in your device browser.
@@ -19,7 +21,7 @@ Choose a theme and switch the app interface between English and Korean. English 
 
 Before you start
 - An ARM64 Android device is required. Android 9 and later is the configured minimum; tool compatibility varies.
-- Preparing the environment downloads additional tools and uses device storage. External services require a network connection.
+- Initial preparation unpacks the included Linux image and uses device storage. Optional tool downloads, updates and external services require a network connection.
 - Root access and a separate Termux installation are not required.
 - Project folders are separate, but they are not security sandboxes. Run only code and tools you trust.
 

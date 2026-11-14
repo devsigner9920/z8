@@ -132,7 +132,7 @@ public final class Z8GuestSessionLauncher {
      */
     public static boolean hasPending(TermuxService service) {
         mainThread();
-        if (Z8InitialSetup.hasWork(service)) return true;
+        if (Z8InitialSetup.hasWork(service) || Z8ToolManager.hasWork(service)) return true;
         if (!alive(active, service)) return false;
         for (Ticket ticket : TICKETS.values())
             if (ticket.owner == active && ticket.phase == Phase.QUEUED) return true;
@@ -142,7 +142,7 @@ public final class Z8GuestSessionLauncher {
     /** The foreground service can consult this without touching main-thread ticket state. */
     public static boolean hasServiceWork(TermuxService service) {
         Generation generation = active;
-        return Z8InitialSetup.hasWork(service)
+        return Z8InitialSetup.hasWork(service) || Z8ToolManager.hasWork(service)
             || generation != null && generation.service.get() == service && generation.pending;
     }
 
@@ -274,7 +274,7 @@ public final class Z8GuestSessionLauncher {
         if (service.z8IsStopRequested()) { ticket.phase = Phase.CANCELLED; return; }
         if (Z8ProjectRemoval.isDeleting(projectId)) { ticket.phase = Phase.CANCELLED; return; }
         android.content.Context context = service.getApplicationContext();
-        boolean needsProfile = projectId != null && !Z8Guest.standardProfilePrepared(context, projectId);
+        boolean needsProfile = projectId != null && !Z8Guest.baseProfilePrepared(context, projectId);
         ticket.preparesShell = action == null && (needsProfile || ticket.recovering);
         if (action == null && projectId != null) {
             for (Ticket other : TICKETS.values())

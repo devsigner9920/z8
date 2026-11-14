@@ -5,7 +5,10 @@ z8_mode=dry-run
 z8_tool=all
 z8_mode_set=false
 z8_tool_set=false
-for z8_arg in "$@"; do
+z8_version=
+while [ "$#" -gt 0 ]; do
+    z8_arg=$1
+    shift
     case "$z8_arg" in
         --dry-run|--apply)
             [ "$z8_mode_set" = false ] || { printf '%s\n' 'Choose one execution mode.' >&2; exit 2; }
@@ -13,18 +16,25 @@ for z8_arg in "$@"; do
         codex|claude|all)
             [ "$z8_tool_set" = false ] || { printf '%s\n' 'Choose codex, claude or all.' >&2; exit 2; }
             z8_tool=$z8_arg; z8_tool_set=true ;;
+        --version)
+            [ -z "$z8_version" ] && [ "$#" -gt 0 ] || { printf '%s\n' 'Choose one exact version.' >&2; exit 2; }
+            z8_version=$1; shift
+            printf '%s\n' "$z8_version" | LC_ALL=C grep -Eq '^(0|[1-9][0-9]{0,5})\.(0|[1-9][0-9]{0,5})\.(0|[1-9][0-9]{0,5})$' || { printf '%s\n' 'Version must be X.Y.Z.' >&2; exit 2; }
+            ;;
         --help|-h)
-            printf '%s\n' 'Usage: install-ai.sh [--dry-run | --apply] [codex | claude | all]' \
+            printf '%s\n' 'Usage: install-ai.sh [--dry-run | --apply] [codex | claude | all] [--version X.Y.Z]' \
                 'Default: print the pinned plan. Apply requires the ARM64 z8 Linux guest, HOME=/z8/home and Python 3.'; exit 0 ;;
         *) printf '%s\n' "Unknown argument: $z8_arg" >&2; exit 2 ;;
     esac
 done
+[ -z "$z8_version" ] || [ "$z8_tool" != all ] || { printf '%s\n' 'An exact version requires one tool.' >&2; exit 2; }
 z8_script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 [ -f "$z8_script_dir/ai-tools.lock.json" ] || { printf '%s\n' 'Missing AI artifact lock.' >&2; exit 2; }
 if [ "$z8_mode" = dry-run ]; then
     printf '%s\n' "Plan: $z8_tool native tools under /z8/home/.local/bin" \
         'No download, installation, login or account request was performed.' \
         'Pinned public artifact metadata (PRoot/CLI compatibility still needs execution tests):'
+    [ -z "$z8_version" ] || printf '%s\n' "Selected version: $z8_version (official integrity metadata checked only after Apply)."
     cat -- "$z8_script_dir/ai-tools.lock.json"
     exit 0
 fi
@@ -39,8 +49,10 @@ case "$(uname -m)" in aarch64|arm64) ;; *) printf '%s\n' '--apply requires ARM64
 [ "$(cat /etc/z8/guest-target)" = z8-guest-v1 ] || { printf '%s\n' 'Incorrect z8 guest image marker.' >&2; exit 2; }
 [ -d /z8/home ] && [ -w /z8/home ] || { printf '%s\n' 'Project HOME is not writable.' >&2; exit 2; }
 [ -x /usr/bin/python3 ] || { printf '%s\n' 'Install the basic development tools first (Python 3 and CA certificates).' >&2; exit 2; }
-exec /usr/bin/python3 - "$z8_script_dir/ai-tools.lock.json" "$z8_tool" <<'Z8_AI_PYTHON'
+exec /usr/bin/python3 - "$z8_script_dir/ai-tools.lock.json" "$z8_tool" "$z8_version" <<'Z8_AI_PYTHON'
 import base64
+import copy
+import fcntl
 import hashlib
 import json
 import os
@@ -60,7 +72,7 @@ import urllib.request
 
 MANAGER = "z8-ai-v1"
 MAX_BINARY = 1024 * 1024 * 1024
-ALLOWED_HOSTS = {"github.com", "release-assets.githubusercontent.com", "objects.githubusercontent.com", "downloads.claude.ai"}
+ALLOWED_HOSTS = {"github.com", "api.github.com", "release-assets.githubusercontent.com", "objects.githubusercontent.com", "downloads.claude.ai"}
 
 def fail(message):
     raise RuntimeError(message)
@@ -109,6 +121,123 @@ def download(url, target, expected_hash, expected_size=None, limit=MAX_BINARY):
         os.fsync(output.fileno())
     if (expected_size is not None and total != expected_size) or result.hexdigest() != expected_hash:
         fail("Official artifact SHA-256 or size mismatch.")
+
+def metadata(url, limit):
+    """Only callers construct these fixed official endpoints; no remote URL is executed."""
+    safe_url(url)
+    request = urllib.request.Request(url, headers={"User-Agent": "z8-native-installer/1", "Accept-Encoding": "identity"})
+    deadline = time.monotonic() + 30
+    with urllib.request.build_opener(OfficialRedirect()).open(request, timeout=10) as response:
+        safe_url(response.geturl())
+        output = bytearray()
+        while True:
+            block = response.read(min(65536, limit + 1 - len(output)))
+            if not block:
+                return bytes(output)
+            output.extend(block)
+            if len(output) > limit or time.monotonic() > deadline:
+                fail("Official metadata exceeds its response limit.")
+
+def selected_pin(tool, version, baseline):
+    if not isinstance(version, str) or not re.fullmatch(r"(0|[1-9][0-9]{0,5})\.(0|[1-9][0-9]{0,5})\.(0|[1-9][0-9]{0,5})", version):
+        fail("Select an exact X.Y.Z release version.")
+    pin = copy.deepcopy(baseline)
+    if version == pin["version"]:
+        return pin
+    pin["version"] = version
+    if tool == "codex":
+        tag = "rust-v" + version
+        release = json.loads(metadata("https://api.github.com/repos/openai/codex/releases/tags/" + tag, 2 * 1024 * 1024))
+        if release.get("tag_name") != tag or release.get("draft") is not False or release.get("prerelease") is not False:
+            fail("The selected Codex release is not a published stable release.")
+        name = "codex-package-aarch64-unknown-linux-musl.tar.gz"
+        assets = [asset for asset in release.get("assets", []) if asset.get("name") == name]
+        url = "https://github.com/openai/codex/releases/download/" + tag + "/" + name
+        if len(assets) != 1:
+            fail("This release has no unique supported ARM64 package.")
+        asset = assets[0]
+        if asset.get("browser_download_url") != url or not re.fullmatch(r"sha256:[0-9a-f]{64}", asset.get("digest") or "") \
+                or type(asset.get("size")) is not int or not 0 < asset["size"] <= MAX_BINARY:
+            fail("The official release does not provide the required SHA-256, size and platform identity.")
+        pin.update(url=url, sha256=asset["digest"][7:], bytes=asset["size"], selectedRelease=True)
+        pin["packageManifest"]["version"] = version
+    elif tool == "claude":
+        root = "https://downloads.claude.ai/claude-code-releases/" + version + "/"
+        pin.update(url=root + "linux-arm64/claude", manifestUrl=root + "manifest.json")
+        signature = pin["manifestSignature"]
+        signature["url"] = pin["manifestUrl"] + ".sig"
+        # Trust remains the bundled signing-key hash/fingerprint. A rotated or
+        # untrusted key requires a Z8 update, never an automatic trust change.
+        with tempfile.TemporaryDirectory(prefix="z8-claude-metadata-") as temporary:
+            directory = Path(temporary)
+            manifest, signed, key = (directory / name for name in ("manifest", "signature", "key"))
+            raw = metadata(pin["manifestUrl"], 1024 * 1024)
+            raw_signature = metadata(signature["url"], 65536)
+            manifest.write_bytes(raw); signed.write_bytes(raw_signature)
+            trusted = signature["signingKey"]
+            download(trusted["url"], key, trusted["sha256"], trusted["bytes"], limit=65536)
+            verify_claude_signature(manifest, signed, key, directory, trusted["fingerprint"])
+            value = json.loads(raw)
+            platform = value.get("platforms", {}).get("linux-arm64", {})
+            if value.get("version") != version or not re.fullmatch(r"[0-9a-f]{64}", platform.get("checksum") or "") \
+                    or type(platform.get("size")) is not int or not 0 < platform["size"] <= MAX_BINARY:
+                fail("Signed Claude metadata does not match the selected ARM64 version.")
+            pin.update(sha256=platform["checksum"], bytes=platform["size"], manifestSha256=hashlib.sha256(raw).hexdigest(), manifestBytes=len(raw))
+            signature.update(sha256=hashlib.sha256(raw_signature).hexdigest(), bytes=len(raw_signature))
+    else:
+        fail("Unknown native tool.")
+    return pin
+
+def selected_codex_members(archive, pin):
+    """Derive file hashes only after the entire official SHA-256 was verified.
+
+    Only the bundled graph and the reviewed 0.169 exec-server graph are known.
+    Other upstream layout changes need review and an app update.
+    """
+    actual, total = {}, 0
+    with tarfile.open(archive, "r:gz") as source:
+        seen, expanded = {}, 0
+        for item in source:
+            expanded += item.size
+            if item.name in seen or len(seen) >= 100 or not (item.isfile() or item.isdir()) \
+                    or item.size < 0 or expanded > MAX_BINARY:
+                fail("Codex package has duplicate or excessive entries.")
+            seen[item.name] = item
+        manifest_item = seen.get("codex-package.json")
+        if manifest_item is None or not manifest_item.isfile() or not 0 < manifest_item.size <= 16384:
+            fail("Codex package lacks a bounded discovery manifest.")
+        manifest = json.loads(source.extractfile(manifest_item).read())
+        expected_manifest = dict(pin["packageManifest"])
+        exec_server_manifest = dict(expected_manifest, execServer="bin/codex-exec-server")
+        if manifest == exec_server_manifest and manifest != expected_manifest:
+            removed = {"codex-resources/zsh", "codex-resources/zsh/bin", "codex-resources/zsh/bin/zsh"}
+            pin["members"] = [dict(record) for record in pin["members"] if record["path"] not in removed]
+            pin["members"].append({"path": "bin/codex-exec-server", "type": "file", "mode": 0o755, "size": 0, "sha256": "0" * 64})
+            pin["binaries"] = [name for name in pin["binaries"] if name not in removed] + ["bin/codex-exec-server"]
+            pin["packageManifest"] = manifest
+        elif manifest != expected_manifest:
+            fail("The selected Codex discovery layout needs an app update.")
+        expected = package_members(pin)
+        for item in seen.values():
+            record = expected.get(item.name)
+            if record is None or item.name in actual or item.mode != record["mode"] \
+                    or (record["type"] == "directory" and not item.isdir()) \
+                    or (record["type"] == "file" and not item.isfile()):
+                fail("The selected Codex package layout needs an app update.")
+            total += item.size
+            if item.size < 0 or total > MAX_BINARY or item.isdir() and item.size != 0:
+                fail("Codex package expansion exceeds the supported limit.")
+            current = dict(record, size=item.size)
+            if item.isfile():
+                digest_value = hashlib.sha256()
+                with source.extractfile(item) as stream:
+                    for block in iter(lambda: stream.read(256 * 1024), b""):
+                        digest_value.update(block)
+                current["sha256"] = digest_value.hexdigest()
+            actual[item.name] = current
+    if set(actual) != set(expected):
+        fail("The selected Codex package is incomplete.")
+    pin["members"] = [actual[name] for name in sorted(actual)]
 
 def private_directory(root, relative):
     if root.is_symlink() or not root.is_dir():
@@ -188,6 +317,10 @@ def package_members(pin):
         fail("The complete Codex package requires its launcher and manifest.")
     manifest = {"layoutVersion": 1, "version": pin["version"], "target": "aarch64-unknown-linux-musl",
         "variant": "codex", "entrypoint": "bin/codex", "resourcesDir": "codex-resources", "pathDir": "codex-path"}
+    if pin.get("packageManifest", {}).get("execServer") == "bin/codex-exec-server":
+        manifest["execServer"] = "bin/codex-exec-server"
+        if "bin/codex-exec-server" not in binaries:
+            fail("The Codex exec-server layout requires its companion executable.")
     if pin.get("packageManifest") != manifest:
         fail("Unsupported Codex package discovery manifest.")
     return entries
@@ -330,6 +463,7 @@ def version_check(binary, version, staging):
     env.pop("LD_PRELOAD", None)
     env.pop("LD_LIBRARY_PATH", None)
     env["PATH"] = "/usr/local/bin:/usr/bin:/bin"
+    env["DISABLE_AUTOUPDATER"] = "1"
     output_path = staging / "version-output.txt"
     with output_path.open("wb") as output:
         completed = subprocess.run([str(binary), "--version"], stdout=output, stderr=subprocess.STDOUT, timeout=45, env=env)
@@ -408,6 +542,7 @@ def verify_claude_manifest(staging, pin):
 
 def install_tool(home, tool, pin):
     tool_root = private_directory(home, ".local/share/z8/ai/" + tool)
+    remove_interrupted_staging(tool_root, tool)
     launch_dir = private_directory(home, ".local/bin")
     launcher = launch_dir / tool
     validate_launcher(launcher, tool_root, tool)
@@ -416,16 +551,22 @@ def install_tool(home, tool, pin):
     # Keep that directory and receipt intact; package layout uses a sibling.
     version_dir = tool_root / (pin["version"] + ("-package-v1" if packaged else ""))
     staging = Path(tempfile.mkdtemp(prefix=".install-", dir=tool_root))
+    marker = staging / ".z8-ai-staging"
+    marker.write_text("z8-ai-staging-v1\n" + staging.name + "\n" + tool + "\n")
     try:
         # Reinstalling an existing binary must not bypass signature validation.
         verification = verify_claude_manifest(staging, pin) if tool == "claude" else None
+        artifact = staging / "download"
+        if packaged and pin.get("selectedRelease"):
+            download(pin["url"], artifact, pin["sha256"], pin["bytes"])
+            selected_codex_members(artifact, pin)
         if version_dir.exists() or version_dir.is_symlink():
             binary = verify_existing_version(version_dir, tool, pin)
             version_output = version_check(binary, pin["version"], staging)
         else:
             print("Downloading official " + tool + " " + pin["version"] + "…", flush=True)
-            artifact = staging / "download"
-            download(pin["url"], artifact, pin["sha256"], pin["bytes"])
+            if not artifact.exists():
+                download(pin["url"], artifact, pin["sha256"], pin["bytes"])
             binary = staging / (pin["entryPoint"] if packaged else tool)
             if packaged:
                 members = extract_codex_package(artifact, staging, pin)
@@ -446,6 +587,7 @@ def install_tool(home, tool, pin):
             write_json(staging / "receipt.json", receipt)
             if version_dir.exists() or version_dir.is_symlink():
                 fail("Another installation created this version; existing files were preserved.")
+            marker.unlink()
             staging.rename(version_dir)
             binary = version_dir / (pin["entryPoint"] if packaged else tool)
         # Recheck immediately before replacing only our own managed launcher.
@@ -464,6 +606,41 @@ def install_tool(home, tool, pin):
     finally:
         if staging.exists():
             shutil.rmtree(staging)
+
+def remove_interrupted_staging(root, tool):
+    for entry in root.iterdir():
+        if not re.fullmatch(r"\.install-[a-z0-9_]{8}", entry.name) or entry.is_symlink() or not entry.is_dir():
+            continue
+        try:
+            descriptor = os.open(entry / ".z8-ai-staging", os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+            with os.fdopen(descriptor, "rb") as source:
+                if not stat.S_ISREG(os.fstat(source.fileno()).st_mode):
+                    continue
+                receipt = source.read(128)
+        except OSError:
+            continue
+        if receipt == ("z8-ai-staging-v1\n" + entry.name + "\n" + tool + "\n").encode():
+            # Only our abandoned temporary tree; rmtree does not follow links.
+            shutil.rmtree(entry)
+
+def installation_lock(root):
+    path = root / ".install.lock"
+    try:
+        descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_NOFOLLOW | os.O_NONBLOCK, 0o600)
+    except OSError:
+        fail("An unrecognized legacy installation lock was preserved; review it before retrying.")
+    stream = os.fdopen(descriptor, "w")
+    try:
+        if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
+            fail("The installation lock is not a regular file; it was preserved.")
+        fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        return stream
+    except BlockingIOError:
+        stream.close()
+        fail("Another tool installation is running in this project.")
+    except BaseException:
+        stream.close()
+        raise
 
 def validate_lock(value):
     if value.get("schemaVersion") != 1 or value.get("platform") != "linux-aarch64":
@@ -502,16 +679,15 @@ def main():
     tools = ("codex", "claude") if sys.argv[2] == "all" else (sys.argv[2],)
     home = Path("/z8/home")
     root = private_directory(home, ".local/share/z8/ai")
-    lock = root / ".install.lock"
-    try:
-        lock.mkdir(mode=0o700)
-    except FileExistsError:
-        fail("Another AI installation is active, or a stopped installation left " + str(lock) + ". Inspect it before retrying.")
-    try:
+    # Kernel ownership is released after normal exit or Android process death.
+    # Old directory locks are never silently removed or treated as our files.
+    with installation_lock(root):
         for tool in tools:
-            install_tool(home, tool, value["tools"][tool])
-    finally:
-        lock.rmdir()
+            selected = sys.argv[3] if len(sys.argv) > 3 else ""
+            if selected and len(tools) != 1:
+                fail("Select one tool for an exact-version install.")
+            pin = selected_pin(tool, selected, value["tools"][tool]) if selected else value["tools"][tool]
+            install_tool(home, tool, pin)
     print("Run codex or claude in /workspace and complete the provider's own login flow when ready.")
     print("Permission and sandbox defaults were not changed. PRoot compatibility still requires a real authenticated task.")
 

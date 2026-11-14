@@ -11,7 +11,8 @@ The app starts in English regardless of the device language. Choose **Settings â
 ## What can you do?
 
 - Keep separate HOME directories, source files, and Linux environments for each project, with multiple terminal sessions.
-- Run Python, Node.js, Git, gh, tmux, and build tools on your device. Use terminal tools for file editing and Git operations.
+- Start with the included terminal, then choose Python, Node.js, Git, gh, tmux, or build tools in Tools for each project.
+- Optionally check official tool version information when the app opens, at most once per 24 hours. Downloads and updates remain user initiated.
 - Preview development servers at `localhost:port` inside the app. Open external links and authentication flows in the device browser.
 - Explicitly install official CLIs such as Codex and Claude Code and authenticate with your own accounts. Compatibility and limitations vary by tool and version.
 
@@ -27,7 +28,7 @@ Z8 provides an environment for running official CLIs. It does not offer a hosted
 | Development environment | Local PRoot Linux; no root or separate Termux app required |
 | Screens | Designed around foldables and tablets, with session navigation adapting to window size |
 
-The minimum SDK is not a compatibility guarantee. Preparing the base environment requires downloads and storage, and each project keeps a separate writable environment.
+The minimum SDK is not a compatibility guarantee. Preparing the included base environment requires storage. Additional tools are installed on demand from Tools, and each project keeps a separate writable environment.
 
 **PRoot is not a security VM or a security boundary between projects.** Projects share the Android kernel and app UID. Untrusted commands or code run by AI tools can affect data accessible to the app. Codex's default Linux sandbox did not work in the tested PRoot environment; do not expect the same isolation as on a conventional Linux host.
 

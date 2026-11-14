@@ -781,6 +781,18 @@ public final class Z8SessionChrome {
 
         }
         if (!projectError.isEmpty()) add(groups, text(projectError, 12, style.danger, false), 10);
+        if (selectedProject != null && !selectedProject.isEmpty() && projects.containsKey(selectedProject)
+                && !projectProblems.containsKey(selectedProject)) {
+            final String toolsProject = selectedProject;
+            TextView tools = action(Z8Text.text("Tools", "도구"),
+                Z8Text.text("Tools for ", "프로젝트 도구: ") + projectName(toolsProject),
+                () -> activity.startActivity(Z8EnvironmentActivity.intent(activity, toolsProject)));
+            tools.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
+            tools.setPadding(dp(12), 0, dp(12), 0);
+            tools.setTextColor(style.accent);
+            focusTag(tools, "project/" + toolsProject + "/tools");
+            panel.addView(tools, new LinearLayout.LayoutParams(-1, dp(48)));
+        }
         final int previousScroll = scrollY;
         scroll.post(() -> { if (!disposed) scroll.scrollTo(0, previousScroll); });
 

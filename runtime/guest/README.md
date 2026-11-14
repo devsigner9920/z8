@@ -1,6 +1,6 @@
 # z8 guest defaults
 
-Status: **Fresh installation prepares the native runtime, pinned Debian GNU/Linux 13.7 (trixie) base and standard tools before project creation.** New projects copy the prepared environment independently, then open their first Terminal. An existing prepared Ubuntu template remains usable and continues to produce Ubuntu projects; existing project rootfs, HOME and source are preserved. An upgrade does not convert or replace them in place. The foreground service owns preparation; interrupted accepted work resumes on the next foreground launch, while completed stages are validated and reused. Clean failures offer retry. No temporary Android shell or tool-install tab is created. The optional environment details screen checks executable versions and reports rootfs, tools and AI separately. Native diagnostic shells are an explicit rescue function, never a project fallback.
+Status: **Fresh installation prepares the included native runtime, pinned Debian GNU/Linux 13.7 (trixie) image and basic shell without downloading the development toolset.** New projects copy the prepared base independently, then open their first terminal. Python, Git, Node.js and other tools are selected per project in Tools. An existing prepared Ubuntu template remains usable; existing project rootfs, HOME, source and installed tools are preserved. An upgrade does not convert or replace them in place. The foreground service owns accepted preparation and selected tool operations. Base preparation can recover on the next foreground launch; interrupted tool actions require an explicit Retry. Previous commands, logins and model tasks are never replayed.
 
 ## Paths and launch contract
 
@@ -10,27 +10,37 @@ Project source remains a separate `/workspace` bind, consistent with the impleme
 
 The launcher binds the target project HOME before provisioning. Setup does not copy source files or rewrite HOME/startup settings.
 
-## Included conveniences
+## Included shell and optional tools
 
-`debian-base-packages.txt` is the default apt package list:
+The included Debian base provides Bash, core utilities and its package manager.
+`provision.sh --apply` initializes missing shell defaults locally and publishes
+`/etc/z8/base.ready` only after basic shell checks pass. An existing
+`tools.ready` receipt from the older full profile also satisfies base readiness;
+it is not removed or reinterpreted as proof that every tool still works.
 
-- Bash and completion, standard file/text/archive utilities.
-- `git`, SSH client, `curl`, `wget` and CA certificates.
-- `gpgv`, used by the optional pinned Claude release-signature verifier.
-- `rg`, `fdfind`, `fzf`, `jq`, `tree`, `file` and process tools.
-- `less`, `nano` and `tmux`.
+The fixed Tools catalog contains recommended Python (pip/venv) and Git, plus
+optional Node.js 24 LTS, Codex, Claude Code, GitHub CLI, SSH client, build tools,
+tmux and utilities. Native Codex and Claude installation does not require Node.
+Their selected dependencies include Python and CA certificates; Claude also
+requires `gpgv`. GitHub CLI also installs Python for Z8's browser sign-in bridge. `debian-base-packages.txt` remains a retained full-profile list,
+not a first-run prerequisite.
 
 Interactive shells get `ll='ls -alF'`, `la='ls -A'`, `l='ls -CF'`, `..='cd ..'`, `...='cd ../..'` and `cls='clear'`. `mkcd <directory>` accepts exactly one directory argument, creates it and enters it only if creation succeeds; quoted spaces and paths beginning with a dash are supported. Existing `cls` and `mkcd` commands, functions or aliases are preserved. `fd` aliases `fdfind` only when a command, function or alias named `fd` is absent. Bash also gets completion, appended history and window-size updates. No Git identity, credentials, SSH keys, CLI approval settings or automatic tmux session are configured.
 
-The standard profile includes `python3`, `python3-pip`, `python3-venv`, `build-essential`, and an official pinned Node LTS distribution including npm. `--with-build-tools` remains a compatibility alias. AI CLIs and project dependencies are still explicit separate installations. Node 24.21.0 / npm 11.19.0 is pinned in `node.lock.json`, verified against the official Node SHA256SUMS file and installed in `/opt/z8/node/v24.21.0`. The `/opt/z8/node/current` pointer publishes only after actual Node/npm version probes pass. Existing `/usr/local/bin/node`, npm or npx that are not z8-managed links are preserved and require review.
+Node's configured baseline remains in `node.lock.json`. An explicit update can
+select an official Node 24 maintenance release; it does not silently switch major
+versions. Native CLI updates validate an exact selected official release and
+artifact integrity before publishing. Existing custom launchers and modified
+managed installations are preserved rather than overwritten. Z8-managed Claude
+launches set `DISABLE_AUTOUPDATER=1`; users can still invoke their own update
+commands or change their startup configuration.
 
 ## Provisioning a future guest
 
 Preview from any host; neither command installs anything:
 
 ```sh
-sh runtime/guest/provision.sh
-sh runtime/guest/provision.sh --dry-run --with-build-tools
+sh runtime/guest/provision.sh --dry-run
 ```
 
 After a verified image builder has entered the target Debian/Ubuntu guest as guest root and mounted its dedicated HOME, it must mark the target rootfs. The following commands are **guest-only**, never Android host or development-machine setup:
@@ -41,7 +51,7 @@ printf '%s\n' z8-guest-v1 > /etc/z8/guest-target
 sh /path/to/runtime/guest/provision.sh --apply
 ```
 
-`--apply` requires the marker, Linux, an exact Debian/Ubuntu distribution ID, guest root and apt. The marker prevents an accidental install on an unprepared system; it does not establish a security boundary. Use the guest's own configured apt repositories. No official-prefix Termux repository is involved.
+Base `--apply` requires the marker, Linux, an exact Debian/Ubuntu distribution ID and guest root. It does not invoke apt. Explicit `tool-manager.sh --apply TOOL` or `--update TOOL` requires the package manager and the selected network consent. The marker prevents an accidental install on an unprepared system; it does not establish a security boundary. Use the guest's own configured apt repositories. No official-prefix Termux repository is involved.
 
 On every guest launch the APK atomically refreshes only its fixed application-owned
 scripts in `/usr/local/lib/z8`; existing environments therefore receive installer and
@@ -52,11 +62,11 @@ HOME, source, `/etc/z8/shellrc`,
 creates missing shell defaults only. Apt retains package-manager locking and retries
 transient repository downloads; the Node installer uses a kernel-released file lock,
 private staging, bounded HTTPS downloads, pinned hashes, archive path/ARM64 checks,
-and version checks before publishing. A failed step never marks the profile ready.
+and version checks before publishing. A failed step never marks a selected tool ready. The selected package operation uses `--no-remove`, package-manager locks and only the required package list; it does not run a blanket distribution upgrade.
 
 `probe-tools.sh` runs bounded read-only version checks. A command that prints a version
 but returns failure is not ready. Python pip/venv, compiler, make, Node/npm, Git/gh and
-tmux must all work for `State.toolsReady`; AI executable readiness does not imply
+tmux must all work for the retained legacy `State.toolsReady`; this is no longer a condition for opening an ordinary terminal. Catalog status uses one bounded local inventory batch, with executable checks on explicit request. AI executable readiness does not imply
 successful authentication or sandbox compatibility. Missing AI fails before a PTY is
 created. Explicit tool/action sessions exit with their actual status rather than
 silently becoming a shell under an AI tab label.
@@ -96,8 +106,8 @@ signature verification or independent reproduction of the upstream rootfs.
 
 No guest code or apt is executed by the normalizer. Upstream package metadata,
 Debian GNU/Linux identity, archive keys, copyright files and APT sources are
-preserved. The base has no CA bundle, Python or `gpgv`; the later standard-tools
-setup installs those. Initial APT repositories retain their publisher-provided
+preserved. The base has no CA bundle, Python or `gpgv`; selected tool operations
+install only the dependencies they require. Initial APT repositories retain their publisher-provided
 HTTP URIs and Signed-By keyring. The app's preparation proxy handles their
 transport; this builder does not replace repository trust or rewrite existing
 users' APT configuration. Initial package installation follows the configured

@@ -1,3 +1,7 @@
 #!/bin/sh
 # Managed browser shim. Arguments remain a vector; URL text is never evaluated.
+[ -x /usr/bin/python3 ] || {
+    printf '%s\n' 'Z8: Install Python from Tools to open browser links or local HTML previews.' >&2
+    exit 127
+}
 exec /usr/bin/python3 /usr/local/lib/z8/browser-open.py "$@"

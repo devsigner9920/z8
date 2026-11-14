@@ -8,6 +8,7 @@ import subprocess
 import tarfile
 import tempfile
 import unittest
+import types
 from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,6 +18,87 @@ spec.loader.exec_module(node)
 
 
 class NodeInstallerTests(unittest.TestCase):
+    def test_selected_release_uses_official_24_lts_index_and_exact_checksum(self):
+        item = {'version': 'v24.22.0', 'npm': '11.20.0', 'lts': 'Krypton', 'files': ['linux-arm64']}
+        sums = ('a' * 64 + '  node-v24.22.0-linux-arm64.tar.xz\n').encode()
+        def fetch(url, limit):
+            self.assertIn(url, ('https://nodejs.org/dist/index.json', 'https://nodejs.org/dist/v24.22.0/SHASUMS256.txt'))
+            return json.dumps([item]).encode() if url.endswith('index.json') else sums
+        with patch.object(node, 'metadata', side_effect=fetch):
+            result = node.selected_lock('v24.22.0')
+            self.assertEqual(result['sha256'], 'a' * 64)
+            self.assertEqual(result['checksumsSha256'], hashlib.sha256(sums).hexdigest())
+            self.assertTrue(result['selectedRelease'])
+            item['lts'] = False
+            with self.assertRaises(ValueError): node.selected_lock('v24.22.0')
+            item['lts'] = 'Krypton'; item['files'] = ['linux-x64']
+            with self.assertRaises(ValueError): node.selected_lock('v24.22.0')
+            item['files'] = ['linux-arm64']; sums += sums
+            with self.assertRaises(ValueError): node.selected_lock('v24.22.0')
+        with patch.object(node, 'metadata') as fetch:
+            for value in ('v26.0.0', 'v24.01.0', 'latest', 'v24.22.0;id', '../v24.22.0'):
+                with self.assertRaises(ValueError): node.selected_lock(value)
+            fetch.assert_not_called()
+
+    def test_official_redirect_cannot_downgrade_or_leave_distribution_host(self):
+        for target in ('http://nodejs.org/dist/x', 'https://evil.invalid/dist/x', 'https://nodejs.org/other/x'):
+            with self.assertRaises(ValueError):
+                node.OfficialRedirect().redirect_request(None, None, 302, '', {}, target)
+
+    def test_modified_managed_node_and_custom_current_are_not_updated(self):
+        data = node.lock_data(ROOT / 'runtime/guest/node.lock.json')
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / 'node'; version = root / data['version']; version.mkdir(parents=True)
+            binary = version / 'node'; binary.write_bytes(b'validated original')
+            node.write_receipt(version, data); node.verify_managed(version)
+            receipt = json.loads((version / '.z8-node-receipt.json').read_text())
+            self.assertEqual((receipt['manager'], receipt['version'], receipt['npm']), ('z8-node-v1', data['version'], data['npm']))
+            current = root / 'current'; current.symlink_to(data['version'])
+            binary.write_bytes(b'user change')
+            newer = dict(data, version='v24.22.0', selectedRelease=True)
+            with patch.object(node, 'download') as download, self.assertRaisesRegex(ValueError, 'Preserving modified'):
+                node._install_locked(root, Path(temporary) / 'bin', newer)
+            download.assert_not_called(); self.assertEqual(current.readlink(), Path(data['version']))
+            self.assertEqual(binary.read_bytes(), b'user change')
+            current.unlink(); current.symlink_to('../user-node')
+            with self.assertRaisesRegex(ValueError, 'unrecognized'):
+                node._install_locked(root, Path(temporary) / 'bin', newer)
+            self.assertEqual(current.readlink(), Path('../user-node'))
+
+    def test_legacy_node_requires_exact_archive_bytes_before_receipt_or_update(self):
+        data = node.lock_data(ROOT / 'runtime/guest/node.lock.json')
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary); installed = root / data['version']; installed.mkdir()
+            (installed / 'node').write_bytes(b'original')
+            def extract(_archive, target, _prefix):
+                target.mkdir(parents=True); (target / 'node').write_bytes(b'original'); return target
+            with patch.object(node, 'download') as download, patch.object(node, 'extract', side_effect=extract):
+                node.verify_managed(installed)
+                self.assertEqual(download.call_args.args[2], data['sha256'])
+                (installed / 'node').write_bytes(b'changed')
+                with self.assertRaisesRegex(ValueError, 'modified legacy'):
+                    node.verify_managed(installed)
+            self.assertFalse((installed / '.z8-node-receipt.json').exists())
+
+    def test_user_selection_changed_during_download_is_preserved(self):
+        old = node.lock_data(ROOT / 'runtime/guest/node.lock.json')
+        new = dict(old, version='v24.22.0', selectedRelease=True,
+            url='https://nodejs.org/dist/v24.22.0/node-v24.22.0-linux-arm64.tar.xz')
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary) / 'node'; prior = root / old['version']; prior.mkdir(parents=True)
+            (prior / 'node').write_bytes(b'original'); node.write_receipt(prior, old)
+            current = root / 'current'; current.symlink_to(old['version'])
+            def download(_url, target, _hash, _limit):
+                target.write_text(new['sha256'] + '  node-v24.22.0-linux-arm64.tar.xz\n')
+            def extract(_archive, target, _prefix):
+                target.mkdir(parents=True); (target / 'node').write_bytes(b'new')
+                current.unlink(); current.symlink_to('../user-selected-node'); return target
+            with patch.object(node, 'download', side_effect=download), patch.object(node, 'extract', side_effect=extract), patch.object(node, 'versions'):
+                with self.assertRaisesRegex(ValueError, 'selection changed'):
+                    node._install_locked(root, Path(temporary) / 'bin', new)
+            self.assertEqual(current.readlink(), Path('../user-selected-node'))
+            self.assertEqual((prior / 'node').read_bytes(), b'original')
+
     def test_lock_and_host_guard(self):
         lock = node.lock_data(ROOT / 'runtime/guest/node.lock.json')
         self.assertEqual(lock['version'], 'v24.21.0')
@@ -35,13 +117,14 @@ class NodeInstallerTests(unittest.TestCase):
         digest = hashlib.sha256(payload).hexdigest()
         with tempfile.TemporaryDirectory() as temporary:
             output = Path(temporary) / 'download'
-            with patch.object(node.urllib.request, 'urlopen', side_effect=[OSError('interrupted'), Response(payload)]), patch.object(node.time, 'sleep'):
+            opener = types.SimpleNamespace(open=unittest.mock.Mock(side_effect=[OSError('interrupted'), Response(payload)]))
+            with patch.object(node.urllib.request, 'build_opener', return_value=opener), patch.object(node.time, 'sleep'):
                 node.download('https://nodejs.org/dist/fixture', output, digest, 100)
                 self.assertEqual(output.read_bytes(), payload)
-            with patch.object(node.urllib.request, 'urlopen', return_value=Response(payload)):
+            with patch.object(node.urllib.request, 'build_opener', return_value=types.SimpleNamespace(open=lambda *a, **k: Response(payload))):
                 with self.assertRaisesRegex(ValueError, 'checksum mismatch'):
                     node.download('https://nodejs.org/dist/fixture', output, '0' * 64, 100)
-            with patch.object(node.urllib.request, 'urlopen', return_value=Response(payload)):
+            with patch.object(node.urllib.request, 'build_opener', return_value=types.SimpleNamespace(open=lambda *a, **k: Response(payload))):
                 with self.assertRaisesRegex(ValueError, 'size limit'):
                     node.download('https://nodejs.org/dist/fixture', output, digest, 2)
 
@@ -94,7 +177,7 @@ class NodeInstallerTests(unittest.TestCase):
             # A hard kill after the version rename / first command link must be
             # recoverable without another network fetch or changing the version.
             (bindir / 'node').symlink_to('/opt/z8/node/current/bin/node')
-            with patch.object(node, 'versions') as verify, patch.object(node, 'download') as download:
+            with patch.object(node, 'versions') as verify, patch.object(node, 'verify_managed'), patch.object(node, 'download') as download:
                 node._install_locked(root, bindir, lock)
                 verify.assert_called_once_with(root / lock['version'], lock)
                 download.assert_not_called()
@@ -116,7 +199,7 @@ class NodeInstallerTests(unittest.TestCase):
                 download.assert_not_called()
             self.assertFalse((root / 'current').exists())
             (bindir / 'npm').write_text('user-owned command')
-            with patch.object(node, 'versions'), patch.object(node, 'download') as download:
+            with patch.object(node, 'versions'), patch.object(node, 'verify_managed'), patch.object(node, 'download') as download:
                 with self.assertRaisesRegex(ValueError, 'Preserving existing'):
                     node._install_locked(root, bindir, lock)
                 download.assert_not_called()
@@ -130,7 +213,7 @@ class NodeInstallerTests(unittest.TestCase):
             (root / lock['version']).mkdir()
             stale = root / ('.current-' + str(node.os.getpid()))
             stale.symlink_to(lock['version'])
-            with patch.object(node, 'versions'), patch.object(node, 'download') as download:
+            with patch.object(node, 'versions'), patch.object(node, 'verify_managed'), patch.object(node, 'download') as download:
                 node._install_locked(root, Path(temporary) / 'bin', lock)
                 download.assert_not_called()
             self.assertEqual((root / 'current').readlink(), Path(lock['version']))
@@ -172,11 +255,12 @@ class NodeInstallerTests(unittest.TestCase):
             result = subprocess.run(['/bin/bash', '-c', source], capture_output=True, text=True)
             self.assertEqual(result.returncode, 0, result.stderr)
             actual = dict(line.split('\t', 1) for line in result.stdout.splitlines())
-            self.assertEqual(actual['python'], '-')
+            # A present command that fails is unknown/broken, not absent.
+            self.assertEqual(actual['python'], '?')
             self.assertEqual(actual['node'], 'v24.21.0')
             self.assertEqual(actual['codex'], '-')
             single = subprocess.run(['/bin/bash', '-c', source, 'probe', 'node'], capture_output=True, text=True)
-            self.assertEqual(single.stdout, 'node\tv24.21.0\n')
+            self.assertEqual(single.stdout, 'node\tv24.21.0\nnpm\t-\n')
 
     def test_aggregate_probe_has_one_deadline(self):
         source = (ROOT / 'runtime/guest/probe-tools.sh').read_text()
@@ -204,4 +288,4 @@ class NodeInstallerTests(unittest.TestCase):
             source = '\n'.join('export PATH=' + str(root) if line.startswith('export PATH=') else line for line in source.splitlines())
             result = subprocess.run(['/bin/bash', '-c', source, 'probe', 'node'], capture_output=True, text=True)
             self.assertEqual(result.returncode, 0)
-            self.assertEqual(result.stdout, 'node\t?\n')
+            self.assertEqual(result.stdout, 'node\t?\nnpm\t-\n')

@@ -1,6 +1,6 @@
 # Play Store submission materials
 
-Prepared on 2026-11-14. English (`en-US`) is the primary listing language;
+Updated on 2026-11-15. English (`en-US`) is the primary listing language;
 `ko-KR` is an optional Korean localization. These files prepare the listing;
 they do not submit or publish it. Recheck the copy against the final candidate
 and the current Console form before submission.
@@ -54,7 +54,7 @@ in `screenshot-plan.json`. Root-level capture results must identify the actual
 candidate, screen dimensions and files before upload. A plan entry is not
 evidence that its screen was captured.
 The local capture/output directory for this preparation is
-`artifacts/play-store/2026-11-14/`; it is intentionally outside the public source
+`artifacts/play-store/2026-11-15/rc6/`; it is intentionally outside the public source
 tree. Its actual asset manifest, when produced, governs which captures exist
 and which final candidate they depict.
 

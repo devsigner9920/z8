@@ -45,7 +45,7 @@ public final class Z8EnvironmentTemplate {
     public static boolean isReady(Context context) {
         try {
             Z8Guest.marker(rootfs(context), ID);
-            return Z8Guest.standardProfilePrepared(context, ID);
+            return Z8Guest.baseProfilePrepared(context, ID);
         } catch (IOException invalid) { return false; }
     }
 

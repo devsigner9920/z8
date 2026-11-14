@@ -69,7 +69,7 @@ STUBS = {
             static void marker(File root,String id)throws IOException {
                 if(!Files.readString(root.toPath().resolve(Z8GuestArchive.MARKER)).equals(id))throw new IOException("marker");
             }
-            static boolean standardProfilePrepared(android.content.Context context,String id){return false;}
+            static boolean baseProfilePrepared(android.content.Context context,String id){return false;}
         }''',
     'com/termux/app/TemplateProbe.java': r'''package com.termux.app;
 import java.io.*;

@@ -40,6 +40,16 @@ public final class Z8SettingsActivity extends Activity {
             "ko".equals(Z8Text.language()) ? "한국어" : "English", this::chooseLanguage);
         ui.section(Z8Text.text("Appearance", "화면"));
         ui.setting(Z8Text.text("Theme", "테마"), ui.palette.name, () -> startActivity(new Intent(this, Z8ThemeActivity.class)));
+        ui.section(Z8Text.text("Tools", "도구"));
+        boolean selectedProject = projectId != null && projectId.matches("[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}");
+        ui.setting(Z8Text.text("Project tools", "프로젝트 도구"),
+            selectedProject ? Z8Text.text("Choose what to install in this project", "현재 프로젝트에 설치할 도구 선택")
+                : Z8Text.text("Create or select a project first", "먼저 프로젝트를 만들거나 선택해 주세요"),
+            selectedProject ? () -> startActivity(Z8EnvironmentActivity.intent(this, projectId)) : null);
+        ui.setting(Z8Text.text("Check tool versions daily", "도구 버전 하루 한 번 확인"),
+            Z8ToolUpdates.enabled(this) ? Z8Text.text("On · When Z8 opens", "켜짐 · Z8을 열었을 때")
+                : Z8Text.text("Off · Check manually in Tools", "꺼짐 · 도구 화면에서 직접 확인"),
+            this::chooseToolVersionChecks);
         ui.section(Z8Text.text("Input", "입력"));
         ui.setting(Z8Text.text("Keyboard shortcuts", "단축키 보기"), Z8Text.text("Copy and paste · Ctrl + Shift + /", "복사·붙여넣기 · Ctrl + Shift + /"), () -> Z8ShortcutHelp.show(this));
         ui.section(Z8Text.text("Notifications", "알림"));
@@ -61,10 +71,6 @@ public final class Z8SettingsActivity extends Activity {
             ui.section(Z8Text.text("Developer", "개발자"));
             ui.setting(Z8Text.text("Runtime diagnostics", "런타임 진단"), Z8Text.text("Execution environment and device compatibility", "실행 환경과 기기 호환성 확인"),
                 () -> startActivity(new Intent(this, Z8DiagnosticsActivity.class)));
-            if (projectId != null && projectId.matches("[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}")) {
-                ui.setting(Z8Text.text("Current project environment", "현재 프로젝트 환경"), Z8Text.text("Install developer tools and repair the environment", "개발 도구 설치와 환경 복구"),
-                    () -> startActivity(Z8EnvironmentActivity.intent(this, projectId)));
-            }
             ui.setting(Z8Text.text("Test notification hook", "훅 수신 테스트"), Z8AttentionBridge.diagnosticStatus(this), () ->
                 Z8AttentionBridge.sendDiagnostic(this, status -> {
                     if (isFinishing() || isDestroyed()) return;
@@ -89,6 +95,20 @@ public final class Z8SettingsActivity extends Activity {
 
     private void openAbout(Z8AboutActivity.Page page) {
         startActivity(Z8AboutActivity.intent(this, page));
+    }
+
+    private void chooseToolVersionChecks() {
+        new AlertDialog.Builder(this).setTitle(Z8Text.text("Check tool versions daily", "도구 버전 하루 한 번 확인"))
+            .setMessage(Z8Text.text("When enabled, Z8 checks official GitHub, Anthropic and Node.js version information when you open the app, at most once a day. These providers receive your IP address and ordinary connection information. Z8 does not send project names, files, account details or a list of installed tools.\n\nDownloads and installations start only when you choose them in Tools. You can turn this off at any time.",
+                "켜면 앱을 열었을 때 하루에 한 번까지 공식 GitHub, Anthropic, Node.js 버전 정보를 확인합니다. 해당 제공자에게 IP 주소와 일반적인 연결 정보가 전달됩니다. 프로젝트 이름, 파일, 계정 정보, 설치된 도구 목록은 보내지 않습니다.\n\n도구의 다운로드와 설치는 도구 화면에서 직접 선택했을 때 시작됩니다. 언제든 끌 수 있습니다."))
+            .setNegativeButton(Z8Text.text("Cancel", "취소"), null)
+            .setNeutralButton(Z8Text.text("Turn off", "끄기"), (dialog, which) -> {
+                Z8ToolUpdates.setEnabled(this, false); render();
+            })
+            .setPositiveButton(Z8Text.text("Turn on", "켜기"), (dialog, which) -> {
+                Z8ToolUpdates.setEnabled(this, true); render();
+                Z8ToolUpdates.requestCheck(getApplicationContext(), false, null);
+            }).show();
     }
 
     private void confirmClearPreviewData() {

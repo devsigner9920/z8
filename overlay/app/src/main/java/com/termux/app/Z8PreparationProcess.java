@@ -45,6 +45,11 @@ final class Z8PreparationProcess implements AutoCloseable {
         this.projectId = projectId; this.process = process; output = process.getInputStream();
     }
 
+    /** Includes failed close attempts; disappearance is published only after verified cleanup. */
+    static boolean hasOutstanding(String projectId) {
+        synchronized (OUTSTANDING) { return OUTSTANDING.containsKey(projectId); }
+    }
+
     /** All arguments remain argv data. No project path or command text is interpolated into sh. */
     static synchronized Z8PreparationProcess start(Context context, String projectId, List<String> argv,
                                                     File directory, Map<String, String> environment) throws IOException {

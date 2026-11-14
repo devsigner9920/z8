@@ -124,82 +124,35 @@ class SetupResumeTests(unittest.TestCase):
         for directory in (self.home_dir, self.source_dir):
             self.assertEqual((directory / 'user-file').read_text(), 'preserve me')
 
-    def test_completed_packages_are_validated_and_skip_network(self):
-        self.write_state({'installed': True})
+    def test_fresh_base_setup_is_offline_and_installs_no_optional_packages(self):
+        self.write_state({'apt_fail': True, 'node_fail': True})
         result = self.run_setup()
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertFalse(any(call[0] == 'apt-get' for call in self.calls()))
-        self.assertNotIn(['dpkg', '--configure', '-a'], self.calls())
-        self.assertEqual((self.state_dir / 'tools.ready').read_text(), 'z8-tools-v2\n')
-        self.assertIn('python3\tinstalled\tok\t1.0', (self.state_dir / 'packages.ready').read_text())
-        self.assert_preserved()
-
-    def test_kill_after_packages_resumes_node_without_reinstalling_packages(self):
-        self.write_state({'wait_node': True})
-        self.kill_at('node')
-        self.assertTrue((self.state_dir / 'packages.ready').is_file())
+        self.assertEqual((self.state_dir / 'base.ready').read_text(), 'z8-base-v1\n')
         self.assertFalse((self.state_dir / 'tools.ready').exists())
-        prior = len(self.calls())
-        self.write_state({'installed': True})
-        result = self.run_setup()
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertFalse(any(call[0] == 'apt-get' for call in self.calls()[prior:]))
-        self.assertTrue((self.state_dir / 'tools.ready').is_file())
+        self.assertFalse(any(call[0] in ('apt-get','dpkg','dpkg-query','python3','node','npm') for call in self.calls()))
         self.assert_preserved()
 
-    def test_kill_mid_unpack_repairs_dependencies_without_removing_packages(self):
-        self.write_state({'wait_packages': True})
-        self.kill_at('packages')
-        self.assertFalse((self.state_dir / 'packages.ready').exists())
-        self.write_state({'unpacked': True})
-        prior = len(self.calls())
-        result = self.run_setup()
-        self.assertEqual(result.returncode, 0, result.stderr)
-        calls = self.calls()[prior:]
-        repair = [call for call in calls if call[0] == 'apt-get' and '-f' in call]
-        self.assertEqual(len(repair), 1)
-        self.assertIn('--no-remove', repair[0])
-        self.assertEqual(sum(call[0] == 'apt-get' and 'update' in call for call in calls), 1)
-        self.assertEqual(sum(call == ['dpkg', '--configure', '-a'] for call in calls), 2)
-        self.assertTrue((self.state_dir / 'tools.ready').is_file())
-        self.assert_preserved()
-
-    def test_stale_receipts_cannot_mark_failed_repair_ready(self):
-        (self.state_dir / 'packages.ready').write_text('previous receipt\n')
+    def test_legacy_full_profile_receipt_and_user_data_are_preserved(self):
         (self.state_dir / 'tools.ready').write_text('z8-tools-v2\n')
-        self.write_state({'apt_fail': True})
         result = self.run_setup()
-        self.assertNotEqual(result.returncode, 0)
-        self.assertFalse((self.state_dir / 'tools.ready').exists())
-        self.assertFalse(any(call[0] == 'python3' for call in self.calls()))
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual((self.state_dir / 'tools.ready').read_text(), 'z8-tools-v2\n')
+        self.assertEqual((self.state_dir / 'base.ready').read_text(), 'z8-base-v1\n')
         self.assert_preserved()
 
-    def test_half_configured_package_or_audit_failure_never_commits_ready(self):
-        for field in ('invalid', 'audit'):
-            with self.subTest(field=field):
-                self.write_state({'installed': True, field: True})
-                result = self.run_setup()
-                self.assertNotEqual(result.returncode, 0)
-                self.assertFalse((self.state_dir / 'tools.ready').exists())
-                self.assertFalse((self.state_dir / 'packages.ready').exists())
-
-    def test_final_validation_failure_retains_only_completed_stages(self):
-        self.write_state({'verify_fail': True})
+    def test_invalid_guest_identity_fails_without_publishing_ready(self):
+        (self.state_dir / 'guest-target').write_text('different environment\n')
         result = self.run_setup()
         self.assertNotEqual(result.returncode, 0)
-        self.assertTrue((self.state_dir / 'packages.ready').exists())
-        self.assertFalse((self.state_dir / 'tools.ready').exists())
-        prior = len(self.calls())
-        self.write_state({'installed': True})
-        self.assertEqual(self.run_setup().returncode, 0)
-        self.assertFalse(any(call[0] == 'apt-get' for call in self.calls()[prior:]))
+        self.assertFalse((self.state_dir / 'base.ready').exists())
         self.assert_preserved()
 
     def test_kill_before_default_publication_never_leaves_partial_destination(self):
         self.write_state({'installed': True, 'wait_defaults': True})
         self.kill_at('defaults')
         self.assertFalse((self.state_dir / 'shellrc').exists())
-        self.assertFalse((self.state_dir / 'tools.ready').exists())
+        self.assertFalse((self.state_dir / 'base.ready').exists())
         self.write_state({'installed': True})
         result = self.run_setup()
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -213,7 +166,7 @@ class SetupResumeTests(unittest.TestCase):
         result = self.run_setup()
         self.assertNotEqual(result.returncode, 0)
         self.assertFalse((self.state_dir / 'shellrc').exists())
-        self.assertFalse((self.state_dir / 'tools.ready').exists())
+        self.assertFalse((self.state_dir / 'base.ready').exists())
         self.assertFalse(list(self.state_dir.glob('.z8-default.*')))
         self.assert_preserved()
 

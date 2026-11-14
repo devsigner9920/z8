@@ -1,14 +1,16 @@
 # Initial setup and project preparation lifecycle
 
-Reviewed 2026-10-11. This document describes the recovery contract and acceptance
+Updated 2026-11-15. This document describes the recovery contract and acceptance
 checks; it does not claim that every case has passed on a physical Samsung device.
 
 ## User-visible contract
 
 Initial setup prepares a hidden app-owned Linux base before the first user project
 exists. The reserved preparation owner is never listed as a project or exposed as
-a terminal. The user can choose to install now or later, with explicit consent
-before metered downloads. New projects copy the validated base into their own
+a terminal. It unpacks included assets and initializes the basic shell offline;
+it does not fetch the full developer profile. The user can prepare now or later.
+Additional Tools installations require explicit download and metered-network
+choices for the selected project. New projects copy the validated base into their own
 writable rootfs; packages, source, HOME, and writable inodes are not shared.
 
 Preparation is owned by `TermuxService`. Leaving
@@ -21,7 +23,7 @@ installation and version checks use an indeterminate progress indicator.
 If Android or the user stops the app process, preparation stops. On the next
 user-initiated foreground launch, an interrupted preparation request can be
 recovered. This is not an automatic restart while the app remains force-stopped.
-Only initial setup and first-environment preparation are eligible: shell commands, AI prompts,
+Only initial setup and first-environment preparation are eligible for automatic foreground recovery. Interrupted selected-tool actions require an explicit Retry; shell commands, AI prompts,
 login flows, Git actions, and previous running processes must not be replayed.
 
 “Continue from the missing stage” means validate completed stages, reuse them,
@@ -34,9 +36,10 @@ or an exact instruction pointer inside `apt`.
 | --- | --- | --- |
 | App runtime | `.z8-bootstrap.sha256` plus executable Bash and PRoot | Reuse the published runtime. An interrupted unpublished extraction starts again. |
 | Project Linux image | Validated `.z8-environment.json` in published `rootfs` | Reuse the existing rootfs. Never replace it because package installation failed. |
-| Distribution packages | Live `dpkg-query` installed/ok status for the complete profile and clean `dpkg --audit` | Skip package downloads when valid; otherwise complete configure/dependency repair without removing packages. |
+| Selected distribution packages | Live `dpkg-query` installed/ok status for the selected dependency list | Reuse complete packages; keep package-manager locks and never remove packages or perform blanket upgrades. |
 | Node/npm | Pinned published Node directory passes actual version probes | Reuse the version, restore missing managed command links, or repeat an incomplete download/extraction. |
-| Final profile | Atomic `tools.ready` publication after Python/pip/venv/Node/npm checks | Initial setup becomes ready without creating a terminal; a project request opens one terminal. A partial receipt cannot establish readiness. |
+| Base shell | Atomic `base.ready` after local shell/defaults checks; an older valid `tools.ready` is also accepted | Initial setup becomes ready without creating a terminal; a project request opens one terminal. No Python/Node/Git download is required. |
+| Selected tool | Complete package status and bounded selected executable checks | Interrupted tool actions remain visible and require explicit Retry. No old shell command or model task is resumed. |
 | New project copy | Complete independent rootfs copy with the new project's environment marker | Reuse the completed base without apt or Node downloads; retry only an unpublished copy. |
 
 Project source and HOME are separate from rootfs. Recovery does not delete or
@@ -57,7 +60,7 @@ values are both preserved; unknown files in a backup stop automatic recovery.
 
 ## Download consent and network changes
 
-`Z8SetupDownloadProxy` routes managed apt and Node installer downloads through a
+`Z8SetupDownloadProxy` routes selected apt, Node and CLI installer downloads through a
 short-lived authenticated loopback proxy. It resolves official download hosts and
 creates upstream sockets using the selected Android `Network`. Losing that
 network fails its connections instead of creating replacement connections on the
@@ -65,7 +68,7 @@ device's new default network. A changed network policy closes the proxy's listen
 and all client/upstream sockets before the installation worker is cancelled.
 
 The proxy accepts only HTTP GET/HEAD and HTTPS CONNECT for the configured Ubuntu
-and Node distribution hosts on their expected ports. Proxy credentials stay in
+Debian, Node, GitHub release and Claude distribution hosts on their expected ports. Proxy credentials stay in
 memory/environment and are stripped from HTTP origin requests. It is not a
 general browser proxy or a security boundary against arbitrary guest software.
 

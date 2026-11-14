@@ -38,6 +38,11 @@ jobs:
           python3 -m unittest discover -s tests -p test_language.py -v
           python3 -m unittest discover -s tests -p test_codex_launch.py -v
           python3 -m unittest discover -s tests -p test_ai_install.py -v
+          python3 -m unittest discover -s tests -p test_node_install.py -v
+          python3 -m unittest discover -s tests -p test_tool_catalog.py -v
+          python3 -m unittest discover -s tests -p test_tool_updates.py -v
+          python3 -m unittest discover -s tests -p test_tool_manager.py -v
+          python3 -m unittest discover -s tests -p test_tool_manager_lifecycle.py -v
           python3 -m unittest discover -s tests -p test_prepare_app.py -v
           python3 -m unittest discover -s tests -p test_setup_download_proxy.py -v
       - name: Source reconstruction and attribution

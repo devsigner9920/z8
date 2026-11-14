@@ -10,7 +10,7 @@ Z8 provides project Linux environments with separate HOME and source directories
 
 The current build configuration uses `dev.devsigner.z8`, ARM64, minSdk 28, and target/compile SDK 36. Declaring Android 9 or later does not mean every Android version, manufacturer, or user profile has been tested.
 
-The current source revision is configured as `0.1.0-rc5`, versionCode `6`, with English as the initial app language and an explicit Korean option. See [app language](LOCALIZATION.md). Its source URL targets the `v0.1.0-rc5` source preview. This version setting does not establish that an app binary has been released or that earlier device checks have been repeated for rc5. The exact candidate hashes and current test results belong to its release evidence.
+The current source revision is configured as `0.1.0-rc6`, versionCode `7`, with English as the initial app language and an explicit Korean option. See [app language](LOCALIZATION.md). This follow-up separates included terminal preparation from optional tool installation. The Tools catalog groups required, recommended and optional tools per project. Optional foreground version checks retrieve public metadata at most once per 24 hours; downloads and updates remain explicit user actions. The rc6 source URL is reserved for the matching source archive and must be verified before an app binary is distributed. Earlier rc5 validation does not establish that the new candidate passed.
 
 The rc5 source work opts out of Android WebView usage statistics, clarifies
 platform diagnostic reporting separately from Z8-operated telemetry, and adds
@@ -48,22 +48,32 @@ JAR source collections have not received this full upstream-input supplement.
 No complete dependency rebuild or final human source-closure review is claimed.
 See [the source and notice procedure](RELEASE_LICENSES.md#pinned-upstream-inputs-for-android-libraries).
 
-Two source corrections still require a new candidate and relevant device checks.
-After a process-record read fails, the process tracker now independently checks
-whether the process directory disappeared; only confirmed absence is treated as
-exit. Errors for live, reused or unverifiable process IDs still preserve the
-project. Host tests and an isolated Android production-code probe cover this
-case. They do not establish the cause of the earlier deletion UI failure or
-successful deletion in a newly built APK.
+The published rc5 source and preparation release is bound to commit
+`4de78e8e040c26646d76d2a22bb9bfbebfbd8e9e`. Its test APK SHA-256 is
+`d64bace92c69311fd8dc1ca0d6a5cb0152d8a8838f60cd5846e7f7aa3a3cf818`;
+its unsigned AAB SHA-256 is
+`26b2c4988017424ee6961fb2ffb590ad248d6e3b8f210a74102564110ec041ae`.
+Neither binary is included in the public source prerelease. The source archive,
+notices, store preparation ZIP and both foreground-service videos were fetched
+without credentials and matched the staged checksums. The public policy and
+review pages matched the published commit.
 
-The base-environment copier now accepts a known Android storage-path alias only
-when it identifies the same prepared base on the filesystem. It continues to
-reject links outside that base. Host tests cover the change. A physical phone
-previously failed to clone a preserved base, but the offending link target was
-not captured; an alias mismatch is a possible explanation, not a confirmed
-diagnosis. Retesting that phone with the new candidate remains necessary. These
-source changes do not alter the already tested candidate or prove a new binary
-has passed.
+On that exact rc5 APK, the storage-alias correction allowed a preserved Ubuntu
+base to copy into an owned physical-phone test project, followed by terminal
+file read/write. The earlier link failure's cause was not independently captured.
+An aggressive process-churn deletion remained incomplete during an emulator
+graphics stall and retained files. After restarting that dedicated emulator, a
+fresh small-child deletion passed while preserving another project's running
+session and source files. These are scoped observations, not a universal fix
+claim. Preview-data deletion preserved project files and the existing CLI login.
+
+A real Codex task edited files in the dedicated test project and four independent
+unit tests passed. This used separately consented local mode after the default
+Codex Linux sandbox failed in PRoot. It does not establish sandbox compatibility.
+A provider-authenticated Claude task remains untested. The rc5 host suite passed
+520 tests with one filesystem-specific skip, and 145 terminal-engine tests
+passed. Fresh Debian setup and both foreground-service trigger/stop videos use
+the same rc5 candidate. New Tools behavior needs its own candidate evidence.
 
 The rc4 candidate was exercised on two dedicated ARM64 emulators with 16 KiB
 pages. Observed checks included initial environment setup, preserving an

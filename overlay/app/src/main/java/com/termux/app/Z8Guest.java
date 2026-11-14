@@ -41,10 +41,10 @@ public final class Z8Guest {
     public static final String EXTRA_TOOL_ACTION = "dev.devsigner.z8.GUEST_TOOL_ACTION";
     private static final String ROOTFS_ASSET = "z8/guest/rootfs.zip";
     private static final String MANIFEST_ASSET = "z8/guest/manifest.json";
-    // This is a fixed application entrypoint, never interpolated with project paths or user text.
+    // Compatibility entrypoint performs local base preparation only; no packages.
     static final String PREPARE_SHELL =
         "trap 'printf \"\\nZ8 · Preparation interrupted. Open a new session to retry.\\n\"; exit 75' INT TERM; "
-        + "printf '\\nZ8 · Preparing this project once: Python, Node, git and gh.\\n'; "
+        + "printf '\\nZ8 · Preparing the embedded local shell.\\n'; "
         + "if /bin/bash /usr/local/lib/z8/setup-tools.sh; then "
         + "unset Z8_SHOW_WELCOME; exec /bin/bash --login; "
         + "else z8_status=$?; printf '\\nZ8 · Preparation stopped. Open a new session to retry. For manual repair: Linux environment > Recovery shell.\\n'; "
@@ -55,6 +55,95 @@ public final class Z8Guest {
     private static final Map<String, Long> LAST_CHECKED = new ConcurrentHashMap<>();
     private static final Map<String, Integer> READINESS_REVISION = new ConcurrentHashMap<>();
     private static final Object LOCK = new Object();
+
+    private static final android.os.Handler TOOL_MAIN = new android.os.Handler(android.os.Looper.getMainLooper());
+    private static final Map<String, ToolState> TOOL_STATES = new ConcurrentHashMap<>();
+    private static final Map<String, Long> TOOL_CHECKED = new ConcurrentHashMap<>();
+    private static final java.util.Set<String> TOOL_IN_FLIGHT = ConcurrentHashMap.newKeySet();
+    private static final java.util.Set<Runnable> TOOL_LISTENERS = new java.util.LinkedHashSet<>();
+    private static final Map<String, String> CONFIGURED_VERSIONS = new ConcurrentHashMap<>();
+    private static final List<String> TOOL_IDS = Arrays.asList("python","git","node","codex","claude","gh","ssh","build-tools","tmux","utilities");
+    public static final class ToolState {
+        public final boolean checked, checking, installed, incomplete;
+        public final String version, message;
+        ToolState(boolean checked, boolean checking, boolean installed, boolean incomplete, String version, String message) {
+            this.checked=checked;this.checking=checking;this.installed=installed;this.incomplete=incomplete;this.version=version;this.message=message;
+        }
+    }
+    public static String configuredToolVersion(Context context,String tool) {
+        if(!Arrays.asList("node","codex","claude").contains(tool))return "";
+        String cached=CONFIGURED_VERSIONS.get(tool);if(cached!=null)return cached;
+        try(InputStream input=context.getAssets().open("z8/guest-managed/"+("node".equals(tool)?"node.lock.json":"ai-tools.lock.json"))) {
+            JSONObject value=new JSONObject(new String(read(input,2*1024*1024),StandardCharsets.UTF_8));
+            String version="node".equals(tool)?value.getString("version"):value.getJSONObject("tools").getJSONObject(tool).getString("version");
+            Z8ToolManager.command(tool,true,version);CONFIGURED_VERSIONS.put(tool,version);return version;
+        }catch(Exception invalid){return "";}
+    }
+    public static ToolState toolState(Context context,String projectId,String toolId) {
+        ToolState value=TOOL_STATES.get(projectId+":"+toolId);
+        return value!=null?value:new ToolState(false,false,false,true,"",Z8Text.text("Not checked yet", "아직 확인하지 않음"));
+    }
+    public static void addToolListener(Runnable listener) {
+        if(android.os.Looper.myLooper()!=android.os.Looper.getMainLooper())throw new IllegalStateException("Tool listeners stay on main thread");
+        TOOL_LISTENERS.add(listener);
+    }
+    public static void removeToolListener(Runnable listener) { TOOL_LISTENERS.remove(listener); }
+    private static void toolsChanged() { for(Runnable listener:new java.util.LinkedHashSet<>(TOOL_LISTENERS))listener.run(); }
+    private static List<String> components(String tool) {
+        switch(tool) {
+            case "python": return Arrays.asList("python","pip","venv");
+            case "node": return Arrays.asList("node","npm");
+            case "build-tools": return Arrays.asList("make","cc");
+            default: return Collections.singletonList(tool);
+        }
+    }
+    private static String displayVersion(String tool,String version) {
+        if(version==null)return "";
+        if("codex".equals(tool)&&version.matches("codex-cli [0-9]+\\.[0-9]+\\.[0-9]+"))return version.substring(10);
+        if("claude".equals(tool)&&version.matches("[0-9]+\\.[0-9]+\\.[0-9]+ \\(Claude Code\\)"))return version.substring(0,version.indexOf(' '));
+        return version;
+    }
+    /** One cheap inventory pass; never invokes installed CLIs or contacts upstream. */
+    public static void refreshCatalog(Context context,String projectId,boolean force) {
+        refreshToolState(context,projectId,null,force);
+    }
+    /** An explicit bounded executable check for only this tool and its components. */
+    public static void refreshTool(Context context,String projectId,String toolId,boolean force) {
+        if(!TOOL_IDS.contains(toolId))throw new IllegalArgumentException("Unknown tool");
+        refreshToolState(context,projectId,toolId,force);
+    }
+    private static void refreshToolState(Context context,String projectId,String toolId,boolean force) {
+        if(!validId(projectId)||Z8EnvironmentTemplate.isTemplate(projectId))return;
+        String key=projectId+":"+(toolId==null?"snapshot":toolId);
+        Long checkedAt=TOOL_CHECKED.get(key);
+        if(!force&&checkedAt!=null&&SystemClock.elapsedRealtime()-checkedAt<60000)return;
+        if(!TOOL_IN_FLIGHT.add(key))return;
+        Context app=context.getApplicationContext();List<String> selected=toolId==null?TOOL_IDS:Collections.singletonList(toolId);
+        for(String id:selected){ToolState prior=toolState(app,projectId,id);TOOL_STATES.put(projectId+":"+id,
+            new ToolState(prior.checked,true,prior.installed,prior.incomplete,prior.version,prior.message));}
+        TOOL_MAIN.post(Z8Guest::toolsChanged);
+        final int revision=READINESS_REVISION.getOrDefault(projectId,0);
+        WORKER.execute(()->{
+            try {
+                ProbeResult result=probe(app,projectId,toolId==null?"snapshot":toolId);
+                if(revision!=READINESS_REVISION.getOrDefault(projectId,0))throw new IOException("Tool state changed while checking");
+                for(String id:selected){List<String> group=components(id);boolean complete=result.observed.containsAll(group)&&Collections.disjoint(result.unknown,group);
+                    boolean installed=result.versions.keySet().containsAll(group);
+                    String primary="build-tools".equals(id)?"cc":id;
+                    String message=!complete?Z8Text.text("Custom or unverified installation. Use Check status.","사용자 설치 또는 미확인 상태입니다. 상태 확인을 실행하세요."):
+                        toolId==null?Z8Text.text("Package inventory or last-verified managed receipt", "패키지 목록 또는 마지막으로 확인한 관리 설치 기록"):
+                        Z8Text.text("Executable check completed", "실행 파일 확인 완료");
+                    ToolState prior=toolState(app,projectId,id);
+                    String version=displayVersion(id,result.versions.get(primary));
+                    if(!complete&&prior.installed){installed=true;if(version.isEmpty())version=prior.version;}
+                    TOOL_STATES.put(projectId+":"+id,new ToolState(complete,false,installed,!complete,version,message));
+                }
+                TOOL_CHECKED.put(key,SystemClock.elapsedRealtime());
+            }catch(Exception failure){for(String id:selected){ToolState prior=toolState(app,projectId,id);TOOL_STATES.put(projectId+":"+id,
+                new ToolState(false,false,prior.installed,true,prior.version,Z8Text.text("Status check did not finish. Previous results are shown.","상태 확인을 마치지 못했습니다. 이전 결과를 표시합니다.")));}}
+            finally{TOOL_IN_FLIGHT.remove(key);TOOL_MAIN.post(Z8Guest::toolsChanged);}
+        });
+    }
 
     public enum Phase { CHECKING, UNAVAILABLE, AVAILABLE, INSTALLING, DELETING, READY, ERROR }
 
@@ -133,6 +222,8 @@ public final class Z8Guest {
 
     /** Caller also refuses live/pending sessions. Run off the UI thread. */
     public static void deleteProject(Context context, String projectId) throws IOException {
+        if (Z8ToolManager.busy(projectId) || Z8PreparationProcess.hasOutstanding(projectId))
+            throw new IOException(Z8Text.text("Tool process shutdown has not been verified. Project files were preserved.", "도구 프로세스 종료를 확인하지 못해 프로젝트 파일을 보존했습니다."));
         synchronized (LOCK) {
             if (!validId(projectId)) throw new IOException(Z8Text.text("Check the project ID.", "프로젝트 ID를 확인해 주세요."));
             State current = STATES.get(projectId);
@@ -174,6 +265,7 @@ public final class Z8Guest {
         if (projectId == null) return;
         synchronized (LOCK) {
             LAST_CHECKED.remove(projectId);
+            TOOL_CHECKED.keySet().removeIf(key -> key.startsWith(projectId + ":"));
             READINESS_REVISION.put(projectId, READINESS_REVISION.getOrDefault(projectId, 0) + 1);
         }
     }
@@ -363,20 +455,24 @@ public final class Z8Guest {
 
     /** Build off the UI thread: validates paths and refreshes managed resolver data. */
     public static Launch command(Context context, String id, String relativeCwd) throws IOException {
-        if (standardProfilePrepared(context, id))
-            return commandFor(context, id, relativeCwd, new String[] { "/bin/bash", "--login" });
-        invalidateReadiness(id);
-        Launch launch = commandFor(context, id, relativeCwd, new String[]{"/bin/bash", "-c", PREPARE_SHELL});
-        return new Launch(launch.executable, Arrays.asList(launch.arguments), launch.workingDirectory, launch.commandOffset, true);
+        return commandFor(context, id, relativeCwd, new String[] { "/bin/bash", "--login" });
+    }
+
+    /** Offline shell readiness; an older complete profile remains valid. */
+    public static boolean baseProfilePrepared(Context context, String id) {
+        return standardProfilePrepared(context, id) || receiptMatches(context, id, "base.ready", "z8-base-v1");
     }
 
     /** Tiny preparation receipt check, not a version scan. New sessions never run a full probe. */
     public static boolean standardProfilePrepared(Context context, String id) {
+        return receiptMatches(context, id, "tools.ready", "z8-tools-v2");
+    }
+    private static boolean receiptMatches(Context context, String id, String name, String expected) {
         if (!validId(id)) return false;
-        Path receipt = new File(context.getFilesDir(), "z8/environments/" + id + "/rootfs/etc/z8/tools.ready").toPath();
+        Path receipt = new File(context.getFilesDir(), "z8/environments/" + id + "/rootfs/etc/z8/" + name).toPath();
         if (!Files.isRegularFile(receipt, LinkOption.NOFOLLOW_LINKS)) return false;
         try (InputStream input = Files.newInputStream(receipt, LinkOption.NOFOLLOW_LINKS)) {
-            return "z8-tools-v2".equals(new String(read(input, 64), StandardCharsets.UTF_8).trim());
+            return expected.equals(new String(read(input, 64), StandardCharsets.UTF_8).trim());
         } catch (IOException ignored) { return false; }
     }
 
@@ -402,6 +498,8 @@ public final class Z8Guest {
 
     public static Launch actionCommand(Context context, String id, String relativeCwd, String action) throws IOException {
         if (!validAction(action)) throw new IOException(Z8Text.text("Unknown terminal action.", "등록되지 않은 터미널 작업입니다."));
+        if ("setup-codex".equals(action) || "setup-claude".equals(action))
+            throw new IOException(Z8Text.text("Choose this tool in Tools to confirm its download and installation.", "도구 화면에서 이 도구의 다운로드와 설치를 확인해 주세요."));
         if ("rescue-shell".equals(action))
             return commandFor(context, id, relativeCwd, new String[]{"/bin/bash", "--login"});
         if (action.startsWith("setup-") || action.startsWith("hooks-")) invalidateReadiness(id);
@@ -436,9 +534,9 @@ public final class Z8Guest {
         boolean fixedAction = guestCommand.length == 3 && "/usr/local/lib/z8/guest-task.sh".equals(guestCommand[1])
             && validAction(guestCommand[2]) && !"setup-tools".equals(guestCommand[2]);
         boolean fixedProbe = guestCommand.length == 3 && "/usr/local/lib/z8/probe-tools.sh".equals(guestCommand[1])
-            && Arrays.asList("python", "pip", "venv", "node", "npm", "git", "gh", "make", "cc", "tmux", "claude", "codex").contains(guestCommand[2]);
+            && Arrays.asList("python", "pip", "venv", "node", "npm", "git", "gh", "make", "cc", "tmux", "claude", "codex", "ssh", "build-tools", "utilities", "snapshot").contains(guestCommand[2]);
         boolean prepareShell = guestCommand.length == 3 && "-c".equals(guestCommand[1]) && PREPARE_SHELL.equals(guestCommand[2]);
-        if (guestCommand[0].equals("/bin/bash") && !loginOrSetup && !fixedAction && !fixedProbe && !prepareShell)
+        if (guestCommand[0].equals("/bin/bash") && !loginOrSetup && !fixedAction && !fixedProbe && !prepareShell && !Z8ToolManager.validCommand(guestCommand))
             throw new IOException(Z8Text.text("Unregistered Linux shell entry point.", "등록되지 않은 Linux 셸 진입점입니다."));
         long argumentBytes = 0;
         for (String argument : guestCommand) {
@@ -478,7 +576,7 @@ public final class Z8Guest {
             "-w", workingDirectory,
             "/usr/bin/env", "-u", "LD_PRELOAD", "-u", "LD_LIBRARY_PATH", "-u", "PREFIX",
             "-u", "ENV", "-u", "BASH_ENV", "-u", "GIT_DIR", "-u", "GIT_WORK_TREE",
-            "HOME=/z8/home", "SHELL=/bin/bash", "USER=root", "LOGNAME=root", "Z8_PROJECT_ID=" + id,
+            "DISABLE_AUTOUPDATER=1", "HOME=/z8/home", "SHELL=/bin/bash", "USER=root", "LOGNAME=root", "Z8_PROJECT_ID=" + id,
             "Z8_UI_LANGUAGE=" + Z8Text.language(),
             "PATH=/usr/local/lib/z8/browser/bin:/opt/z8/node/current/bin:/z8/home/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin", "TERM=xterm-256color", "LANG=C.UTF-8",
             "BROWSER=/usr/local/lib/z8/browser/bin/xdg-open", "GH_BROWSER=/usr/local/lib/z8/browser/bin/xdg-open",
@@ -496,7 +594,11 @@ public final class Z8Guest {
     private static final class ProbeResult {
         final Map<String, String> versions;
         final boolean complete;
-        ProbeResult(Map<String, String> versions, boolean complete) { this.versions = versions; this.complete = complete; }
+        final java.util.Set<String> observed, unknown;
+        ProbeResult(Map<String, String> versions, boolean complete) { this(versions,complete,versions.keySet(),Collections.emptySet()); }
+        ProbeResult(Map<String,String> versions,boolean complete,java.util.Set<String> observed,java.util.Set<String> unknown) {
+            this.versions=versions;this.complete=complete;this.observed=observed;this.unknown=unknown;
+        }
     }
     private static ProbeResult probe(Context context, String id) throws IOException { return probe(context, id, null); }
     private static ProbeResult probe(Context context, String id, String tool) throws IOException {
@@ -510,21 +612,23 @@ public final class Z8Guest {
         Z8Git.Result result;
         try {
             result = new Z8Git.ProcessRunner().run(argv, new File(launch.workingDirectory), environment,
-                new byte[0], 100, 64 * 1024);
+                new byte[0], "snapshot".equals(tool) ? 15 : 100, 64 * 1024);
         } catch (IOException error) { throw new IOException(Z8Text.text("Could not check Linux tools. Try again shortly.", "Linux 도구 상태를 확인하지 못했습니다. 잠시 후 다시 확인해 주세요."), error); }
         if (result.code != 0 && result.code != 124)
             throw new IOException(Z8Text.text("Linux tool verification did not finish (", "Linux 도구 상태 확인이 완료되지 않았습니다 (") + result.code + ").");
         Map<String, String> values = new LinkedHashMap<>();
         boolean complete = result.code == 0;
+        java.util.Set<String> observed=new java.util.LinkedHashSet<>(), unknown=new java.util.LinkedHashSet<>();
         for (String line : result.output().split("\n")) {
             String[] fields = line.split("\t", 2);
-            if (fields.length == 2 && fields[1].equals("?")) complete = false;
-            if (fields.length == 2 && fields[0].matches("[a-z]+") && !fields[1].equals("-") && !fields[1].equals("?")
+            if (fields.length == 2 && fields[0].matches("[a-z-]+")) observed.add(fields[0]);
+            if (fields.length == 2 && fields[1].equals("?")) {complete = false;unknown.add(fields[0]);}
+            if (fields.length == 2 && fields[0].matches("[a-z-]+") && !fields[1].equals("-") && !fields[1].equals("?")
                     && !fields[1].isEmpty() && fields[1].length() <= 160) values.put(fields[0], fields[1]);
         }
         // The aggregate deadline can expire after core tools already passed. Preserve
         // those successes rather than turning an installed profile back into unknown.
-        return new ProbeResult(values, complete);
+        return new ProbeResult(values, complete, observed, unknown);
     }
 
     /** Updates only application-owned entrypoints; never writes HOME, source or user startup/config files. */
@@ -532,7 +636,7 @@ public final class Z8Guest {
         File directory = Z8Files.directory(rootfs, "usr/local/lib/z8");
         for (String name : Arrays.asList("provision.sh", "debian-base-packages.txt", "shellrc", "welcome.sh",
                 "setup-tools.sh", "guest-task.sh", "install-ai.sh", "ai-tools.lock.json", "install-node.py",
-                "node.lock.json", "probe-tools.sh", "browser-open.py", "html-preview.py", "xdg-open", "browser-profile.sh", "cli-profile.sh", "codex-launch.py")) {
+                "node.lock.json", "tool-manager.sh", "probe-tools.sh", "browser-open.py", "html-preview.py", "xdg-open", "browser-profile.sh", "cli-profile.sh", "codex-launch.py")) {
             byte[] content;
             try (InputStream input = context.getAssets().open("z8/guest-managed/" + name)) { content = read(input, 2 * 1024 * 1024); }
             // Keep just the browser shim on PATH; it must be executable for CLI

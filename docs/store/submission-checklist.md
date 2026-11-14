@@ -1,6 +1,6 @@
 # Submission checklist and declaration worksheet
 
-Prepared 2026-11-14. This is a worksheet, not a signed declaration or a record
+Updated 2026-11-15. This is a worksheet, not a signed declaration or a record
 of completed Console actions. The maintainer asked to prepare the app and
 listing while Google verifies the account. No external inquiries are to be sent.
 
@@ -45,6 +45,7 @@ sharing exception does not automatically remove collection disclosure.
 | Project files, shell history, settings and CLI credentials | Stored in app/project storage; project deletion removes its HOME and files | Check final build and any selected tool's extra storage paths |
 | Notifications | Local event type/time and project/session identifiers; no original prompt copied into records | Confirm final code and retention behavior |
 | Environment/tool downloads | Requests reach distribution servers, including request information and IP address | Identify provider retention and any required data-type disclosures |
+| Optional daily version metadata | Public GitHub, Anthropic and Node.js requests on app open, at most once per 24 hours after opt-in; manual Check now is separate | Account for IP/request metadata; no project/files/credentials/installed list is sent |
 | Optional Codex/Claude Code and other tools | User-installed code may send prompts, source code, output, diagnostics and credentials to external services | Evaluate actual pinned/current tool versions and defaults; no final “no collection” assertion |
 | Built-in preview | Local cookies/storage/cache; page code can contact external servers | Distinguish controlled sample/content from user-directed web content |
 | External browser / support email | Browser/provider handles sign-in; support messages go to the operator's email service | Apply the form's scope and user-directed-transfer criteria accurately |

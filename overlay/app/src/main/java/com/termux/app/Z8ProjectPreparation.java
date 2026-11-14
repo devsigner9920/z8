@@ -31,9 +31,23 @@ public final class Z8ProjectPreparation {
         Z8Bootstrap.ensure(context, (percent, message) -> progress.update("bootstrap", percent, Z8Text.text("Preparing runtime", "실행 기반 준비")));
         progress.update("rootfs", -1, Z8EnvironmentTemplate.isTemplate(id) ? Z8Text.text("Preparing Linux environment", "Linux 환경 준비") : Z8Text.text("Preparing project environment", "프로젝트 환경 준비"));
         Z8Guest.ensureRootfs(context, id, (percent, message) -> progress.update("rootfs", percent, message));
-        if (Z8Guest.standardProfilePrepared(context, id)) return;
-        progress.update("tools", -1, Z8Text.text("Install developer tools", "개발 도구 설치"));
+        if (Z8Guest.baseProfilePrepared(context, id)) return;
+        progress.update("base", -1, Z8Text.text("Preparing the local shell", "로컬 셸 준비"));
         Z8Guest.Launch launch = Z8Guest.actionCommand(context, id, null, "setup-tools");
+        runLaunch(context, id, progress, downloadEnvironment, launch, true);
+    }
+
+    static void installTool(Context context, String id, String tool, boolean update, String version,
+                            Progress progress, Map<String, String> downloadEnvironment) throws Exception {
+        if (Z8EnvironmentTemplate.isTemplate(id)) throw new IOException("Tools belong to a project, not the base template");
+        run(context, id, progress);
+        progress.update("tools", -1, Z8Text.text("Preparing selected tool", "선택한 도구 준비"));
+        Z8Guest.Launch launch = Z8Guest.commandFor(context, id, null, Z8ToolManager.command(tool, update, version));
+        runLaunch(context, id, progress, downloadEnvironment, launch, false);
+    }
+
+    private static void runLaunch(Context context, String id, Progress progress, Map<String, String> downloadEnvironment,
+                                  Z8Guest.Launch launch, boolean requireBase) throws Exception {
         List<String> arguments = new ArrayList<>(Arrays.asList(launch.arguments));
         List<String> assignments = new ArrayList<>();
         for (Map.Entry<String, String> entry : downloadEnvironment.entrySet()) {
@@ -65,7 +79,8 @@ public final class Z8ProjectPreparation {
                         char value = buffer[i];
                         if (value == '\n') {
                             if (!overflow && acceptingProgress.get()) switch (line.toString()) {
-                                case "Z8_SETUP:packages": progress.update("tools", -1, Z8Text.text("Installing Python, Git and developer tools", "Python · Git · 개발 도구 설치")); break;
+                                case "Z8_SETUP:base": progress.update("base", -1, Z8Text.text("Preparing the local shell", "로컬 셸 준비")); break;
+                                case "Z8_SETUP:packages": progress.update("tools", -1, Z8Text.text("Installing selected packages and dependencies", "선택한 패키지와 의존성 설치")); break;
                                 case "Z8_SETUP:node": progress.update("tools", -1, Z8Text.text("Installing Node.js and npm", "Node.js · npm 설치")); break;
                                 case "Z8_SETUP:verify": progress.update("tools", -1, Z8Text.text("Verifying installation", "설치 확인")); break;
                             }
@@ -83,12 +98,12 @@ public final class Z8ProjectPreparation {
             if (!process.waitFor(30, TimeUnit.MINUTES)) throw new IOException(Z8Text.text("Installation timed out. Check the network and try again.", "설치 시간이 초과되었습니다. 네트워크를 확인하고 다시 시도해 주세요."));
             reader.join(2000);
             if (reader.isAlive() || readFailure.get() != null) throw new IOException(Z8Text.text("Could not read the installation result. Try again.", "설치 결과를 읽지 못했습니다. 다시 시도해 주세요."));
-            if (process.exitValue() != 0 || !Z8Guest.standardProfilePrepared(context, id)) {
+            if (process.exitValue() != 0 || requireBase && !Z8Guest.baseProfilePrepared(context, id)) {
                 String detail;
                 synchronized (tail) { detail = tail.toString(); }
                 for (String value : downloadEnvironment.values())
                     if (!value.isEmpty()) detail = detail.replace(value, Z8Text.text("[installation connection]", "[설치 연결]"));
-                throw new IOException(Z8Text.text("Developer tool installation did not finish (", "개발 도구 설치가 완료되지 않았습니다 (") + process.exitValue()
+                throw new IOException(Z8Text.text("The selected preparation did not finish (", "선택한 준비 작업이 완료되지 않았습니다 (") + process.exitValue()
                     + Z8Text.text("). Check the network and available storage, then try again.\n\n", "). 네트워크와 저장 공간을 확인한 뒤 다시 시도해 주세요.\n\n") + detail);
             }
             Z8Guest.invalidateReadiness(id);

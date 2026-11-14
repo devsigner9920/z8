@@ -121,11 +121,12 @@ public class PreparationProcessProbe {
         }
         case "retained": {
             Child child=new Child();Z8PreparationProcess handle=owned(child);Z8ProjectProcesses.reject=true;
-            deny(handle::close);check(outstanding().containsKey("owned-project"),"Unverified identity retained");
+            check(Z8PreparationProcess.hasOutstanding("owned-project")&&!Z8PreparationProcess.hasOutstanding("other-project"),"Project-specific guard exists before close");
+            deny(handle::close);check(outstanding().containsKey("owned-project")&&Z8PreparationProcess.hasOutstanding("owned-project"),"Unverified identity retained for deletion guard");
             // Must fail before attempting /system/bin/sh on this host, even when the next project differs.
             deny(()->Z8PreparationProcess.start(new android.content.Context(),"other-project",List.of("/fixture/proot"),root.toFile(),Map.of()));
             check(Z8ProjectProcesses.stops==2&&child.destroys==0,"Retry verifies retained tree and never kills acknowledged child directly");
-            Z8ProjectProcesses.reject=false;handle.close();check(outstanding().isEmpty(),"Verified retry releases installation queue");
+            Z8ProjectProcesses.reject=false;handle.close();check(outstanding().isEmpty()&&!Z8PreparationProcess.hasOutstanding("owned-project"),"Verified retry releases installation queue and deletion guard");
             break;
         }
         case "interrupt": {

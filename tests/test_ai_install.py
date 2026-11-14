@@ -7,6 +7,7 @@ import json
 import contextlib
 from pathlib import Path
 import subprocess
+import sys
 import tarfile
 import tempfile
 import types
@@ -90,6 +91,129 @@ def claude_fixture():
 
 
 class AIInstallerTests(unittest.TestCase):
+    def test_installation_lock_releases_on_killed_owner_and_rejects_concurrent_or_legacy_locks(self):
+        code = module()
+        child_source = """import sys,time,types\nfrom pathlib import Path\np=Path(sys.argv[1]);s=p.read_text().split(\"<<'Z8_AI_PYTHON'\\n\",1)[1].rsplit('\\nZ8_AI_PYTHON',1)[0]\nm=types.ModuleType('lock_fixture');exec(compile(s,str(p),'exec'),m.__dict__)\nwith m.installation_lock(Path(sys.argv[2])):\n print('LOCKED',flush=True)\n time.sleep(30)\n"""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            child = subprocess.Popen([sys.executable, '-c', child_source, str(SCRIPT), str(root)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+            try:
+                self.assertEqual(child.stdout.readline().strip(), 'LOCKED')
+                with self.assertRaisesRegex(RuntimeError, 'Another tool installation'):
+                    code.installation_lock(root)
+            finally:
+                child.kill(); child.communicate(timeout=5)
+            with code.installation_lock(root):
+                self.assertTrue((root / '.install.lock').is_file())
+            (root / '.install.lock').unlink(); (root / '.install.lock').mkdir()
+            with self.assertRaisesRegex(RuntimeError, 'legacy'):
+                code.installation_lock(root)
+            self.assertTrue((root / '.install.lock').is_dir())
+            (root / '.install.lock').rmdir(); (root / 'private').write_text('keep')
+            (root / '.install.lock').symlink_to(root / 'private')
+            with self.assertRaises(RuntimeError): code.installation_lock(root)
+            self.assertEqual((root / 'private').read_text(), 'keep')
+
+    def test_interrupted_ai_staging_cleanup_requires_exact_owner_marker(self):
+        code = module()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary); outside = root / 'outside'; outside.mkdir(); (outside / 'source').write_text('keep')
+            owned = root / '.install-abcdefgh'; owned.mkdir(); (owned / '.z8-ai-staging').write_text('z8-ai-staging-v1\n.install-abcdefgh\ncodex\n')
+            (owned / 'link').symlink_to(outside, target_is_directory=True)
+            unknown = root / '.install-ijklmnop'; unknown.mkdir(); (unknown / 'partial').write_text('preserve')
+            other = root / '.install-qrstuvwx'; other.mkdir(); (other / '.z8-ai-staging').write_text('z8-ai-staging-v1\n.install-qrstuvwx\nclaude\n')
+            linked = root / '.install-12345678'; linked.symlink_to(outside, target_is_directory=True)
+            code.remove_interrupted_staging(root, 'codex')
+            self.assertFalse(owned.exists()); self.assertTrue(unknown.is_dir()); self.assertTrue(other.is_dir()); self.assertTrue(linked.is_symlink())
+            self.assertEqual((outside / 'source').read_text(), 'keep')
+
+    def test_selected_codex_reviewed_exec_server_layout_and_unknown_manifest(self):
+        code = module(); pin, payloads = package_fixture()
+        selected = copy.deepcopy(pin); selected['version'] = '0.169.0'; selected['packageManifest']['version'] = '0.169.0'
+        new = copy.deepcopy(selected); removed = {'codex-resources/zsh', 'codex-resources/zsh/bin', 'codex-resources/zsh/bin/zsh'}
+        new['members'] = [r for r in new['members'] if r['path'] not in removed]
+        new['members'].append({'path': 'bin/codex-exec-server', 'type': 'file', 'mode': 0o755, 'size': 64, 'sha256': '0' * 64})
+        manifest = dict(new['packageManifest'], execServer='bin/codex-exec-server')
+        payloads['bin/codex-exec-server'] = arm64_elf(); payloads['codex-package.json'] = json.dumps(manifest).encode()
+        with tempfile.TemporaryDirectory() as temporary:
+            archive = Path(temporary) / 'package'; archive.write_bytes(package_tar(new, payloads))
+            code.selected_codex_members(archive, selected)
+            self.assertEqual(selected['packageManifest'], manifest)
+            self.assertIn('bin/codex-exec-server', selected['binaries']); self.assertEqual(len(selected['members']), 52)
+            output = Path(temporary) / 'extracted'; output.mkdir(); code.extract_codex_package(archive, output, selected)
+            manifest['execServer'] = '../../outside'; payloads['codex-package.json'] = json.dumps(manifest).encode()
+            archive.write_bytes(package_tar(new, payloads))
+            with self.assertRaises(RuntimeError): code.selected_codex_members(archive, selected)
+
+    def test_selected_codex_requires_exact_public_arm64_asset_digest(self):
+        code = module(); baseline = json.loads(LOCK.read_text())["tools"]["codex"]
+        name = "codex-package-aarch64-unknown-linux-musl.tar.gz"
+        release = {"tag_name": "rust-v0.161.0", "draft": False, "prerelease": False, "assets": [{
+            "name": name, "browser_download_url": "https://github.com/openai/codex/releases/download/rust-v0.161.0/" + name,
+            "size": 100, "digest": "sha256:" + "a" * 64}]}
+        with patch.object(code, "metadata", return_value=json.dumps(release).encode()) as fetch:
+            pin = code.selected_pin("codex", "0.161.0", baseline)
+            self.assertTrue(pin["selectedRelease"])
+            self.assertEqual(pin["packageManifest"]["version"], "0.161.0")
+            self.assertEqual(fetch.call_args.args[0], "https://api.github.com/repos/openai/codex/releases/tags/rust-v0.161.0")
+        for mutate in (lambda x: x.update(prerelease=True), lambda x: x.update(tag_name="rust-v0.162.0"),
+                lambda x: x["assets"][0].update(digest=None), lambda x: x["assets"][0].update(size=True),
+                lambda x: x["assets"][0].update(browser_download_url="https://evil.invalid/code"),
+                lambda x: x["assets"].append(dict(x["assets"][0]))):
+            bad = copy.deepcopy(release); mutate(bad)
+            with patch.object(code, "metadata", return_value=json.dumps(bad).encode()), self.assertRaises(RuntimeError):
+                code.selected_pin("codex", "0.161.0", baseline)
+        with patch.object(code, "metadata") as fetch:
+            for value in ("latest", "0.161.0;id", "../0.161.0", "01.2.3", "1.2.3-beta", "9999999.0.0"):
+                with self.assertRaises(RuntimeError): code.selected_pin("codex", value, baseline)
+            fetch.assert_not_called()
+
+    def test_selected_codex_update_preserves_old_version_and_checks_new_package_graph(self):
+        code = module(); pin, payloads = package_fixture()
+        with tempfile.TemporaryDirectory() as temporary, contextlib.redirect_stdout(io.StringIO()):
+            home = Path(temporary)
+            def download(_url, target, _hash, _size): target.write_bytes(package_tar(pin, payloads))
+            with patch.object(code, "download", side_effect=download), patch.object(code, "version_check", return_value="fixture"):
+                code.install_tool(home, "codex", pin)
+            old = (home / '.local/bin/codex').resolve()
+            selected = copy.deepcopy(pin); selected.update(version="0.161.0", selectedRelease=True)
+            selected["packageManifest"]["version"] = "0.161.0"
+            new_payload = dict(payloads, **{"codex-package.json": json.dumps(selected["packageManifest"]).encode()})
+            def newer(_url, target, _hash, _size): target.write_bytes(package_tar(selected, new_payload))
+            with patch.object(code, "download", side_effect=newer), patch.object(code, "version_check", return_value="fixture"):
+                code.install_tool(home, "codex", selected)
+            current = (home / '.local/bin/codex').resolve()
+            self.assertNotEqual(current, old); self.assertTrue(old.is_file())
+            self.assertEqual(json.loads((current.parent.parent / 'receipt.json').read_text())["version"], "0.161.0")
+            bad = home / 'bad.tar.gz'
+            bad.write_bytes(package_tar(selected, new_payload, lambda records: records[1].update(tarType=tarfile.SYMTYPE)))
+            with self.assertRaises(RuntimeError): code.selected_codex_members(bad, selected)
+            self.assertEqual((home / '.local/bin/codex').resolve(), current)
+
+    def test_selected_claude_verifies_pinned_key_before_trusting_new_manifest(self):
+        code = module(); baseline, _ = claude_fixture()
+        raw = json.dumps({"version": "2.1.286", "platforms": {"linux-arm64": {"size": 123, "checksum": "b" * 64}}}).encode()
+        def metadata(url, limit): return b'new signature' if url.endswith('.sig') else raw
+        def key_download(url, target, digest, size, **kwargs):
+            self.assertEqual(url, baseline['manifestSignature']['signingKey']['url'])
+            self.assertEqual(digest, baseline['manifestSignature']['signingKey']['sha256'])
+            target.write_bytes(b'fixture')
+        with patch.object(code, 'metadata', side_effect=metadata), patch.object(code, 'download', side_effect=key_download), \
+                patch.object(code, 'verify_claude_signature') as verify:
+            pin = code.selected_pin('claude', '2.1.286', baseline)
+            self.assertEqual(pin['sha256'], 'b' * 64)
+            self.assertEqual(pin['manifestSignature']['signingKey'], baseline['manifestSignature']['signingKey'])
+            self.assertEqual(verify.call_args.args[-1], baseline['manifestSignature']['signingKey']['fingerprint'])
+            verify.side_effect = RuntimeError('untrusted signature')
+            with self.assertRaisesRegex(RuntimeError, 'untrusted signature'):
+                code.selected_pin('claude', '2.1.286', baseline)
+
+    def test_redirects_to_nonofficial_or_http_hosts_rejected_before_request(self):
+        code = module()
+        handler = code.OfficialRedirect()
+        for url in ('http://github.com/x', 'https://example.com/x', 'https://api.github.com.evil/x'):
+            with self.assertRaises(RuntimeError): handler.redirect_request(None, None, 302, '', {}, url)
+
     def test_default_dry_run_and_host_guard(self):
         result = subprocess.run(["sh", str(SCRIPT)], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -277,6 +401,7 @@ class AIInstallerTests(unittest.TestCase):
             def version(argv, **kwargs):
                 self.assertEqual(argv, [str(root / "codex"), "--version"])
                 self.assertNotIn("LD_PRELOAD", kwargs["env"])
+                self.assertEqual(kwargs["env"]["DISABLE_AUTOUPDATER"], "1")
                 kwargs["stdout"].write(b"codex-cli 0.160.0\n")
                 return types.SimpleNamespace(returncode=0)
             with patch.object(code.subprocess, "run", side_effect=version):

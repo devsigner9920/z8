@@ -34,6 +34,7 @@ class GuestSessionLauncherTests(unittest.TestCase):
 
 
 STUBS = {
+    'com/termux/app/Z8ToolManager.java': '''package com.termux.app;public class Z8ToolManager {public static boolean hasWork(TermuxService s){return false;}}''',
     'com/termux/app/Z8InitialSetup.java': 'package com.termux.app; public class Z8InitialSetup {public static boolean hasWork(TermuxService service){return false;}}',
     'com/termux/app/Z8Projects.java': '''package com.termux.app;import android.content.Context;import java.io.IOException;
         public class Z8Projects {public Z8Projects(Context c){}public static class Project {public String name="Recovered project";}
@@ -103,7 +104,7 @@ STUBS = {
     ''',
     'com/termux/app/Z8Guest.java': '''package com.termux.app; import android.content.Context;import java.util.concurrent.*;
         public class Z8Guest {public static final String EXTRA_GUEST_SESSION="guest";public static volatile CountDownLatch entered=new CountDownLatch(0),release=new CountDownLatch(0);public static volatile boolean fail; public static volatile boolean profilePrepared=true;
-        public static boolean standardProfilePrepared(Context c,String p){return profilePrepared;}
+        public static boolean baseProfilePrepared(Context c,String p){return profilePrepared;}
         public static class Launch {public String executable="proot"; public String[] arguments={"-r","fixture"};public String workingDirectory="source";public boolean preparesShell=!profilePrepared;}
         public static Launch command(Context c,String p,String d)throws Exception {CountDownLatch gate=release;entered.countDown(); boolean done=false;while(!done){try{gate.await();done=true;}catch(InterruptedException ignored){}} if(fail)throw new Exception("Fixture failure");return new Launch();}
         public static Launch actionCommand(Context c,String p,String d,String a)throws Exception{return command(c,p,d);}public static String actionLabel(String a){return a==null?"Linux":a;}

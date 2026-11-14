@@ -174,14 +174,16 @@ public class ProxyProbe {
                 fixture.received.get(3,TimeUnit.SECONDS);
                 check(factory.ports.stream().allMatch(port->port==443),"No off-device HTTP or redirect downgrade");
 
+                for(String host:new String[]{"nodejs.org","api.github.com","github.com","release-assets.githubusercontent.com","objects.githubusercontent.com","downloads.claude.ai"}) {
                 factory.target=tunnel.server.getLocalPort();tunnel.echo();
                 try(Socket socket=client(proxy)) {
-                    socket.getOutputStream().write(("CONNECT nodejs.org:443 HTTP/1.1\r\n"+auth(proxy)+"\r\n").getBytes(StandardCharsets.US_ASCII));
+                    socket.getOutputStream().write(("CONNECT "+host+":443 HTTP/1.1\r\n"+auth(proxy)+"\r\n").getBytes(StandardCharsets.US_ASCII));
                     check(header(socket.getInputStream()).startsWith("HTTP/1.1 200 Connection Established"),"Authenticated CONNECT established");
                     socket.getOutputStream().write("PING".getBytes(StandardCharsets.US_ASCII));
                     check(new String(socket.getInputStream().readNBytes(4),StandardCharsets.US_ASCII).equals("PING"),"CONNECT relays both directions");
                 }
                 check(tunnel.received.get(3,TimeUnit.SECONDS).equals("PING")&&factory.ports.get(factory.ports.size()-1)==443,"CONNECT tunnel remains byte-transparent on port 443");
+                }
 
                 deny(proxy,factory,"GET http://example.com/ HTTP/1.1","","403");
                 deny(proxy,factory,"GET http://ports.ubuntu.com.evil/ HTTP/1.1","","403");
@@ -196,6 +198,9 @@ public class ProxyProbe {
                 deny(proxy,factory,"CONNECT nodejs.org:80 HTTP/1.1","","403");
                 deny(proxy,factory,"CONNECT nodejs.org:443/extra HTTP/1.1","","403");
                 deny(proxy,factory,"CONNECT 127.0.0.1:443 HTTP/1.1","","403");
+                deny(proxy,factory,"CONNECT api.github.com.evil:443 HTTP/1.1","","403");
+                deny(proxy,factory,"CONNECT raw.githubusercontent.com:443 HTTP/1.1","","403");
+                deny(proxy,factory,"GET http://downloads.claude.ai/ HTTP/1.1","","403");
                 deny(proxy,factory,"POST http://ports.ubuntu.com/ HTTP/1.1","","405");
                 deny(proxy,factory,"GET http://ports.ubuntu.com/ubuntu-ports/ HTTP/1.1","Content-Length: 1\r\n","400");
                 deny(proxy,factory,"GET http://ports.ubuntu.com/ubuntu-ports/ HTTP/1.1","Transfer-Encoding: chunked\r\n","400");

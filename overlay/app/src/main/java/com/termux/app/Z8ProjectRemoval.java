@@ -38,6 +38,9 @@ public final class Z8ProjectRemoval {
         if (Looper.myLooper() != Looper.getMainLooper()) throw new IllegalStateException("Removal must start on the main thread");
         if (service == null || service.wantsToStop()) { result.complete(Z8Text.text("Reconnect to the runtime service.", "실행 서비스를 다시 연결해 주세요.")); return; }
         if (service.z8IsStopRequested()) { result.complete(Z8Text.text("Checking that the app's terminals have stopped.", "앱의 터미널 종료를 확인하는 중입니다.")); return; }
+        if (Z8ToolManager.busy(id) || Z8PreparationProcess.hasOutstanding(id)) {
+            result.complete(Z8Text.text("A tool installation or its shutdown check is still active. Your files are preserved.", "도구 설치 또는 종료 확인이 진행 중입니다. 파일은 보존됩니다.")); return;
+        }
         if (Z8GuestSessionLauncher.hasPending(service)) { result.complete(Z8Text.text("Wait for environment setup to finish, then try again.", "환경 준비가 끝난 뒤 다시 시도해 주세요.")); return; }
         if (id != null && STOPPING.containsValue(id)) { result.complete(Z8Text.text("Wait for the terminal shutdown check to finish, then try again.", "터미널 종료 확인이 끝난 뒤 다시 시도해 주세요.")); return; }
         if (id == null || id.isEmpty() || !ACTIVE.add(id)) { result.complete(Z8Text.text("This project is already being deleted.", "이미 삭제 중인 프로젝트입니다.")); return; }

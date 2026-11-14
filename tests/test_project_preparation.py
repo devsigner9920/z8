@@ -41,6 +41,7 @@ class ProjectPreparationTests(unittest.TestCase):
 
 
 STUBS = {
+    'com/termux/app/Z8ToolManager.java': '''package com.termux.app; public class Z8ToolManager {static String[] command(String t,boolean u,String v){return new String[0];}}''',
     'com/termux/app/Z8EnvironmentTemplate.java': '''package com.termux.app;import android.content.Context;import java.io.IOException;
         public class Z8EnvironmentTemplate {public static boolean isTemplate(String id){return false;}public static void project(Context c,String id)throws IOException{new Z8Projects(c).open(id);}}''',
     'com/termux/app/Z8PreparationProcess.java': '''package com.termux.app;
@@ -82,14 +83,15 @@ STUBS = {
                 calls++;if(fail)throw new IOException("Rootfs fixture failure");
                 if(installed)return;installs++;progress.update(50,"rootfs fixture");installed=true;
             }
-            public static boolean standardProfilePrepared(Context context,String id) {
-                try{return Files.readString(new File(context.root,"receipt").toPath()).equals("z8-tools-v2");}
+            public static boolean baseProfilePrepared(Context context,String id) {
+                try{return Files.readString(new File(context.root,"receipt").toPath()).equals("z8-base-v1");}
                 catch(IOException error){return false;}
             }
             public static Launch actionCommand(Context context,String id,String cwd,String action) {
                 if(cwd!=null||!"setup-tools".equals(action))throw new AssertionError("Wrong setup entrypoint");
                 actions++;return new Launch(context);
             }
+            public static Launch commandFor(Context c,String id,String cwd,String[]argv){return new Launch(c);}
             public static void invalidateReadiness(String id){invalidations++;}
             public static class Launch {public String executable="/usr/bin/env";public String[]arguments;public String workingDirectory;public int commandOffset=0;
                 Launch(Context context){workingDirectory=context.root.getAbsolutePath();arguments=new String[]{"/bin/sh",new File(context.root,"fixture.sh").getAbsolutePath(),workingDirectory};}}
@@ -111,7 +113,7 @@ STUBS = {
             static void run(String id)throws Exception {
                 Z8ProjectPreparation.run(context,id,(stage,percent,message)->{
                     check(percent==-1||(percent>=0&&percent<=100),"Invalid progress: "+percent);
-                    check(List.of("bootstrap","rootfs","tools").contains(stage),"Unknown progress stage");
+                    check(List.of("bootstrap","rootfs","base","tools").contains(stage),"Unknown progress stage");
                     if(stage.equals("tools"))check(percent==-1,"Tool installation must not invent a percentage");
                     messages.add(stage+":"+percent+":"+message);
                 });
@@ -134,7 +136,7 @@ STUBS = {
                 catch(IOException expected){check(expected.getMessage().contains("Missing project"),"Project validation runs first");}
                 check(Z8Bootstrap.calls==0&&Z8Guest.actions==0,"Invalid project does not install or execute");
 
-                reset();Z8Bootstrap.installed=Z8Guest.installed=true;Files.writeString(path("receipt"),"z8-tools-v2");
+                reset();Z8Bootstrap.installed=Z8Guest.installed=true;Files.writeString(path("receipt"),"z8-base-v1");
                 run("project");
                 check(Z8Bootstrap.calls==1&&Z8Guest.calls==1,"Warm adapters still validate existing environment");
                 check(Z8Bootstrap.installs==0&&Z8Guest.installs==0&&Z8Guest.actions==0,"Warm environment does not reinstall or start a setup process");
@@ -153,16 +155,16 @@ STUBS = {
                     +"printf '%s' \"$PROOT_TMP_DIR\" > \"$1/tmp\"\n"
                     +"if read payload; then exit 93; fi\n"
                     +"printf 'Z8_SETUP:packages\\nZ8_SETUP:unknown\\nprefix Z8_SETUP:node\\nZ8_SETUP:node\\nZ8_SETUP:verify\\n'\n"
-                    +"printf z8-tools-v2 > \"$1/receipt\"\n");
+                    +"printf z8-base-v1 > \"$1/receipt\"\n");
                 run("project");
                 check(Z8Bootstrap.installs==1&&Z8Guest.installs==1&&Z8Guest.actions==1,"Cold path executes each phase once");
                 check(Files.readString(path("path")).equals("/system/bin"),"Parent PATH is not inherited");
                 check(Files.readString(path("tmp")).equals(context.getCacheDir().getAbsolutePath()),"PRoot cache is explicit");
                 check(Z8Guest.invalidations==1,"Successful receipt invalidates cached readiness");
                 List<String> toolMessages=new ArrayList<>();for(String message:messages)if(message.startsWith("tools:"))toolMessages.add(message);
-                check(toolMessages.equals(List.of("tools:-1:Install developer tools","tools:-1:Installing Python, Git and developer tools","tools:-1:Installing Node.js and npm","tools:-1:Verifying installation")),"Only known exact stage markers produce progress: "+toolMessages);
+                check(toolMessages.equals(List.of("tools:-1:Installing selected packages and dependencies","tools:-1:Installing Node.js and npm","tools:-1:Verifying installation")),"Only known exact stage markers produce progress: "+toolMessages);
 
-                reset();script("printf z8-tools-v2 > \"$1/receipt\"\nprintf 'failure detail\\n' >&2\nexit 7\n");
+                reset();script("printf z8-base-v1 > \"$1/receipt\"\nprintf 'failure detail\\n' >&2\nexit 7\n");
                 IOException exitError=failure();
                 check(exitError.getMessage().contains("(7)")&&exitError.getMessage().contains("failure detail"),"Nonzero exit fails even with receipt and preserves stderr");
                 check(Z8Guest.invalidations==0,"Failure does not mark readiness successful");
@@ -181,7 +183,7 @@ STUBS = {
                 check(messages.stream().noneMatch(m->m.equals("tools:-1:Verifying installation")),"Overflowed lines cannot impersonate a stage marker");
                 check(messages.stream().anyMatch(m->m.equals("tools:-1:Installing Node.js and npm")),"Stage recognition recovers at the next newline");
 
-                reset();script("printf '%s' \"$https_proxy\" > \"$1/proxy\"\nprintf z8-tools-v2 > \"$1/receipt\"\n");
+                reset();script("printf '%s' \"$https_proxy\" > \"$1/proxy\"\nprintf z8-base-v1 > \"$1/receipt\"\n");
                 String proxy="http://z8:literal$(touch forbidden)@127.0.0.1:3128";
                 Z8ProjectPreparation.run(context,"project",(s,p,m)->{},Map.of("https_proxy",proxy,"NO_PROXY",""));
                 check(Files.readString(path("proxy")).equals(proxy)&&!Files.exists(path("forbidden")),"Proxy assignments reach guest env literally without shell expansion");
