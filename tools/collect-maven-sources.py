@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Collect exact runtime Maven source artifacts without claiming source closure."""
 import argparse
+import base64
 import copy
 import hashlib
 import io
@@ -15,6 +16,7 @@ import zipfile
 
 from release_compliance import ROOT, atomic_write, issue, json_bytes, read_json, sha256
 import embedded_maven_source
+import maven_upstream_supplements as supplements
 
 GOOGLE = 'https://dl.google.com/dl/android/maven2/'
 CENTRAL = 'https://repo.maven.apache.org/maven2/'
@@ -159,6 +161,49 @@ def mapped_file(mapping, key, mapping_root, output, role):
             'status': 'VERIFIED', 'role': role, **({'url': record['url']} if record.get('url') else {})}
 
 
+def upstream_file(spec, output, fetch, caches):
+    """Retain exact original inputs, reusing cache bytes before any network request."""
+    supplements.validate_spec(spec)
+    extension = {'zip': '.zip', 'tar.gz': '.tar.gz', 'gitiles-base64': '.base64', 'gitiles-file': '.txt',
+                 'gitiles-tree': '.json'}[spec['format']]
+    relative = 'downloads/' + spec['sha256'] + '/' + spec['id'] + extension
+    target = output / relative
+    def valid(path):
+        return (path.is_file() and not path.is_symlink() and path.stat().st_size == spec['bytes']
+                and sha256(path) == spec['sha256'])
+    data = target.read_bytes() if valid(target) else None
+    if data is None:
+        for cache in caches:
+            for path in cache.rglob('*'):
+                if valid(path):
+                    data = path.read_bytes()
+                    break
+            if data is not None:
+                break
+    if data is None:
+        if not fetch:
+            raise ValueError('Pinned upstream input is not cached; supply --upstream-cache or --fetch')
+        class PinnedRedirects(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, request, fp, code, msg, headers, newurl):
+                if newurl != spec['url']:
+                    raise ValueError('Redirect away from immutable upstream input')
+                return super().redirect_request(request, fp, code, msg, headers, newurl)
+        request = urllib.request.Request(spec['url'], headers={'User-Agent': 'Z8-source-evidence/1'})
+        with urllib.request.build_opener(PinnedRedirects()).open(request, timeout=45) as response:
+            if response.geturl() != spec['url']:
+                raise ValueError('Response outside the pinned upstream URL')
+            data = response.read(MAX_DOWNLOAD * 2 + 1)
+        if len(data) > MAX_DOWNLOAD * 2:
+            raise ValueError('Upstream response exceeds download limit')
+        if spec['format'] == 'gitiles-file':
+            data = base64.b64decode(b''.join(data.split()), validate=True)
+    if len(data) != spec['bytes'] or hashlib.sha256(data).hexdigest() != spec['sha256']:
+        raise ValueError('Upstream download differs from the pinned original input')
+    atomic_write(target, data)
+    return {'path': relative, 'url': spec['url'], 'sha256': spec['sha256'], 'bytes': len(data),
+            'status': 'VERIFIED', 'role': supplements.ROLE}
+
+
 def collect(args):
     evidence = read_json(args.gradle_artifacts)
     if evidence.get('kind') != 'z8-gradle-runtime-artifacts' or evidence.get('configuration') != 'releaseRuntimeClasspath':
@@ -179,6 +224,10 @@ def collect(args):
         groups.setdefault(parts, []).append(dict(inventory, fileName=path.name,
             type=item.get('type', path.suffix.lstrip('.')), sha256=item['sha256'], bytes=path.stat().st_size))
     mappings = {}
+    supplement_path = getattr(args, 'upstream_lock', None)
+    supplement_specs, supplement_components = {}, {}
+    if supplement_path:
+        supplement_specs, supplement_components = supplements.validate_lock(read_json(supplement_path))
     mapping_path = getattr(args, 'source_mappings', None)
     if mapping_path:
         supplied = read_json(mapping_path)
@@ -214,6 +263,14 @@ def collect(args):
         atomic_write(output / 'provenance/source-mappings.json', mapping_bytes)
         retain({'path': 'provenance/source-mappings.json', 'sha256': hashlib.sha256(mapping_bytes).hexdigest(),
                 'bytes': len(mapping_bytes), 'status': 'VERIFIED'}, 'source-mapping-evidence')
+    supplement_record = None
+    if supplement_path:
+        lock_bytes = Path(supplement_path).read_bytes()
+        atomic_write(output / 'provenance/upstream-supplements.json', lock_bytes)
+        supplement_record = retain({'path': 'provenance/upstream-supplements.json',
+            'sha256': hashlib.sha256(lock_bytes).hexdigest(), 'bytes': len(lock_bytes),
+            'status': 'VERIFIED'}, 'maven-upstream-lock')
+    upstream_records = {}
     for parts, binaries in sorted(groups.items()):
         coordinate = ':'.join(parts)
         component = {'id': 'maven:' + coordinate, 'group': parts[0], 'name': parts[1], 'version': parts[2],
@@ -303,6 +360,33 @@ def collect(args):
                 component['unresolved'].append(issue('MAVEN_SOURCE_UNAVAILABLE', coordinate, str(error)))
         if not component['licenses']:
             component['unresolved'].append(issue('MAVEN_LICENSE_METADATA_MISSING', coordinate, 'No POM license declaration was found'))
+        supplement = supplement_components.get(parts)
+        if supplement:
+            try:
+                if (component['sourceDisposition'] != 'PUBLISHED_SOURCE_JAR'
+                        or sorted(set(supplement['binaryArtifactSha256'])) != sorted({x['sha256'] for x in binaries})):
+                    raise ValueError('Upstream supplement must match exact published-source runtime artifacts')
+                used = {x['archiveId'] for x in supplement['sourceMatches'] + supplement['requiredInputs']}
+                used.update(supplement.get('commonSupportArchiveIds', []))
+                used.update(x[key] for x in supplement.get('rootBlobBindings', []) for key in ('archiveId', 'treeArchiveId'))
+                for key in sorted(used):
+                    if key not in upstream_records:
+                        upstream_records[key] = retain(upstream_file(supplement_specs[key], output, args.fetch,
+                            getattr(args, 'upstream_cache', []) or []), supplements.ROLE)
+                proof = supplements.evidence(supplement, supplement_specs,
+                    (output / component['sourceFiles'][0]['path']).read_bytes(),
+                    {key: (output / upstream_records[key]['path']).read_bytes() for key in used})
+                proof_bytes = json_bytes(proof)
+                relative = 'inventories/' + hashlib.sha256(proof_bytes).hexdigest() + '-upstream.json'
+                atomic_write(output / relative, proof_bytes)
+                proof_record = retain({'path': relative, 'sha256': hashlib.sha256(proof_bytes).hexdigest(),
+                    'bytes': len(proof_bytes), 'status': 'VERIFIED'}, supplements.EVIDENCE_ROLE)
+                component['upstreamSnapshot'] = {'lockSha256': supplement_record['sha256'],
+                    'inputs': [{'archiveId': key, **upstream_records[key]} for key in sorted(used)],
+                    'evidence': proof_record, 'sourceClosureReviewed': False}
+                component['reviewRequired'].append('Original upstream build, resource and license inputs are retained with recomputed published-source byte correspondence. Complete build closure and binary-identical rebuilding remain unconfirmed.')
+            except (ValueError, OSError, zipfile.BadZipFile) as error:
+                component['unresolved'].append(issue('MAVEN_UPSTREAM_SUPPLEMENT_UNAVAILABLE', coordinate, str(error)))
         if mapping and component['sourceFiles']:
             portable = copy.deepcopy(mapping)
             portable['sourceArchive']['path'] = component['sourceFiles'][0]['path']
@@ -337,6 +421,9 @@ def collect(args):
     if mapping_path:
         report['inputs']['sourceMappingsSha256'] = hashlib.sha256(mapping_bytes).hexdigest()
         report['portableSourceMappings'] = portable_record
+    if supplement_record:
+        report['inputs']['upstreamSupplementsSha256'] = supplement_record['sha256']
+        report['upstreamSupplements'] = supplement_record
     atomic_write(previous_file, json_bytes(report))
     return report
 
@@ -347,7 +434,11 @@ def main():
     parser.add_argument('--gradle-artifacts', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--source-mappings', type=Path, help='Exact upstream ZIP or supported embedded-source mappings keyed to actual binary hashes; never approvals')
-    parser.add_argument('--fetch', action='store_true', help='Download only from fixed official HTTPS Maven repositories')
+    parser.add_argument('--upstream-lock', type=Path, default=ROOT / 'tools/maven-upstream-supplements.lock.json',
+                        help='Pinned supplemental original build/resource/license inputs; publisher source JARs remain intact')
+    parser.add_argument('--upstream-cache', type=Path, action='append', default=[],
+                        help='Reuse hash-matching original inputs from this directory; repeat for multiple caches')
+    parser.add_argument('--fetch', action='store_true', help='Download from allowed Maven repositories and exact hash-pinned upstream HTTPS URLs')
     parser.add_argument('--allow-incomplete', action='store_true')
     args = parser.parse_args()
     report = collect(args)

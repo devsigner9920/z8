@@ -16,6 +16,7 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -24,6 +25,7 @@ public final class Z8EnvironmentTemplate {
     public static final String ID = "00000000-0000-4000-8000-000000000008";
     private static final long MAX_BYTES = 4L * 1024 * 1024 * 1024;
     private static final int MAX_ITEMS = 200000;
+    private static final String BASE_RELATIVE = "z8/environments/" + ID + "/rootfs";
     private Z8EnvironmentTemplate() {}
 
     public static boolean isTemplate(String id) { return ID.equals(id); }
@@ -69,6 +71,21 @@ public final class Z8EnvironmentTemplate {
 
     /** Copy bytes and links into a new owned stage; no inode or writable HOME is shared. */
     static void copyRootfs(File prepared, File staging, Z8GuestArchive.Progress progress) throws IOException {
+        copyRootfs(prepared, staging, progress, Collections.emptyList());
+    }
+
+    /** Only current-app aliases of this exact hidden base may be relocated. */
+    static void copyRootfs(Context context, File prepared, File staging, Z8GuestArchive.Progress progress) throws IOException {
+        Path expected = context.getFilesDir().getCanonicalFile().toPath().resolve(BASE_RELATIVE);
+        if (!prepared.toPath().toAbsolutePath().normalize().equals(expected))
+            throw new IOException(Z8Text.text("The base environment path could not be verified.", "기본 환경의 경로를 확인하지 못했습니다."));
+        List<Path> aliases = Arrays.asList(
+            context.getFilesDir().toPath().toAbsolutePath().normalize().resolve(BASE_RELATIVE),
+            new File("/data/data/" + context.getPackageName() + "/files").toPath().resolve(BASE_RELATIVE));
+        copyRootfs(prepared, staging, progress, aliases);
+    }
+
+    private static void copyRootfs(File prepared, File staging, Z8GuestArchive.Progress progress, List<Path> aliases) throws IOException {
         final Path source = Z8Files.directory(prepared, "").toPath();
         final Path target = Z8Files.directory(staging, "").toPath();
         if (source.startsWith(target) || target.startsWith(source)) throw new IOException(Z8Text.text("The environment copy paths overlap.", "환경 복사 경로가 겹칩니다."));
@@ -109,7 +126,7 @@ public final class Z8EnvironmentTemplate {
             if (entry.directory) {
                 Files.createDirectory(destination);
             } else if (entry.link != null) {
-                Files.createSymbolicLink(destination, portableLink(source, original, entry.link));
+                Files.createSymbolicLink(destination, portableLink(source, original, entry.link, aliases));
             } else {
                 long fileBytes = 0;
                 try (InputStream input = Files.newInputStream(original, LinkOption.NOFOLLOW_LINKS);
@@ -145,18 +162,41 @@ public final class Z8EnvironmentTemplate {
     }
 
     static Path portableLink(Path root, Path original, Path link) throws IOException {
+        return portableLink(root, original, link, Collections.emptyList());
+    }
+
+    private static Path portableLink(Path root, Path original, Path link, List<Path> aliases) throws IOException {
         if (link.isAbsolute()) {
             Path normalized = link.normalize();
             // PRoot's link2symlink can encode an absolute Android host rootfs path.
             // Relocate it within this copy rather than retaining a shared target.
             if (normalized.startsWith(root)) return original.getParent().relativize(normalized);
+            for (Path alias : aliases) if (normalized.startsWith(alias)) {
+                // Android bind aliases need not canonicalize to the same string.
+                // Check only the known base directory's identity, never resolve the
+                // link target: a dangling guest link must remain a dangling link.
+                boolean same = false;
+                try { same = Files.isSameFile(alias, root); } catch (IOException unavailable) { /* Reject below. */ }
+                if (same) return original.getParent().relativize(root.resolve(alias.relativize(normalized)));
+                throw linkError(root, original, false);
+            }
             if (normalized.startsWith("/data") || normalized.startsWith("/storage") || normalized.startsWith("/sdcard"))
-                throw new IOException(Z8Text.text("A base environment link points outside app storage.", "기본 환경의 링크가 앱 외부 저장소를 가리킵니다."));
+                throw linkError(root, original, false);
             return link; // Guest-absolute links such as /etc/alternatives are preserved.
         }
         if (!original.getParent().resolve(link).normalize().startsWith(root))
-            throw new IOException(Z8Text.text("A relative link points outside the base environment.", "기본 환경 밖을 가리키는 상대 링크가 있습니다."));
+            throw linkError(root, original, true);
         return link;
+    }
+
+    private static IOException linkError(Path root, Path original, boolean relative) {
+        String member = original.startsWith(root) ? root.relativize(original).toString() : "?";
+        member = member.replaceAll("[\\p{Cntrl}\\p{Cf}\\p{Zl}\\p{Zp}]", "?");
+        if (member.length() > 160) member = member.substring(0, 160) + "…";
+        return new IOException((relative
+            ? Z8Text.text("A relative link points outside the base environment.", "기본 환경 밖을 가리키는 상대 링크가 있습니다.")
+            : Z8Text.text("A base environment link points outside app storage.", "기본 환경의 링크가 앱 외부 저장소를 가리킵니다."))
+            + Z8Text.text("\nBase link: ", "\n기본 환경 링크: ") + member);
     }
 
     private static void interrupted() throws IOException {

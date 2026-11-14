@@ -11,7 +11,7 @@ import tarfile
 import tempfile
 import zipfile
 from release_compliance import ROOT, GENERATED_NOTICES, atomic_write, bytes_sha, json_bytes, read_json, safe_relative, secret_path, sha256, zip_entry, maven_source_inventory, historical_guest_inventory
-from release_compliance import package_source_indexes
+from release_compliance import package_source_indexes, PINNED_PUBLIC_SOURCE_KEYS, verified_public_source_key
 
 DIRECTORIES = ('tools', 'runtime', 'overlay', 'tests', 'docs', 'LICENSES', '.github')
 ROOT_FILES = ('README.md', 'README.ko.md', 'BUILDING.md', 'BUILDING.ko.md', 'THIRD_PARTY_NOTICES.md', '.gitignore',
@@ -68,6 +68,14 @@ def package(root, output, package_sources=None, maven_sources=None, historical_g
             for member in tar:
                 name = 'upstream/' + folder + '/' + safe_relative(member.name)
                 if member.isdir():
+                    continue
+                if name in PINNED_PUBLIC_SOURCE_KEYS:
+                    if not member.isfile():
+                        raise ValueError('Pinned public verification key is not a regular file')
+                    data = tar.extractfile(member).read()
+                    if not verified_public_source_key(name, data, lock):
+                        raise ValueError('Pinned public verification key differs from reviewed source')
+                    payload[name] = (data, member.mode & 0o777, 0o100000)
                     continue
                 if secret_path(name):
                     omitted.append({'path': name, 'reason': 'credential/key filename excluded, including upstream public test keys'})

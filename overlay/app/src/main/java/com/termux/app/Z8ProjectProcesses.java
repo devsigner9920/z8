@@ -280,7 +280,16 @@ public final class Z8ProjectProcesses {
                 if (!one.same(two)) throw preserved(Z8Text.text("The process changed during verification.", "프로세스가 확인 중 변경되었습니다."));
                 return two;
             } catch (java.nio.file.NoSuchFileException gone) { return null; }
-            catch (IOException error) { throw preserved(Z8Text.text("Could not read the project process status.", "프로젝트 프로세스 상태를 읽지 못했습니다.")); }
+            catch (IOException error) {
+                // Android can report ESRCH as a plain IOException when a process
+                // exits after a proc file was opened. Confirm absence independently;
+                // a live/reused PID or an unreadable directory must still fail closed.
+                try { Os.stat(directory.toString()); }
+                catch (ErrnoException unavailable) {
+                    if (unavailable.errno == OsConstants.ENOENT || unavailable.errno == OsConstants.ESRCH) return null;
+                }
+                throw preserved(Z8Text.text("Could not read the project process status.", "프로젝트 프로세스 상태를 읽지 못했습니다."));
+            }
         }
         @Override public boolean isProot(int pid, String projectId) throws IOException {
             Path prefix = Paths.get(TermuxConstants.TERMUX_PREFIX_DIR_PATH);

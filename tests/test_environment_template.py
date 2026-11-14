@@ -42,6 +42,11 @@ class EnvironmentTemplateTests(unittest.TestCase):
     def test_template_owner_is_hidden_and_cannot_run_user_commands(self): self.scenario('hidden')
     def test_clone_has_independent_files_and_empty_home_source(self): self.scenario('independent')
     def test_host_absolute_link_is_relocated_to_copied_backing_file(self): self.scenario('links')
+    def test_current_app_base_alias_is_relocated_without_following_dangling_target(self): self.scenario('alias')
+    def test_alias_changed_to_another_base_is_rejected(self): self.scenario('alias-changed')
+    def test_alias_that_cannot_be_verified_is_rejected(self): self.scenario('alias-missing')
+    def test_context_cannot_authorize_a_different_project_as_the_base(self): self.scenario('wrong-base')
+    def test_rejected_link_diagnostic_contains_only_a_bounded_safe_relative_name(self): self.scenario('link-diagnostic')
     def test_unknown_host_links_and_escaping_relative_links_fail(self): self.scenario('bad-links')
     def test_existing_or_nested_destination_is_never_overwritten(self): self.scenario('destination')
     def test_interruption_never_modifies_original_and_progress_is_measured(self): self.scenario('interrupt')
@@ -49,7 +54,8 @@ class EnvironmentTemplateTests(unittest.TestCase):
 
 STUBS = {
     'android/content/Context.java': '''package android.content;
-        public abstract class Context { public abstract java.io.File getFilesDir(); }''',
+        public abstract class Context { public abstract java.io.File getFilesDir();
+            public String getPackageName(){return "dev.devsigner.z8";} }''',
     'com/termux/app/Z8Guest.java': '''package com.termux.app;
         import java.io.*; import java.nio.file.*;
         final class Z8Guest {
@@ -134,9 +140,65 @@ public class TemplateProbe {
             check(Files.readString(source.resolve("usr/bin/.l2s.backing")).equals("original backing"),"No shared backing through absolute link");
             check(Files.readSymbolicLink(target.resolve("usr/bin/guest-absolute")).equals(Path.of("/etc/alternatives/tool")),"Guest absolute link retained");
             break;
+        case "alias": case "alias-changed": case "alias-missing": {
+            String baseRelative="z8/environments/"+Z8EnvironmentTemplate.ID+"/rootfs";
+            Path files=Files.createDirectory(root.resolve("real-files"));
+            Path prepared=files.resolve(baseRelative);Files.createDirectories(prepared.getParent());Files.move(source,prepared);
+            Path aliasFiles=root.resolve("files-alias");Files.createSymbolicLink(aliasFiles,files);
+            Path aliasBase=aliasFiles.resolve(baseRelative);
+            file(prepared,"usr/bin/.l2s.backing","template backing");
+            Files.createSymbolicLink(prepared.resolve("usr/bin/tool"),aliasBase.resolve("usr/bin/.l2s.backing"));
+            if(args[0].equals("alias")) {
+                Files.createSymbolicLink(prepared.resolve("usr/bin/dangling"),aliasBase.resolve("usr/bin/not-yet-created"));
+                Files.createSymbolicLink(prepared.resolve("usr/bin/guest-absolute"),Path.of("/etc/alternatives/tool"));
+                Z8EnvironmentTemplate.copyRootfs(new Ctx(aliasFiles),prepared.toFile(),target.toFile(),progress);
+                check(Files.readSymbolicLink(target.resolve("usr/bin/tool")).equals(Path.of(".l2s.backing")),"Verified alias is mapped inside this copy");
+                check(Files.readSymbolicLink(target.resolve("usr/bin/dangling")).equals(Path.of("not-yet-created")),"Dangling target is relocated without resolution");
+                check(!Files.isSameFile(prepared.resolve("usr/bin/.l2s.backing"),target.resolve("usr/bin/.l2s.backing")),"Backing inode is not shared");
+                Files.writeString(target.resolve("usr/bin/tool"),"project edit");
+                check(Files.readString(prepared.resolve("usr/bin/.l2s.backing")).equals("template backing"),"Writing alias copy cannot modify template");
+                check(Files.readSymbolicLink(target.resolve("usr/bin/guest-absolute")).equals(Path.of("/etc/alternatives/tool")),"Guest absolute semantics unchanged");
+            } else {
+                Path otherFiles=Files.createDirectory(root.resolve("different-files"));
+                Files.createDirectories(otherFiles.resolve(baseRelative));
+                file(otherFiles.resolve(baseRelative),"usr/bin/.l2s.backing","unrelated backing");
+                Z8GuestArchive.Progress redirect=(percent,detail)-> {
+                    if(percent!=-1)return;
+                    try {
+                        Files.delete(aliasFiles);
+                        if(args[0].equals("alias-changed"))Files.createSymbolicLink(aliasFiles,otherFiles);
+                    } catch(IOException failure) {throw new UncheckedIOException(failure);}
+                };
+                deny(()->Z8EnvironmentTemplate.copyRootfs(new Ctx(aliasFiles),prepared.toFile(),target.toFile(),redirect));
+                check(!Files.exists(target.resolve("usr/bin/tool"),LinkOption.NOFOLLOW_LINKS),"Unverified alias is not published");
+                check(Files.readString(prepared.resolve("usr/bin/.l2s.backing")).equals("template backing"),"Original template preserved");
+                check(Files.readString(otherFiles.resolve(baseRelative).resolve("usr/bin/.l2s.backing")).equals("unrelated backing"),"Different base untouched");
+            }
+            break;
+        }
+        case "wrong-base":
+            deny(()->Z8EnvironmentTemplate.copyRootfs(context,source.toFile(),target.toFile(),progress));
+            try(var children=Files.list(target)){check(children.count()==0,"Context cannot authorize an arbitrary project root");}
+            break;
+        case "link-diagnostic": {
+            String name="etc/line\n\u202e"+"x".repeat(200);
+            String secretTarget="/data/user/0/other-app/files/private-target-never-print";
+            try {
+                Z8EnvironmentTemplate.portableLink(source,source.resolve(name),Path.of(secretTarget));
+                throw new AssertionError("Must reject external link");
+            } catch(IOException expected) {
+                String message=expected.getMessage();
+                check(message.contains("Base link: etc/line??"),"Safe relative member remains diagnosable");
+                check(!message.contains(secretTarget)&&!message.contains(source.toString()),"No host target or absolute app path in diagnostics");
+                check(!message.contains("\u202e")&&message.length()<300,"Control/bidi characters removed and length bounded");
+            }
+            break;
+        }
         case "bad-links":
             deny(()->Z8EnvironmentTemplate.portableLink(source,source.resolve("etc/link"),Path.of("../../outside")));
             deny(()->Z8EnvironmentTemplate.portableLink(source,source.resolve("etc/link"),Path.of("/data/user/0/other-app/files")));
+            deny(()->Z8EnvironmentTemplate.portableLink(source,source.resolve("etc/link"),Path.of("/data/data/dev.devsigner.z8/files/z8/environments/other-project/rootfs/usr/bin/tool")));
+            deny(()->Z8EnvironmentTemplate.portableLink(source,source.resolve("etc/link"),Path.of("/data/data/dev.devsigner.z8/files/z8/environments/"+Z8EnvironmentTemplate.ID+"/rootfs/../../../../homes/private")));
             break;
         case "destination":
             file(target,"user-file","preserve");

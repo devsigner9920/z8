@@ -327,7 +327,7 @@ public final class Z8Guest {
                     if (Thread.currentThread().isInterrupted()) throw new java.util.concurrent.CancellationException(Z8Text.text("Installation was interrupted.", "설치가 중단되었습니다."));
                     STATES.put(id, new State(Phase.INSTALLING, percent, detail, false, true));
                 };
-            if (fromTemplate) Z8EnvironmentTemplate.copyRootfs(prepared, staging, installProgress);
+            if (fromTemplate) Z8EnvironmentTemplate.copyRootfs(context, prepared, staging, installProgress);
             else Z8GuestArchive.extract(() -> context.getAssets().open(ROOTFS_ASSET), asset.archive, staging, installProgress);
             STATES.put(id, new State(Phase.INSTALLING, 92, Z8Text.text("Preparing the project HOME and mount paths…", "프로젝트 HOME과 연결 경로를 준비하고 있습니다."), false, true));
             for (String mount : Arrays.asList("dev", "proc", "sys", "tmp", "workspace", "z8/home", "run/z8/attention"))

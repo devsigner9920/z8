@@ -11,12 +11,13 @@ import sys
 import tempfile
 import types
 import unittest
+from unittest import mock
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'tools'))
 from release_compliance import archive_inventory, bytes_sha, deb822, json_bytes, safe_relative, sha256, maven_source_inventory, historical_guest_inventory
-from release_compliance import HISTORICAL_GUEST_ARCHIVES_REQUIRING_SOURCES
+from release_compliance import HISTORICAL_GUEST_ARCHIVES_REQUIRING_SOURCES, PINNED_PUBLIC_SOURCE_KEYS, verified_public_source_key
 
 
 def load(name):
@@ -66,6 +67,40 @@ class ComplianceTests(unittest.TestCase):
             self.assertTrue(any(n.startswith('upstream/termux-app/') for n in z.namelist()))
             self.assertFalse(any('/.git/' in n or n.startswith('.local/') or n.endswith(('.jks', '.keystore')) for n in z.namelist()))
         self.assertTrue(any(x['path'].endswith('testkey_untrusted.jks') for x in first['omitted']))
+
+    def test_only_exact_pinned_public_verification_key_is_exported_and_verified(self):
+        relative = 'upstream/termux-packages/scripts/llvm-snapshot.gpg.key'
+        content = b'-----BEGIN PGP PUBLIC KEY BLOCK-----\nPublic verification fixture\n'
+        target = self.root / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(content)
+        checkout = self.root / 'upstream/termux-packages'
+        subprocess.run(['git', '-C', str(checkout), 'add', '.'], check=True)
+        subprocess.run(['git', '-C', str(checkout), '-c', 'user.name=Fixture',
+                        '-c', 'user.email=fixture@example.invalid', 'commit', '-qm', 'public key fixture'], check=True)
+        revision = subprocess.check_output(['git', '-C', str(checkout), 'rev-parse', 'HEAD'], text=True).strip()
+        self.lock['termuxPackages']['commit'] = revision
+        (self.root / 'tools/sources.lock.json').write_bytes(json_bytes(self.lock))
+        # Keep this test independent of fetched upstream checkouts. Production
+        # packaging verifies the real pinned revision and public key digest.
+        entry = dict(PINNED_PUBLIC_SOURCE_KEYS[relative], commit=revision,
+                     sha256=bytes_sha(content))
+        with mock.patch.dict(PINNED_PUBLIC_SOURCE_KEYS, {relative: entry}):
+            self.assertTrue(verified_public_source_key(relative, content, self.lock))
+            self.assertFalse(verified_public_source_key(relative, content + b'changed', self.lock))
+            self.assertFalse(verified_public_source_key('tools/llvm-snapshot.gpg.key', content, self.lock))
+            self.assertFalse(verified_public_source_key(relative, content, {'termuxPackages': {'commit': '0' * 40}}))
+            result = sources.package(self.root, self.root / 'out')
+            with zipfile.ZipFile(self.root / 'out' / result['archive']) as archive:
+                self.assertEqual(archive.read(relative), content)
+                self.assertFalse(any(name.endswith('.jks') for name in archive.namelist()))
+            _, _, problems = verifier.verify_source(self.root / 'out/source-manifest.json', self.root)
+            self.assertEqual(problems, [])
+        with mock.patch.dict(PINNED_PUBLIC_SOURCE_KEYS, {relative: dict(entry, sha256='0' * 64)}):
+            with self.assertRaisesRegex(ValueError, 'Pinned public verification key differs'):
+                sources.package(self.root, self.root / 'rejected')
+            with self.assertRaisesRegex(ValueError, 'Disallowed source archive entry'):
+                verifier.verify_source(self.root / 'out/source-manifest.json', self.root)
 
     def maven_fixture(self):
         directory = self.root / 'maven-inputs'

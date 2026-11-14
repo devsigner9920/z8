@@ -13,12 +13,32 @@ import urllib.parse
 import urllib.request
 import zipfile
 import embedded_maven_source
+import maven_upstream_supplements as supplements
 
 ROOT = Path(__file__).resolve().parents[1]
 GENERATED_NOTICES = {'third-party-notices.txt', 'release-notices.json'}
 SECRET_NAMES = {'.env', '.netrc', '.npmrc', 'credentials', 'credentials.json', 'auth.json',
                 'local.properties', 'id_rsa', 'id_ed25519', 'id_ecdsa', 'testkey_untrusted.jks'}
 SECRET_SUFFIXES = {'.jks', '.keystore', '.p12', '.pfx', '.pem', '.key'}
+
+
+# Public verification material is not a signing secret. This exception is
+# deliberately tied to one upstream path, revision and byte sequence.
+PINNED_PUBLIC_SOURCE_KEYS = {
+    'upstream/termux-packages/scripts/llvm-snapshot.gpg.key': {
+        'source': 'termuxPackages',
+        'commit': '27d2485b86dd0aed74ae7095434c83cbba7bf1dd',
+        'sha256': 'ce6eee4130298f79b0e0f09a89f93c1bc711cd68e7e3182d37c8e96c5227e2f0',
+    },
+}
+
+
+def verified_public_source_key(name, payload, source_lock):
+    expected = PINNED_PUBLIC_SOURCE_KEYS.get(name)
+    return bool(expected
+                and source_lock.get(expected['source'], {}).get('commit') == expected['commit']
+                and payload.startswith(b'-----BEGIN PGP PUBLIC KEY BLOCK-----')
+                and hashlib.sha256(payload).hexdigest() == expected['sha256'])
 
 # This reviewed image contains older Z8-managed scripts than the current source.
 # This is a known-archive guard, not automatic source-closure detection for future images.
@@ -211,6 +231,47 @@ def maven_source_inventory(path, gradle_artifacts=None):
             raise ValueError('Portable Maven mapping is missing for a collected upstream source')
     elif any(component['sourceDisposition'] == embedded_maven_source.DISPOSITION for component in components.values()):
         raise ValueError('Embedded Maven source requires explicit mapping provenance')
+    supplement_sha = report.get('inputs', {}).get('upstreamSupplementsSha256')
+    if supplement_sha:
+        lock_record = report.get('upstreamSupplements', {})
+        if (lock_record.get('sha256') != supplement_sha
+                or lock_record.get('path') != 'provenance/upstream-supplements.json'):
+            raise ValueError('Missing pinned Maven upstream supplement provenance')
+        specs, pinned = supplements.validate_lock(read_json(reference(lock_record, 'maven-upstream-lock')))
+        for coordinate, component in components.items():
+            parts = tuple(component[key] for key in ('group', 'name', 'version'))
+            mapping, snapshot = pinned.get(parts), component.get('upstreamSnapshot')
+            if not mapping:
+                if snapshot:
+                    raise ValueError('Unpinned upstream supplement')
+                continue
+            if not snapshot:
+                if not any(x.get('code') == 'MAVEN_UPSTREAM_SUPPLEMENT_UNAVAILABLE' for x in component['unresolved']):
+                    raise ValueError('Missing upstream inputs must remain unresolved')
+                continue
+            if (component['sourceDisposition'] != 'PUBLISHED_SOURCE_JAR'
+                    or snapshot.get('sourceClosureReviewed') is not False
+                    or snapshot.get('lockSha256') != supplement_sha
+                    or sorted(set(mapping['binaryArtifactSha256'])) != sorted({x['sha256'] for x in component['binaryArtifacts']})):
+                raise ValueError('Upstream supplement does not match actual runtime inputs')
+            used = {x['archiveId'] for x in mapping['sourceMatches'] + mapping['requiredInputs']}
+            used.update(mapping.get('commonSupportArchiveIds', []))
+            used.update(x[key] for x in mapping.get('rootBlobBindings', []) for key in ('archiveId', 'treeArchiveId'))
+            retained = snapshot.get('inputs', [])
+            if len(retained) != len(used) or {x.get('archiveId') for x in retained} != used:
+                raise ValueError('Missing or duplicate pinned upstream payload')
+            payloads = {}
+            for item in retained:
+                spec = specs[item['archiveId']]
+                if (any(item.get(key) != spec[key] for key in ('url', 'sha256', 'bytes'))
+                        or records.get(item.get('path'), {}).get('url') != spec['url']):
+                    raise ValueError('Upstream payload reference differs from pinned original')
+                payloads[item['archiveId']] = reference(item, supplements.ROLE).read_bytes()
+            proof = supplements.evidence(mapping, specs, reference(component['sourceFiles'][0]).read_bytes(), payloads)
+            if read_json(reference(snapshot['evidence'], supplements.EVIDENCE_ROLE)) != proof:
+                raise ValueError('Upstream correspondence differs from original source bytes')
+    elif any(component.get('upstreamSnapshot') for component in components.values()):
+        raise ValueError('Upstream supplement lacks pinned provenance')
     return report
 
 

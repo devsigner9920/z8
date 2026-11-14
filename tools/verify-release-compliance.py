@@ -7,7 +7,7 @@ import urllib.parse
 import zipfile
 from release_compliance import ROOT, atomic_write, bytes_sha, checked_asset, download, issue, json_bytes, read_json, safe_relative, secret_path, sha256, maven_source_inventory, historical_guest_inventory
 from release_compliance import HISTORICAL_GUEST_ARCHIVES_REQUIRING_SOURCES
-from release_compliance import package_source_indexes
+from release_compliance import package_source_indexes, verified_public_source_key
 
 
 def verify_source(manifest_path, root):
@@ -29,9 +29,10 @@ def verify_source(manifest_path, root):
             raise ValueError('Source archive internal/external manifests differ')
         for item in records:
             name = safe_relative(item['path'])
-            if secret_path(name) or '/.git/' in name or name.startswith('.local/'):
-                raise ValueError('Disallowed source archive entry')
             payload = z.read(name)
+            public_key = verified_public_source_key(name, payload, source.get('sourceLock', {}))
+            if (secret_path(name) and not public_key) or '/.git/' in name or name.startswith('.local/'):
+                raise ValueError('Disallowed source archive entry')
             if bytes_sha(payload) != item['sha256'] or len(payload) != item['bytes']:
                 raise ValueError('Source member changed: ' + name)
             if not name.startswith(('upstream/', 'third-party-sources/')):

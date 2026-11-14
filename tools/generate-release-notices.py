@@ -10,6 +10,7 @@ from release_compliance import ROOT, atomic_write, bytes_sha, issue, json_bytes,
 from release_compliance import HISTORICAL_GUEST_ARCHIVES_REQUIRING_SOURCES
 from release_compliance import package_source_indexes
 import embedded_maven_source
+import maven_upstream_supplements as supplements
 
 
 def pom_licenses(path, cache=None, visited=None):
@@ -137,6 +138,23 @@ def generate(args):
             component = {'id': 'maven:' + coordinate, 'name': coordinate, 'version': item['version'],
                          'scope': 'bundled-maven', 'artifactSha256': item['sha256'], 'licenses': licenses}
             source_component = maven_components.get(coordinate, {})
+            if source_component.get('upstreamSnapshot'):
+                # The inventory verifier has recomputed correspondence from the
+                # pinned originals. Keep actual original license/NOTICE text.
+                snapshot = source_component['upstreamSnapshot']
+                proof = read_json(args.maven_sources.parent / snapshot['evidence']['path'])
+                upstream_inputs = {item['archiveId']: item for item in snapshot['inputs']}
+                specs = {item['id']: item for item in proof['upstreamInputs']}
+                license_members = [item for item in proof['requiredInputs'] if item['category'] == 'license']
+                component['upstreamSourceEvidenceSha256'] = snapshot['evidence']['sha256']
+                component['upstreamLicenseEvidence'] = license_members
+                for archive_id in sorted({item['archiveId'] for item in license_members}):
+                    members, _ = supplements.read_members(specs[archive_id],
+                        (args.maven_sources.parent / upstream_inputs[archive_id]['path']).read_bytes())
+                    for item in license_members:
+                        if item['archiveId'] == archive_id:
+                            sections.append((coordinate + '/upstream/' + archive_id + '/' + item['member'],
+                                             members[item['member']].decode('utf-8')))
             if source_component.get('sourceDisposition') == embedded_maven_source.DISPOSITION:
                 # maven_source_inventory independently rederives this evidence from
                 # the exact original JAR and SVN dump before any notice is emitted.

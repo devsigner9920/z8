@@ -45,6 +45,7 @@ jobs:
           python3 -m unittest discover -s tests -p test_source_modifications.py -v
           python3 -m unittest discover -s tests -p test_historical_guest_inputs.py -v
           python3 -m unittest discover -s tests -p test_maven_sources.py -v
+          python3 -m unittest discover -s tests -p test_maven_upstream_supplements.py -v
           python3 -m unittest discover -s tests -p test_embedded_maven_source.py -v
           python3 -m unittest discover -s tests -p test_debian_guest.py -v
           python3 -m unittest discover -s tests -p test_debian_package_sources.py -v

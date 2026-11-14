@@ -76,6 +76,15 @@ class ProjectProcessTests(unittest.TestCase):
     def test_production_proc_reader_matches_executable_and_project_rootfs(self):
         self.probe('filesystem')
 
+    def test_proc_read_error_accepts_only_independently_confirmed_absence(self):
+        self.probe('proc-read-gone')
+
+    def test_proc_read_error_preserves_live_or_reused_pid(self):
+        self.probe('proc-read-present')
+
+    def test_proc_read_error_preserves_files_when_absence_check_is_unreadable(self):
+        self.probe('proc-read-unverifiable')
+
     def test_runtime_upgrade_rejects_any_live_owned_child_without_signalling(self):
         self.probe('upgrade-idle')
 
@@ -106,7 +115,11 @@ STUBS = {
     'android/system/OsConstants.java': '''package android.system;public class OsConstants {
         public static final int ENOENT=2,ESRCH=3,SIGQUIT=3; }''',
     'android/system/Os.java': '''package android.system;public class Os {
+        public static final java.util.Map<String,Integer> statErrors=new java.util.HashMap<>();
+        public static Runnable beforeStat;
         public static StructStat stat(String path)throws ErrnoException {
+            Runnable action=beforeStat;beforeStat=null;if(action!=null)action.run();
+            if(statErrors.containsKey(path))throw new ErrnoException("fixture stat failure",statErrors.get(path));
             if(!java.nio.file.Files.exists(java.nio.file.Paths.get(path)))throw new ErrnoException("gone",2);
             return new StructStat(path.endsWith("/900")?20000:10001);}
         public static void kill(int pid,int signal)throws ErrnoException{throw new AssertionError("Tests must never signal a process");}}''',
@@ -322,6 +335,51 @@ public class ProcessProbe {
                 fails(()->Z8ProjectProcesses.parse(123,stat(123,1,1,"sh"),"Uid: 10001\n"),"files were kept");
                 fails(()->Z8ProjectProcesses.parse(123,stat(123,-1,1,"sh"),status(0)),"files were kept");
                 fails(()->Z8ProjectProcesses.parse(123,stat(123,1,-1,"sh"),status(0)),"files were kept");break;
+            }
+            case "proc-read-gone": {
+                Path proc=Paths.get(args[1]);Path process=proc.resolve("100");
+                // A directory used as a proc file causes a real generic NIO read
+                // failure. Only the separate stat result may establish exit.
+                Files.createDirectories(process.resolve("stat"));
+                var access=new Z8ProjectProcesses.ProcAccess(proc,10001);
+                for(int errno:new int[]{2,3}) {
+                    android.system.Os.statErrors.put(process.toString(),errno);
+                    check(access.read(100)==null,"ENOENT/ESRCH independently establishes absence after read failure");
+                }
+                android.system.Os.statErrors.clear();
+                fails(()->access.read(100),"files were kept");
+                break;
+            }
+            case "proc-read-present": {
+                Path proc=Paths.get(args[1]);Path process=proc.resolve("100");
+                Files.createDirectories(process.resolve("stat"));
+                var access=new Z8ProjectProcesses.ProcAccess(proc,10001);
+                fails(()->access.read(100),"files were kept");
+                // The PID is replaced between a failed read and the independent
+                // existence check. Its new, valid identity must not be treated as gone.
+                android.system.Os.beforeStat=()-> {
+                    try {
+                        Files.delete(process.resolve("stat"));
+                        Files.writeString(process.resolve("stat"),stat(100,77,999,"replacement"));
+                        Files.writeString(process.resolve("status"),status(0));
+                    } catch(IOException failure) {throw new UncheckedIOException(failure);}
+                };
+                fails(()->access.read(100),"files were kept");
+                check(access.read(100).started==999,"Replacement process remains intact and observable");
+                Path foreign=proc.resolve("900");Files.createDirectories(foreign.resolve("stat"));
+                fails(()->access.read(900),"files were kept");
+                break;
+            }
+            case "proc-read-unverifiable": {
+                Path proc=Paths.get(args[1]);Path process=proc.resolve("100");
+                Files.createDirectories(process.resolve("stat"));
+                var access=new Z8ProjectProcesses.ProcAccess(proc,10001);
+                for(int errno:new int[]{1,5,13}) {
+                    android.system.Os.statErrors.put(process.toString(),errno);
+                    fails(()->access.read(100),"files were kept");
+                }
+                android.system.Os.statErrors.clear();
+                break;
             }
             case "filesystem": {
                 Path fixture=Paths.get(args[1]);Path files=fixture.resolve("files");Path prefix=files.resolve("usr");

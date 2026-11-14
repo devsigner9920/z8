@@ -1,6 +1,6 @@
 # Release sources and license evidence
 
-Updated 2026-11-04. These tools prepare and verify evidence. They do not accept provider
+Updated 2026-11-15. These tools prepare and verify evidence. They do not accept provider
 terms, approve Ubuntu branding, publish files, or give legal approval. A generated
 inventory is not a claim that every license obligation has been satisfied.
 
@@ -57,6 +57,14 @@ inventory is not a claim that every license obligation has been satisfied.
    and its upstream build tree. Verified empty compatibility artifacts are recorded
    separately; missing source is not treated as empty.
 
+   The collector also reads `tools/maven-upstream-supplements.lock.json` by
+   default. For its exact supported coordinates, it preserves the original
+   published source JAR and adds pinned upstream build/resource/license inputs
+   plus byte-correspondence evidence. Use `--upstream-cache DIRECTORY` to reuse
+   previously collected originals; the option can be repeated. Missing or
+   mismatched supplemental inputs remain explicit unresolved findings. See
+   [the supplement checks](#pinned-upstream-inputs-for-android-libraries).
+
    Where a published source JAR is unavailable, `--source-mappings FILE` can
    supply an explicitly reviewed upstream source ZIP. Each mapping must name the
    exact runtime binary hashes, upstream repository, tag, full commit, version
@@ -86,7 +94,9 @@ inventory is not a claim that every license obligation has been satisfied.
    decision/QA records are not included in the public source archive.
    It does not copy `.local`, repository `.git` configuration, signing keys,
    `.env`, CLI credentials, or arbitrary build caches. Upstream public test keys
-   are also excluded and the omission is recorded. Safe upstream relative
+   are also excluded and the omission is recorded. One original public
+   verification key required by the LLVM snapshot recipe is retained under the
+   exact exception described below. Safe upstream relative
    symlinks are preserved as ZIP symlinks; use an extractor that preserves them.
    Local source symlinks fail rather than following files outside the source set.
 
@@ -99,6 +109,15 @@ inventory is not a claim that every license obligation has been satisfied.
    signing key for your build. Keep the source exports available even if upstream
    hosting changes. Before final release, prove the documented reconstruction path
    and resolve any missing source/build inputs.
+
+   The public-key exception is restricted to
+   `upstream/termux-packages/scripts/llvm-snapshot.gpg.key` at Termux packages
+   commit `27d2485b86dd0aed74ae7095434c83cbba7bf1dd`, with SHA-256
+   `ce6eee4130298f79b0e0f09a89f93c1bc711cd68e7e3182d37c8e96c5227e2f0`
+   and the expected OpenPGP public-key header. The packager and verifier check
+   that exact path, source revision and bytes. Other private/signing/test-key
+   exclusions remain in place. This preserves the original recipe's verification
+   input without granting an unrestricted key-file exception.
 
 4. Generate offline notices before the final APK/AAB build:
 
@@ -143,6 +162,59 @@ inventory is not a claim that every license obligation has been satisfied.
    `VERIFIED` means this tool's evidence checks passed, not Google approval.
    Default exit status is 2 when blocked. Candidate builds can use
    `--allow-incomplete`, but retain the `BLOCKED` status and blocker list.
+
+## Pinned upstream inputs for Android libraries
+
+The November 14–15 follow-up adds supplemental inputs for **57 of 59 AAR
+coordinates** in the selected 85-coordinate runtime inventory. ConstraintLayout
+2.0.1 and termux-am-library v2.0.0 already use separate pinned upstream source
+mappings. The collector retains all existing publisher source JARs and metadata,
+and supplements the other 57 AARs with **374 original pinned
+upstream inputs**. It verifies **1,627 original Java/Kotlin members byte for
+byte** and separately retains the publisher's one generated HiddenApiBypass
+`BuildConfig.java` with its original Gradle generator declarations. That narrow
+exception is restricted to the exact reviewed coordinate, path and bytes;
+arbitrary generated files are not accepted.
+
+The lock records immutable official GitHub or Google Gitiles revisions, exact
+URLs, SHA-256 values and sizes, source-member mappings, required build/resource/
+license members, and shared build-support inputs. The collector reads bounded
+archives in memory without executing recipes or following links. Unknown lock
+fields, unsafe paths, missing required files, unaccounted published source files,
+changed bytes or runtime hashes fail verification. The independently run
+inventory verifier recomputes the evidence from the retained original payloads.
+The source packager includes these retained payloads and the lock when producing
+the new corresponding-source package.
+
+Some identical root build files are shared across revisions. **384 Git object
+bindings** compare their original bytes with the official root tree at the
+selected source revision. A file from another commit in the same repository
+requires that binding. Gitiles file responses may use base64 transport; these
+records explicitly distinguish decoded original file bytes from the HTTP
+response encoding. No locally modified resource is presented as an original.
+
+The supplemental evidence preserves module manifests and resources, consumer
+rules, original licenses, and available root/build-support inputs. In particular,
+WebKit 1.13.0's 45 Chromium boundary source files have their original BSD license
+restored in generated notices alongside the AndroidX/POM declarations. The
+[original Chromium license](https://chromium.googlesource.com/chromium/src/+/0a4560c3749c482ee5365b5023db4aa807b29d62/LICENSE)
+is retained unchanged (1,536 bytes, SHA-256
+`368cca1106be99d39ecd32a38d8305585d802a475effb66380b91ffc9bcf709b`).
+
+These are source and notice checks, not a complete dependency rebuild. The
+remaining **23 published JAR source collections** have not received this full
+upstream-input supplement. Original release environments, complete upstream
+project graphs, external prebuilts and SDK/NDK inputs still require appropriate
+scope review. A matching source member does not prove the original binary's
+build commit or a byte-identical rebuilt binary. `sourceClosureReviewed` stays
+false; final human review of the combined work and exact release inputs remains
+separate. The previous inventories and released assets are preserved unchanged.
+
+For a follow-up release, collect into a new output directory, regenerate the
+source package and offline notices from its exact inputs, and build a new
+candidate. The source-level process-exit and prepared-base alias corrections
+described in [release status](RELEASE_STATUS.md) also require device checks on
+that new candidate; source collection does not validate their Android behavior.
 
 ## Exact embedded sources for JSR305 1.3.9
 

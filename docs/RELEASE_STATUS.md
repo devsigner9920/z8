@@ -2,7 +2,7 @@
 
 Documentation: [English](../README.md) | [한국어](../README.ko.md)
 
-As of November 14, 2026, Z8 is a development project that has not reached a stable app release or Play Store launch. Source publication and app submission or approval are separate procedures. This document is a public summary of validation, not a compatibility guarantee for every build from current sources or every device.
+As of November 15, 2026, Z8 is a development project that has not reached a stable app release or Play Store launch. Source publication and app submission or approval are separate procedures. This document is a public summary of validation, not a compatibility guarantee for every build from current sources or every device.
 
 ## Current scope
 
@@ -33,6 +33,37 @@ binary JAR. All 31 embedded Java files match the retained upstream SVN revision
 49. Collection now verifies binary identity, class/source coverage, upstream
 build files and file-specific BSD/CC-BY notices. This resolves that collection
 gap; it does not by itself complete the separate combined-work source review.
+
+The latest source-evidence collection supplements 57 of the 59 resolved Android
+library coordinates packaged as AARs while retaining their published source
+JARs. ConstraintLayout and termux-am-library already have separate pinned
+upstream source mappings. The new supplement
+preserves 374 pinned upstream inputs, verifies 1,627 original Java/Kotlin files
+byte for byte, and retains one original generated `BuildConfig.java` with its
+generator recipe. Another 384 Git object checks connect shared root build files
+to the selected source commits. Original Android resources, build scripts,
+licenses and notices are retained; the generated notices now include the full
+Chromium BSD license for WebKit's boundary interfaces. The other 23 published
+JAR source collections have not received this full upstream-input supplement.
+No complete dependency rebuild or final human source-closure review is claimed.
+See [the source and notice procedure](RELEASE_LICENSES.md#pinned-upstream-inputs-for-android-libraries).
+
+Two source corrections still require a new candidate and relevant device checks.
+After a process-record read fails, the process tracker now independently checks
+whether the process directory disappeared; only confirmed absence is treated as
+exit. Errors for live, reused or unverifiable process IDs still preserve the
+project. Host tests and an isolated Android production-code probe cover this
+case. They do not establish the cause of the earlier deletion UI failure or
+successful deletion in a newly built APK.
+
+The base-environment copier now accepts a known Android storage-path alias only
+when it identifies the same prepared base on the filesystem. It continues to
+reject links outside that base. Host tests cover the change. A physical phone
+previously failed to clone a preserved base, but the offending link target was
+not captured; an alias mismatch is a possible explanation, not a confirmed
+diagnosis. Retesting that phone with the new candidate remains necessary. These
+source changes do not alter the already tested candidate or prove a new binary
+has passed.
 
 The rc4 candidate was exercised on two dedicated ARM64 emulators with 16 KiB
 pages. Observed checks included initial environment setup, preserving an
@@ -96,5 +127,12 @@ The UI and deletion tests summarized here did not sign in to real service accoun
 ## Remaining distribution steps
 
 Public contact information and the privacy policy, corresponding source distribution for the binary, external tool and package terms, the necessary tests of the final candidate, and Play Console declarations and review must be checked as part of distribution preparation. Filling in public settings or creating a candidate does not grant store approval.
+
+The latest source and notice changes require a fresh source snapshot, regenerated
+offline notices and a newly built candidate. Repeat the affected deletion and
+base-cloning device checks against that candidate's exact hash, including the
+pending physical-phone check. Review the remaining JAR build inputs and the
+combined work before recording final source closure; successful collection
+keeps `sourceClosureReviewed: false`.
 
 Follow the [build guide](../BUILDING.md) and [release notices and corresponding source procedure](RELEASE_LICENSES.md). A draft privacy policy does not replace a finalized policy that matches the operator's actual data handling and public URL.
