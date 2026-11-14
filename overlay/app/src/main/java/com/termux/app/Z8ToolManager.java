@@ -126,7 +126,7 @@ public final class Z8ToolManager {
         job.connectivity=service.getSystemService(ConnectivityManager.class);
         job.network=allowedNetwork(job.connectivity,job.allowMetered);
         if(job.network==null){job.networkStopped=true;finish(job,new IOException("Network consent required"));return;}
-        try{service.z8AcquireExecution();Z8PreparationNotification.begin(service,job.id,job.projectId,job.toolId);
+        try{service.z8AcquireExecution();Z8PreparationNotification.beginTool(service,job.id,job.projectId,Z8ToolCatalog.get(job.toolId).name(),job.update);
             job.connectivity.registerDefaultNetworkCallback(job.callback);job.registered=true;}
         catch(RuntimeException failure){finish(job,new IOException("Could not start foreground installation or monitor the selected connection",failure));return;}
         job.enqueued=true;WORKER.execute(()->run(job));
@@ -171,7 +171,10 @@ public final class Z8ToolManager {
             error.getMessage()==null?Z8Text.text("Installation did not finish. Retry after checking the error.","설치가 완료되지 않았습니다. 오류를 확인하고 다시 시도해 주세요."):error.getMessage();
         if(!save(job,phase,message)){phase=Phase.FAILED;message=Z8Text.text("Could not save the operation result. Check tool status before retrying.","작업 결과를 저장하지 못했습니다. 다시 시도하기 전에 도구 상태를 확인해 주세요.");success=false;}
         JOBS.remove(job.projectId,job);Z8Guest.invalidateReadiness(job.projectId);publish(job,phase,success?"ready":"error",success?100:-1,message);
-        if(job.service!=null){Z8PreparationNotification.finish(job.service,job.id,success,null);job.service.updateNotification();}
+        if(job.service!=null){
+            if(phase==Phase.WAITING_NETWORK)Z8PreparationNotification.waiting(job.service,job.id);
+            else Z8PreparationNotification.finish(job.service,job.id,success,null);
+            job.service.updateNotification();}
         release(job);
     }
     private static void unregister(Job job){if(job.registered){try{job.connectivity.unregisterNetworkCallback(job.callback);}catch(IllegalArgumentException ignored){}job.registered=false;}}

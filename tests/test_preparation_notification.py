@@ -43,6 +43,10 @@ class PreparationNotificationTests(unittest.TestCase):
     def test_new_service_ignores_old_worker_updates(self): self.probe('generation')
     def test_initial_setup_notification_opens_setup_without_project_or_session(self): self.probe('initial')
     def test_network_pause_is_waiting_not_failure_and_releases_lock(self): self.probe('waiting')
+    def test_selected_install_progress_and_success_open_exact_project_tools(self): self.probe('tool-install')
+    def test_selected_update_and_failure_return_to_tools_without_replaying_commands(self): self.probe('tool-update')
+    def test_selected_network_pause_returns_to_tools_retry(self): self.probe('tool-waiting')
+    def test_project_and_tool_queue_keep_their_own_navigation(self): self.probe('tool-queue')
 
 STUBS = {
 'android/os/Looper.java': r'''package android.os; public class Looper {
@@ -66,7 +70,7 @@ public <T>T getSystemService(Class<T> type){return type.cast(type==NotificationM
 ''',
 'android/content/Intent.java': r'''package android.content; import android.net.Uri; import java.util.*; public class Intent {
 public static final int FLAG_ACTIVITY_CLEAR_TOP=1,FLAG_ACTIVITY_SINGLE_TOP=2; public final Map<String,String> extras=new HashMap<>(); public Uri data;
-public Class<?> target; public Intent(Context c,Class<?> cls){target=cls;} public Intent setData(Uri d){data=d;return this;} public Intent addFlags(int f){return this;}
+public Class<?> target; public int flags; public Intent(Context c,Class<?> cls){target=cls;} public Intent setData(Uri d){data=d;return this;} public Intent addFlags(int f){flags|=f;return this;}
 public Intent putExtra(String k,String v){extras.put(k,v);return this;}}
 ''',
 'android/net/Uri.java': r'''package android.net; public class Uri { public String value; Uri(String s){value=s;}
@@ -79,10 +83,10 @@ public static PendingIntent getActivity(Context c,int code,Intent i,int flags){P
 ''',
 'android/app/Notification.java': r'''package android.app; import android.content.Context; public class Notification {
 public static final String CATEGORY_PROGRESS="progress",CATEGORY_STATUS="status",CATEGORY_ERROR="error";
-public Builder source; public static class BigTextStyle {public BigTextStyle bigText(String s){return this;}}
-public static class Builder { public String title,text; public int progress; public boolean indeterminate,ongoing,autoCancel; public PendingIntent intent;
+public Builder source; public static class BigTextStyle {public String text;public BigTextStyle bigText(String s){text=s;return this;}}
+public static class Builder { public String title,text; public BigTextStyle style; public int progress; public boolean indeterminate,ongoing,autoCancel; public PendingIntent intent;
 public Builder(Context c){} public Builder(Context c,String channel){} public Builder setContentTitle(String s){title=s;return this;}
-public Builder setContentText(String s){text=s;return this;} public Builder setStyle(BigTextStyle s){return this;}
+public Builder setContentText(String s){text=s;return this;} public Builder setStyle(BigTextStyle s){style=s;return this;}
 public Builder setContentIntent(PendingIntent p){intent=p;return this;} public Builder setProgress(int max,int p,boolean i){progress=p;indeterminate=i;return this;}
 public Builder setCategory(String s){return this;} public Builder setOnlyAlertOnce(boolean b){return this;} public Builder setShowWhen(boolean b){return this;}
 public Builder setOngoing(boolean b){ongoing=b;return this;} public Builder setAutoCancel(boolean b){autoCancel=b;return this;}
@@ -98,6 +102,8 @@ public void createNotificationChannel(NotificationChannel c){} public void notif
 'com/termux/R.java': r'''package com.termux; public class R {public static class drawable {public static final int ic_service_notification=1;}}''',
 'com/termux/app/TermuxActivity.java': r'''package com.termux.app; public class TermuxActivity {}''',
 'com/termux/app/Z8SetupActivity.java': r'''package com.termux.app; public class Z8SetupActivity {}''',
+'com/termux/app/Z8EnvironmentActivity.java': r'''package com.termux.app; public class Z8EnvironmentActivity {
+public static android.content.Intent intent(android.content.Context context,String id){return new android.content.Intent(context,Z8EnvironmentActivity.class).putExtra("tools-project",id);}}''',
 'com/termux/app/Z8InitialSetup.java': r'''package com.termux.app; public class Z8InitialSetup {public static final String NOTIFICATION_ID="__initial_setup__";}''',
 'com/termux/app/TermuxService.java': r'''package com.termux.app; public class TermuxService extends android.content.Context {
 public int updates; public boolean stopped; public void updateNotification(){updates++;} public boolean wantsToStop(){return stopped;}}''',
@@ -112,6 +118,9 @@ public class NotificationProbe {
 static void eq(Object a,Object b){if(!java.util.Objects.equals(a,b))throw new AssertionError(a+" != "+b);}
 static Notification.Builder card(TermuxService s){Notification.Builder b=new Notification.Builder(s);eq(true,Z8PreparationNotification.decorate(b,s));return b;}
 static void empty(TermuxService s){eq(false,Z8PreparationNotification.decorate(new Notification.Builder(s),s));}
+static void tools(Notification.Builder b,String project){
+eq(Z8EnvironmentActivity.class,b.intent.intent.target);eq(1,b.intent.intent.extras.size());eq(project,b.intent.intent.extras.get("tools-project"));
+eq("z8://tool-operation/"+project,b.intent.intent.data.value);eq(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP,b.intent.intent.flags);eq(3,b.intent.flags);}
 public static void main(String[] args){
 TermuxService s=new TermuxService(); Z8PreparationNotification.begin(s,"a","project-a","My project");
 eq(true,s.power.lock.held);eq(false,s.power.lock.referenceCounted);eq(true,s.power.lock.timeout>0);
@@ -144,11 +153,30 @@ case "initial": {
 Z8PreparationNotification.releaseOwner(s);Z8PreparationNotification.begin(s,"initial",Z8InitialSetup.NOTIFICATION_ID,"template");
 Notification.Builder b=card(s);eq("z8 · Initial setup",b.title);eq(Z8SetupActivity.class,b.intent.intent.target);eq(0,b.intent.intent.extras.size());
 Z8PreparationNotification.finish(s,"initial",true,null);b=s.notifications.posted.get(Z8InitialSetup.NOTIFICATION_ID).source;
-eq(Z8SetupActivity.class,b.intent.intent.target);eq(true,b.text.contains("first project"));eq(false,s.power.lock.held);break;}
+eq(Z8SetupActivity.class,b.intent.intent.target);eq("The terminal is ready. Tap to create your first project.",b.text);eq(false,s.power.lock.held);break;}
 case "waiting": {
 Z8PreparationNotification.releaseOwner(s);Z8PreparationNotification.begin(s,"initial",Z8InitialSetup.NOTIFICATION_ID,"template");
 Z8PreparationNotification.waiting(s,"initial");Notification.Builder b=s.notifications.posted.get(Z8InitialSetup.NOTIFICATION_ID).source;
 eq("z8 · Waiting for network",b.title);eq(Z8SetupActivity.class,b.intent.intent.target);eq(false,s.power.lock.held);empty(s);break;}
+case "tool-install": {
+Z8PreparationNotification.releaseOwner(s);Z8PreparationNotification.beginTool(s,"tool","project-b","Git",false);
+Notification.Builder b=card(s);eq("Git · Installing",b.title);tools(b,"project-b");eq(true,b.style.text.contains("progress in Tools"));eq(false,b.style.text.contains("First-time"));
+Z8PreparationNotification.progress(s,"tool","packages",40,"Installing selected packages");Handler.tick(1000);b=card(s);eq(40,b.progress);eq(true,b.text.contains("Installing selected packages"));
+Z8PreparationNotification.finish(s,"tool",true,"PRIVATE_LOG");empty(s);eq(false,s.power.lock.held);b=s.notifications.posted.get("project-b").source;
+eq("Git · Ready",b.title);tools(b,"project-b");eq(true,b.text.contains("selected tool"));eq(false,b.text.contains("PRIVATE_LOG"));break;}
+case "tool-update": {
+Z8PreparationNotification.releaseOwner(s);Z8PreparationNotification.beginTool(s,"tool","project-b","Node.js 24 LTS",true);
+eq("Node.js 24 LTS · Updating",card(s).title);tools(card(s),"project-b");
+Z8PreparationNotification.finish(s,"tool",true,null);Notification.Builder b=s.notifications.posted.get("project-b").source;eq("Node.js 24 LTS · Updated",b.title);tools(b,"project-b");
+Z8PreparationNotification.beginTool(s,"retry","project-c","Node.js 24 LTS",true);Z8PreparationNotification.finish(s,"retry",false,"TOKEN_SECRET\nprivate log");
+b=s.notifications.posted.get("project-c").source;tools(b,"project-c");eq("Node.js 24 LTS · Operation incomplete",b.title);eq(true,b.text.contains("retry"));eq(false,b.text.contains("TOKEN_SECRET"));eq(false,s.power.lock.held);break;}
+case "tool-waiting": {
+Z8PreparationNotification.releaseOwner(s);Z8PreparationNotification.beginTool(s,"tool","project-b","Python",false);Z8PreparationNotification.waiting(s,"tool");
+Notification.Builder b=s.notifications.posted.get("project-b").source;tools(b,"project-b");eq("Python · Waiting for network",b.title);eq(true,b.text.contains("retry"));eq(false,s.power.lock.held);empty(s);break;}
+case "tool-queue": {
+Z8PreparationNotification.beginTool(s,"tool","project-b","Git",false);eq(TermuxActivity.class,card(s).intent.intent.target);
+Z8PreparationNotification.finish(s,"a",true,null);tools(card(s),"project-b");eq("Git · Installing",card(s).title);
+eq(TermuxActivity.class,s.notifications.posted.get("project-a").source.intent.intent.target);Z8PreparationNotification.finish(s,"tool",true,null);eq(false,s.power.lock.held);break;}
 default:throw new AssertionError("Unknown case");
 }
 System.out.println("PASS "+args[0]);}

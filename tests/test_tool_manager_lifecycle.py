@@ -97,8 +97,8 @@ public static class LocalBinder implements android.os.IBinder{public final Termu
 'com/termux/app/Z8Guest.java': '''package com.termux.app;public class Z8Guest{public static int invalidated;public static void invalidateReadiness(String id){invalidated++;}}''',
 'com/termux/app/Z8Projects.java': '''package com.termux.app;public class Z8Projects{public Z8Projects(android.content.Context c){}public void open(String id){}}''',
 'com/termux/app/Z8PreparationNotification.java': '''package com.termux.app;public class Z8PreparationNotification{
-public static boolean failBegin;public static int begins,finishes;public static void begin(TermuxService s,String id,String project,String name){if(failBegin)throw new IllegalStateException("notification failed");begins++;}
-public static void progress(TermuxService s,String id,String stage,int percent,String message){}public static void finish(TermuxService s,String id,boolean good,String detail){finishes++;}}
+public static boolean failBegin,lastUpdate;public static String lastName,lastProject;public static int begins,finishes,waits;public static void beginTool(TermuxService s,String id,String project,String name,boolean update){if(failBegin)throw new IllegalStateException("notification failed");begins++;lastName=name;lastProject=project;lastUpdate=update;}
+public static void progress(TermuxService s,String id,String stage,int percent,String message){}public static void finish(TermuxService s,String id,boolean good,String detail){finishes++;}public static void waiting(TermuxService s,String id){waits++;}}
 ''',
 'com/termux/app/Z8SetupDownloadProxy.java': '''package com.termux.app;import java.util.*;import android.net.*;public class Z8SetupDownloadProxy{
 public static final List<String> events=Collections.synchronizedList(new ArrayList<>());public static volatile Z8SetupDownloadProxy last;public volatile boolean closed;
@@ -151,11 +151,11 @@ network.caps.notMetered=false;start(app,service);eq(Z8ToolManager.Phase.WAITING_
 network.caps.notMetered=true;Handler.flush();eq(0,Z8ProjectPreparation.calls.get());network.caps.notMetered=false;
 Z8ToolManager.start(app,ID,"node",true,"v24.22.3",true);connect(app,service);await(Z8ProjectPreparation.entered);finish();eq(Z8ToolManager.Phase.READY,Z8ToolManager.state(app,ID).phase);break;}
 case "cellular":{
-network.caps.cellular=true;network.caps.notMetered=true;start(app,service);await(Z8ProjectPreparation.entered);eq("node",Z8ProjectPreparation.tool);eq("v24.22.3",Z8ProjectPreparation.version);check(Z8ProjectPreparation.update,"Selected update flag");finish();eq(Z8ToolManager.Phase.READY,Z8ToolManager.state(app,ID).phase);break;}
+network.caps.cellular=true;network.caps.notMetered=true;start(app,service);await(Z8ProjectPreparation.entered);eq("node",Z8ProjectPreparation.tool);eq("v24.22.3",Z8ProjectPreparation.version);check(Z8ProjectPreparation.update,"Selected update flag");eq("Node.js 24 LTS",Z8PreparationNotification.lastName);eq(ID,Z8PreparationNotification.lastProject);eq(true,Z8PreparationNotification.lastUpdate);finish();eq(1,Z8PreparationNotification.finishes);eq(0,Z8PreparationNotification.waits);eq(Z8ToolManager.Phase.READY,Z8ToolManager.state(app,ID).phase);break;}
 case "network":{
 start(app,service);await(Z8ProjectPreparation.entered);network.callback.onLost(network.network);await(Z8ProjectPreparation.cleanupEntered);
 List<String> events=Z8SetupDownloadProxy.events;check(events.indexOf("close")>=0&&events.indexOf("close")<events.indexOf("interrupt"),"Close network before worker interrupt");
-while(Z8ToolManager.busy(ID))Handler.next();eq(Z8ToolManager.Phase.WAITING_NETWORK,Z8ToolManager.state(app,ID).phase);eq(1,network.unregistered);Handler.flush();eq(1,Z8ProjectPreparation.calls.get());break;}
+while(Z8ToolManager.busy(ID))Handler.next();eq(Z8ToolManager.Phase.WAITING_NETWORK,Z8ToolManager.state(app,ID).phase);eq(1,Z8PreparationNotification.waits);eq(0,Z8PreparationNotification.finishes);eq(1,network.unregistered);Handler.flush();eq(1,Z8ProjectPreparation.calls.get());break;}
 case "cleanup":{
 Z8ProjectPreparation.cleanupRelease=new CountDownLatch(1);start(app,service);await(Z8ProjectPreparation.entered);Z8ToolManager.stop(service);await(Z8ProjectPreparation.cleanupEntered);
 check(Z8ToolManager.busy(ID),"Project remains busy while old installer cleanup owns it");eq(false,Z8ToolManager.hasWork(service));eq(1,app.unbinds);

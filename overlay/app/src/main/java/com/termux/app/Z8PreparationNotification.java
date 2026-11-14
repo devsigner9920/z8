@@ -42,19 +42,28 @@ public final class Z8PreparationNotification {
 
     private static final class Entry {
         final String projectId, name;
-        Progress progress = new Progress("bootstrap", -1, Z8Text.text("Preparing runtime", "실행 기반 준비"));
-        Entry(String projectId, String name) {
+        final boolean tool, update;
+        Progress progress;
+        Entry(String projectId, String name, boolean tool, boolean update) {
             this.projectId = projectId;
             this.name = label(name, Z8Text.text("Project", "프로젝트"));
+            this.tool = tool;
+            this.update = update;
+            progress = new Progress(tool ? "queued" : "bootstrap", -1, tool
+                ? Z8Text.text("Waiting to prepare the selected tool", "선택한 도구 준비 대기")
+                : Z8Text.text("Preparing runtime", "실행 기반 준비"));
         }
     }
 
     private static final class Snapshot {
         final String projectId, name, text;
+        final boolean tool, update;
         final int percent;
         Snapshot(Entry entry, int waiting) {
             projectId = entry.projectId;
             name = entry.name;
+            tool = entry.tool;
+            update = entry.update;
             percent = entry.progress.percent;
             text = entry.progress.message + (percent < 0 ? "" : " · " + percent + "%")
                 + (waiting == 0 ? "" : " · " + waiting + Z8Text.text(" project(s) waiting", "개 프로젝트 대기"));
@@ -83,14 +92,23 @@ public final class Z8PreparationNotification {
 
     /** Call only for accepted first-install/recovery work, never for an ordinary new terminal. */
     public static void begin(TermuxService service, String requestId, String projectId, String name) {
+        begin(service, requestId, new Entry(projectId, name, false, false));
+    }
+
+    /** Selected tool operations return to Tools, without creating a terminal or replaying an install. */
+    public static void beginTool(TermuxService service, String requestId, String projectId, String name, boolean update) {
+        begin(service, requestId, new Entry(projectId, name, true, update));
+    }
+
+    private static void begin(TermuxService service, String requestId, Entry entry) {
         mainThread();
         Owner owner = active;
         if (owner != null && owner.service.get() != service) release(owner);
         if (active == null) active = new Owner(service);
         owner = active;
-        owner.entries.put(requestId, new Entry(projectId, name));
+        owner.entries.put(requestId, entry);
         NotificationManager notifications = service.getSystemService(NotificationManager.class);
-        if (notifications != null) notifications.cancel(projectId, RESULT_ID);
+        if (notifications != null) notifications.cancel(entry.projectId, RESULT_ID);
         publish(owner);
         if (owner.wakeLock == null) renewWakeLock(owner);
         service.updateNotification();
@@ -190,11 +208,17 @@ public final class Z8PreparationNotification {
         Snapshot snapshot = owner != null && owner.service.get() == service ? owner.snapshot : null;
         if (snapshot == null) return false;
         boolean initial = Z8InitialSetup.NOTIFICATION_ID.equals(snapshot.projectId);
-        String explanation = Z8Text.text("First-time setup may take a while. Preparation continues after you leave the app.", "처음 준비할 때는 시간이 걸릴 수 있습니다. 앱을 나가도 준비를 계속합니다.");
-        builder.setContentTitle(initial ? Z8Text.text("z8 · Initial setup", "z8 · 처음 준비") : snapshot.name + Z8Text.text(" · Preparing first launch", " · 첫 실행 준비"))
+        String explanation = snapshot.tool
+            ? Z8Text.text("The selected operation continues after you leave the app. Tap to view progress in Tools.", "앱을 나가도 선택한 작업을 계속합니다. 눌러서 도구 화면에서 진행 상태를 확인하세요.")
+            : Z8Text.text("First-time setup may take a while. Preparation continues after you leave the app.", "처음 준비할 때는 시간이 걸릴 수 있습니다. 앱을 나가도 준비를 계속합니다.");
+        String title = snapshot.tool ? snapshot.name + (snapshot.update
+            ? Z8Text.text(" · Updating", " · 업데이트 중") : Z8Text.text(" · Installing", " · 설치 중"))
+            : initial ? Z8Text.text("z8 · Initial setup", "z8 · 처음 준비")
+                : snapshot.name + Z8Text.text(" · Preparing first launch", " · 첫 실행 준비");
+        builder.setContentTitle(title)
             .setContentText(snapshot.text)
             .setStyle(new Notification.BigTextStyle().bigText(snapshot.text + "\n" + explanation))
-            .setContentIntent(projectIntent(service, snapshot.projectId))
+            .setContentIntent(projectIntent(service, snapshot.projectId, snapshot.tool))
             .setProgress(100, Math.max(0, snapshot.percent), snapshot.percent < 0)
             .setCategory(Notification.CATEGORY_PROGRESS)
             .setOnlyAlertOnce(true)
@@ -203,12 +227,15 @@ public final class Z8PreparationNotification {
         return true;
     }
 
-    private static PendingIntent projectIntent(Context context, String projectId) {
+    private static PendingIntent projectIntent(Context context, String projectId, boolean tool) {
         boolean initial = Z8InitialSetup.NOTIFICATION_ID.equals(projectId);
-        Intent intent = new Intent(context, initial ? Z8SetupActivity.class : TermuxActivity.class)
-            .setData(new Uri.Builder().scheme("z8").authority("preparation").appendPath(projectId).build())
-            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        if (!initial) intent.putExtra(Z8WorkspaceActivity.EXTRA_FOCUS_PROJECT_ID, projectId);
+        Intent intent = tool ? Z8EnvironmentActivity.intent(context, projectId)
+            : new Intent(context, initial ? Z8SetupActivity.class : TermuxActivity.class);
+        intent.setData(new Uri.Builder().scheme("z8").authority(tool ? "tool-operation" : "preparation").appendPath(projectId).build())
+            // Tools reads its project on creation. Recreate an existing Tools activity instead of
+            // delivering a different project's intent to a stale single-top activity instance.
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | (tool ? 0 : Intent.FLAG_ACTIVITY_SINGLE_TOP));
+        if (!tool && !initial) intent.putExtra(Z8WorkspaceActivity.EXTRA_FOCUS_PROJECT_ID, projectId);
         return PendingIntent.getActivity(context, 0, intent,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
     }
@@ -221,12 +248,18 @@ public final class Z8PreparationNotification {
         boolean initial = Z8InitialSetup.NOTIFICATION_ID.equals(entry.projectId);
         Notification.Builder builder = new Notification.Builder(context, RESULT_CHANNEL)
             .setSmallIcon(R.drawable.ic_service_notification)
-            .setContentTitle((initial ? "z8" : entry.name) + (waiting ? Z8Text.text(" · Waiting for network", " · 네트워크 대기") : success ? Z8Text.text(" · Ready", " · 준비 완료") : Z8Text.text(" · Setup incomplete", " · 준비를 완료하지 못했어요")))
-            .setContentText(waiting ? Z8Text.text("Download paused. Tap to check the connection and resume setup.", "다운로드를 멈췄어요. 눌러서 연결을 확인하고 이어서 준비하세요.")
-                : success ? initial ? Z8Text.text("Developer tools are ready. Tap to create your first project.", "개발 도구를 준비했어요. 눌러서 첫 프로젝트를 만드세요.")
+            .setContentTitle((initial ? "z8" : entry.name) + (waiting ? Z8Text.text(" · Waiting for network", " · 네트워크 대기")
+                : success ? entry.tool && entry.update ? Z8Text.text(" · Updated", " · 업데이트 완료") : Z8Text.text(" · Ready", " · 준비 완료")
+                : entry.tool ? Z8Text.text(" · Operation incomplete", " · 작업 미완료") : Z8Text.text(" · Setup incomplete", " · 준비를 완료하지 못했어요")))
+            .setContentText(entry.tool ? waiting
+                    ? Z8Text.text("Download paused. Tap Tools to check the connection and retry.", "다운로드를 멈췄어요. 눌러서 도구 화면에서 연결을 확인하고 다시 시도하세요.")
+                    : success ? Z8Text.text("The selected tool is ready. Tap to view its status in Tools.", "선택한 도구를 준비했어요. 눌러서 도구 화면에서 상태를 확인하세요.")
+                    : Z8Text.text("Tap Tools to review the error and retry the selected operation.", "눌러서 도구 화면에서 오류를 확인하고 선택한 작업을 다시 시도하세요.")
+                : waiting ? Z8Text.text("Download paused. Tap to check the connection and resume setup.", "다운로드를 멈췄어요. 눌러서 연결을 확인하고 이어서 준비하세요.")
+                : success ? initial ? Z8Text.text("The terminal is ready. Tap to create your first project.", "터미널을 준비했어요. 눌러서 첫 프로젝트를 만드세요.")
                     : Z8Text.text("The terminal is ready. Tap to open the project.", "터미널을 사용할 수 있습니다. 눌러서 프로젝트를 여세요.")
                 : Z8Text.text("Tap to check the remaining setup steps.", "눌러서 남은 준비 단계를 확인하세요."))
-            .setContentIntent(projectIntent(context, entry.projectId))
+            .setContentIntent(projectIntent(context, entry.projectId, entry.tool))
             .setOnlyAlertOnce(true).setAutoCancel(true)
             .setCategory(success || waiting ? Notification.CATEGORY_STATUS : Notification.CATEGORY_ERROR);
         // The installer log can contain paths or command output; never place it on the lock screen.

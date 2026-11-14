@@ -201,6 +201,7 @@ public final class Z8EnvironmentActivity extends Activity {
         }
         boolean canChange = baseReady && !busy(task) && !state.checking;
         LinearLayout actions = new LinearLayout(this);
+        actions.setBaselineAligned(false);
         if (state.installed) {
             String label = tool.isProviderClient() ? Z8Text.text("Open", "열기") : Z8Text.text("Open terminal", "터미널 열기");
             addAction(actions, action(tool, label, () -> openTool(tool), baseReady && !(ownTask && busy(task))));
