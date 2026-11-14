@@ -1,0 +1,168 @@
+{
+  "schemaVersion": 1,
+  "kind": "z8-rc8-final-release-validation",
+  "status": "PREPARED_WITH_OPEN_GATES",
+  "recordedAtUtc": "2026-11-14T23:41:31.861948+00:00",
+  "sourceCommit": "b180705dc91a321674d697bea6ae9f6cfa95f501",
+  "tag": "v0.1.0-rc8",
+  "versionName": "0.1.0-rc8",
+  "versionCode": 9,
+  "candidate": {
+    "apkSha256": "0634cdd49f1c4c4ed64a63e6352327090618c16767bb0d721aed3584040f7395",
+    "aabSha256": "b99dfab5910e3ee2a5c350f1a94479e3f4d2072cec7e108887ef0f0357bcde8b",
+    "apkSigning": "Development identity for exact local QA",
+    "originalAabSigning": "Unsigned; preserved unchanged"
+  },
+  "source": {
+    "status": "VERIFIED",
+    "url": "https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/z8-source.zip",
+    "sha256": "3b3e32a429d3a27496175a3371caa32bd6dcdba0af45b6dde6656033fc3fe5ef",
+    "sourceRecords": 13018,
+    "noticeComponents": 191,
+    "unresolvedNoticeEntries": 0,
+    "scope": "Bounded attributed technical source-delivery assessment with exact optimized-artifact and anonymous public-download checks; not a human legal approval or full rebuild of every dependency."
+  },
+  "automated": {
+    "hostPassed": 637,
+    "hostSkipped": 1,
+    "hostFailures": 0,
+    "hostErrors": 0,
+    "terminalEnginePassed": 145,
+    "sourceCommitCi": "PASS",
+    "skipScope": "Mac case-sensitive guest extraction skipped; actual fresh Android extraction separately passed."
+  },
+  "qa": {
+    "status": "INCOMPLETE",
+    "checks": {
+      "freshInstall": "PASS",
+      "updatePreservesProjects": "PASS",
+      "projectDeletion": "PASS",
+      "runtimeAndChildProcesses": "PASS",
+      "codexAuthenticatedTask": "PASS",
+      "claudeAuthenticatedTask": "NOT_TESTED",
+      "physicalDevice": "PASS",
+      "pageSize16KiB": "PASS",
+      "previewDataDeletion": "PASS",
+      "backAndKeyboard": "PASS",
+      "foregroundStopAndNotifications": "PASS"
+    },
+    "unresolved": [
+      "Claude authenticated real task remains NOT_TESTED.",
+      "Actual interruption/retry during project-file deletion was not observed on a device; natural deletion and bounded host cancellation tests passed.",
+      "Physical-phone preview rendering and new project deletion were not confirmed; their final-candidate emulator checks are separate."
+    ],
+    "cleanup": {
+      "localExecutionModeRestoredOff": true,
+      "ownedPhysicalQaProcessesStopped": true,
+      "originalProjectsAndKnownFilesPreserved": true,
+      "testEmulatorsStoppedWithDataRetained": true
+    }
+  },
+  "privateInternalSigning": {
+    "status": "SIGNED_AND_VERIFIED",
+    "aabSha256": "8cfe4b8a3f629939678c1a50ef2a4f5b5058236d95d7eadef494110cf914dc1e",
+    "uploadCertificateSha256": "cb566e75a575085538576b2a7c7849af7b19210c7cd813cdfe68c759a5d89c44",
+    "payloadUnchanged": true,
+    "certificateAndBundleValidation": "PASS",
+    "artifactPublished": false,
+    "productionReady": false,
+    "readyForConsoleUpload": false,
+    "registrationWithPlay": "NOT_VERIFIED",
+    "externalKeyBackup": "NOT_VERIFIED",
+    "scope": "Private local copy only. Exact original QA/compliance records retained, including incomplete QA. Google-generated Play APKs have not been tested."
+  },
+  "store": {
+    "url": "https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/z8-play-store-preparation.zip",
+    "sha256": "8a10c5033fd80f326b6c88005cf6f4eb3b7e5ef08a1ac8855ffbb541a6fc7efb",
+    "bytes": 16182981,
+    "files": 64,
+    "englishScreenshots": 5,
+    "reviewerVideos": 4,
+    "englishPrimary": true,
+    "koreanTextPrepared": true,
+    "screenshotsFormat": "RGB24 PNG, no alpha; exact original RGB pixels verified",
+    "anonymousPublicDownloadVerified": true,
+    "scope": "Emulator captures, original media and scoped reports; provider/private phone screens and binaries excluded."
+  },
+  "console": {
+    "schemaVersion": 1,
+    "kind": "z8-console-status",
+    "observedAtUtc": "2026-11-14T23:23:27.639893+00:00",
+    "accountType": "Personal",
+    "identityVerification": "IN_PROGRESS",
+    "phoneVerification": "PENDING_IDENTITY_APPROVAL",
+    "createApp": "DISABLED",
+    "method": "Read-only visible Play Console home after reload; no forms, settings, documents or release submission changed."
+  },
+  "remainingBeforeProduction": [
+    "Google identity approval, required phone/device verification and accurate account/trader declarations.",
+    "Create the Console app and complete actual listing, App access, Data safety, audience, IARC and foreground-service declarations.",
+    "Authenticated Claude task remains untested; do not invent an entitlement, purchase or successful test.",
+    "Establish ordinary-Gmail overseas-processing country/route particulars for operator support handling; retention/deletion procedure remains an operator duty.",
+    "Submit transparent native Linux download/PRoot and optional-client functionality through ordinary Play policy review; no exemption or approval is inferred.",
+    "Perform Play-track/pre-launch checks; applicable new-personal-account production access requires genuine closed testing with at least 12 continuously opted-in testers for 14 days and an application.",
+    "Register the upload identity with Play when available and establish a verified external private-key backup before relying on it for releases."
+  ],
+  "productionReady": false,
+  "readyForConsoleUpload": false,
+  "submission": "NOT_SUBMITTED",
+  "binaryPublished": false,
+  "evidence": [
+    {
+      "path": "reports/compliance/2026-11-15/rc8/release-compliance.json",
+      "sha256": "3fb1c1acc8e587c2c417743d64a4061ae51d612a8b31fc9d48c3b76b75a02f2e",
+      "url": "https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/release-compliance.json"
+    },
+    {
+      "path": "reports/compliance/2026-11-15/rc8/source-independent.json",
+      "sha256": "31f4d01e414224a6a74ae636642c090c1f41368fa56084b2c6541c8daee5912f",
+      "url": "https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/source-independent.json"
+    },
+    {
+      "path": "reports/compliance/2026-11-15/rc8/notices-independent.json",
+      "sha256": "072ee9ed963584dc566642e0b40383bd58f9db9ae9ed9803debb7ddc5490b5dc",
+      "url": "https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/notices-independent.json"
+    },
+    {
+      "path": "reports/compliance/2026-11-15/rc8/final-artifact-independent.json",
+      "sha256": "ae7b0ae996933ea76c590f94905aa50c941ec93613311719c5d7ea6727c3ac37",
+      "url": "https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/final-artifact-independent.json"
+    },
+    {
+      "path": "reports/compliance/2026-11-15/rc8/automated-validation.json",
+      "sha256": "10ec74e702bc1ae39e92228a44a5b16ebd83ada927f8f5654117dfc706cf4307",
+      "url": "https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/automated-validation.json"
+    },
+    {
+      "path": "reports/compliance/2026-11-15/rc8/release-qa.json",
+      "sha256": "a632ecf453a30d016fdacb0fd1cd24ac97bb7484039dae17b382a27b85ebe657",
+      "url": "https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/release-qa.json"
+    },
+    {
+      "path": "reports/compliance/2026-11-15/rc8/physical/qa-physical-public.json",
+      "sha256": "f2c8166e7745e015a53a54c2b3afd1e94b9fd52b812d23298d44177b3700e54c",
+      "url": "https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/qa-physical-public.json"
+    },
+    {
+      "path": "reports/compliance/2026-11-15/rc8/final-fresh/qa-final-fresh.json",
+      "sha256": "3a5c7511e56a1dcc564b5ae353b60c37113efa2ee489d5d0946948416e5d02e4",
+      "url": "https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/qa-final-fresh.json"
+    },
+    {
+      "path": "reports/compliance/2026-11-15/rc8/final-regression/qa-regression.json",
+      "sha256": "f8acf5b2dd02659f1cba2d3bca2e002c00e1eabcffebe406069370d423c59d3b",
+      "url": "https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/qa-regression.json"
+    },
+    {
+      "path": "reports/compliance/2026-11-15/rc8/store-bundle-independent.json",
+      "sha256": "e30e080ea22029023a848ea7e1ae5c47e02b6f7457905706b5e03e6f74cab3fc",
+      "url": "https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/store-bundle-independent.json"
+    },
+    {
+      "path": "reports/compliance/2026-11-15/rc8/public-store-bundle.json",
+      "sha256": "e44584fe829e99d219612c3a2676b598db8564da239d0cc7bab843d3ca27302f",
+      "url": "https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/public-store-bundle.json"
+    }
+  ],
+  "documentationScope": "Supplemental final observations after immutable b180705 source publication; the source archive, tag and original candidates remain unchanged. No private raw phone captures, auth values or signing secrets are included."
+}

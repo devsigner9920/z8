@@ -30,7 +30,7 @@ successful CI run alone does not approve an app binary for Play distribution.
 | Privacy policy | Public URL in `README.md` | Recheck reachable, current and consistent with final build |
 | Z8 account creation | None | External CLI sign-in does not create a Z8 account |
 | Access | Core local terminal works without a Z8 account; external clients may require provider accounts | Do not answer “all functionality unrestricted” without disclosing external restrictions |
-| Foreground services | `specialUse` for active interactive terminals; separate `dataSync` for finite preparation/download work | rc8 implementation; final AAB manifest, timeout/stop behavior and matching videos still govern |
+| Foreground services | `specialUse` for active interactive terminals; separate `dataSync` for finite preparation/download and confirmed project-file deletion | rc8 implementation; final AAB manifest, timeout/stop behavior and matching videos still govern |
 
 ## Data safety — review required before answering
 
@@ -50,10 +50,14 @@ sharing exception does not automatically remove collection disclosure.
 | Built-in preview | Local cookies/storage/cache; page code can contact external servers | Distinguish controlled sample/content from user-directed web content |
 | External browser / support email | Browser/provider handles sign-in; support messages go to the operator's email service | Apply the form's scope and user-directed-transfer criteria accurately |
 
-Pending answers: data types, collection/sharing purposes, optional/required
-status, encryption in transit across the declared flows, and deletion-request
-options. Do not claim all user-run commands use encrypted transport. Do not
-claim that deleting a local project deletes an external provider account.
+The [current Data safety worksheet](play-console-data-safety.md) now specifies
+the proposed data types, collection/sharing purposes, optional status, scoped
+transport-encryption answer and deletion responses. Apply those concrete draft
+answers to the actual Console form and final supported client flows; the table
+above is not a claim that this classification is still entirely unprepared.
+Operator Gmail overseas-processing particulars remain unresolved. Do not claim
+all user-run commands use encrypted transport or that local project deletion
+deletes an external provider account.
 
 ## Other declarations that still need an actual Console review
 
@@ -81,12 +85,20 @@ claim that deleting a local project deletes an external provider account.
 
 - [ ] Google finishes account identity verification and required contact/device
   verification and declarations are complete.
-- [ ] Final candidate uses the intended public operator/contact information.
-- [ ] App tests and images are tied to that candidate, with actual results
-  retained; earlier rc3 evidence is not automatically evidence for a changed build.
-- [ ] Complete the distribution decisions and corresponding-source review
-  recorded in [`DISTRIBUTION_REVIEW.md`](../DISTRIBUTION_REVIEW.md)
-  and [`RELEASE_LICENSES.md`](../RELEASE_LICENSES.md).
+- [x] Final rc8 candidate uses the intended public operator/contact information;
+  source/configuration and actual bytecode were independently checked.
+- [x] Observed rc8 tests and actual screenshots/videos are bound to the exact
+  candidate. See [release status](../RELEASE_STATUS.md) for completed scopes and
+  untested cases; this does not mark every provider/device scenario tested.
+- [x] Complete the bounded rc8 corresponding-source/notices assessment and
+  strict public-delivery verification; the exact report is `VERIFIED`.
+- [ ] Complete the remaining operator and distribution decisions recorded in
+  [`DISTRIBUTION_REVIEW.md`](../DISTRIBUTION_REVIEW.md). Source verification does
+  not grant policy approval; retain the [`license procedure`](../RELEASE_LICENSES.md).
+- [x] Sign and verify a private rc8 internal-test AAB with exact source/QA
+  evidence retained. This is not production promotion or Console readiness.
+- [ ] Verify external upload-key backup and Play key registration when app
+  creation becomes available.
 - [ ] Produce a properly signed upload AAB through the release procedure. An
   unsigned candidate or development-signed test APK is not an upload-ready release.
 - [ ] Create the Console app, select the primary language and fill in the listing.

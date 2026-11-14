@@ -5,10 +5,13 @@ Updated on 2026-11-15. English (`en-US`) is the primary listing language;
 they do not submit or publish it. Recheck the copy against the final candidate
 and the current Console form before submission.
 
-The current release notes describe the rc7 disclosure/source follow-up. The
-published screenshots and three videos described below are immutable rc6
-evidence. Do not relabel them as new rc7 captures or as a completed rc7 submission
-package; add candidate-specific captures/checks when preparing that submission.
+The current release notes and [published preparation ZIP](https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/z8-play-store-preparation.zip)
+refer to **0.1.0-rc8**, version code **9**. The ZIP contains 64 files, including
+five actual English screenshots, English/Korean copy, four demonstration videos
+and scoped emulator evidence. Its [separate checksum](https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/store-SHA256SUMS)
+and [independent review](https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/store-bundle-independent.json)
+identify the exact bytes. Earlier releases retain their own immutable evidence;
+none of this is a completed Play submission.
 
 ## Copy and account settings
 
@@ -58,14 +61,23 @@ invent successful provider sign-in. A proposed capture order and alt text are
 in `screenshot-plan.json`. Root-level capture results must identify the actual
 candidate, screen dimensions and files before upload. A plan entry is not
 evidence that its screen was captured.
-The local capture/output directory for this preparation is
-`artifacts/play-store/2026-11-15/rc6-final/`; it is intentionally outside the public source
-tree. Its capture manifest identifies five actual screenshots from the final
-candidate. The [rc6 preparation release](https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc6)
-contains the verified store ZIP and three demonstration videos. Earlier `rc6/`
-captures are provisional and must not replace the final captures.
+The current unpacked submission directory is
+`artifacts/play-store/2026-11-15/rc8/submission/`; it is outside the public source
+tree. The ZIP's `capture-manifest.json` binds the five English listing images to
+the final APK. These 1080 × 1920 PNGs are RGB 24-bit without alpha; all RGB pixels
+match the retained original captures. Original emulator captures and four
+unmodified videos are included separately for reviewers. The existing brand
+icon/feature graphic retain their original provenance. Korean text is prepared;
+Korean listing screenshots and tablet screenshots are not claimed.
 
-Asset requirements checked on 2026-11-14:
+Use the ZIP's actual manifest, not the suggested filenames in the older capture
+plan. The setup/deletion videos show natural completion, the tools video shows
+Stop tasks (retry completed outside the clip), and the terminal video shows
+notification Exit. Private phone authentication captures and app binaries are
+excluded. The ZIP documents its own emulator scope; phone/provider QA is in the
+separate final release record.
+
+Asset requirements checked on 2026-11-15:
 
 - App icon: 512 × 512, 32-bit PNG, at most 1,024 KB.
 - Feature graphic: 1,024 × 500, JPEG or RGB PNG without alpha.
@@ -85,10 +97,11 @@ The Console may expose additional fields for selected device types.
 
 Use `submission-checklist.md` and `review-notes.txt` for the next Console steps.
 The detailed [Data safety and foreground-service worksheet](play-console-data-safety.md)
-separates observed data flows from unanswered provider/Console classifications.
+provides concrete draft answers and distinguishes remaining operator/Console work.
 They distinguish known implementation facts from declarations still requiring
 review. Do not convert an unconfirmed answer into a declaration to advance the
 form. Keep final candidate hashes and QA evidence with the release package.
 The [November 15 policy and license review](../compliance/2026-11-15/README.md)
-assesses the published rc6 candidate. Later review documents do not replace its
-immutable source ZIP, app candidate, or previously published preparation ZIP.
+retains its historical rc6 baseline with explicit rc7/rc8 follow-ups. See
+[current release status](../RELEASE_STATUS.md) for the exact latest candidate and
+remaining gates; supplemental documents do not replace historical artifacts.

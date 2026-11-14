@@ -1,4 +1,17 @@
-# Z8 rc6 policy and license review
+# Z8 policy and license review — rc6 baseline with release follow-ups
+
+Current **rc8 follow-up**: the [rc8 source release](https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc8)
+contains the additional original AndroidX rules, reviewed notices and exact
+source/artifact verification. The bounded corresponding-source check now passes
+for rc8; the source omissions listed in the historical rc6 baseline below are
+not current unresolved rc8 omissions. Foreground work is split into interactive
+`specialUse` and finite `dataSync` services. See [current release status](../../RELEASE_STATUS.md)
+and the [concrete Data safety draft](../../store/play-console-data-safety.md).
+The [final rc8 record](rc8-final-review.json) adds exact-candidate emulator/phone
+checks, actual Codex work, scoped cleanup, private internal signing and published
+store materials; its production/submission gates remain open.
+Operator Gmail overseas-processing particulars, actual Console declarations
+and Play review remain separate from these technical checks.
 
 Implementation follow-up: [rc7 changes](implementation.md) address concrete
 source and external-client disclosure findings. The original baseline below
@@ -16,7 +29,7 @@ development environment**, with optional official tools using the user's own
 accounts. It is free, with no advertising, in-app purchases, model proxy or
 shared provider subscription. This review preserves that product scope.
 
-**Conclusion:** continuing preparation for an ordinary, transparent Play
+**Historical rc6 conclusion:** continuing preparation for an ordinary, transparent Play
 submission is reasonable. The reviewed provider terms support the official
 client arrangement subject to their conditions. The current candidate is
 **not ready to be represented as a source-complete, upload-ready release**:

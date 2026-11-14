@@ -1,5 +1,15 @@
 # Distribution review
 
+Latest release-specific follow-up: [rc8 release status](RELEASE_STATUS.md) and
+[public rc8 source evidence](https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc8).
+The exact rc8 corresponding-source/notices and optimized-artifact checks pass;
+its foreground implementation separates interactive specialUse from finite
+dataSync work. The older source omissions and pending device statements below
+are historical findings, not a new assertion that those same omissions remain
+in rc8. Current privacy particulars, provider test limits and Console/Play gates
+are recorded in the latest status; no binary-distribution or Play approval is
+inferred from technical source checks.
+
 Current review: [November 15, 2026 policy and license assessment](compliance/2026-11-15/README.md).
 This document retains the **November 14** distribution evidence and unsent
 historical inquiry drafts. The linked assessment addresses the published rc6

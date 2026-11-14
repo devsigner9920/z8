@@ -1,9 +1,9 @@
-Z8 review information — factual draft; attach only to the matching tested build
+Z8 review information — rc8 final-candidate media; attach only to the matching build
 
 Z8 is a local Android terminal and Linux development environment. It provides project workspaces, multiple terminal sessions and a preview for local development servers. It does not provide its own user accounts, AI model service, model-request proxy, shared provider accounts or included AI usage.
 
 Core access
-No Z8 account is required. Start the app and unpack the included base environment using available device storage. This base preparation does not require downloading the development toolset. Create or open a project and launch a terminal. The shell, project navigation and local preview can be reviewed without signing into an AI provider. Verify the exact first-run button labels against the final candidate before submitting these instructions.
+No Z8 account is required. Start the app, review the setup disclosures and choose Start setup to unpack the included base environment using available device storage. This base preparation does not require downloading the development toolset. Create or open a project and launch a terminal. The shell, project navigation and local preview can be reviewed without signing into an AI provider. The Start setup label was verified on the final candidate.
 
 Suggested local workflow
 1. Prepare the local development environment and open a demo project.
@@ -18,14 +18,34 @@ Users explicitly choose whether to install official CLI clients such as Codex an
 Executable delivery
 The application includes the Android host runtime, PRoot loader and a Linux filesystem. The base image is included. User-selected tool installation downloads additional distribution packages, Node.js, or official CLI binaries. Optional daily checks retrieve public version metadata for Codex, Claude Code and the Node.js 24 maintenance line at most once per 24 hours when Z8 is visible; they do not install code. Check now is an explicit one-time metadata request. These include native ARM64 code executed under PRoot using the Android kernel and app UID. PRoot is not a separate-kernel virtual machine or a security boundary between projects. The app does not download APK or DEX self-updates. Users and third-party tools can download or update additional Linux executables. This description does not assert that these flows qualify for a Google Play execution-policy exception.
 
-Foreground services — rc8 draft; attach matching final-candidate demonstrations
+Foreground services — rc8 implementation and recorded scope
 Interactive terminals use TermuxService with specialUse while an actual interactive PTY is running or its requested shutdown is being verified. The user creates a terminal and starts work; commands and child processes continue when switching apps, with a dedicated terminal notification. Delay would make interactive command execution unusable, and interruption can terminate a running command or local server. Stopping terminal work ends its sessions; reopening does not silently replay commands.
 
 Finite environment preparation, selected tool installation and confirmed whole-project deletion use the separate Z8PreparationService with dataSync. The user starts setup, creates a project that needs preparation, confirms an install/update, or confirms deletion of a selected project. Work consists of local extraction/copying/file processing or explicit package download, verification and setup. Progress and a Stop tasks action appear in a separate notification. Deferred work postpones the user's requested operation; interruption stops active and queued finite jobs and requires explicit retry. Android timeout and Stop tasks do not stop unrelated interactive terminals. The finite-work service stops when no jobs remain. Android's Active apps Stop ends the whole app, which is a separate control.
 
 Deletion removes the selected project's source files, HOME and environment. Before file removal starts, cancellation keeps those files. After removal starts, Stop tasks may leave partial deletion; already deleted files cannot be restored. The app keeps the remaining project addressable for an explicit deletion retry. Demonstrate deletion only with a disposable test project, preserving another project's known files and terminal work. Do not describe interrupted deletion as universally preserving all files.
 
-The service types are not enabled together for every operation: each service runs only for its own active work. If both an interactive terminal and preparation are active, both may have separate notifications. No boot-triggered service or scheduled background tool updater is used. The reviewer page is https://devsigner9920.github.io/z8/review.html. Attach exact rc8 recordings of the trigger, progress/background behavior and stop path; older rc6 videos remain historical evidence and must not be relabeled. Service-type eligibility remains subject to ordinary Play review.
+The service types are not enabled together for every operation: each service runs only for its own active work. If both an interactive terminal and preparation are active, both may have separate notifications. No boot-triggered service or scheduled background tool updater is used. The reviewer page is https://devsigner9920.github.io/z8/review.html. The four rc8 recordings below are from the exact final candidate; older rc6 videos remain historical evidence in their original release and are not relabeled. Service-type eligibility remains subject to ordinary Play review.
+
+Current recordings and limits
+All four are original silent Android screen recordings. The final-candidate APK SHA-256 is 0634cdd49f1c4c4ed64a63e6352327090618c16767bb0d721aed3584040f7395. Recording lengths are approximate and are not performance guarantees. These materials do not assert an overall device, provider authentication or Play approval result.
+
+1. Included setup, about 27 seconds: the actual Start setup action on a fresh installation, offline bundled-environment preparation and natural completion. No cancellation or retry is shown.
+https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/foreground-service-setup-0.1.0-rc8.mp4
+
+2. Interactive terminal, about 74 seconds: create Terminal 2, run sleep, switch to Home, open the terminal notification, press its Exit action and reopen to zero sessions without command replay. This is the terminal notification Exit action, not Android's whole-app Stop.
+https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/foreground-service-terminal-0.1.0-rc8.mp4
+
+3. Selected tool, about 93 seconds: confirm Install Git with its dependencies/network choice, switch to Home, expand the installation notification, press Stop tasks and verify the other interactive terminal's running work and known file remain intact. After this recording ended, an explicit Retry completed Git 2.47.3 installation; the separate candidate-bound QA report and screenshots document that result. Do not describe Retry completion as part of the clip.
+https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/foreground-service-tools-0.1.0-rc8.mp4
+
+4. Project deletion, about 45 seconds: confirm deletion of a new disposable synthetic project, observe its closing/deletion progress and natural completion while another project remains. Deletion finished before its notification could be expanded. Deletion Stop tasks, cancellation and retry are untested in this recording; it does not demonstrate a visible deletion dataSync notification.
+https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/foreground-service-deletion-0.1.0-rc8.mp4
+
+Source and evidence
+Matching rc8 corresponding-source ZIP: https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/z8-source.zip
+Release evidence and checksums: https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc8
+The source snapshot is immutable commit b180705dc91a321674d697bea6ae9f6cfa95f501. These later reviewer captions are supplemental documentation and do not change or rebuild that source archive. The release materials do not mean an installable app has been approved or published on Google Play.
 
 Contact
 Romi Ethsy

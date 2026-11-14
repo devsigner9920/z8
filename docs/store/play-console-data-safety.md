@@ -1,10 +1,23 @@
 # Play Console worksheet — rc8 preparation
 
-**rc8 scope:** version `0.1.0-rc8`, version code `9`, is being prepared with
+**Current rc8 scope:** final candidate `0.1.0-rc8`, version code `9`, uses
 separate finite-work and interactive-terminal foreground services. The service
-description below covers that implementation. Final rc8 source/notices, artifact
-identities, device QA and demonstration links must be verified together before
-submission; no final rc8 hash or completed-device-test claim is made here.
+description below covers that implementation. Its exact identities are:
+
+| Item | Current rc8 value |
+| --- | --- |
+| Source commit | `b180705dc91a321674d697bea6ae9f6cfa95f501` |
+| APK SHA-256 | `0634cdd49f1c4c4ed64a63e6352327090618c16767bb0d721aed3584040f7395` |
+| AAB SHA-256 | `b99dfab5910e3ee2a5c350f1a94479e3f4d2072cec7e108887ef0f0357bcde8b` |
+
+The [rc8 source-compliance report](https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/release-compliance.json)
+is **VERIFIED** for this AAB, its notices and matching public corresponding
+source. [Independent public-source verification](https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/public-source-release.json)
+confirms the published source bytes and commit. This is a bounded technical
+source-delivery result, not Google approval or completion of the privacy
+declaration. The APK is development-signed and this AAB unsigned; this worksheet
+does not make either upload-ready. Device/provider QA and demonstration scopes
+remain identified separately in the release-specific reports.
 
 **rc7 follow-up:** [implemented client notices](../compliance/2026-11-15/implementation.md)
 add project-local acknowledgment records, install-time data/terms links and a

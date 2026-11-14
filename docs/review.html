@@ -41,35 +41,44 @@
   <h2>Current foreground-service behavior</h2>
   <p>Interactive terminal sessions use a dedicated special-use foreground service. Finite environment preparation, selected tool installation and project-file deletion use a separate data-sync service. Each task starts from a visible user action. The two service types are not enabled together for every operation.</p>
   <p>The Project tasks notification provides <strong>Stop tasks</strong>. Android data-sync timeouts and this action cancel the finite tasks, preserving unrelated interactive terminals. Interrupted setup or installation requires an explicit retry; completed stages and project files are checked again. Interrupted deletion can leave a partly deleted project and offers an explicit retry. Android's Stop action for the entire app terminates all its processes.</p>
-  <p class="notice">The recordings below are historical rc6 evidence, not demonstrations of rc8's separated services. The rc8 release record must include recordings and device evidence from its exact final candidate before these materials are used for submission.</p>
+  <p class="notice">The four silent recordings below show the exact final rc8 candidate on dedicated Android emulators. Their captions distinguish actions visible in each clip from separately recorded checks. They do not establish that every device or provider sign-in flow has been tested.</p>
 
-  <h2>Historical rc6 terminal demonstration</h2>
-  <p>A user opens a terminal and starts a command. The ongoing notification makes the active session visible while switching apps. Stopping the service terminates its sessions and child processes; reopening the app does not silently replay commands.</p>
-  <video controls playsinline preload="none" aria-label="Z8 terminal foreground service demonstration">
-    <source src="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc6/foreground-service-terminal-0.1.0-rc6.mp4" type="video/mp4">
+  <h2>Included environment preparation · about 27 seconds</h2>
+  <p>On a fresh installation, the user reviews the included-base disclosure and presses <strong>Start setup</strong>. The app unpacks the bundled environment while offline and completes naturally. This clip does not demonstrate cancellation or retry.</p>
+  <video controls playsinline preload="none" aria-label="rc8 included environment setup, user initiation and natural completion">
+    <source src="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/foreground-service-setup-0.1.0-rc8.mp4" type="video/mp4">
     Your browser cannot play this video. Use the download link below.
   </video>
-  <p><a href="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc6/foreground-service-terminal-0.1.0-rc6.mp4">Download the terminal demonstration</a>. Silent screen recording; the visible actions demonstrate session start, background operation and stop.</p>
+  <p><a href="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/foreground-service-setup-0.1.0-rc8.mp4">Download the setup recording</a>. This is the recording length, not a promised setup time; preparation time depends on the device.</p>
 
-  <h2>Historical rc6 environment preparation demonstration</h2>
-  <p>Preparation starts after the user presses Start setup. Progress remains visible in the app and through Android's foreground-service controls. It unpacks the included runtime and Linux image and prepares shell defaults. Additional package downloads are separate user-selected tool operations. Android can stop preparation; reopening Z8 can validate completed stages and continue.</p>
-  <video controls playsinline preload="none" aria-label="Z8 environment preparation foreground service demonstration">
-    <source src="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc6/foreground-service-setup-0.1.0-rc6.mp4" type="video/mp4">
+  <h2>Interactive terminal · about 74 seconds</h2>
+  <p>The user creates Terminal 2, runs a harmless <code>sleep</code> command, switches to Home and opens the ongoing terminal notification. Pressing the notification's <strong>Exit</strong> action ends the terminal sessions and their child processes. Reopening Z8 shows zero sessions and no silent command replay. This is the terminal notification control, separate from Android's whole-app Stop control.</p>
+  <video controls playsinline preload="none" aria-label="rc8 terminal creation, background notification, Exit and reopening with zero sessions">
+    <source src="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/foreground-service-terminal-0.1.0-rc8.mp4" type="video/mp4">
     Your browser cannot play this video. Use the download link below.
   </video>
-  <p><a href="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc6/foreground-service-setup-0.1.0-rc6.mp4">Download the preparation demonstration</a>. Silent screen recording; it shows user initiation and local preparation; durations depend on the device.</p>
+  <p><a href="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/foreground-service-terminal-0.1.0-rc8.mp4">Download the terminal recording</a>.</p>
 
-  <h2>Historical rc6 selected-tool demonstration</h2>
-  <p>Users choose a tool for the current project, review dependencies and network usage, and confirm the download. Installation can continue while switching apps. Android's active-app controls can stop it; an interrupted tool operation requires an explicit Retry and does not replay terminal commands.</p>
-  <video controls playsinline preload="none" aria-label="Z8 selected tool installation foreground service demonstration">
-    <source src="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc6/foreground-service-tools-0.1.0-rc6.mp4" type="video/mp4">
+  <h2>Selected tool and Stop tasks · about 93 seconds</h2>
+  <p>The user chooses Git in the current project's Tools screen, reviews dependencies and the network choice, and confirms installation. The clip shows Home, the expanded installation notification and an actual <strong>Stop tasks</strong> action. The operation becomes incomplete; returning to an unrelated interactive terminal shows that its running work and known file remain intact.</p>
+  <video controls playsinline preload="none" aria-label="rc8 Git installation confirmation, background notification, Stop tasks and unrelated terminal preservation">
+    <source src="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/foreground-service-tools-0.1.0-rc8.mp4" type="video/mp4">
     Your browser cannot play this video. Use the download link below.
   </video>
-  <p><a href="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc6/foreground-service-tools-0.1.0-rc6.mp4">Download the selected-tool demonstration</a>. Silent recording of the user-started installation flow.</p>
+  <p><a href="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/foreground-service-tools-0.1.0-rc8.mp4">Download the selected-tool recording</a>. After recording ended, an explicit Retry completed Git installation; the separate candidate-bound QA report and screenshots record Git 2.47.3 and file preservation. Retry completion is not shown in this clip.</p>
+
+  <h2>Disposable project deletion · about 45 seconds</h2>
+  <p>The user confirms deletion of a newly created test project containing synthetic files. The app closes that project's terminals and completes deletion naturally while the other project remains available. Deletion completed before its notification could be expanded: this clip does not demonstrate deletion cancellation, retry or a visible data-sync notification.</p>
+  <video controls playsinline preload="none" aria-label="rc8 disposable project deletion, natural completion and retained second project">
+    <source src="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/foreground-service-deletion-0.1.0-rc8.mp4" type="video/mp4">
+    Your browser cannot play this video. Use the download link below.
+  </video>
+  <p><a href="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/foreground-service-deletion-0.1.0-rc8.mp4">Download the deletion recording</a>. Interrupted deletion can be partial; already deleted files cannot be restored. Only a disposable test project was removed.</p>
 
   <h2>Executable delivery and source</h2>
   <p>The app bundles a host runtime, PRoot and a Linux filesystem. The initial base is included. Selecting tools downloads native Linux packages, Node.js or official CLI binaries. Optional daily version checks retrieve public metadata only; they do not install code. PRoot uses Android's kernel and app UID; it is not a separate security virtual machine. This description does not claim a policy exception has been approved.</p>
-  <p>Z8 is GPL-3.0-only software with separately licensed components. <a href="https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc8">Matching source and release evidence</a>. <strong>Debian</strong>'s registered trademark belongs to Software in the Public Interest, Inc.; Z8 has no affiliation with or endorsement from the Debian project.</p>
+  <p>Z8 is GPL-3.0-only software with separately licensed components. <a href="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/z8-source.zip">Download the matching rc8 source ZIP</a>, or view the <a href="https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc8">release evidence and checksums</a>. <strong>Debian</strong>'s registered trademark belongs to Software in the Public Interest, Inc.; Z8 has no affiliation with or endorsement from the Debian project.</p>
+  <p class="label">These reviewer instructions and media captions supplement the immutable rc8 source snapshot at commit <code>b180705dc91a321674d697bea6ae9f6cfa95f501</code>. They were updated after that snapshot; the source archive has not been rebuilt to include these later captions. Earlier rc6 recordings remain historical assets in their original release.</p>
   <footer>Romi Ethsy · <a href="mailto:ethsy2462@gmail.com">ethsy2462@gmail.com</a> · <a href="privacy.html">Privacy and deletion instructions</a></footer>
 </main>
 </body>

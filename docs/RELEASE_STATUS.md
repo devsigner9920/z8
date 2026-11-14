@@ -9,61 +9,117 @@ is the current review entry point. Its findings supplement the immutable rc6
 releases and the historical records below; they do not change a tested binary
 or establish Google Play approval.
 
-## rc8 implementation and pre-freeze validation
+## Published rc8 source and final-candidate validation
 
-The current configuration targets **0.1.0-rc8**, version code **9**. This section
-records implementation progress before final source/artifact binding. It does
-not claim a published rc8 release, a final signed binary, or completed rc8 device
-QA. The immutable rc7 and earlier results below remain attached to their own
-artifacts.
+The **[0.1.0-rc8 source prerelease](https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc8)**
+uses version code **9** and source commit
+`b180705dc91a321674d697bea6ae9f6cfa95f501`. Later documentation and QA records
+are supplements; they do not replace the immutable tag, source ZIP or tested
+candidate. No installable APK or AAB is included in the public release.
+
+| Artifact | SHA-256 |
+| --- | --- |
+| Public `z8-source.zip` | `3b3e32a429d3a27496175a3371caa32bd6dcdba0af45b6dde6656033fc3fe5ef` |
+| Local development-signed QA APK | `0634cdd49f1c4c4ed64a63e6352327090618c16767bb0d721aed3584040f7395` |
+| Original unsigned candidate AAB | `b99dfab5910e3ee2a5c350f1a94479e3f4d2072cec7e108887ef0f0357bcde8b` |
 
 Interactive PTYs now use `TermuxService` with `specialUse`; finite setup, project
 preparation, selected tool installation/update and confirmed project deletion
 use a separate `dataSync` service. Workers wait for foreground promotion and
 their runtime binding. **Stop tasks**, owner destruction and Android timeout
 cancel finite work without stopping unrelated terminals; retry is explicit.
-Terminal shutdown verification retains its interactive lifetime. File deletion
-can be partial when interrupted, and the app explains that deleted files cannot
-be restored while retaining the remaining project for retry. The Tools return
-label now follows its actual entry screen.
+File deletion can be partial when interrupted. The app explains that already
+deleted files cannot be restored and retains the remaining project for retry.
+The Tools return label now follows its actual entry screen.
 
-The focused lifecycle/generated-source/filesystem suite passed **134 host
-tests**; private evidence is `reports/compliance/2026-11-15/rc8/fgs-host-tests.json`.
-An independent 57-test service/deletion/filesystem subset also passed after the
-deletion lifetime correction. The earlier rc8 preflight build passed 145
-terminal-engine tests and exercised the new service boundary on a dedicated
-emulator. Preflight evidence predates the final source snapshot and is not
-substituted for final-candidate or physical-device results.
+The final source passed **637 host tests**, with one case-sensitive-filesystem
+skip and no failures, plus **145 terminal-engine tests**. Actual fresh Android
+unpacking covers the skipped host extraction separately. The focused 134-test
+lifecycle suite and independent 57-test service/deletion subset also passed;
+these are subsets, not additional unique tests to add to the full-suite count.
 
 The [bounded source-delivery assessment](compliance/2026-11-15/source-closure-assessment.md)
-retains the last identified missing build-control input: the original 433-byte
-AndroidX annotation ProGuard rule with its license and provenance. It found no
-further specific missing input in the examined combined-work scope. Dependency
-source proofs are reused only where their exact identities remain unchanged;
-the final rc8 source, notices, optimized artifact and public download still need
-their own matching verification. This is an attributed technical assessment,
-not a fabricated human sign-off or a claim that every dependency was rebuilt.
+retains the original AndroidX annotation rules, license and provenance.
+Independent verification checked all **13,018 source records**, preserved
+build inputs, 85 Maven coordinates and exact package-source payloads.
+The actual optimized APK/AAB, R8 mapping, notices, runtime, guest and dependency
+identities match that source. Notices cover **191 components** with no
+unresolved entries. The strict [corresponding-source verification](https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/release-compliance.json)
+is **VERIFIED**, including an anonymous download of the public source ZIP.
+This is an attributed technical assessment, not a fabricated human/legal sign-off,
+a claim that every dependency was rebuilt or permission from Google Play.
+
+On a fresh ARM64 Android 17 emulator with **16 KiB pages**, the exact APK
+prepared Debian 13.7 while offline with optional Python initially absent.
+Background project preparation handed off from `dataSync` to the interactive
+service. An actual Android timeout stopped Python installation while preserving
+the running terminal and marker; explicit retry installed Python 3.13.5 and a
+real calculation passed. Preview storage clearing, multiple terminals,
+notification Exit, Android's user Stop and explicit relaunch without command
+replay passed. English default and the Korean switch were checked.
+
+A separate upgraded emulator preserved its project, tools and marker. An actual
+**Stop tasks** action interrupted Git installation without killing the sibling
+terminal/children; explicit retry completed. A new disposable project deleted
+successfully while other work survived. **Cancellation during file deletion was
+not observed on a device** because deletion completed too quickly; host tests
+cover the cancellation boundary, and the deletion video demonstrates natural
+completion only. Android timeout overrides were restored; both dedicated
+emulators were closed with their data retained.
+
+On an ARM64 Samsung phone with Android 17 and **4 KiB pages**, the exact
+rc7 → rc8 in-place upgrade preserved the existing projects and known files.
+The retained Ubuntu 24.04.5 base was not converted; this is upgrade evidence,
+not a fresh Debian phone install. The same terminal survived background use
+and explicit Git work while both foreground-service types were observed.
+Existing official Codex 0.160.0 authentication remained usable. An actual
+Codex task created two files and passed three unit tests; an independent shell
+reran those three tests and an additional assertion successfully. Local execution
+was enabled only in the already-authorized `RC7PhysicalQA` project, then reset
+**off**. This does not establish default Codex sandbox compatibility in PRoot.
+Preview rendering and new project deletion were not confirmed on this phone;
+the corresponding final-candidate emulator results above remain separate.
+
+The final phone cleanup rechecked all four known original fixture hashes,
+preserved both new model files and the existing login, and confirmed the three
+original project identities. Only the owned loopback server and verification
+shells were terminated through normal job termination/exit; their absence was
+verified. No project, credential or personal file was removed.
+
+A **private internal-test AAB** was signed with the dedicated upload identity.
+Signature/certificate, bundle validity and unchanged payload were verified;
+the original unsigned candidate and exact incomplete QA/source evidence were
+retained. Its SHA-256 is
+`8cfe4b8a3f629939678c1a50ef2a4f5b5058236d95d7eadef494110cf914dc1e`.
+This file is not published or uploaded. `productionReady=false` and
+`readyForConsoleUpload=false` remain explicit: signing does not complete the
+untested provider case, operator decisions or Console requirements. Upload-key
+registration and an external backup are not verified. See [building and signing](../BUILDING.md).
+
+The [public store preparation ZIP](https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/z8-play-store-preparation.zip)
+contains five actual English listing screenshots, English/Korean text, four
+original service demonstration videos and scoped emulator evidence. Its 64
+files were independently checked and anonymously downloaded with exact hashes.
+The five RGB24 screenshots preserve every original RGB pixel; original captures
+remain available separately. Phone authentication screens, private raw dumps,
+installable binaries and signing keys are excluded. The [final validation record](compliance/2026-11-15/rc8-final-review.json)
+binds the source, QA, signing result, store bundle and outstanding gates. These
+are post-source observations, not modifications to the b180705 source archive.
 
 The [final privacy assessment](compliance/2026-11-15/support-and-data-safety-final.md)
-and [Data safety worksheet](store/play-console-data-safety.md) now provide
-concrete draft form choices. Ordinary Gmail support processing still lacks
-complete country/overseas-route particulars. Changing to another consumer mail
-brand has not been established as resolving that evidence gap.
+and [Data safety worksheet](store/play-console-data-safety.md) provide concrete
+draft form choices. Ordinary Gmail support processing still lacks complete
+country/overseas-route particulars; a change to another consumer-mail brand has
+not been established as resolving that gap. Supported optional clients use the
+user's own accounts and subscriptions. No authenticated Claude task has been
+performed, and no provider purchase was made.
 
-A separate private internal-test signing path preserves the exact candidate,
-verified corresponding source and honest incomplete QA. Its 34 focused tests
-passed, including an inert-key signature check; this is not evidence that a
-real candidate was signed. Output remains `productionReady=false` and
-`readyForConsoleUpload=false`; the production promotion checks are unchanged.
-See [building and signing](../BUILDING.md).
-
-Final evidence is planned under `reports/compliance/2026-11-15/rc8/`: frozen
-source/artifact verification, final host/build checks, emulator and physical
-QA, and service demonstration manifests. These are required release-specific
-records, not links to reports presumed complete. Capture/publication materials
-must identify the actual tested candidate. Console identity verification remains
-in progress, phone verification awaits identity approval, and Create app was
-disabled in the read-only check. No app/release has been submitted.
+Console identity verification remains in progress, phone verification awaits
+identity approval, and **Create app was disabled** at the recorded read-only
+check. The app has **not been submitted**. Actual Console declarations, Play
+track/pre-launch checks and the applicable personal-account closed test remain.
+Native Linux-download policy treatment remains a normal Play review question;
+source/QA success does not establish a policy exemption or legal-risk guarantee.
 
 ## Published rc7 source and exact candidate evidence
 
