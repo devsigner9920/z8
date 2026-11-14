@@ -4,6 +4,13 @@ Implementation follow-up: [rc7 changes](implementation.md) address concrete
 source and external-client disclosure findings. The original baseline below
 remains scoped to the immutable rc6 release.
 
+Subsequent **rc7 final review**: [current release status](../../RELEASE_STATUS.md)
+and [exact-candidate results](final-review.json) include completed physical-phone
+and fresh offline-install checks, a real Codex file task, current Console gates,
+and the foreground-service alignment improvement recommended before production.
+They supersede the old pending-device statements, without relabeling the rc6
+baseline below or declaring Play/upload readiness.
+
 Reviewed November 15, 2026. Z8 remains a **local Android terminal and Linux
 development environment**, with optional official tools using the user's own
 accounts. It is free, with no advertising, in-app purchases, model proxy or

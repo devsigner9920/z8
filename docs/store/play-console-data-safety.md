@@ -1,12 +1,15 @@
-# Play Console worksheet — rc6
+# Play Console worksheet — rc7
 
 **rc7 follow-up:** [implemented client notices](../compliance/2026-11-15/implementation.md)
 add project-local acknowledgment records, install-time data/terms links and a
 notice before app-created client sessions. Provider binaries/authentication and
 telemetry settings are unchanged. The [new provider evidence](../compliance/2026-11-15/follow-up-provider-data.md)
 narrows the data-control assessment and confirms ordinary Gmail without automatic
-forwarding. Artifact/video identities below remain rc6; bind final answers to
-the actual rc7 candidate before submission.
+forwarding. Artifact identities below describe rc7. The linked rc6 videos remain
+historical reference evidence and are not relabeled as recordings of rc7.
+The [final rc7 review](../compliance/2026-11-15/final-review.json) adds physical
+upgrade/Codex task checks and fresh offline Debian setup, with exact artifact
+identities. These functional checks do not finish the data-flow classification.
 
 Updated **November 15, 2026**. This is an evidence-based preparation worksheet,
 not submitted answers or Google approval. No Console setting changed.
@@ -20,12 +23,14 @@ open items. Reconcile any other active Play versions before submission.
 
 | Item | Reviewed value |
 | --- | --- |
-| Release | `v0.1.0-rc6`, version code `7`, package `dev.devsigner.z8` |
-| Source commit | `131ce7f3d83b6671121f1f0dedbcbda439f92905` |
-| APK SHA-256 | `bed7761c4777ffb31f3009ef58e8a074b79b97d0fe4e77730f06c6f233ea31d7` |
-| AAB SHA-256 | `4d426219d125bc7f380223e3295c157676e631b3a835a78af6944781a8b5eabd` |
+| Release | `v0.1.0-rc7`, version code `8`, package `dev.devsigner.z8` |
+| Source commit | `9b13ee5998305c2985f998e805bf524adf33b5af` |
+| APK SHA-256 | `9d53696df74a542cd99d5fc78bf5559b60d2ae689cfc46d2b475b78ec550f0e8` |
+| AAB SHA-256 | `46ec5946029652d341701dc65cc0644a8761ec638ae5309d0546d5f2415ce5e1` |
 
-The final AAB manifest **contains** `android.webkit.WebView.MetricsOptOut=true`.
+The [independent artifact verification](https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc7/final-artifact-independent.json)
+binds these files to their source, notices and actual dependencies. The final
+AAB manifest **contains** `android.webkit.WebView.MetricsOptOut=true`.
 It disables WebView usage statistics, **not crash reporting**. Safe Browsing
 remains enabled. The APK is development-signed and the AAB unsigned; this
 worksheet does not make them upload-ready.
@@ -118,7 +123,8 @@ after resolution**. The updated [public policy](../privacy.html) and
 deletion of operator-controlled correspondence/working copies and earlier
 requests. Gmail's provider-side deletion/backups and senders' copies are
 separate. No automatic deletion job was created. This web-policy/operating-rule
-update does not alter the frozen APK.
+update is distinct from the frozen APK's local behavior and does not constitute
+an automatic mailbox-deletion service.
 
 Project and shared-preview-data deletion are local controls. They do not delete
 provider accounts, cloud content or support mail. Z8 has no own registration
@@ -137,9 +143,15 @@ promise of indefinite execution or automatic restoration.
 Standalone downloading/unpacking overlaps Android's `dataSync` examples;
 sharing a service class does not itself justify `specialUse`. Retain the
 feature-specific explanation and review the [service types](https://developer.android.com/develop/background-work/services/fgs/service-types#special-use).
+The final review recommends aligning standalone finite jobs with their actual
+service type and lifecycle before production, including timeout/stop handling
+that preserves unrelated interactive terminals. Merely declaring both types
+and always enabling them does not resolve the issue. The rc7 runtime remains
+unchanged; this is a preproduction recommendation, not a Google ruling.
 Metadata checks are not a scheduled foreground service.
 
-These final-candidate videos have public, anonymous byte/hash verification.
+These historical rc6 videos have public, anonymous byte/hash verification.
+They are not evidence that the corresponding rc7 flows were re-recorded.
 The [reviewer page](https://devsigner9920.github.io/z8/review.html) supplies playback:
 
 | Video | Actual scope |

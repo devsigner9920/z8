@@ -1,0 +1,686 @@
+{
+  "schemaVersion": 1,
+  "kind": "z8-rc7-final-review",
+  "reviewDate": "2026-11-15",
+  "status": "BOUNDED_DEVICE_QA_PASSED_PRODUCTION_PREPARATION_INCOMPLETE",
+  "candidate": {
+    "versionCode": 8,
+    "versionName": "0.1.0-rc7",
+    "apkSha256": "9d53696df74a542cd99d5fc78bf5559b60d2ae689cfc46d2b475b78ec550f0e8",
+    "installedReadbackSha256": "9d53696df74a542cd99d5fc78bf5559b60d2ae689cfc46d2b475b78ec550f0e8",
+    "aabSha256": "46ec5946029652d341701dc65cc0644a8761ec638ae5309d0546d5f2415ce5e1",
+    "apkSigning": "development-key-for-local-verification",
+    "aabSigning": "unsigned",
+    "uploadReady": false
+  },
+  "releaseTag": "v0.1.0-rc7",
+  "sourceCommit": "9b13ee5998305c2985f998e805bf524adf33b5af",
+  "sourceArchiveSha256": "6ad6d1d6e97ef38a9d7089ddb32fbe7d89a947f7aae86b0c6d6f2f05dfe81521",
+  "applicationSourceChangedDuringReview": false,
+  "appCodeAtHostTestCommitMatchesReleaseTag": true,
+  "host": {
+    "schemaVersion": 1,
+    "kind": "z8-final-host-tests",
+    "commit": "b458650f5f856627161fc249a7b23e3e687457de",
+    "releaseSourceCommit": "9b13ee5998305c2985f998e805bf524adf33b5af",
+    "python": "3.12.14",
+    "startedAtUtc": "2026-11-14T22:12:39.043767+00:00",
+    "completedAtUtc": "2026-11-14T22:13:58.550718+00:00",
+    "seconds": 79.507,
+    "status": "PASS",
+    "tests": 595,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1,
+    "expectedFailures": 0,
+    "unexpectedSuccesses": 0,
+    "failedTests": [],
+    "logSha256": "3a69da5310b467cd670ae96496fd6871a8f9d450aa6f0bf46126cfba3563cc8e",
+    "scope": "Host unittest suite only; no device testing or legal/source-closure approval.",
+    "passed": 594,
+    "skippedTests": [
+      {
+        "test": "test_guest_archive.GuestArchiveTests.test_real_image_when_present",
+        "reason": "Real guest extraction requires a case-sensitive filesystem; verify on Linux/Android"
+      }
+    ]
+  },
+  "physical": {
+    "schemaVersion": 1,
+    "reviewDate": "2026-11-15",
+    "status": "PASS_WITH_SCOPE_LIMITS",
+    "scope": "Actual physical-device upgrade, local terminal, selected tools, provider disclosure, scoped deletion and authenticated Codex QA. No Play approval or legal clearance is implied.",
+    "candidate": {
+      "versionName": "0.1.0-rc7",
+      "versionCode": 8,
+      "sourceCommit": "9b13ee5998305c2985f998e805bf524adf33b5af",
+      "apkSha256": "9d53696df74a542cd99d5fc78bf5559b60d2ae689cfc46d2b475b78ec550f0e8",
+      "aabSha256": "46ec5946029652d341701dc65cc0644a8761ec638ae5309d0546d5f2415ce5e1",
+      "installedApkReadbackSha256": "9d53696df74a542cd99d5fc78bf5559b60d2ae689cfc46d2b475b78ec550f0e8",
+      "installedApkHashVerified": true,
+      "uploadReady": false
+    },
+    "device": {
+      "type": "physical",
+      "model": "Samsung SM-F971N",
+      "android": "17",
+      "api": 37,
+      "architecture": "arm64-v8a",
+      "pageSizeBytes": 4096,
+      "displayTested": "Cover display, portrait and provider-notice landscape rotation"
+    },
+    "upgrade": {
+      "result": "PASS",
+      "fromVersionCode": 6,
+      "baselineApkSha256": "d64bace92c69311fd8dc1ca0d6a5cb0152d8a8838f60cd5846e7f7aa3a3cf818",
+      "method": "In-place package update preserving application data",
+      "sameSigningCertificateVerified": true,
+      "uninstallOrDataClear": false,
+      "rootOrSecuritySettingChanges": false,
+      "baselineProjectCount": 2,
+      "baselineProjectsRetained": true,
+      "unrelatedUserProjectOpened": false,
+      "preservedGuest": "Ubuntu 24.04.5 LTS",
+      "freshProjectBehavior": "Cloned the already prepared legacy Ubuntu template; no distribution conversion."
+    },
+    "checks": [
+      {
+        "id": "legacy-fixture-preservation",
+        "result": "PASS",
+        "project": "RC5PhysicalQA",
+        "fixture": "rc5-check.txt",
+        "sha256BeforeUpgradeAfterUpgradeAndAfterAllTests": "73475cb40a568e8da8a045ced110137e159f890ac4da883b6b17dc651b3a8049"
+      },
+      {
+        "id": "new-project-local-shell",
+        "result": "PASS",
+        "project": "RC7PhysicalQA",
+        "guest": "Ubuntu 24.04.5 LTS",
+        "python": "3.12.3",
+        "git": "2.43.0",
+        "fixture": "rc7-check.txt",
+        "fixtureSha256BeforeAndAfter": "ad46596180bbbe236bf146d427c9cb8a99d99f7871fadca016b97ee477286e01",
+        "networkScope": "No base-setup download shown; the phone network was not disabled, so this is not an offline-device test."
+      },
+      {
+        "id": "tools-catalog-and-selected-update",
+        "result": "PASS",
+        "observed": "Included terminal/base, recommended Python and Git, and optional native clients displayed. Legacy unmanaged Node shown as unverified. Explicit Git update confirmation and selected-operation progress were exercised; background/return and subsequent executable check completed.",
+        "gitExecutableAfter": "git version 2.43.0",
+        "limitation": "Git was already installed; this does not establish a newly downloaded Git version or the byte count of an APT transfer. No daily-check opt-in changed."
+      },
+      {
+        "id": "official-codex-install",
+        "result": "PASS",
+        "version": "0.160.0",
+        "method": "Explicit Tools install after dependency/data disclosure; official client installed through the application, not preseeded."
+      },
+      {
+        "id": "provider-disclosure",
+        "result": "PASS",
+        "observed": [
+          "Install disclosure, provider information and terms/privacy/license links visible",
+          "Install cancellation returned to Tools without starting that attempt",
+          "First Open Cancel and Android Back canceled launch; reopening presented the notice again",
+          "Landscape-to-portrait rotation retained the notice; Continue created the intended Codex session",
+          "Same installed client later opened without repeating the acknowledged provider notice",
+          "Separate project-local execution consent initially declined and remained separate from provider disclosure"
+        ],
+        "locale": "English",
+        "limitation": "Physical version-change prompting and Korean locale were not retested in this run; separate emulator evidence must be identified separately."
+      },
+      {
+        "id": "loopback-preview-and-background-return",
+        "result": "PASS",
+        "observed": "Own Python HTTP server bound only to 127.0.0.1:8767; app preview rendered synthetic HTML, survived Home/return and deletion of a separate disposable project. Server stopped normally during cleanup."
+      },
+      {
+        "id": "scoped-disposable-project-deletion",
+        "result": "PASS",
+        "deletedProject": "RC7DeleteQA",
+        "observed": "Close all and delete confirmed for one active QA terminal running an owned sleep process. Disposable project disappeared; sibling terminal/preview and known RC7/RC5 fixture hashes remained intact.",
+        "limitation": "Observed application deletion and scoped preservation, not forensic secure-erasure verification."
+      }
+    ],
+    "codexAuthenticatedChecks": {
+      "clientVersion": "0.160.0",
+      "modelObserved": "gpt-6.1-sol",
+      "login": {
+        "result": "PASS",
+        "method": "Official normal browser OAuth with an already authorized existing ChatGPT account; loopback callback and official login status confirmed success.",
+        "deviceCodeAttempt": "Canceled when a global account security setting would have been needed; no such setting was changed.",
+        "credentialsReadCopiedOrDeleted": false,
+        "purchaseOrNewAccount": false
+      },
+      "textOnly": {
+        "result": "PASS",
+        "mode": "Official codex exec --sandbox read-only",
+        "prompt": "Reply exactly Z8_RC7_AUTH_OK. Do not use tools, run commands, access files, or change anything.",
+        "actualReply": "Z8_RC7_AUTH_OK",
+        "toolCallsObserved": 0,
+        "limitation": "Response-only authentication check. A bundled bubblewrap fallback warning was present; this does not prove restricted file-tool execution works on Android."
+      },
+      "fileTask": {
+        "result": "PASS",
+        "authorization": "User explicitly allowed local execution only in RC7PhysicalQA.",
+        "mode": "The app adapter's separate project-scoped local-mode consent, accepted interactively; no manual bypass flags or global setting changes.",
+        "folder": "rc7-agent-qa",
+        "preparation": "Only the empty QA folder was manually created. Codex wrote both source files and ran the tests.",
+        "task": "Create add(a,b) and unittest cases for positive, negative and zero inputs; limit work to the empty QA folder, no other files or settings and no package installs.",
+        "actualModelToolExecutionObserved": true,
+        "modelTestsPassed": 3,
+        "independentOrdinaryShellTestsPassed": 3,
+        "files": [
+          {
+            "name": "math_utils.py",
+            "sha256": "ba1a531f581d2e6094e978ed6f7aca7a8d92eeb62c6e7ad73ee692f7f18bc772"
+          },
+          {
+            "name": "test_math_utils.py",
+            "sha256": "6fbd350964198fa929aa1b9ab8deeed02d383251fda9bd22af9de990f08dbf77"
+          }
+        ],
+        "localModeResetAfterward": true,
+        "resetMethod": "codex --z8-reset-local-mode; cleared message observed for this project.",
+        "loginPreservedAfterReset": true,
+        "limitation": "File-task success used the explicitly authorized project-local mode; it is not a claim that normal Linux restricted file execution works."
+      }
+    },
+    "cleanup": {
+      "result": "PASS",
+      "finalProjectCount": 3,
+      "baselineProjectsRetained": true,
+      "newPrimaryQaProjectRetained": true,
+      "onlyDisposableQaProjectDeleted": true,
+      "activeOrEndedSessions": 0,
+      "ownedPreviewServerStopped": true,
+      "language": "English",
+      "rotationRestored": "Original locked portrait setting",
+      "applicationLeftInstalled": true,
+      "officialLoginAndQaSourcePreserved": true,
+      "credentialsInspectedOrCopied": false,
+      "deviceOwnershipReturned": true
+    },
+    "screenshots": [
+      {
+        "file": "13-codex-created-files-and-tests.png",
+        "sha256": "adbcd64633c899462b883eed9a58e8800017e7312f69cf4ff0aae7a998cd6496",
+        "bytes": 269986,
+        "width": 1248,
+        "height": 1972,
+        "description": "Actual interactive Codex task, source creation tool call, and three passing tests in an explicitly authorized disposable QA folder.",
+        "capture": "Raw ADB capture of the active physical cover display; no pixel edits.",
+        "visualReview": "PASS"
+      },
+      {
+        "file": "14-independent-source-and-tests.png",
+        "sha256": "fd9c8a145d8bb809c8e692948f07e323cd24a8c237a329c237ef195a81b7eb8a",
+        "bytes": 197355,
+        "width": 1248,
+        "height": 1972,
+        "description": "Independent ordinary terminal inspection of the model-created source and rerun of all three tests.",
+        "capture": "Raw ADB capture of the active physical cover display; no pixel edits.",
+        "visualReview": "PASS"
+      },
+      {
+        "file": "15-independent-hashes-local-mode-reset.png",
+        "sha256": "e4ee490ba5ac76b9c0a7ba6a61babdd3e745c7b1b7f3dce6a6a0ffe489837b20",
+        "bytes": 136306,
+        "width": 1248,
+        "height": 1972,
+        "description": "Independent source and fixture hashes, followed by clearing this project's local-mode consent.",
+        "capture": "Raw ADB capture of the active physical cover display; no pixel edits.",
+        "visualReview": "PASS"
+      }
+    ],
+    "limitations": [
+      "One physical model and its cover display tested, not all devices or OEM behaviors.",
+      "Physical upgrade preserves legacy Ubuntu; fresh Debian and offline-first installation are separate emulator tests.",
+      "System notification shade/Android Active Apps Stop were not exercised on this phone; ordinary background return and owned session cleanup were tested.",
+      "No Claude authentication/model use, purchases, API credits or global device-auth/security changes.",
+      "No claim of whole-device network capture or forensic exclusion of every provider diagnostic.",
+      "Private auth/account/device-serial evidence, XML files and APK readbacks are excluded from this public report.",
+      "No confirmed blocking application defect was found in the completed scope."
+    ]
+  },
+  "freshInstallation": {
+    "schemaVersion": 1,
+    "kind": "z8-rc7-fresh-install-qa",
+    "reviewDate": "2026-11-15",
+    "completedAtUtc": "2026-11-14T22:33:15.541769+00:00",
+    "sourceCommit": "9b13ee5998305c2985f998e805bf524adf33b5af",
+    "releaseTag": "v0.1.0-rc7",
+    "candidate": {
+      "versionCode": 8,
+      "versionName": "0.1.0-rc7",
+      "apkSha256": "9d53696df74a542cd99d5fc78bf5559b60d2ae689cfc46d2b475b78ec550f0e8",
+      "installedReadbackSha256": "9d53696df74a542cd99d5fc78bf5559b60d2ae689cfc46d2b475b78ec550f0e8",
+      "aabSha256": "46ec5946029652d341701dc65cc0644a8761ec638ae5309d0546d5f2415ce5e1",
+      "apkSigning": "development-key-for-local-verification",
+      "aabSigning": "unsigned",
+      "uploadReady": false
+    },
+    "device": {
+      "kind": "fresh dedicated emulator",
+      "api": 37,
+      "abi": "arm64-v8a",
+      "pageSizeBytes": 16384,
+      "displayPixels": "1080x1920",
+      "noPreexistingAppData": true
+    },
+    "result": "PASS_WITH_BOUNDED_SCOPE",
+    "checks": [
+      {
+        "id": "fresh-install",
+        "result": "PASS",
+        "detail": "Package absent before installation; installed APK read back and its SHA-256 matched the final candidate. Android API 37, arm64, 16 KiB pages."
+      },
+      {
+        "id": "offline-first-shell",
+        "result": "PASS",
+        "detail": "Wi-Fi and mobile data disabled before first launch; no default Android network. Acknowledged Z8 setup information, prepared bundled minimal Debian 13.7, created a project, opened a usable shell and wrote/read an own source file without downloading tools. No external provider contract accepted.",
+        "evidence": [
+          "02-offline-setup-disclosure",
+          "03-offline-minimal-shell",
+          "offline-baseline.json"
+        ]
+      },
+      {
+        "id": "optional-tools-deferred",
+        "result": "PASS",
+        "detail": "type -P found no python3, git, node, codex or claude native executable before any optional installation. A Codex shell shim was present; this was not an installed Codex binary.",
+        "evidence": [
+          "04-offline-native-tools-absent"
+        ]
+      },
+      {
+        "id": "tools-catalog-and-default",
+        "result": "PASS",
+        "detail": "Included Linux + terminal was Ready; Recommended Python/Git needed installation; Optional category and Node.js 24 LTS/Codex were visible. Daily version checking defaulted to Off and remained Off.",
+        "evidence": [
+          "05-settings-default-daily-off",
+          "06-tools-included-recommended",
+          "07-tools-optional",
+          "24-final-settings-english-daily-off"
+        ]
+      },
+      {
+        "id": "explicit-python-install",
+        "result": "PASS",
+        "detail": "After enabling the emulator network, selected Python Install and the actual Download and install confirmation. Required Python/pip/venv/CA package list was shown and metered opt-in remained unchecked. Operation completed naturally; UI reported 3.13.5-1 and actual python3 --version reported 3.13.5. A Python arithmetic assertion printed 42.",
+        "evidence": [
+          "08-python-download-consent",
+          "10-python-installed",
+          "11-python-operation"
+        ]
+      },
+      {
+        "id": "keyboard-home-return",
+        "result": "PASS",
+        "detail": "Back dismissed the keyboard. Home and explicit app return preserved the existing terminal, shell variable and own source marker.",
+        "evidence": [
+          "09-home-return-continuity"
+        ]
+      },
+      {
+        "id": "localhost-preview",
+        "result": "PASS",
+        "detail": "An own manually started Python server bound to 127.0.0.1:8090 served a synthetic page through the actual app preview opened by xdg-open. No external page or account was used.",
+        "evidence": [
+          "12-preview-storage-seeded"
+        ]
+      },
+      {
+        "id": "preview-data-cancel-and-clear",
+        "result": "PASS",
+        "detail": "Actual Settings Cancel retained own seeded cookie/localStorage. Confirmed clear stopped the preview to a placeholder; explicitly reopening the same origin showed empty cookie/localStorage. Source marker, fixture hash and manually started server were preserved.",
+        "evidence": [
+          "13-preview-clear-dialog",
+          "14-preview-cancel-preserves",
+          "15-preview-clear-complete",
+          "16-preview-storage-cleared",
+          "17-preview-same-origin-after-clear",
+          "preview-data-check.json"
+        ]
+      },
+      {
+        "id": "new-project-base-isolation",
+        "result": "PASS",
+        "detail": "A second new project cloned from the included prepared base did not inherit the primary project source marker or optional Python installation. This was a new base project, not a copy of an existing user project.",
+        "evidence": [
+          "18-disposable-base-project"
+        ]
+      },
+      {
+        "id": "owned-project-delete",
+        "result": "PASS",
+        "detail": "One actual Close all and delete action stopped the disposable project live sleep child and removed its project/source, HOME and environment directories. The other primary project source hash and live manual server identity were preserved; no retry was needed.",
+        "evidence": [
+          "19-owned-project-delete-confirmation",
+          "20-project-delete-returned-primary",
+          "project-deletion-check.json"
+        ]
+      },
+      {
+        "id": "android-user-stop",
+        "result": "PASS",
+        "detail": "Android Quick Settings > Active apps > z8 > Stop displayed Stopped. No processes remained for the app UID; the manual preview server was gone and the source marker hash was unchanged. Explicit relaunch showed zero open sessions and did not replay the command.",
+        "evidence": [
+          "21-android-active-app-stop",
+          "22-android-stopped",
+          "23-after-android-stop-no-replay",
+          "android-stop-check.json"
+        ]
+      }
+    ],
+    "observations": [
+      {
+        "severity": "non-blocking",
+        "id": "tools-back-label",
+        "detail": "Tools opened through Settings shows “Back to project”, but tapping it returns to Settings. A further Back returns to the project. Navigation worked; the wording could be made context-specific. No code change was made."
+      }
+    ],
+    "notTested": [
+      "Physical-device behavior in this report (covered separately by the other reviewer).",
+      "Git, Node, Codex and Claude installation/update or authentication on this fresh emulator; only Python was selected.",
+      "Paid/provider model requests, account data or credentials; none accessed.",
+      "Per-origin IndexedDB, Cache API and service-worker fixtures in this run; only one cookie and localStorage key were deliberately seeded.",
+      "Daily opt-in network traffic, forced metadata refresh, metered/interrupted installer recovery or provider notices in this fresh run.",
+      "Exact first-shell performance benchmark, all Android/OEM versions, accessibility audit, Play approval or legal compliance approval."
+    ],
+    "cleanup": {
+      "openSessions": 0,
+      "manualServerStopped": true,
+      "primarySyntheticProjectPreserved": true,
+      "disposableProjectDeleted": true,
+      "language": "English",
+      "orientation": "portrait",
+      "wifi": "enabled",
+      "mobileData": "enabled",
+      "dailyVersionChecks": "off",
+      "ownershipReturnedToParent": true,
+      "emulatorDiskPreserved": true
+    },
+    "evidenceIndex": "reports/compliance/2026-11-15/rc7-final-review/fresh/evidence-index.json",
+    "screenCount": 24,
+    "videoCount": 1,
+    "sourceEdits": false,
+    "consoleOrReleaseMutations": false
+  },
+  "console": {
+    "schemaVersion": 1,
+    "kind": "z8-play-console-readonly-status",
+    "reviewDate": "2026-11-15",
+    "observedAtUtc": "2026-11-14T22:22:10.571433+00:00",
+    "method": "Read-only visible Google Play Console home through user browser; no form submission or settings changed.",
+    "accountType": "Personal",
+    "identityVerification": "Google is verifying identity; documents uploaded; email will be sent when complete.",
+    "phoneVerification": "Action required, available after other verification including identity approval.",
+    "createAppButton": "DISABLED",
+    "visibleInstruction": "Complete account verification to create an app.",
+    "appOrReleaseCreated": false,
+    "consoleSubmissionPerformed": false,
+    "scope": "Observed current UI status only; not a promised completion date or proof of production access."
+  },
+  "storeMetadata": {
+    "status": "PASS",
+    "scope": "Local metadata consistency and store text limits only",
+    "versionCode": 8,
+    "versionName": "0.1.0-rc7",
+    "releaseTag": "v0.1.0-rc7",
+    "storeText": {
+      "en-US": {
+        "title.txt": {
+          "characters": 24,
+          "limit": 30
+        },
+        "short-description.txt": {
+          "characters": 69,
+          "limit": 80
+        },
+        "full-description.txt": {
+          "characters": 2661,
+          "limit": 4000
+        },
+        "release-notes.txt": {
+          "characters": 280,
+          "limit": 500
+        }
+      },
+      "ko-KR": {
+        "title.txt": {
+          "characters": 10,
+          "limit": 30
+        },
+        "short-description.txt": {
+          "characters": 43,
+          "limit": 80
+        },
+        "full-description.txt": {
+          "characters": 1475,
+          "limit": 4000
+        },
+        "release-notes.txt": {
+          "characters": 140,
+          "limit": 500
+        }
+      }
+    },
+    "limitations": [
+      "Does not check public source downloads, screenshots, or signed release artifacts.",
+      "Does not establish policy compliance, completed device QA, or permission to publish binaries."
+    ]
+  },
+  "productionFindings": [
+    {
+      "id": "ACCOUNT_VERIFICATION",
+      "category": "CONSOLE_BLOCKED",
+      "priority": "HIGH",
+      "finding": "Read-only Console inspection showed identity review in progress, phone verification pending and Create app disabled.",
+      "action": "Wait for Google identity review, then complete the available phone verification and actual app/testing requirements. No release was submitted."
+    },
+    {
+      "id": "UPLOAD_SIGNING",
+      "category": "RELEASE_OPERATION_REQUIRED",
+      "priority": "HIGH",
+      "finding": "The candidate AAB is unsigned and APK is development-signed. There is no upload-ready release artifact in the checked candidate/evidence.",
+      "action": "After the applicable QA, source and declaration checks are complete, use the existing promotion/signing path with the actual upload key; verify the signed AAB's signature and unchanged payload. Confirm Play App Signing/upload-certificate registration in Console. Do not publish the development APK as stable.",
+      "evidence": [
+        "artifacts/candidates/8-46ec59460296/z8-candidate-runtime-arm64.json:110",
+        "tools/promote-release.py:30",
+        "tools/promote-release.py:84"
+      ]
+    },
+    {
+      "id": "PROVIDER_QA_SCOPE",
+      "category": "VERIFICATION_PENDING",
+      "priority": "MEDIUM",
+      "finding": "Exact rc7 physical upgrade, fresh Debian and authenticated Codex file/test checks are now complete within the attached scopes. Claude authentication/model work remains outside the completed test scope; no purchase or new entitlement was provisioned.",
+      "action": "Do not mark the current project promotion contract complete. Resolve the supported-client release scope or add the missing authenticated test; do not invent a passing result.",
+      "limit": "This is a project QA requirement, not a claim that Google mandates every provider task."
+    },
+    {
+      "id": "DATA_SAFETY_AND_APP_CONTENT",
+      "category": "CONSOLE_DECLARATION_REQUIRED",
+      "priority": "HIGH",
+      "finding": "The root-owned working draft now binds the worksheet to rc7 and labels the older videos historical. Actual supported-client account/content/diagnostic handling, platform reporting and support mail have not been converted into final Console answers. No collection-free conclusion follows from the lack of a Z8 server.",
+      "action": "Complete actual collected/shared types, purposes, optionality, encryption and deletion answers using the documented provider versions/settings. Finish audience/content rating, countries, no-ads/no-IAP and app-access instructions from actual Console facts. Reconcile older screenshot/video scope; reuse unchanged visuals only with honest version labeling.",
+      "evidence": [
+        "docs/store/play-console-data-safety.md:3",
+        "docs/store/play-console-data-safety.md:59",
+        "docs/store/play-console-data-safety.md:73",
+        "docs/compliance/2026-11-15/follow-up-provider-data.md:27",
+        "docs/store/play-console-data-safety.md:142"
+      ],
+      "source": "https://support.google.com/googleplay/android-developer/answer/10787469?hl=en",
+      "limit": "No need to declare every imaginable user-written script. A user-directed sharing exception is not a general exception from collection."
+    },
+    {
+      "id": "NATIVE_CODE_CLASSIFICATION",
+      "category": "POLICY_INTERPRETATION_NOT_PROVEN_VIOLATION",
+      "priority": "HIGH_REVIEW_UNCERTAINTY",
+      "finding": "Optional APT/Node/CLI paths still download native executables outside Play. Official policy restricts external executable delivery and has a VM/interpreter exception; the reviewed text does not conclusively classify this PRoot design.",
+      "action": "Use the existing transparent local-terminal submission explanation, disclosing official downloads and actual execution. Preserve a contingency if Google rejects the stated architecture. Do not rename/hide native payloads or claim user initiation alone grants an exception.",
+      "evidence": [
+        "runtime/guest/tool-manager.sh:55",
+        "runtime/guest/install-ai.sh:662",
+        "runtime/guest/install-node.py:220",
+        "docs/compliance/2026-11-15/play-policy-review.md:33"
+      ],
+      "source": "https://support.google.com/googleplay/android-developer/answer/16559646?hl=en",
+      "limit": "No categorical rejection or preapproved exception established; no vendor inquiry imposed."
+    },
+    {
+      "id": "FGS_OPERATION_TYPE_ALIGNMENT",
+      "category": "CONCRETE_CODE_ALIGNMENT_RECOMMENDED_BEFORE_PRODUCTION",
+      "priority": "HIGH",
+      "finding": "The shared service always starts with SPECIAL_USE, including independently initiated base preparation and selected-tool installation with no interactive terminal required. These finite jobs download, unpack, configure and verify files. Official Android guidance expressly assigns download/fetch/local-file processing to dataSync, whereas specialUse covers valid cases outside other types. This is a concrete scope mismatch to address, not merely an unspecified review question.",
+      "action": "Give finite preparation/install work an appropriate dataSync or other suitable job lifecycle; retain specialUse for actual interactive terminal work. Select types by active work, handle timeout/stop and concurrent terminal preservation, and retest. Merely adding a manifest type or always enabling both is insufficient. Then prepare feature-specific descriptions and trigger videos.",
+      "evidence": [
+        "tools/prepare-app.py:663",
+        "overlay/app/src/main/java/com/termux/app/Z8ToolManager.java:111",
+        "overlay/app/src/main/java/com/termux/app/Z8ToolManager.java:129",
+        "overlay/app/src/main/java/com/termux/app/Z8ToolManager.java:147",
+        "runtime/guest/tool-manager.sh:55",
+        "runtime/guest/tool-manager.sh:75",
+        "overlay/app/src/main/java/com/termux/app/Z8InitialSetup.java:97",
+        "artifacts/candidates/8-46ec59460296/z8-candidate-runtime-arm64-bundle-manifest.xml:140"
+      ],
+      "sources": [
+        "https://developer.android.com/develop/background-work/services/fgs/service-types#special-use",
+        "https://support.google.com/googleplay/android-developer/answer/13392821?hl=en"
+      ],
+      "limit": "Engineering classification based on observed standalone paths, not a Google enforcement decision. User initiation and visible progress support general FGS eligibility but do not themselves justify specialUse. Interruption-safe package handling and user Stop must survive any change."
+    },
+    {
+      "id": "SUPPORT_PROCESSING_PARTICULARS",
+      "category": "OPERATOR_FACTS_AND_LEGAL_BASIS_PENDING",
+      "priority": "HIGH",
+      "finding": "The operator's ordinary Gmail/no-forwarding arrangement and90day retention are documented. The actual support-processing/overseas-transfer legal route, applicable recipient-country/timing/method/contact/refusal particulars and necessary controller/responsibility details remain unestablished. A Google US address is not proof of processing only in the US.",
+      "action": "Document the arrangement and the applicable Korean legal basis, then publish the required particulars supported by that route. If consumer Gmail cannot supply them, assess a dedicated support provider with documented processing/storage/access terms. No automatic migration, forwarding or third-party inquiry is authorized by this finding.",
+      "evidence": [
+        "docs/privacy.html:113",
+        "docs/compliance/2026-11-15/follow-up-provider-data.md:199",
+        "docs/compliance/2026-11-15/follow-up-provider-data.md:203"
+      ],
+      "sources": [
+        "https://www.law.go.kr/LSW/lsLinkCommonInfo.do?chrClsCd=010202&lsJoLnkSeq=1029334743",
+        "https://www.law.go.kr/LSW/lsLinkCommonInfo.do?lsJoLnkSeq=1033215841"
+      ],
+      "limit": "This is a concrete unresolved operational/legal assessment, not a finding that all direct user-provider requests are operator-controlled overseas transfers."
+    },
+    {
+      "id": "SOURCE_RELEASE_ASSESSMENT",
+      "category": "PROJECT_RELEASE_REVIEW_OPEN_NO_NEW_MISSING_INPUT_FOUND",
+      "priority": "MEDIUM",
+      "finding": "rc7 technical work closed the named Coroutines probe/resource omission, preserved Kotlin's bounded source/build mapping and demonstrated four Java-library functional rebuilds plus a source-export Android build. No additional missing source input was established here. Immutable source/notices still retain pending closure/review flags, so the project's promotion gate remains closed.",
+      "action": "Finish a finite assessment of the combined-work source/delivery obligations against the published inputs and actual binary distribution arrangement. Retain precise upstream notices and the version-specific source link. If anything is missing, identify the specific input and build role; do not substitute an unlimited full-repository/full-machine demand or a reviewer name for evidence.",
+      "evidence": [
+        "docs/compliance/2026-11-15/implementation.md:34",
+        "reports/compliance/2026-11-15/rc7/source-independent.json",
+        "reports/compliance/2026-11-15/rc7/export-build-verification.json",
+        "tools/promote-release.py:40"
+      ],
+      "limit": "No legal approval or closure flag granted. Reproducible byte identity for every permissive library and a lawyer's signature are not asserted as universal license conditions."
+    },
+    {
+      "id": "AI_FEATURE_SCOPE",
+      "category": "CONDITIONAL_POLICY_CLASSIFICATION",
+      "priority": "MEDIUM_REVIEW_UNCERTAINTY",
+      "finding": "Z8 remains a general-purpose local terminal with optional official clients, not its own model service. The current guidance does not expressly classify this exact architecture. If treated as an AI-generation feature, the policy's in-app reporting/moderation obligations become relevant; support-email handoff alone is not that workflow.",
+      "action": "Keep review/listing claims aligned with the actual terminal/client boundary. Do not claim a confirmed exemption or invent a hosted AI product. If Google identifies an in-scope feature, implement the corresponding substantive safeguards or narrow that feature transparently.",
+      "evidence": [
+        "docs/compliance/2026-11-15/play-policy-review.md:202",
+        "docs/store/review-notes.txt"
+      ],
+      "sources": [
+        "https://support.google.com/googleplay/android-developer/answer/14094294?hl=en-EN",
+        "https://support.google.com/googleplay/android-developer/answer/13985936?hl=en"
+      ],
+      "limit": "Conditional, not a new mandatory report-button code change established by this audit."
+    }
+  ],
+  "minorObservation": [
+    {
+      "severity": "non-blocking",
+      "id": "tools-back-label",
+      "detail": "Tools opened through Settings shows “Back to project”, but tapping it returns to Settings. A further Back returns to the project. Navigation worked; the wording could be made context-specific. No code change was made."
+    }
+  ],
+  "sourceVerification": {
+    "originalReleaseAssets": "The original 15 source/review assets remain unchanged; their anonymous byte verification is retained. This follow-up adds three distinct supplemental assets.",
+    "sourceRecordsIndependentlyVerified": 13008,
+    "exportedSourceBuildWithoutGit": "Previously completed on this exact rc7 source; not rerun during this documentation/device follow-up.",
+    "terminalTestsInExportBuild": 145,
+    "combinedWorkSourceAssessmentComplete": false,
+    "previousCoroutinesOmission": "Resolved by retained preferred source and byte-identical probe reconstruction; not a current demonstrated omission.",
+    "artifactProofUrl": "https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc7/final-artifact-independent.json",
+    "sourceProofUrl": "https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc7/source-independent.json"
+  },
+  "publication": {
+    "bundle": "z8-rc7-final-review.zip",
+    "checksums": "z8-rc7-final-review-SHA256SUMS",
+    "contents": "Public-safe summary reports, all 24 fresh-emulator synthetic captures and raw setup video, and three selected physical Codex task/test/reset captures. ZIP paths retain repository-relative evidence paths; unbundled private XML/auth/readback files are excluded.",
+    "privateAuthOrDeviceIdentifiersIncluded": false,
+    "installableBinaryIncluded": false,
+    "originalReleaseAssetsReplaced": false,
+    "marketingScreenshotsRelabeled": false,
+    "legalOrPlayApproval": false,
+    "uploadReady": false
+  },
+  "cleanup": {
+    "physical": {
+      "result": "PASS",
+      "finalProjectCount": 3,
+      "baselineProjectsRetained": true,
+      "newPrimaryQaProjectRetained": true,
+      "onlyDisposableQaProjectDeleted": true,
+      "activeOrEndedSessions": 0,
+      "ownedPreviewServerStopped": true,
+      "language": "English",
+      "rotationRestored": "Original locked portrait setting",
+      "applicationLeftInstalled": true,
+      "officialLoginAndQaSourcePreserved": true,
+      "credentialsInspectedOrCopied": false,
+      "deviceOwnershipReturned": true
+    },
+    "freshEmulator": "Stopped only the dedicated final-review emulator after verifying its AVD identity; disk and synthetic source preserved."
+  },
+  "reportInputs": [
+    {
+      "path": "reports/compliance/2026-11-15/rc7-final-review/host-tests-summary.json",
+      "bytes": 909,
+      "sha256": "05a08bfba4c3244c463014153659a4514e83d8c9f08c593c3cc0cd03650a4b4e"
+    },
+    {
+      "path": "reports/compliance/2026-11-15/rc7-final-review/store-metadata.json",
+      "bytes": 1129,
+      "sha256": "97926293fb5ef491d152c8a66307162b7d58e7d0c42ebfb416e2451c5072df28"
+    },
+    {
+      "path": "reports/compliance/2026-11-15/rc7-final-review/console-status.json",
+      "bytes": 812,
+      "sha256": "8577c950441ae1bb7b8b5a4df63c5a90930b64daba27f1b994545680c4ed9164"
+    },
+    {
+      "path": "reports/compliance/2026-11-15/rc7-final-review/fresh/qa-fresh.json",
+      "bytes": 7374,
+      "sha256": "92675395decc926be7685e1c60bca6252263492b177c99c810c89973e436a1dc"
+    },
+    {
+      "path": "reports/compliance/2026-11-15/rc7-final-review/fresh/evidence-index.json",
+      "bytes": 11681,
+      "sha256": "b4d660522b9d134f7b79cb1d2dcfef4b0fbc232a41d6c5437bc11fd52c7268f8"
+    },
+    {
+      "path": "reports/compliance/2026-11-15/rc7-final-review/physical/qa-physical.json",
+      "bytes": 10036,
+      "sha256": "6ceaec2478b65352c54dd6c45ff1c4cbb2b6b618eea485c994f2f0bbbd8468bb"
+    },
+    {
+      "path": "reports/compliance/2026-11-15/rc7-final-review/fresh/media-privacy-review.json",
+      "bytes": 2005,
+      "sha256": "a11f006d8873477cd832b7beea00a7935cbced11f34bb73a14abaf342ff1b06a"
+    }
+  ]
+}

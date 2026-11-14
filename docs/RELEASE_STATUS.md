@@ -23,14 +23,49 @@ without Git metadata and passed 145 terminal tests. Separate artifact checks
 matched notices, runtime, guest, dependencies and 16KiB alignment. Focused
 English/Korean emulator testing passed cancellation, rotation, terms-browser
 return and remembered reopening, using a retained official Claude test fixture.
-It did not test provider installation, authentication or model requests.
+That earlier report did not test provider installation, authentication or model
+requests; the subsequent final review below adds separate exact-candidate tests.
 
-Final-candidate physical-device testing is pending because the phone was
-unavailable. Final license/source-closure review, Gmail overseas-processing
-particulars and legal basis, supported-provider Data safety, Play declarations,
-Console requirements and upload signing remain production gates. The rc6
-publication and QA identities below remain historical. New rc7 captures are QA
-evidence; the older store screenshot/video package has not been relabeled rc7.
+The [final review record](compliance/2026-11-15/final-review.json) binds the
+following new results to the same rc7 APK. The host suite passed **594 tests**,
+with one filesystem-specific skip and no failures. On a Samsung ARM64 phone
+with Android 17 and 4 KiB pages, an in-place rc5 → rc7 update preserved existing
+projects and a known source-file hash. The retained Ubuntu base remained
+Ubuntu; this was not a fresh Debian installation. A new test project passed
+shell/Python/Git use, explicit Git update, local preview and scoped deletion.
+Official Codex 0.160.0 installed and signed in through its normal browser flow,
+returned a real model response, and created two files with **three passing unit
+tests**, independently rerun in a separate shell. The file task used the user's
+explicitly approved local execution mode only in `RC7PhysicalQA`; that mode was
+reset off afterward. This does not establish Codex's default Linux sandbox
+compatibility in PRoot. Claude authentication/model work remains untested.
+
+On a separate fresh ARM64 Android 17 emulator with 16 KiB pages, the exact APK
+prepared its minimal Debian 13.7 environment and opened a working terminal
+while offline, without installing optional native tools. Explicit Python
+installation and execution then passed. Preview-data cancellation/clearing,
+project deletion with other work preserved, and Android's user Stop action
+passed within the recorded scopes. Explicit relaunch did not replay commands.
+Daily version checking defaulted to off. One minor wording issue remains:
+Tools opened from Settings says “Back to project” although it returns to Settings.
+
+**Production preparation remains incomplete.** Standalone setup/download jobs
+still use the interactive terminal's `specialUse` foreground-service type; the
+final assessment recommends aligning finite jobs with their actual service
+type/lifecycle before production (see below). Final license/source-closure
+assessment, Gmail overseas-processing particulars and legal basis,
+supported-provider Data safety, Play declarations and upload signing also
+remain open. The actual Console check showed identity verification in progress,
+phone verification pending and **Create app disabled**. No app or release was
+submitted. The rc6 publication and QA identities below remain historical.
+New rc7 captures are QA evidence; older store screenshots/videos have not been
+relabeled rc7, and the original rc7 source/candidate artifacts remain unchanged.
+The [supplemental evidence ZIP](https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc7/z8-rc7-final-review.zip)
+contains bounded reports, 24 synthetic fresh-install captures, the raw setup
+video and three physical Codex task/test/reset captures. Private authentication
+screens and installable binaries are excluded. Its
+[separate checksums](https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc7/z8-rc7-final-review-SHA256SUMS)
+cover only this follow-up; the original 15 assets remain unchanged.
 
 ## Current scope
 
@@ -62,22 +97,19 @@ binary JAR. All 31 embedded Java files match the retained upstream SVN revision
 build files and file-specific BSD/CC-BY notices. This resolves that collection
 gap; it does not by itself complete the separate combined-work source review.
 
-The latest source-evidence collection supplements 57 of the 59 resolved Android
-library coordinates packaged as AARs while retaining their published source
-JARs. ConstraintLayout and termux-am-library already have separate pinned
-upstream source mappings. The new supplement
-preserves 374 pinned upstream inputs, verifies 1,627 original Java/Kotlin files
-byte for byte, and retains one original generated `BuildConfig.java` with its
-generator recipe. Another 384 Git object checks connect shared root build files
-to the selected source commits. Original Android resources, build scripts,
-licenses and notices are retained; the generated notices now include the full
-Chromium BSD license for WebKit's boundary interfaces. The other 23 published
-JAR source collections have not received this full upstream-input supplement;
-that is a review category, not 23 demonstrated missing libraries. The current
-[license review](compliance/2026-11-15/license-review.md) identifies a concrete
-coroutines source/resource gap, a bounded Kotlin build/source-set mapping, and
-a functional reconstruction task from the public inputs. No complete dependency
-rebuild or completed corresponding-source delivery is claimed.
+The rc7 source collection retains 1,224 Maven payloads for 85 dependency
+coordinates, with 65 upstream proofs, 2,252 direct source matches, seven binary
+resource matches and one narrowly verified source-version substitution. It
+preserves the earlier Android resources, build inputs and original licenses,
+including the Chromium BSD notice. The rc6 audit's identified Coroutines gap
+has been supplemented: its probe was rebuilt byte-for-byte from preferred
+source. Kotlin build/generator and Unicode inputs are separately recorded.
+Four Java libraries were rebuilt from 788 retained source files and passed
+bounded functional checks. These completed checks are described in the
+[implementation follow-up](compliance/2026-11-15/implementation.md); the
+[original review](compliance/2026-11-15/license-review.md) remains historical
+evidence. A full dependency rebuild or completed legal/source-closure approval
+is not claimed.
 See [the source and notice procedure](RELEASE_LICENSES.md#pinned-upstream-inputs-for-android-libraries).
 
 ## Published rc6 source and exact candidate evidence
@@ -223,19 +255,28 @@ The UI and deletion tests summarized here did not sign in to real service accoun
 
 Public contact information and the privacy policy, corresponding source distribution for the binary, external tool and package terms, the necessary tests of the final candidate, and Play Console declarations and review must be checked as part of distribution preparation. Filling in public settings or creating a candidate does not grant store approval.
 
-Resolve the specific coroutines source/resource omission and bounded
-reconstruction tasks in the current license review, rather than treating every
-unsupplemented JAR or a generic review flag as a demonstrated defect. Preserve
-the published rc6 evidence. Any runtime, notice or source-binding correction
-must receive a new source snapshot and corresponding candidate checks.
+The identified rc6 Coroutines omission and bounded reconstruction tasks were
+addressed in rc7 as described above. The combined-work delivery assessment is
+still open; a generic review flag alone is not a demonstrated missing input.
+Preserve the published rc6/rc7 source and evidence. Any app, runtime, notice or
+source-binding correction needs its own source snapshot and candidate checks.
 `sourceClosureReviewed: false` remains until the actual delivery requirements
-are supported; an arbitrary sign-off does not replace the missing evidence.
+and exact evidence are assessed; merely changing a flag is not that assessment.
 
-The exact final rc6 candidate still needs physical-device coverage, broader
-lifecycle/preview regressions and a provider-authenticated Claude task for any
-compatibility claim about that workflow. Complete the applicable Play Console
-declarations and review, operator distribution decisions, and verified upload-key
-backup before upload signing. Native-download policy and provider conditions
-are assessed in the current review; technical success is not policy approval.
+The final review identifies a concrete service-type alignment recommendation:
+standalone setup and selected-tool jobs currently use `specialUse` even for
+finite download, unpacking and file-processing work. The official
+[foreground-service types](https://developer.android.com/develop/background-work/services/fgs/service-types)
+map those activities to `dataSync`, while `specialUse` covers valid work outside
+the other types. Give finite jobs the appropriate lifecycle and preserve
+interactive terminals when types change or a job times out. Adding both types
+unconditionally does not address this finding. This is a production engineering
+recommendation, not a Google enforcement decision.
+
+Complete the remaining exact-candidate provider coverage, applicable Play
+Console declarations, operator distribution decisions and verified upload-key
+backup before upload signing. Native-download and AI-feature policy
+classification still depend on the actual disclosed functions and ordinary
+review; technical success does not establish approval or exemption.
 
 Follow the [build guide](../BUILDING.md) and [release notices and corresponding source procedure](RELEASE_LICENSES.md). A draft privacy policy does not replace a finalized policy that matches the operator's actual data handling and public URL.
