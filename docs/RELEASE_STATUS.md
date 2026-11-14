@@ -4,13 +4,18 @@ Documentation: [English](../README.md) | [한국어](../README.ko.md)
 
 As of November 15, 2026, Z8 is a development project that has not reached a stable app release or Play Store launch. Source publication and app submission or approval are separate procedures. This document is a public summary of validation, not a compatibility guarantee for every build from current sources or every device.
 
+The [November 15 policy and license review](compliance/2026-11-15/README.md)
+is the current review entry point. Its findings supplement the immutable rc6
+release and the historical records below; they do not change a tested binary
+or establish Google Play approval.
+
 ## Current scope
 
 Z8 provides project Linux environments with separate HOME and source directories, multiple terminal sessions, local web previews, and public privacy, retention/deletion, environment, and license information. Users explicitly install and authenticate official AI CLIs. Z8 does not supply accounts, model services, or usage. SSH host management and remote session connections are not yet provided by the app.
 
 The current build configuration uses `dev.devsigner.z8`, ARM64, minSdk 28, and target/compile SDK 36. Declaring Android 9 or later does not mean every Android version, manufacturer, or user profile has been tested.
 
-The current source revision is configured as `0.1.0-rc6`, versionCode `7`, with English as the initial app language and an explicit Korean option. See [app language](LOCALIZATION.md). This follow-up separates included terminal preparation from optional tool installation. The Tools catalog groups required, recommended and optional tools per project. Optional foreground version checks retrieve public metadata at most once per 24 hours; downloads and updates remain explicit user actions. The rc6 source URL is reserved for the matching source archive and must be verified before an app binary is distributed. Earlier rc5 validation does not establish that the new candidate passed.
+The published source release is `0.1.0-rc6`, versionCode `7`, with English as the initial app language and an explicit Korean option. See [app language](LOCALIZATION.md). This release separates included offline terminal preparation from optional tool installation. The Tools catalog groups included, recommended and optional tools per project. Opted-in on-open version checks retrieve public metadata at most once per 24 hours; Check now is a separate explicit request. Downloads and updates remain explicit user actions. The matching source archive and store materials have been published and independently downloaded without credentials; the exact validation scope is recorded below.
 
 The rc5 source work opts out of Android WebView usage statistics, clarifies
 platform diagnostic reporting separately from Z8-operated telemetry, and adds
@@ -44,9 +49,66 @@ generator recipe. Another 384 Git object checks connect shared root build files
 to the selected source commits. Original Android resources, build scripts,
 licenses and notices are retained; the generated notices now include the full
 Chromium BSD license for WebKit's boundary interfaces. The other 23 published
-JAR source collections have not received this full upstream-input supplement.
-No complete dependency rebuild or final human source-closure review is claimed.
+JAR source collections have not received this full upstream-input supplement;
+that is a review category, not 23 demonstrated missing libraries. The current
+[license review](compliance/2026-11-15/license-review.md) identifies a concrete
+coroutines source/resource gap, a bounded Kotlin build/source-set mapping, and
+a functional reconstruction task from the public inputs. No complete dependency
+rebuild or completed corresponding-source delivery is claimed.
 See [the source and notice procedure](RELEASE_LICENSES.md#pinned-upstream-inputs-for-android-libraries).
+
+## Published rc6 source and exact candidate evidence
+
+The immutable [rc6 source release](https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc6)
+is bound to commit `131ce7f3d83b6671121f1f0dedbcbda439f92905`.
+
+| Artifact | SHA-256 |
+| --- | --- |
+| Public `z8-source.zip` | `36ff81fc7dd0f9444fff57dab523b8464278a0b1329706348a07f47e0786d10d` |
+| Local test APK | `bed7761c4777ffb31f3009ef58e8a074b79b97d0fe4e77730f06c6f233ea31d7` |
+| Local unsigned AAB | `4d426219d125bc7f380223e3295c157676e631b3a835a78af6944781a8b5eabd` |
+
+All 16 public source and store-preparation assets were downloaded without
+credentials and matched the staged hashes. The preparation ZIP contains five
+actual screenshots and three foreground-service demonstrations. It contains no
+installable binary. The test APK is development-signed, the AAB is unsigned,
+and `uploadReady` remains false.
+
+The final source passed 568 host tests with one filesystem-specific skip,
+145 terminal-engine tests, bundle validation and 16 KiB alignment checks.
+On dedicated ARM64 emulators, the exact final APK passed offline base
+preparation and first-terminal file read/write without optional tools, explicit
+Git installation and use, Claude Code 2.1.285 → 2.1.311 update with official
+manifest-signature and installed-binary verification, and preservation of
+existing project files and tools. English/Korean Tools controls, explicit
+Check now, daily-check opt-in/off, notification return to the selected project,
+and a real local preview were checked. The terminal demonstration includes
+actual Android Stop and preserved project files; the tool-update demonstration
+completed naturally and does not establish interruption/retry behavior.
+
+Python installation with pip/venv, Node 24.21.0 → 24.22.3 update, and a real
+authenticated Codex 0.169.0 task passed on the preceding rc6 candidate with the
+same installers. These are not relabeled as final-APK model or install tests.
+The final APK preserved the updated Codex client, login and fixture; five
+independent fixture tests passed before the owned test login was logged out.
+That task used explicitly consented project-local execution, not a working
+default Linux sandbox. No authenticated Claude task or physical-device run of
+this exact final rc6 binary is claimed. Host lifecycle tests cover selected
+tool ownership and scoped deletion guards; earlier device deletion observations
+remain attached to their own candidates below.
+
+A minor locale-cache issue remains: after switching language in the same
+process, a cached tool-status explanation can retain the old language until
+Check status refreshes it. English cold-start default and tool actions remain
+correct.
+
+The November 15 live privacy update adopts deletion of operator-held support
+correspondence 90 days after resolution, with a
+[manual operating procedure](compliance/2026-11-15/support-retention.md).
+It is a post-release documentation change, not an automated mailbox cleanup or
+a change to the immutable rc6 source archive, in-app text or QA evidence.
+
+## Earlier rc5 and rc4 validation
 
 The published rc5 source and preparation release is bound to commit
 `4de78e8e040c26646d76d2a22bb9bfbebfbd8e9e`. Its test APK SHA-256 is
@@ -73,7 +135,7 @@ Codex Linux sandbox failed in PRoot. It does not establish sandbox compatibility
 A provider-authenticated Claude task remains untested. The rc5 host suite passed
 520 tests with one filesystem-specific skip, and 145 terminal-engine tests
 passed. Fresh Debian setup and both foreground-service trigger/stop videos use
-the same rc5 candidate. New Tools behavior needs its own candidate evidence.
+the same rc5 candidate. The rc6 Tools evidence is recorded separately above.
 
 The rc4 candidate was exercised on two dedicated ARM64 emulators with 16 KiB
 pages. Observed checks included initial environment setup, preserving an
@@ -138,11 +200,19 @@ The UI and deletion tests summarized here did not sign in to real service accoun
 
 Public contact information and the privacy policy, corresponding source distribution for the binary, external tool and package terms, the necessary tests of the final candidate, and Play Console declarations and review must be checked as part of distribution preparation. Filling in public settings or creating a candidate does not grant store approval.
 
-The latest source and notice changes require a fresh source snapshot, regenerated
-offline notices and a newly built candidate. Repeat the affected deletion and
-base-cloning device checks against that candidate's exact hash, including the
-pending physical-phone check. Review the remaining JAR build inputs and the
-combined work before recording final source closure; successful collection
-keeps `sourceClosureReviewed: false`.
+Resolve the specific coroutines source/resource omission and bounded
+reconstruction tasks in the current license review, rather than treating every
+unsupplemented JAR or a generic review flag as a demonstrated defect. Preserve
+the published rc6 evidence. Any runtime, notice or source-binding correction
+must receive a new source snapshot and corresponding candidate checks.
+`sourceClosureReviewed: false` remains until the actual delivery requirements
+are supported; an arbitrary sign-off does not replace the missing evidence.
+
+The exact final rc6 candidate still needs physical-device coverage, broader
+lifecycle/preview regressions and a provider-authenticated Claude task for any
+compatibility claim about that workflow. Complete the applicable Play Console
+declarations and review, operator distribution decisions, and verified upload-key
+backup before upload signing. Native-download policy and provider conditions
+are assessed in the current review; technical success is not policy approval.
 
 Follow the [build guide](../BUILDING.md) and [release notices and corresponding source procedure](RELEASE_LICENSES.md). A draft privacy policy does not replace a finalized policy that matches the operator's actual data handling and public URL.

@@ -429,7 +429,7 @@ source distribution. Focused tests are in `tests/test_historical_guest_inputs.py
 
 ## Assembling Debian package sources and historical native inputs
 
-Collected Ubuntu source files live in separate hash directories. Before using
+Collected Debian source files live in separate hash directories. Before using
 `dpkg-source`, assemble every `sourceFiles` entry for the selected component into
 one directory, decode the URL filename (`%2B` becomes `+`), and verify each file's
 recorded SHA-256 and size, including the `.dsc`. For example, from the source ZIP
@@ -456,7 +456,7 @@ for record in component['sourceFiles']:
     (out / name).write_bytes(data)
 PY
 # On a system with Debian source tools, after reviewing the inputs:
-dpkg-source -x source-work/hostname/hostname_3.23+nmu2ubuntu2.dsc
+dpkg-source -x source-work/hostname/hostname_3.25.dsc
 ```
 
 The `.dsc` also declares the expected sibling payload names and checksums. Hash

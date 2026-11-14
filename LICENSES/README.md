@@ -83,7 +83,7 @@ Their inclusion does not assert that every resolved annotation class survives
 optimization into the app binary. Full collected source files retain their
 original headers independently of this supplementary index.
 
-Bundled native packages, the Ubuntu guest, Maven dependencies and independently
+Bundled native packages, the Debian guest, Maven dependencies and independently
 installed CLI tools have their own notices and terms. This directory is not a
 claim that all of them use the application's GPL license. The release source
 archive and generated offline notices are assembled and verified using

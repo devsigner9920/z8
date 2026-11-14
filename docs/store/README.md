@@ -54,9 +54,11 @@ in `screenshot-plan.json`. Root-level capture results must identify the actual
 candidate, screen dimensions and files before upload. A plan entry is not
 evidence that its screen was captured.
 The local capture/output directory for this preparation is
-`artifacts/play-store/2026-11-15/rc6/`; it is intentionally outside the public source
-tree. Its actual asset manifest, when produced, governs which captures exist
-and which final candidate they depict.
+`artifacts/play-store/2026-11-15/rc6-final/`; it is intentionally outside the public source
+tree. Its capture manifest identifies five actual screenshots from the final
+candidate. The [rc6 preparation release](https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc6)
+contains the verified store ZIP and three demonstration videos. Earlier `rc6/`
+captures are provisional and must not replace the final captures.
 
 Asset requirements checked on 2026-11-14:
 
@@ -82,3 +84,6 @@ separates observed data flows from unanswered provider/Console classifications.
 They distinguish known implementation facts from declarations still requiring
 review. Do not convert an unconfirmed answer into a declaration to advance the
 form. Keep final candidate hashes and QA evidence with the release package.
+The [November 15 policy and license review](../compliance/2026-11-15/README.md)
+assesses the published rc6 candidate. Later review documents do not replace its
+immutable source ZIP, app candidate, or previously published preparation ZIP.
