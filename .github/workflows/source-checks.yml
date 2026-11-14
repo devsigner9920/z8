@@ -30,14 +30,21 @@ jobs:
           python3 -m unittest discover -s tests -p test_release_build.py -v
           python3 -m unittest discover -s tests -p test_native_alignment.py -v
           python3 -m unittest discover -s tests -p test_signing_identity.py -v
+          python3 -m unittest discover -s tests -p test_upload_signing.py -v
       - name: Prepare public source set without publishing
         run: python3 tools/prepare-public-repo.py
       - name: Language preferences and CLI consent
         run: |
           python3 -m unittest discover -s tests -p test_language.py -v
           python3 -m unittest discover -s tests -p test_codex_launch.py -v
+          python3 -m unittest discover -s tests -p test_ai_install.py -v
+          python3 -m unittest discover -s tests -p test_prepare_app.py -v
+          python3 -m unittest discover -s tests -p test_setup_download_proxy.py -v
       - name: Source reconstruction and attribution
         run: |
           python3 -m unittest discover -s tests -p test_source_modifications.py -v
           python3 -m unittest discover -s tests -p test_historical_guest_inputs.py -v
           python3 -m unittest discover -s tests -p test_maven_sources.py -v
+          python3 -m unittest discover -s tests -p test_embedded_maven_source.py -v
+          python3 -m unittest discover -s tests -p test_debian_guest.py -v
+          python3 -m unittest discover -s tests -p test_debian_package_sources.py -v

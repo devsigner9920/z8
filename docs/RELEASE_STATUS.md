@@ -10,7 +10,38 @@ Z8 provides project Linux environments with separate HOME and source directories
 
 The current build configuration uses `dev.devsigner.z8`, ARM64, minSdk 28, and target/compile SDK 36. Declaring Android 9 or later does not mean every Android version, manufacturer, or user profile has been tested.
 
-The current source revision is configured as `0.1.0-rc4`, versionCode `5`, with English as the initial app language and an explicit Korean option. See [app language](LOCALIZATION.md). Its source URL targets the `v0.1.0-rc4` source preview. This version setting does not establish that an app binary has been released or that earlier device checks have been repeated for rc4. The exact candidate hashes and current test results belong to its release evidence.
+The current source revision is configured as `0.1.0-rc5`, versionCode `6`, with English as the initial app language and an explicit Korean option. See [app language](LOCALIZATION.md). Its source URL targets the `v0.1.0-rc5` source preview. This version setting does not establish that an app binary has been released or that earlier device checks have been repeated for rc5. The exact candidate hashes and current test results belong to its release evidence.
+
+The rc5 source work opts out of Android WebView usage statistics, clarifies
+platform diagnostic reporting separately from Z8-operated telemetry, and adds
+private upload-key preparation without bypassing the existing release checks.
+The optional Claude installer also verifies the official detached manifest
+signature with the guest's existing `gpgv` and a pinned signing-key fingerprint
+before downloading or executing the selected binary. It does not change the
+official CLI or its authentication choices.
+The current guest lock selects a fresh Debian 13.7 ARM64 base. Existing Ubuntu
+projects and prepared bases are preserved on upgrade; they are not converted
+or deleted. Consequently, an upgraded installation may continue creating
+projects from its existing Ubuntu base, while a fresh installation prepares
+the new Debian base. This is an explicit compatibility boundary, not a claim
+that every stored project has changed distributions.
+The [Data safety worksheet](store/play-console-data-safety.md) maps observed
+features and transmission paths; it is not a completed Play declaration.
+
+The previously missing `jsr305:1.3.9` sources were found inside the exact Maven
+binary JAR. All 31 embedded Java files match the retained upstream SVN revision
+49. Collection now verifies binary identity, class/source coverage, upstream
+build files and file-specific BSD/CC-BY notices. This resolves that collection
+gap; it does not by itself complete the separate combined-work source review.
+
+The rc4 candidate was exercised on two dedicated ARM64 emulators with 16 KiB
+pages. Observed checks included initial environment setup, preserving an
+existing project on update, Python/Node/Git execution, local preview, language
+switching, foreground-service stop, preview-data deletion and project deletion.
+The deletion check preserved another project's files and session. These were
+emulator observations; real-provider authenticated tasks and physical-device
+validation were not performed in those runs. Release-specific evidence remains
+bound to the exact tested artifact rather than inferred from this summary.
 
 ## November 14 submission preparation
 
@@ -22,11 +53,11 @@ The [English-primary store preparation](store/README.md) includes localized desc
 
 The source preparation now records dated modification notices for changed upstream files while preserving their original licenses. Runtime Maven source artifacts and version-matched upstream evidence can be collected and included in the public source package; source JAR availability alone does not prove all required resources and build scripts are present.
 
-The rc3 source collection covers 85 resolved Maven coordinates with 265 evidence files: 80 published source JARs, three pinned upstream source mappings, and one verified empty compatibility artifact. Exact source for `jsr305:1.3.9` remains unavailable. Its annotation classes were absent from the optimized local rc3 candidate inspected during this review; the unresolved input is retained for a source-scope decision rather than represented as a proven missing shipped-code source. Applicable NDK and file-specific source notices are also preserved.
+The historical rc3 source collection covered 85 resolved Maven coordinates with 265 evidence files: 80 published source JARs, three pinned upstream source mappings, and one verified empty compatibility artifact. That collection left `jsr305:1.3.9` unresolved; the rc5 follow-up above supplies exact embedded and upstream source evidence without replacing the old release. Its annotation classes were absent from the optimized local rc3 candidate inspected during that review. Applicable NDK and file-specific source notices are also preserved.
 
 Nineteen retained Z8 guest source files allow reconstruction of the exact historical guest ZIP and manifest. Current guest defaults produce a different image and must not be substituted silently. The source package and verifier now bind these retained inputs explicitly. See [the reconstruction procedure](RELEASE_LICENSES.md).
 
-The [distribution review](DISTRIBUTION_REVIEW.md), updated on November 14 against the retained rc3 candidate, maps the actual apt, Node and CLI download paths to the Play execution-policy question, compares the modified Ubuntu image with its original archive, and checks the official Claude Code host conditions. It includes precise, unsent Play and Canonical inquiry drafts and the official contact routes. The operator's contract basis and distribution decisions remain separate from the technical findings. The follow-up updates documentation only; it does not replace rc3 binaries or source assets, complete license review, or establish store approval.
+The [distribution review](DISTRIBUTION_REVIEW.md) retains the rc3 Ubuntu findings and unsent inquiry drafts as historical evidence. Its November 14 follow-up adds a reasoned ordinary Play submission basis, the observed operator Commercial Terms assent, and the current Debian delivery decision. These do not replace rc3 binaries or source assets, complete license review, or establish store approval.
 
 ## English-default update
 

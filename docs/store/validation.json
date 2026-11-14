@@ -1,65 +1,49 @@
 {
-  "schemaVersion": 1,
-  "checkedDate": "2026-11-14",
-  "countingRule": "Unicode code points, excluding the final file newline",
-  "status": "text-length-checks-pass",
-  "checks": [
-    {
-      "locale": "en-US",
-      "file": "en-US/title.txt",
-      "characters": 24,
-      "limit": 30,
-      "withinLimit": true
+  "status": "PASS",
+  "scope": "Local metadata consistency and store text limits only",
+  "versionCode": 6,
+  "versionName": "0.1.0-rc5",
+  "releaseTag": "v0.1.0-rc5",
+  "storeText": {
+    "en-US": {
+      "title.txt": {
+        "characters": 24,
+        "limit": 30
+      },
+      "short-description.txt": {
+        "characters": 69,
+        "limit": 80
+      },
+      "full-description.txt": {
+        "characters": 2289,
+        "limit": 4000
+      },
+      "release-notes.txt": {
+        "characters": 263,
+        "limit": 500
+      }
     },
-    {
-      "locale": "en-US",
-      "file": "en-US/short-description.txt",
-      "characters": 69,
-      "limit": 80,
-      "withinLimit": true
-    },
-    {
-      "locale": "en-US",
-      "file": "en-US/full-description.txt",
-      "characters": 2289,
-      "limit": 4000,
-      "withinLimit": true
-    },
-    {
-      "locale": "en-US",
-      "file": "en-US/release-notes.txt",
-      "characters": 263,
-      "limit": 500,
-      "withinLimit": true
-    },
-    {
-      "locale": "ko-KR",
-      "file": "ko-KR/title.txt",
-      "characters": 10,
-      "limit": 30,
-      "withinLimit": true
-    },
-    {
-      "locale": "ko-KR",
-      "file": "ko-KR/short-description.txt",
-      "characters": 43,
-      "limit": 80,
-      "withinLimit": true
-    },
-    {
-      "locale": "ko-KR",
-      "file": "ko-KR/full-description.txt",
-      "characters": 1268,
-      "limit": 4000,
-      "withinLimit": true
-    },
-    {
-      "locale": "ko-KR",
-      "file": "ko-KR/release-notes.txt",
-      "characters": 134,
-      "limit": 500,
-      "withinLimit": true
+    "ko-KR": {
+      "title.txt": {
+        "characters": 10,
+        "limit": 30
+      },
+      "short-description.txt": {
+        "characters": 43,
+        "limit": 80
+      },
+      "full-description.txt": {
+        "characters": 1268,
+        "limit": 4000
+      },
+      "release-notes.txt": {
+        "characters": 134,
+        "limit": 500
+      }
     }
-  ],
-  "scope": "Character limits only; not a record of final-candidate QA, asset capture, policy clearance or Console submission."
+  },
+  "limitations": [
+    "Does not check public source downloads, screenshots, or signed release artifacts.",
+    "Does not establish policy compliance, completed device QA, or permission to publish binaries."
+  ]
 }

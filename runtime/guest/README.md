@@ -1,6 +1,6 @@
 # z8 guest defaults
 
-Status: **Initial setup prepares the native runtime, pinned Ubuntu Base and standard tools before project creation.** New projects copy the prepared environment independently, then open their first Terminal. The foreground service owns preparation; interrupted accepted work resumes on the next foreground launch, while completed stages are validated and reused. Clean failures offer retry. No temporary Android shell or tool-install tab is created. The optional environment details screen checks executable versions and reports rootfs, tools and AI separately. Native diagnostic shells are an explicit rescue function, never a project fallback.
+Status: **Fresh installation prepares the native runtime, pinned Debian GNU/Linux 13.7 (trixie) base and standard tools before project creation.** New projects copy the prepared environment independently, then open their first Terminal. An existing prepared Ubuntu template remains usable and continues to produce Ubuntu projects; existing project rootfs, HOME and source are preserved. An upgrade does not convert or replace them in place. The foreground service owns preparation; interrupted accepted work resumes on the next foreground launch, while completed stages are validated and reused. Clean failures offer retry. No temporary Android shell or tool-install tab is created. The optional environment details screen checks executable versions and reports rootfs, tools and AI separately. Native diagnostic shells are an explicit rescue function, never a project fallback.
 
 ## Paths and launch contract
 
@@ -16,6 +16,7 @@ The launcher binds the target project HOME before provisioning. Setup does not c
 
 - Bash and completion, standard file/text/archive utilities.
 - `git`, SSH client, `curl`, `wget` and CA certificates.
+- `gpgv`, used by the optional pinned Claude release-signature verifier.
 - `rg`, `fdfind`, `fzf`, `jq`, `tree`, `file` and process tools.
 - `less`, `nano` and `tmux`.
 
@@ -67,10 +68,14 @@ Primary sources: [Node release lifecycle](https://nodejs.org/en/about/previous-r
 Package names are input requirements, not a reproducible image manifest: the selected distro release, repository snapshot, package versions, image digest and licenses must be recorded by the future image build. Device verification must check `pwd`, `printf '%s\n' "$HOME"`, `ll`, completion, package executables and persistence across new sessions. These inputs alone do not close the runtime build or guest-execution validation gates.
 
 
-## Pinned Ubuntu Base artifact
+## Pinned Debian artifact and retained Ubuntu inputs
 
-`image.lock.json` pins the official Ubuntu Base 24.04.5 AArch64 tarball and its
-published SHA256SUMS file. `tools/prepare-guest.py` defaults to a read-only plan:
+`image.lock.json` pins the Debian GNU/Linux 13.7 ARM64 rootfs produced for the
+Debian Docker official image by debuerreotype 0.17. The artifact revision is
+`3b26c3995c7fae47d95ba678632a3520e97054f7`, with snapshot
+`20261104T212339Z` and debootstrap 1.0.141. The input is the original single OCI
+gzip layer. Android continues to use local PRoot; Docker is not required on the
+device. `tools/prepare-guest.py` defaults to a read-only plan:
 
 ```sh
 python3 tools/prepare-guest.py
@@ -78,11 +83,41 @@ python3 tools/prepare-guest.py --build
 python3 tools/prepare-guest.py --verify /absolute/artifact/path/manifest.json
 ```
 
-The builder downloads over HTTPS, checks both pinned hashes and the tarball's
-entry in the checksum list, and never executes guest code or runs apt. The hash
-is a pin obtained from Canonical's HTTPS publication; GPG signature verification
-is not claimed. It preserves the base image's package metadata and copyright
-files. No compiler, AI CLI or convenience package is installed by this step.
+The builder downloads immutable HTTPS artifact URLs and checks exact SHA-256
+hashes and byte counts. It validates the OCI index, embedded manifest and config,
+Linux/ARM64/v8 platform, single gzip layer digest and size, and the decompressed
+layer's `diff_id`. The source layer hash is
+`23b69c48ce5c2a6fb0681d959fa700427ad2a7cf7e6be5d25249170a1853d7ad`.
+The input is linked from [Debian's image provenance](https://docker.debian.net/)
+and the [immutable artifact revision](https://github.com/debuerreotype/docker-debian-artifacts/tree/3b26c3995c7fae47d95ba678632a3520e97054f7/trixie).
+The lock records the original builder command and three exact source-index
+snapshots for corresponding-source collection. This does not claim repository
+signature verification or independent reproduction of the upstream rootfs.
+
+No guest code or apt is executed by the normalizer. Upstream package metadata,
+Debian GNU/Linux identity, archive keys, copyright files and APT sources are
+preserved. The base has no CA bundle, Python or `gpgv`; the later standard-tools
+setup installs those. Initial APT repositories retain their publisher-provided
+HTTP URIs and Signed-By keyring. The app's preparation proxy handles their
+transport; this builder does not replace repository trust or rewrite existing
+users' APT configuration. Initial package installation follows the configured
+release repositories, separately from the pinned base layer. No compiler, AI CLI
+or convenience package is installed by image normalization.
+
+`legacy/ubuntu-24.04.5.lock.json` preserves the original Ubuntu source lock
+verbatim for historical reconstruction. Select it explicitly; the default
+embedding validator only accepts the current Debian image:
+
+```sh
+python3 tools/prepare-guest.py --lock runtime/guest/legacy/ubuntu-24.04.5.lock.json \
+  --verify /absolute/retained-ubuntu/manifest.json
+python3 tools/prepare-guest.py --lock runtime/guest/legacy/ubuntu-24.04.5.lock.json \
+  --build --historical-managed-inputs /absolute/retained-managed-inputs/manifest.json
+```
+
+The legacy path checks Ubuntu's original tarball and SHA256SUMS pins. It writes
+only a new hash-addressed output or verifies an identical existing one; retained
+release artifacts are never replaced with Debian or current managed scripts.
 
 Image normalization adds an effective-UID guard to Ubuntu's exact, verified
 `/etc/bash.bashrc` sudo-hint block. Guest root skips this unnecessary hint before
@@ -91,15 +126,19 @@ that have no Ubuntu names. Non-root behavior and other shell errors are preserve
 Android group membership is unchanged. This applies only to newly built image
 generations and never rewrites an existing project's rootfs.
 
-Artifacts live in `artifacts/guest/ubuntu-24.04.5-arm64/<ZIP SHA-256>/`. The
+Current artifacts live in `artifacts/guest/debian-13.7-arm64/<ZIP SHA-256>/`;
+legacy artifacts retain `artifacts/guest/ubuntu-24.04.5-arm64/<ZIP SHA-256>/`. The
 `rootfs.zip`/`manifest.json` pair is validated before publication. ZIP order and
 timestamps are normalized; byte reproducibility across Python/zlib versions has
 not been established. `verify_manifest(path)` is the read-only embedding API and
-returns `(archive_path, manifest_data)`.
+returns `(archive_path, manifest_data)`. The optional `lock_path` argument
+selects retained inputs explicitly; `read_lock(path=None)` and
+`build(historical_managed_inputs=None, lock_path=None)` use the same selection.
 
 The manifest includes `schemaVersion=1`, `type=z8-guest-rootfs`,
 `normalizationVersion=1`, `architecture=aarch64`, distribution/release, pinned
-source/checksum URLs and hashes, ZIP name/hash/bytes, `entryCount`,
+source URLs and hashes, Debian OCI/provenance/source-index pins (or retained
+Ubuntu checksum pins), ZIP name/hash/bytes, `entryCount`,
 `totalUncompressedBytes`, and every ZIP entry as `{path,type,size,mode}`.
 Directory paths end in `/`, their size is zero, and modes are integers in
 0..0777. Setuid/setgid/sticky bits are stripped. `SYMLINKS.txt` is an ordinary
@@ -159,7 +198,7 @@ is mapped to `/run/z8/attention`; the app journal stays outside the guest. The
 launcher requires a valid nonce and registered launch ID in its environment. The
 Python helper and provider hooks remain separate opt-in installation steps.
 
-Ubuntu Base ships empty `/etc/resolv.conf` and `/etc/hosts`. Networking requires
+Base images do not supply the Android environment's DNS configuration. Networking requires
 a separate, per-environment DNS configuration derived from the device/user; this
 recipe does not silently choose a public resolver or bind host `/etc` files.
 Do not report apt, network or AI CLI compatibility from a successful bash launch.
@@ -173,7 +212,7 @@ Source references: [Ubuntu Base release](https://cdimage.ubuntu.com/ubuntu-base/
 
 New terminal launches set `BROWSER` and `GH_BROWSER` to the managed
 `/usr/local/lib/z8/browser/bin/xdg-open`. The same directory is added to `PATH`
-after the Ubuntu login profile, so Python `webbrowser`, GitHub CLI, and ordinary
+after the distribution login profile, so Python `webbrowser`, GitHub CLI, and ordinary
 `xdg-open https://…` can request the Android browser. Personal shell startup files
 may override these defaults. Existing running shells retain their old environment;
 open a new terminal after upgrading the app.

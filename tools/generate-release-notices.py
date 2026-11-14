@@ -8,6 +8,8 @@ import xml.etree.ElementTree as ET
 import zipfile
 from release_compliance import ROOT, atomic_write, bytes_sha, issue, json_bytes, read_json, sha256, maven_source_inventory, historical_guest_inventory
 from release_compliance import HISTORICAL_GUEST_ARCHIVES_REQUIRING_SOURCES
+from release_compliance import package_source_indexes
+import embedded_maven_source
 
 
 def pom_licenses(path, cache=None, visited=None):
@@ -84,6 +86,7 @@ def generate(args):
         unresolved.append(issue('SOURCE_SNAPSHOT_MISSING', 'application', 'Generate and supply the release source manifest'))
     if args.package_sources:
         packages = read_json(args.package_sources)
+        package_source_indexes(packages, args.package_sources.parent)
         inputs['packageSourcesSha256'] = sha256(args.package_sources)
         inputs.update(packages['inputs'])
         components += packages['components']
@@ -133,6 +136,30 @@ def generate(args):
                 child_pom_sha = sha256(candidates[0]) if len(candidates) == 1 else None
             component = {'id': 'maven:' + coordinate, 'name': coordinate, 'version': item['version'],
                          'scope': 'bundled-maven', 'artifactSha256': item['sha256'], 'licenses': licenses}
+            source_component = maven_components.get(coordinate, {})
+            if source_component.get('sourceDisposition') == embedded_maven_source.DISPOSITION:
+                # maven_source_inventory independently rederives this evidence from
+                # the exact original JAR and SVN dump before any notice is emitted.
+                source_record = source_component['embeddedSourceEvidence']
+                source_evidence = read_json(args.maven_sources.parent / source_record['path'])
+                component['pomLicenseDeclarations'] = licenses
+                licenses = [{'name': 'BSD-3-Clause', 'url': 'https://opensource.org/license/bsd-3-clause',
+                             'scope': 'Preserved JSR305 reference implementation LICENSE'},
+                            {'name': 'CC-BY-2.5', 'url': 'https://creativecommons.org/licenses/by/2.5/',
+                             'scope': 'GuardedBy.java, Immutable.java and NotThreadSafe.java source headers'}]
+                component['licenses'] = licenses
+                component['sourceLicenseEvidenceSha256'] = source_record['sha256']
+                component['scope'] = 'resolved-maven-runtime-input'
+                sections.append((coordinate + '/license-provenance',
+                    'The Maven POM declares Apache-2.0. The original source evidence instead includes the '
+                    'BSD-3-Clause LICENSE below and the listed CC-BY-2.5 file headers; these original terms are preserved. '
+                    'The original sources are unmodified. This entry describes a resolved build input and does not '
+                    'assert that its class definitions survive release shrinking. Source correspondence and release '
+                    'review remain separate from this notice.'))
+                sections.append((coordinate + '/' + source_evidence['license']['member'],
+                                 source_evidence['license']['text']))
+                sections.extend((coordinate + '/' + record['member'], record['header'])
+                                for record in source_evidence['perFileLicenses'])
             if not licenses or any(not x['name'] for x in licenses):
                 unresolved.append(issue('LICENSE_UNRESOLVED', coordinate, 'No unambiguous license declaration in artifact/POM hierarchy'))
             if child_pom_sha:

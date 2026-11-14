@@ -6,8 +6,6 @@ Unsupported recipe expressions stay unresolved; this program never sources shell
 """
 import argparse
 import concurrent.futures
-import gzip
-import lzma
 from pathlib import Path
 import re
 import shlex
@@ -15,6 +13,7 @@ import tarfile
 import urllib.parse
 import zipfile
 from release_compliance import ROOT, archive_inventory, atomic_write, checked_asset, deb822, download, issue, json_bytes, read_json, safe_relative, secret_path, sha256, source_id
+from release_compliance import read_source_index, debian_snapshot_base, source_payload_table, package_source_indexes
 
 
 def assignment(text, name):
@@ -151,14 +150,7 @@ def host_records(root, packages):
 
 
 def read_index(path):
-    data = Path(path).read_bytes()
-    if str(path).endswith('.xz'):
-        data = lzma.decompress(data, memlimit=128 * 1024 * 1024)
-    elif str(path).endswith('.gz'):
-        data = gzip.decompress(data)
-    if len(data) > 256 * 1024 * 1024:
-        raise ValueError('Ubuntu source index exceeds limit')
-    return deb822(data.decode())
+    return read_source_index(path)
 
 
 def source_notices(path):
@@ -188,12 +180,13 @@ def source_notices(path):
     return found
 
 
-def ubuntu_records(packages, indexes):
+def distribution_records(packages, indexes, distribution):
     lookup = {}
     for path, url in indexes:
+        index_sha = sha256(path)
         for item in read_index(path):
             key = (item.get('Package'), item.get('Version'))
-            lookup[key] = (item, url, sha256(path))
+            lookup[key] = (item, url, index_sha)
     result = []
     for package in packages:
         name, version = source_id(package)
@@ -203,28 +196,53 @@ def ubuntu_records(packages, indexes):
                   'sourceFiles': [], 'unresolved': []}
         found = lookup.get((name, version))
         if found is None:
-            record['unresolved'].append('Exact Ubuntu source version not present in supplied indexes')
+            record['unresolved'].append('Exact ' + distribution.title() + ' source version not present in supplied indexes')
         else:
             item, index_url, index_sha = found
             record['sourceIndex'] = {'url': index_url, 'sha256': index_sha, 'signatureVerified': False}
-            source_base = (index_url.split('/dists/', 1)[0] + '/'
-                           if index_url.startswith('https://snapshot.ubuntu.com/ubuntu/')
-                           else 'https://ports.ubuntu.com/ubuntu-ports/')
-            directory = item.get('Directory', '')
-            if not directory.startswith('pool/') or '..' in directory.split('/'):
-                raise ValueError('Invalid Ubuntu source directory')
-            for line in item.get('Checksums-Sha256', '').splitlines():
-                if not line.strip():
-                    continue
-                digest, size, filename = line.split()
-                if not re.fullmatch('[a-f0-9]{64}', digest) or '/' in filename or filename in {'.', '..'}:
-                    raise ValueError('Invalid source checksum table')
-                record['sourceFiles'].append({'url': source_base + directory + '/' + urllib.parse.quote(filename),
-                    'sha256': digest, 'bytes': int(size), 'evidence': 'exact source package/version from Ubuntu Sources index'})
+            if distribution == 'debian':
+                if not re.fullmatch(r'https://snapshot\.debian\.org/archive/(debian|debian-security)/\d{8}T\d{6}Z/dists/(trixie|trixie-updates|trixie-security)/main/source/Sources\.xz', index_url):
+                    raise ValueError('Debian source index is not a pinned official snapshot URL')
+                source_base = index_url.split('/dists/', 1)[0] + '/'
+            else:
+                source_base = (index_url.split('/dists/', 1)[0] + '/'
+                               if index_url.startswith('https://snapshot.ubuntu.com/ubuntu/')
+                               else 'https://ports.ubuntu.com/ubuntu-ports/')
+            record['sourceFiles'] = [dict(source, evidence='exact source package/version from ' + distribution.title() + ' Sources index')
+                                     for source in source_payload_table(item, source_base)]
             if not record['sourceFiles']:
                 record['unresolved'].append('Source index lacks SHA-256 payload table')
         result.append(record)
     return result
+
+
+def ubuntu_records(packages, indexes):
+    return distribution_records(packages, indexes, 'ubuntu')
+
+
+def debian_indexes(root, out, guest, fetch):
+    lock = read_json(root / 'runtime/guest/image.lock.json')
+    if lock.get('distribution') != 'debian' or any(guest.get(key) != value for key, value in lock.items()):
+        raise ValueError('Debian guest manifest differs from the current image lock')
+    pins = lock.get('sourceIndexes', [])
+    if not pins or len({pin.get('url') for pin in pins}) != len(pins):
+        raise ValueError('Debian image lock requires unique pinned source indexes')
+    indexes, records = [], []
+    for pin in pins:
+        base = debian_snapshot_base(pin)
+        stamp = base.rstrip('/').rsplit('/', 1)[1]
+        if stamp != lock.get('snapshot'):
+            raise ValueError('Debian source index snapshot differs from the image lock')
+        relative = 'indexes/' + pin['archive'] + '-' + stamp + '-' + pin['suite'] + '-Sources.xz'
+        target = out / relative
+        if fetch:
+            download(pin['url'], target, pin['sha256'], limit=pin['bytes'])
+        if (target.is_symlink() or not target.is_file() or target.stat().st_size != pin['bytes']
+                or sha256(target) != pin['sha256']):
+            raise ValueError('Pinned Debian source index is missing or changed: ' + pin['suite'])
+        records.append(dict(pin, path=relative, role='guest-source-index', status='VERIFIED', signatureVerified=False))
+        indexes.append((target, pin['url']))
+    return indexes, records, pins
 
 
 def preserve_runtime_inputs(root, out, provenance, extra_scripts):
@@ -264,7 +282,7 @@ def preserve_runtime_inputs(root, out, provenance, extra_scripts):
 def collect(args):
     root, out = args.root.resolve(), args.output.resolve()
     out.mkdir(parents=True, exist_ok=True)
-    records, inputs, notices, build_inputs, build_problems = [], {}, {}, [], []
+    records, inputs, notices, build_inputs, build_problems, source_indexes = [], {}, {}, [], [], []
     if args.runtime_manifest:
         path, data = checked_asset(args.runtime_manifest)
         if data['termuxPackagesCommit'] != read_json(root / 'tools/sources.lock.json')['termuxPackages']['commit']:
@@ -303,8 +321,15 @@ def collect(args):
         path, data = checked_asset(args.guest_manifest, hash_key='archiveSha256')
         packages, texts = archive_inventory(path)
         notices.update({'guest/' + name: text for name, text in texts.items()})
-        indexes = [(p, 'provided-local-source-index') for p in args.ubuntu_index]
-        for suite in ('noble', 'noble-updates', 'noble-security'):
+        distribution = data.get('distribution')
+        if distribution not in ('ubuntu', 'debian'):
+            raise ValueError('Unsupported guest source distribution')
+        if distribution == 'debian':
+            indexes, source_indexes, pins = debian_indexes(root, out, data, args.fetch)
+            inputs.update(guestDistribution='debian', guestSourceIndexes=pins)
+        else:
+            indexes = [(p, 'provided-local-source-index') for p in args.ubuntu_index]
+        for suite in (() if distribution == 'debian' else ('noble', 'noble-updates', 'noble-security')):
             url = f'https://ports.ubuntu.com/ubuntu-ports/dists/{suite}/main/source/Sources.xz'
             target = out / 'indexes' / (suite + '-main-Sources.xz')
             try:
@@ -314,7 +339,7 @@ def collect(args):
                     indexes.append((target, url))
             except Exception as exc:
                 inputs.setdefault('indexErrors', []).append({'url': url, 'error': type(exc).__name__ + ': ' + str(exc)[:300]})
-        for stamp in getattr(args, 'ubuntu_snapshot', []):
+        for stamp in ([] if distribution == 'debian' else getattr(args, 'ubuntu_snapshot', [])):
             if not re.fullmatch(r'\d{8}T\d{6}Z', stamp):
                 raise ValueError('Ubuntu snapshot must be YYYYMMDDTHHMMSSZ')
             for suite in ('noble', 'noble-updates', 'noble-security'):
@@ -327,7 +352,7 @@ def collect(args):
                         indexes.append((target, url))
                 except Exception as exc:
                     inputs.setdefault('indexErrors', []).append({'url': url, 'error': type(exc).__name__ + ': ' + str(exc)[:300]})
-        records += ubuntu_records(packages, indexes)
+        records += distribution_records(packages, indexes, distribution)
         inputs['guestArchiveSha256'] = sha256(path)
         inputs['guestManifestSha256'] = sha256(args.guest_manifest)
     if not records:
@@ -368,7 +393,7 @@ def collect(args):
     unique = {}
     for record in records:
         for source in record['sourceFiles']:
-            suffix = source.get('fileName') or Path(urllib.parse.urlsplit(source['url']).path).name or 'source'
+            suffix = source.get('fileName') or urllib.parse.unquote(Path(urllib.parse.urlsplit(source['url']).path).name) or 'source'
             source['path'] = 'downloads/' + source['sha256'] + '/' + safe_relative(suffix)
             # Different mirror URLs can name the same bytes differently. Verify
             # one canonical local payload and reference that actual path everywhere.
@@ -380,6 +405,8 @@ def collect(args):
             if args.fetch and source.get('downloadAllowed', True):
                 download(source['url'], path, source['sha256'])
             if path.is_file() and not path.is_symlink() and sha256(path) == source['sha256']:
+                if 'bytes' in source and path.stat().st_size != source['bytes']:
+                    raise ValueError('Source payload size differs from its pinned index')
                 return source['sha256'], {'status': 'VERIFIED', 'bytes': path.stat().st_size}
             return source['sha256'], {'status': 'MISSING'}
         except Exception as exc:
@@ -415,6 +442,9 @@ def collect(args):
                     'Recipes, all local patches and build scripts are included separately in the application source archive.',
                     'Runtime package closure, static-linked components and additional custom recipe fetches require release review.',
                     'Official tools downloaded independently by users are not represented as APK-bundled binaries.']}
+    if source_indexes:
+        evidence['sourceIndexes'] = source_indexes
+        package_source_indexes(evidence, out)
     atomic_write(out / 'package-sources.json', json_bytes(evidence))
     return evidence
 

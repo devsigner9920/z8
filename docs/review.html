@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Z8 development terminal: reviewer access and foreground service demonstrations.">
+  <title>Z8 — Review information</title>
+  <link rel="canonical" href="https://devsigner9920.github.io/z8/review.html">
+  <style>
+    :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+    body { margin: 0; background: #11151d; color: #e7edf7; line-height: 1.65; }
+    main { max-width: 880px; margin: auto; padding: 36px 24px 64px; }
+    a { color: #a8bcff; text-underline-offset: .2em; }
+    a:focus-visible, video:focus-visible { outline: 3px solid #d6e1ff; outline-offset: 5px; }
+    h1 { font-size: clamp(30px, 6vw, 48px); line-height: 1.15; margin: 30px 0 18px; }
+    h2 { font-size: 24px; margin-top: 40px; }
+    p, li { max-width: 75ch; }
+    .label { color: #b9c7de; font-size: 14px; }
+    .notice { padding: 16px 20px; background: #1c2638; border-radius: 12px; }
+    video { display: block; width: 100%; max-height: 70vh; background: #080a0f; border-radius: 12px; }
+    footer { border-top: 1px solid #36415a; margin-top: 40px; padding-top: 24px; }
+  </style>
+</head>
+<body>
+<main>
+  <nav aria-label="Main"><a href="index.html">About Z8</a> · <a href="privacy.html">Privacy</a> · <a href="https://github.com/devsigner9920/z8">Open source</a></nav>
+  <p class="label">REVIEW INFORMATION · 0.1.0-rc5</p>
+  <h1>A local development terminal for Android</h1>
+  <p>Z8 provides project Linux environments, multiple terminal sessions and local web previews. Z8 has no account system, model server, shared provider accounts, advertising or in-app purchases.</p>
+  <p class="notice">This page provides review materials. The source preview and demonstrations do not represent a Play Store approval or a publicly released app binary.</p>
+
+  <h2>Access the core app</h2>
+  <ol>
+    <li>Open Z8 and review the setup disclosures. Choose <strong>Start setup</strong> to prepare the development environment using an internet connection.</li>
+    <li>Create or open a project. Open a terminal and run a local command such as <code>python3 --version</code>.</li>
+    <li>Add another terminal, switch between sessions, or start a local development server and open its localhost address in the preview.</li>
+    <li>Use Settings to read the privacy, data deletion, environment and open-source notices.</li>
+  </ol>
+  <p>These core functions require no Z8 or AI-provider login. Optional official CLI clients require the user's own provider authentication and any applicable subscription or usage fees. The videos below do not demonstrate provider sign-in or a model request.</p>
+
+  <h2>Terminal foreground service</h2>
+  <p>A user opens a terminal and starts a command. The ongoing notification makes the active session visible while switching apps. Stopping the service terminates its sessions and child processes; reopening the app does not silently replay commands.</p>
+  <video controls playsinline preload="none" aria-label="Z8 terminal foreground service demonstration">
+    <source src="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc5/foreground-service-terminal-0.1.0-rc5.mp4" type="video/mp4">
+    Your browser cannot play this video. Use the download link below.
+  </video>
+  <p><a href="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc5/foreground-service-terminal-0.1.0-rc5.mp4">Download the terminal demonstration</a>. Silent screen recording; the visible actions demonstrate session start, background operation and stop.</p>
+
+  <h2>Environment preparation foreground service</h2>
+  <p>Preparation starts after the user presses Start setup. Progress remains visible in the app and through Android's foreground-service controls. It downloads and installs development packages; the operation can be stopped through Android's active-app controls and resumed through the app.</p>
+  <video controls playsinline preload="none" aria-label="Z8 environment preparation foreground service demonstration">
+    <source src="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc5/foreground-service-setup-0.1.0-rc5.mp4" type="video/mp4">
+    Your browser cannot play this video. Use the download link below.
+  </video>
+  <p><a href="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc5/foreground-service-setup-0.1.0-rc5.mp4">Download the preparation demonstration</a>. Silent screen recording; it demonstrates initiation and service controls, rather than every minute of package installation.</p>
+
+  <h2>Executable delivery and source</h2>
+  <p>The app bundles a host runtime, PRoot and a Linux filesystem. Preparation downloads additional native Linux packages and Node.js. Optional CLI installation downloads official binaries. PRoot uses Android's kernel and app UID; it is not a separate security virtual machine. This description does not claim a policy exception has been approved.</p>
+  <p>Z8 is GPL-3.0-only software with separately licensed components. <a href="https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc5">Matching source and release evidence</a>. <strong>Debian</strong>'s registered trademark belongs to Software in the Public Interest, Inc.; Z8 has no affiliation with or endorsement from the Debian project.</p>
+  <footer>Romi Ethsy · <a href="mailto:ethsy2462@gmail.com">ethsy2462@gmail.com</a> · <a href="privacy.html">Privacy and deletion instructions</a></footer>
+</main>
+</body>
+</html>

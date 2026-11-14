@@ -13,6 +13,7 @@ xz-utils
 unzip
 zip
 ca-certificates
+gpgv
 curl
 wget
 git

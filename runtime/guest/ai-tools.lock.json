@@ -423,11 +423,24 @@
       "manifestUrl": "https://downloads.claude.ai/claude-code-releases/2.1.285/manifest.json",
       "manifestSha256": "ab45eee79e59db6c01147e19b83074df8773304d790f5553b03c2a495eaa8297",
       "manifestPlatform": "linux-arm64",
-      "manifestTrust": "Pinned official HTTPS manifest; detached signature not verified by this recipe",
+      "manifestTrust": "Pinned manifest, detached signature and signing key; verified by isolated guest gpgv before binary download or execution",
       "officialInstallerUrl": "https://claude.ai/install.sh",
       "inspectedInstallerSha256": "3a68d3406cf674e17bed1733a4dcf37805e2e47d87417700007d7e1aa766a944",
       "documentation": "https://code.claude.com/docs/en/setup",
-      "distribution": "Download from Anthropic when explicitly installed; never embedded in the APK"
+      "distribution": "Download from Anthropic when explicitly installed; never embedded in the APK",
+      "manifestBytes": 2161,
+      "manifestSignature": {
+        "url": "https://downloads.claude.ai/claude-code-releases/2.1.285/manifest.json.sig",
+        "sha256": "e68646c8a718f003a0c60fde9ebf1ae76646f092cc1f9484c3fab1f93015501a",
+        "bytes": 833,
+        "verifiedOn": "2026-11-14",
+        "signingKey": {
+          "url": "https://downloads.claude.ai/keys/claude-code.asc",
+          "sha256": "bd70a5e4a268002704024ceba7f8446024114e94f3f0bdd11c23a9e592be81c6",
+          "bytes": 1688,
+          "fingerprint": "31DDDE24DDFAB679F42D7BD2BAA929FF1A7ECACE"
+        }
+      }
     }
   }
 }

@@ -14,6 +14,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 
 from release_compliance import ROOT, atomic_write, issue, json_bytes, read_json, sha256
+import embedded_maven_source
 
 GOOGLE = 'https://dl.google.com/dl/android/maven2/'
 CENTRAL = 'https://repo.maven.apache.org/maven2/'
@@ -189,13 +190,17 @@ def collect(args):
                 raise ValueError('Unknown or duplicate mapped coordinate')
             if sorted(set(mapping['binaryArtifactSha256'])) != sorted({x['sha256'] for x in groups[parts]}):
                 raise ValueError('Mapped binary hashes do not match the actual runtime inventory')
-            commit = mapping.get('commit', '')
-            url = mapping['sourceArchive']['url']
-            repository = mapping.get('repository', '')
-            if (not re.fullmatch(r'[0-9a-f]{40}', commit) or not mapping.get('tag') or not mapping.get('versionEvidence')
-                    or not re.fullmatch(r'https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', repository)
-                    or url != 'https://codeload.github.com/' + repository.removeprefix('https://github.com/') + '/zip/' + commit):
-                raise ValueError('Mapping must identify an immutable upstream commit, tag and version evidence')
+            if mapping.get('type') == embedded_maven_source.MAPPING_TYPE:
+                embedded_maven_source.validate_mapping(mapping, parts, mapping['binaryArtifactSha256'])
+            else:
+                commit = mapping.get('commit', '')
+                url = mapping['sourceArchive']['url']
+                repository = mapping.get('repository', '')
+                if (mapping.get('type') not in (None, 'upstream-git-source')
+                        or not re.fullmatch(r'[0-9a-f]{40}', commit) or not mapping.get('tag') or not mapping.get('versionEvidence')
+                        or not re.fullmatch(r'https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', repository)
+                        or url != 'https://codeload.github.com/' + repository.removeprefix('https://github.com/') + '/zip/' + commit):
+                    raise ValueError('Mapping must identify an immutable upstream commit, tag and version evidence')
             mappings[parts] = mapping
     all_files, components, unresolved, portable_mappings = {}, [], [], []
     def retain(record, role):
@@ -246,6 +251,8 @@ def collect(args):
             component['reviewRequired'].append('Explicit empty listenablefuture compatibility artifact; no classes, native code, resources or module-info found. Retain its metadata and license declaration.')
         else:
             try:
+                embedded = mapping and mapping.get('type') == embedded_maven_source.MAPPING_TYPE
+                source_role = ('embedded-source-binary' if embedded else 'upstream-source-archive') if mapping else 'published-source-jar'
                 record = (mapped_file(mapping, 'sourceArchive', mapping_path.parent, output, 'upstream-source-archive')
                           if mapping else download(repository_url(parts, '-sources.jar'), output, args.fetch, previous))
                 inventory = archive_inventory(output / record['path'], True)
@@ -253,7 +260,23 @@ def collect(args):
                                    for x in inventory['members'])
                 if not source_count:
                     raise ValueError('Published sources JAR contains no recognized source files; no automatic exemption')
-                record = retain(record, 'upstream-source-archive' if mapping else 'published-source-jar')
+                if embedded:
+                    upstream = mapped_file(mapping, 'upstreamArchive', mapping_path.parent, output, 'upstream-svn-dump')
+                    snapshot, evidence = embedded_maven_source.evidence(
+                        (output / record['path']).read_bytes(), (output / upstream['path']).read_bytes())
+                    upstream = retain(upstream, 'upstream-svn-dump')
+                    relative = 'derived/' + hashlib.sha256(snapshot).hexdigest() + '/jsr-305-r49.zip'
+                    atomic_write(output / relative, snapshot)
+                    snapshot_record = retain({'path': relative, 'sha256': hashlib.sha256(snapshot).hexdigest(),
+                        'bytes': len(snapshot), 'status': 'VERIFIED'}, 'upstream-svn-snapshot')
+                    evidence_bytes = json_bytes(evidence)
+                    relative = 'inventories/' + hashlib.sha256(evidence_bytes).hexdigest() + '-embedded.json'
+                    atomic_write(output / relative, evidence_bytes)
+                    component['embeddedSourceEvidence'] = retain({'path': relative,
+                        'sha256': hashlib.sha256(evidence_bytes).hexdigest(),
+                        'bytes': len(evidence_bytes), 'status': 'VERIFIED'}, 'embedded-source-evidence')
+                    component['buildEvidenceFiles'] = [upstream, snapshot_record]
+                record = retain(record, source_role)
                 component['sourceFiles'].append(record)
                 content = json_bytes({'schemaVersion': 1, 'kind': 'z8-source-content-inventory',
                     'coordinate': coordinate, 'sourceArtifactSha256': record['sha256'], 'members': inventory['members']})
@@ -263,13 +286,17 @@ def collect(args):
                     'bytes': len(content), 'status': 'VERIFIED'}, 'source-content-index')
                 component['contentInventory'] = index
                 component['sourceFileCount'] = source_count
-                component['sourceDisposition'] = 'PINNED_UPSTREAM_SOURCE_ARCHIVE' if mapping else 'PUBLISHED_SOURCE_JAR'
-                if mapping:
+                component['sourceDisposition'] = (embedded_maven_source.DISPOSITION if embedded else
+                    'PINNED_UPSTREAM_SOURCE_ARCHIVE' if mapping else 'PUBLISHED_SOURCE_JAR')
+                if embedded:
+                    component['reviewRequired'].append('Exact embedded Java sources match preserved SVN revision 49. Original build and license files are retained; this is not a binary-identical rebuild or source-closure approval.')
+                    component['reviewRequired'].append('POM Apache-2.0 metadata differs from the preserved BSD-3-Clause license and three CC-BY-2.5 source headers; notices must preserve the source evidence.')
+                elif mapping:
                     component['upstreamMapping'] = {key: mapping[key] for key in ('repository', 'tag', 'commit', 'versionEvidence')}
                     component['reviewRequired'].append('Exact upstream tag/commit and binary hashes are recorded. Binary-identical rebuild and complete source closure have not been established.')
                 else:
                     component['reviewRequired'].append('Published sources.jar is evidence, not a complete corresponding-source determination. Confirm version match, generated inputs and upstream build scripts.')
-                if any(binary['type'] == 'aar' or binary['resourceCount'] for binary in binaries):
+                if not embedded and any(binary['type'] == 'aar' or binary['resourceCount'] for binary in binaries):
                     component['reviewRequired'].append('Review Android resources, manifests and other non-class inputs: published sources.jar may omit inputs required to rebuild this artifact.')
             except (ValueError, OSError, zipfile.BadZipFile) as error:
                 component['sourceDisposition'] = 'MISSING'
@@ -279,6 +306,8 @@ def collect(args):
         if mapping and component['sourceFiles']:
             portable = copy.deepcopy(mapping)
             portable['sourceArchive']['path'] = component['sourceFiles'][0]['path']
+            if mapping.get('type') == embedded_maven_source.MAPPING_TYPE:
+                portable['upstreamArchive']['path'] = component['buildEvidenceFiles'][0]['path']
             if mapping.get('metadataPom'):
                 matched = next((record for record in component['metadataFiles']
                                 if record['sha256'] == mapping['metadataPom']['sha256']), None)
@@ -317,7 +346,7 @@ def main():
     parser.add_argument('--root', type=Path, default=ROOT)
     parser.add_argument('--gradle-artifacts', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--source-mappings', type=Path, help='Explicit exact-version upstream ZIP mappings keyed to actual binary hashes; never approvals')
+    parser.add_argument('--source-mappings', type=Path, help='Exact upstream ZIP or supported embedded-source mappings keyed to actual binary hashes; never approvals')
     parser.add_argument('--fetch', action='store_true', help='Download only from fixed official HTTPS Maven repositories')
     parser.add_argument('--allow-incomplete', action='store_true')
     args = parser.parse_args()

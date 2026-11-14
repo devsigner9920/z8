@@ -6,13 +6,20 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+import zipfile
 
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 class GuestArchiveTests(unittest.TestCase):
-    def test_extractor_and_real_image_when_present(self):
+    def test_extractor_hostile_fixtures(self):
+        self.run_extractor(include_real=False)
+
+    def test_real_image_when_present(self):
+        self.run_extractor(include_real=True)
+
+    def run_extractor(self, include_real):
         jdk = ROOT / ".local/jdk/Contents/Home/bin"
         javac = str(jdk / "javac") if (jdk / "javac").is_file() else shutil.which("javac")
         java = str(jdk / "java") if (jdk / "java").is_file() else shutil.which("java")
@@ -28,9 +35,23 @@ class GuestArchiveTests(unittest.TestCase):
             self.assertEqual(0, compiled.returncode, compiled.stdout + compiled.stderr)
             arguments = [java, "-cp", str(directory), "com.termux.app.GuestArchiveProbe", str(directory / "fixtures")]
             candidates = sorted((ROOT / "artifacts/guest").glob("*/*/manifest.json"), key=lambda path: path.stat().st_mtime)
-            if candidates:
+            if include_real and not candidates:
+                self.skipTest("No real guest artifact is present")
+            if include_real:
                 manifest_path = candidates[-1]
                 manifest = json.loads(manifest_path.read_text())
+                # Upstream Debian includes PAM.7.gz plus a pam.7.gz symlink.
+                # Preserve both on Android/Linux; a case-insensitive host cannot
+                # represent that image faithfully. Hostile fixtures still run in
+                # their separate test; real extraction requires case-sensitive CI
+                # or Android device QA.
+                (directory / "CaseSensitivity").write_text("probe")
+                if (directory / "casesensitivity").exists():
+                    with zipfile.ZipFile(manifest_path.parent / "rootfs.zip") as image:
+                        paths = [item["path"].rstrip("/") for item in manifest["files"]]
+                        paths += [line.split("←")[1] for line in image.read("SYMLINKS.txt").decode().splitlines()]
+                    if len({name.casefold() for name in paths}) != len(paths):
+                        self.skipTest("Real guest extraction requires a case-sensitive filesystem; verify on Linux/Android")
                 converted = directory / "real-manifest.tsv"
                 lines = [f"{manifest['archiveSha256']}\t{manifest['archiveBytes']}\t{manifest['totalUncompressedBytes']}"]
                 for item in manifest["files"]:
@@ -42,7 +63,7 @@ class GuestArchiveTests(unittest.TestCase):
             tested = subprocess.run(arguments, capture_output=True, text=True, timeout=60)
             self.assertEqual(0, tested.returncode, tested.stdout + tested.stderr)
             self.assertIn("PASS: archive safety", tested.stdout)
-            if candidates:
+            if include_real:
                 self.assertIn("PASS: real image extraction", tested.stdout)
 
 

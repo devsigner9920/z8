@@ -40,6 +40,7 @@ case "$(uname -m)" in aarch64|arm64) ;; *) printf '%s\n' '--apply requires ARM64
 [ -d /z8/home ] && [ -w /z8/home ] || { printf '%s\n' 'Project HOME is not writable.' >&2; exit 2; }
 [ -x /usr/bin/python3 ] || { printf '%s\n' 'Install the basic development tools first (Python 3 and CA certificates).' >&2; exit 2; }
 exec /usr/bin/python3 - "$z8_script_dir/ai-tools.lock.json" "$z8_tool" <<'Z8_AI_PYTHON'
+import base64
 import hashlib
 import json
 import os
@@ -285,6 +286,10 @@ def verify_existing_version(version_dir, tool, pin):
         verify_package_tree(version_dir, expected)
         for name in pin["binaries"]:
             validate_elf(version_dir / name)
+    elif tool == "claude":
+        if binary.stat().st_size != pin["bytes"] or digest(binary) != pin["sha256"]:
+            fail("Existing Claude binary differs from the signed release; it was preserved.")
+        validate_elf(binary)
     return binary
 
 def validate_launcher(launcher, tool_root, tool):
@@ -335,6 +340,72 @@ def version_check(binary, version, staging):
         fail("Native binary did not report the pinned version: " + output[:2000])
     return output
 
+def verify_claude_signature(manifest, signature, armored_key, directory, fingerprint):
+    # The raw key was hash/size checked before this transport-only conversion.
+    # gpgv expects a binary keyring; all OpenPGP parsing and cryptography remain
+    # in the existing guest verifier, never in this installer.
+    armor = armored_key.read_text(encoding="ascii")
+    match = re.fullmatch(r"-----BEGIN PGP PUBLIC KEY BLOCK-----\n\n([A-Za-z0-9+/=\n]+)\n=[A-Za-z0-9+/]{4}\n-----END PGP PUBLIC KEY BLOCK-----\n?", armor)
+    if match is None:
+        fail("Unsupported pinned Claude signing-key armor.")
+    keyring = directory / "claude-keyring.gpg"
+    with keyring.open("xb") as output:
+        output.write(base64.b64decode(match.group(1).replace("\n", ""), validate=True))
+    homedir = directory / "gnupg"
+    homedir.mkdir(mode=0o700)
+    verifier = Path("/usr/bin/gpgv")
+    if not verifier.is_file() or not os.access(verifier, os.X_OK):
+        fail("The guest's /usr/bin/gpgv is required to verify Claude's release signature.")
+    status_path, log_path = directory / "gpgv-status.txt", directory / "gpgv-log.txt"
+    # A private home and an explicit absolute keyring exclude the user's keys,
+    # trust database and configuration. No keyserver or network lookup occurs.
+    env = {"PATH": "/usr/bin:/bin", "HOME": str(homedir.resolve()),
+        "GNUPGHOME": str(homedir.resolve()), "LANG": "C", "LC_ALL": "C"}
+    with status_path.open("xb") as status_output, log_path.open("xb") as log_output:
+        completed = subprocess.run([str(verifier), "--homedir", str(homedir.resolve()),
+            "--keyring", str(keyring.resolve()), "--status-fd", "1",
+            str(signature.resolve()), str(manifest.resolve())],
+            stdin=subprocess.DEVNULL, stdout=status_output, stderr=log_output, timeout=45, env=env)
+    if status_path.stat().st_size > 65536 or log_path.stat().st_size > 65536:
+        fail("Claude signature verification produced too much output.")
+    statuses = []
+    rejected = {"BADSIG", "ERRSIG", "EXPSIG", "EXPKEYSIG", "REVKEYSIG", "NO_PUBKEY", "NODATA", "FAILURE", "ERROR", "KEYEXPIRED", "SIGEXPIRED", "KEYREVOKED"}
+    for line in status_path.read_text(encoding="ascii").splitlines():
+        if not line.startswith("[GNUPG:] "):
+            fail("Unexpected Claude signature verification status.")
+        fields = line[len("[GNUPG:] "):].split()
+        if not fields or fields[0] in rejected:
+            fail("Claude release signature verification failed.")
+        if fields[0] == "VALIDSIG":
+            statuses.append(fields[1:])
+    if completed.returncode != 0 or len(statuses) != 1:
+        fail("Claude release signature verification failed.")
+    valid = statuses[0]
+    # VALIDSIG field 1 is the signing key; optional field 10 identifies its
+    # primary key when a subkey signed. Require the exact pinned primary key.
+    if len(valid) not in (9, 10) or (valid[9] if len(valid) == 10 else valid[0]) != fingerprint \
+            or not re.fullmatch(r"[0-9A-F]{40}", valid[0]) or valid[7] not in ("8", "9", "10", "11"):
+        fail("Claude release signature does not match the pinned signing key.")
+    return valid[0]
+
+def verify_claude_manifest(staging, pin):
+    signature_pin = pin["manifestSignature"]
+    key_pin = signature_pin["signingKey"]
+    with tempfile.TemporaryDirectory(prefix=".claude-verify-", dir=staging) as temporary:
+        directory = Path(temporary)
+        manifest, signature, key = (directory / name for name in ("manifest.json", "manifest.json.sig", "claude-code.asc"))
+        download(pin["manifestUrl"], manifest, pin["manifestSha256"], pin["manifestBytes"], limit=1024 * 1024)
+        download(signature_pin["url"], signature, signature_pin["sha256"], signature_pin["bytes"], limit=65536)
+        download(key_pin["url"], key, key_pin["sha256"], key_pin["bytes"], limit=65536)
+        signer = verify_claude_signature(manifest, signature, key, directory, key_pin["fingerprint"])
+        value = json.loads(manifest.read_text(encoding="utf-8"))
+        platform = value["platforms"][pin["manifestPlatform"]]
+        if value["version"] != pin["version"] or platform["checksum"] != pin["sha256"] or platform["size"] != pin["bytes"]:
+            fail("Claude's signed official manifest does not match the artifact lock.")
+    return {"verifier": "gpgv", "manifestSha256": pin["manifestSha256"],
+        "signatureSha256": signature_pin["sha256"], "signingKeySha256": key_pin["sha256"],
+        "primaryFingerprint": key_pin["fingerprint"], "signingFingerprint": signer}
+
 def install_tool(home, tool, pin):
     tool_root = private_directory(home, ".local/share/z8/ai/" + tool)
     launch_dir = private_directory(home, ".local/bin")
@@ -346,18 +417,13 @@ def install_tool(home, tool, pin):
     version_dir = tool_root / (pin["version"] + ("-package-v1" if packaged else ""))
     staging = Path(tempfile.mkdtemp(prefix=".install-", dir=tool_root))
     try:
+        # Reinstalling an existing binary must not bypass signature validation.
+        verification = verify_claude_manifest(staging, pin) if tool == "claude" else None
         if version_dir.exists() or version_dir.is_symlink():
             binary = verify_existing_version(version_dir, tool, pin)
             version_output = version_check(binary, pin["version"], staging)
         else:
             print("Downloading official " + tool + " " + pin["version"] + "…", flush=True)
-            if tool == "claude":
-                manifest = staging / "manifest.json"
-                download(pin["manifestUrl"], manifest, pin["manifestSha256"], limit=1024 * 1024)
-                value = json.loads(manifest.read_text(encoding="utf-8"))
-                platform = value["platforms"][pin["manifestPlatform"]]
-                if value["version"] != pin["version"] or platform["checksum"] != pin["sha256"] or platform["size"] != pin["bytes"]:
-                    fail("Claude's pinned official manifest does not match the artifact lock.")
             artifact = staging / "download"
             download(pin["url"], artifact, pin["sha256"], pin["bytes"])
             binary = staging / (pin["entryPoint"] if packaged else tool)
@@ -375,6 +441,8 @@ def install_tool(home, tool, pin):
             if packaged:
                 receipt.update(layoutRevision=pin["layoutRevision"], entryPoint=pin["entryPoint"],
                     binaries=pin["binaries"], packageManifest=pin["packageManifest"], members=members)
+            if verification is not None:
+                receipt["manifestVerification"] = verification
             write_json(staging / "receipt.json", receipt)
             if version_dir.exists() or version_dir.is_symlink():
                 fail("Another installation created this version; existing files were preserved.")
@@ -414,7 +482,19 @@ def validate_lock(value):
         if tool == "claude":
             if pin["kind"] != "binary" or not re.fullmatch(r"[0-9a-f]{64}", pin["manifestSha256"]):
                 fail("Unsupported Claude artifact metadata.")
-            safe_url(pin["manifestUrl"])
+            release = "https://downloads.claude.ai/claude-code-releases/" + pin["version"] + "/"
+            signature = pin.get("manifestSignature", {})
+            key = signature.get("signingKey", {})
+            if pin.get("manifestPlatform") != "linux-arm64" or pin["url"] != release + "linux-arm64/claude" \
+                    or pin["manifestUrl"] != release + "manifest.json" or signature.get("url") != pin["manifestUrl"] + ".sig" \
+                    or key.get("url") != "https://downloads.claude.ai/keys/claude-code.asc" \
+                    or not re.fullmatch(r"[0-9A-F]{40}", key.get("fingerprint", "")):
+                fail("Unsupported Claude release signature identity or URL.")
+            for checksum, size, limit in ((pin["manifestSha256"], pin.get("manifestBytes"), 1024 * 1024),
+                    (signature.get("sha256", ""), signature.get("bytes"), 65536), (key.get("sha256", ""), key.get("bytes"), 65536)):
+                if type(size) is not int or not 0 < size <= limit \
+                        or not re.fullmatch(r"[0-9a-f]{64}", checksum):
+                    fail("Missing bounded Claude release signature metadata.")
     return value
 
 def main():

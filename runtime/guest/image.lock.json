@@ -1,12 +1,52 @@
 {
   "schemaVersion": 1,
-  "distribution": "ubuntu",
-  "release": "24.04.5",
+  "distribution": "debian",
+  "release": "13.7",
   "architecture": "aarch64",
+  "suite": "trixie",
+  "snapshot": "20261104T212339Z",
   "source": {
-    "url": "https://cdimage.ubuntu.com/ubuntu-base/releases/24.04/release/ubuntu-base-24.04.5-base-arm64.tar.gz",
-    "sha256": "a91d5a93010193712d346d761372b7c9db6dfcf093893161c64ca107f05914f2",
-    "sha256SumsUrl": "https://cdimage.ubuntu.com/ubuntu-base/releases/24.04/release/SHA256SUMS",
-    "sha256SumsSha256": "30f23cec3a46679bcf21dbe0c0a0ab51440e9b2f5ac69b3ae1d4a7a71c0ffc69"
+    "url": "https://raw.githubusercontent.com/debuerreotype/docker-debian-artifacts/3b26c3995c7fae47d95ba678632a3520e97054f7/trixie/oci/blobs/rootfs.tar.gz",
+    "sha256": "23b69c48ce5c2a6fb0681d959fa700427ad2a7cf7e6be5d25249170a1853d7ad",
+    "bytes": 49778604,
+    "ociIndexUrl": "https://raw.githubusercontent.com/debuerreotype/docker-debian-artifacts/3b26c3995c7fae47d95ba678632a3520e97054f7/trixie/oci/index.json",
+    "ociIndexSha256": "9f448262c673e990bdbdc735fa2f63c5b5dc851e19e7fc636279c1b3f5e650c3",
+    "ociIndexBytes": 1831,
+    "ociManifestSha256": "e529717ccc8118a0b9d38525f2b4e78cf150dbe470ad60d733c7c0023cabc3b0",
+    "ociConfigSha256": "fed135679c98b17d66a68b7569f030c17cb6a27b5186073abc2bc045da1d2e9b",
+    "ociRootfsDiffId": "811ed5ec8bc0a1a475acb253d144913bb6b60b923fe9376439846aeeb4b3eb3b"
+  },
+  "sourceIndexes": [
+    {
+      "suite": "trixie",
+      "archive": "debian",
+      "url": "https://snapshot.debian.org/archive/debian/20261104T212339Z/dists/trixie/main/source/Sources.xz",
+      "sha256": "6002f81f463a2d976d84b34170367cc16da2d60bd0ba9ab9d868d6e1c1a935d9",
+      "bytes": 10540436
+    },
+    {
+      "suite": "trixie-updates",
+      "archive": "debian",
+      "url": "https://snapshot.debian.org/archive/debian/20261104T212339Z/dists/trixie-updates/main/source/Sources.xz",
+      "sha256": "79552ccddf12a94348fe953e53a8584881b00a2c3eb984c871ae26783d67e391",
+      "bytes": 1396
+    },
+    {
+      "suite": "trixie-security",
+      "archive": "debian-security",
+      "url": "https://snapshot.debian.org/archive/debian-security/20261104T212339Z/dists/trixie-security/main/source/Sources.xz",
+      "sha256": "a4a72ae89a83443eb5f5743516cdc2acd31f5800726e01bacb63b424d0d82d73",
+      "bytes": 258872
+    }
+  ],
+  "provenance": {
+    "originPage": "https://docker.debian.net/",
+    "artifactRepository": "https://github.com/debuerreotype/docker-debian-artifacts",
+    "artifactCommit": "3b26c3995c7fae47d95ba678632a3520e97054f7",
+    "builder": "debuerreotype",
+    "builderVersion": "0.17",
+    "debootstrapVersion": "1.0.141",
+    "buildCommand": "./examples/debian.sh --arch arm64 out/ trixie @1793827419",
+    "repositorySignatureVerified": false
   }
 }

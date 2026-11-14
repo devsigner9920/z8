@@ -30,12 +30,15 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.net.SocketFactory;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
 
 /** Short-lived authenticated proxy for managed installer downloads, never general browsing. */
 public final class Z8SetupDownloadProxy implements AutoCloseable {
     interface Resolver { InetAddress[] resolve(String host) throws IOException; }
     private static final Set<String> HOSTS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-        "ports.ubuntu.com", "archive.ubuntu.com", "security.ubuntu.com", "nodejs.org")));
+        "deb.debian.org", "ports.ubuntu.com", "archive.ubuntu.com", "security.ubuntu.com", "nodejs.org")));
     private static final Set<String> HOP_HEADERS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
         "connection", "proxy-connection", "proxy-authorization", "proxy-authenticate", "keep-alive",
         "te", "trailer", "transfer-encoding", "upgrade", "host")));
@@ -125,14 +128,18 @@ public final class Z8SetupDownloadProxy implements AutoCloseable {
                     || target.getRawFragment() != null || request.target.indexOf('\\') >= 0
                     || !((tunnel && "https".equals(target.getScheme()) && port == 443
                         && (target.getRawPath() == null || target.getRawPath().isEmpty()) && target.getRawQuery() == null)
-                    || (!tunnel && "http".equals(target.getScheme()) && port == 80))) {
+                    || (!tunnel && "http".equals(target.getScheme()) && port == 80 && packagePath(host, target)))) {
                 reply(client, "403 Forbidden", ""); return;
             }
             if (request.headers.containsKey("transfer-encoding")
                     || request.headers.containsKey("content-length") && !"0".equals(request.headers.get("content-length"))) {
                 reply(client, "400 Bad Request", ""); return;
             }
-            upstream = connect(host, port);
+            // Minimal base images may not contain CA certificates yet. Upgrade
+            // their APT HTTP requests using Android's trust store, without
+            // rewriting existing project sources or allowing off-device HTTP.
+            upstream = connect(host, 443);
+            if (!tunnel) upstream = secure(upstream, host);
             client.setSoTimeout(IDLE_TIMEOUT);
             if (tunnel) {
                 client.getOutputStream().write("HTTP/1.1 200 Connection Established\r\n\r\n".getBytes(StandardCharsets.US_ASCII));
@@ -164,6 +171,34 @@ public final class Z8SetupDownloadProxy implements AutoCloseable {
         } catch (IOException | RuntimeException unavailable) {
             if (!committed && !closed.get()) try { reply(client, "502 Bad Gateway", ""); } catch (IOException ignored) { }
         } finally { if (upstream != null) release(upstream); }
+    }
+
+    private static boolean packagePath(String host, URI target) {
+        String path = target.getPath();
+        if (path == null || path.indexOf('\\') >= 0) return false;
+        for (String part : path.split("/", -1)) if (part.equals(".") || part.equals("..")) return false;
+        String name = host.toLowerCase(Locale.ROOT);
+        if (name.equals("deb.debian.org")) return path.startsWith("/debian/") || path.startsWith("/debian-security/");
+        if (name.equals("ports.ubuntu.com")) return path.startsWith("/ubuntu-ports/");
+        return (name.equals("archive.ubuntu.com") || name.equals("security.ubuntu.com")) && path.startsWith("/ubuntu/");
+    }
+
+    private Socket secure(Socket socket, String host) throws IOException {
+        SSLSocket tls = (SSLSocket) ((SSLSocketFactory) SSLSocketFactory.getDefault()).createSocket(socket, host, 443, true);
+        try {
+            track(tls);
+            tls.setSoTimeout(IDLE_TIMEOUT);
+            SSLParameters parameters = tls.getSSLParameters();
+            parameters.setEndpointIdentificationAlgorithm("HTTPS");
+            tls.setSSLParameters(parameters);
+            tls.startHandshake();
+            sockets.remove(socket); // The TLS socket now owns and closes it.
+            // Redirects are returned to APT, not followed here. Every subsequent
+            // allowed HTTP request is independently upgraded to verified TLS.
+            return tls;
+        } catch (IOException | RuntimeException failure) {
+            release(tls); throw failure;
+        }
     }
 
     private Socket connect(String host, int port) throws IOException {

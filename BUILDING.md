@@ -60,6 +60,21 @@ Prepare the following evidence for the candidate:
 
 Use a separate operator-managed upload key. Pass passwords through `Z8_UPLOAD_STORE_PASSWORD` and `Z8_UPLOAD_KEY_PASSWORD`, and the keystore path and alias through `Z8_UPLOAD_KEYSTORE` and `Z8_UPLOAD_KEY_ALIAS`. Do not put their values in source files, reports, or command records. Once all evidence is ready, the following command signs the validated candidate **without rebuilding it**:
 
+For this local checkout, `python3 tools/upload-signing.py create` generates a
+dedicated RSA-3072 upload key once under `.local/keys/z8-play-upload/`. It refuses
+to replace an existing identity. `verify` checks owner-only file permissions and
+the actual certificate fingerprint. The encrypted PKCS#12 key and its password
+are stored together locally; the password file is not an independent protection
+against someone who can read that directory. Keep the directory private and
+make a separate encrypted backup under the maintainer's control. The tool does
+not claim a backup has been made or register the key with Google. This upload
+key is distinct from the eventual Play App Signing key.
+
+Use `python3 tools/upload-signing.py promote` with the same evidence arguments
+shown below to load the local key without copying its password into shell
+history. It invokes the existing promotion checks unchanged. External signing
+systems can continue using the environment variables directly.
+
 ```sh
 python3 tools/promote-release.py \
   --candidate-metadata artifacts/z8-candidate-runtime-arm64.json \
@@ -107,13 +122,20 @@ Diagnostic mode does not include a bootstrap. Its Linux button is disabled, and 
 bash tools/build-runtime.sh --build --profile core --jobs 4
 # Use the generated verified manifest path.
 python3 tools/build-app.py --mode runtime --runtime-manifest /absolute/path/runtime-manifest.json
-# Check the pinned Ubuntu Base and create guest artifacts.
+# Check the pinned Linux base and create guest artifacts.
 python3 tools/prepare-guest.py --build
 # Add --guest-manifest to embed a project Linux image.
 python3 tools/build-app.py --mode runtime --runtime-manifest /absolute/path/runtime-manifest.json --guest-manifest /absolute/path/guest/manifest.json
 ```
 
 The bootstrap contains Android-native tools. Guest image installation and actual Claude/Codex sign-in, editing, shell, and test validation are separate. The Linux screen prepares each project's rootfs in a new staging directory before publishing it, without overwriting an existing environment. HOME and source files are kept outside rootfs. There is no UI to reset or delete only the environment yet. Deleting an entire project through its title removes source files, HOME, and the Linux environment together; distinguish this from environment recovery.
+
+The current pinned base is Debian. Upgrades retain existing project environments
+and prepared bases, including Ubuntu bases from earlier builds. New projects
+on those upgraded installations can still use the existing base. Use a fresh,
+dedicated installation to test the current default; do not clear an existing
+user's app data merely to exercise it. Historical Ubuntu reconstruction uses its
+explicit legacy image lock, not the current Debian lock.
 
 `tools/build-runtime.sh` pins source commits, the official builder image digest, and the NDK, and compiles tools from source for Z8's prefix. `core` focuses on the shell, tmux, PRoot, and compression tools; `workspace` is the full package management profile. It does not silently substitute official `com.termux` packages. See [runtime/README.md](runtime/README.md) for supply boundaries.
 

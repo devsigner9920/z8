@@ -11,6 +11,7 @@ import tarfile
 import tempfile
 import zipfile
 from release_compliance import ROOT, GENERATED_NOTICES, atomic_write, bytes_sha, json_bytes, read_json, safe_relative, secret_path, sha256, zip_entry, maven_source_inventory, historical_guest_inventory
+from release_compliance import package_source_indexes
 
 DIRECTORIES = ('tools', 'runtime', 'overlay', 'tests', 'docs', 'LICENSES', '.github')
 ROOT_FILES = ('README.md', 'README.ko.md', 'BUILDING.md', 'BUILDING.ko.md', 'THIRD_PARTY_NOTICES.md', '.gitignore',
@@ -86,6 +87,7 @@ def package(root, output, package_sources=None, maven_sources=None, historical_g
     if package_sources:
         package_sources = Path(package_sources)
         inventory = read_json(package_sources)
+        index_records = package_source_indexes(inventory, package_sources.parent)
         package_inventory_sha = sha256(package_sources)
         streamed['third-party-sources/package-sources.json'] = package_sources
         for component in inventory['components']:
@@ -97,7 +99,7 @@ def package(root, output, package_sources=None, maven_sources=None, historical_g
                 if path.is_symlink() or sha256(path) != record['sha256']:
                     raise ValueError('Package source payload changed before archiving')
                 streamed['third-party-sources/' + relative] = path
-        for record in inventory['installedNotices'] + inventory.get('sourceNotices', []) + inventory.get('buildInputs', []):
+        for record in inventory['installedNotices'] + inventory.get('sourceNotices', []) + inventory.get('buildInputs', []) + index_records:
             relative = safe_relative(record['path'])
             path = package_sources.parent / relative
             if path.is_symlink() or sha256(path) != record['sha256']:

@@ -62,8 +62,8 @@ inventory is not a claim that every license obligation has been satisfied.
    exact runtime binary hashes, upstream repository, tag, full commit, version
    evidence and source ZIP checksum. It does not substitute a newer version or
    approve source closure. The mapping and archive are preserved in the source
-   package. The rc3 collection retains `jsr305:1.3.9` as unresolved rather than
-   assigning an inexact historical source tree to it.
+   package. The published rc3/rc4 evidence retains `jsr305:1.3.9` as unresolved;
+   later collections can use the exact embedded-source path described below.
 
    Set `release/config.json` first, including a version-specific public source URL
    whose filename is chosen in advance, such as `/releases/2/z8-source.zip` on
@@ -143,6 +143,104 @@ inventory is not a claim that every license obligation has been satisfied.
    `VERIFIED` means this tool's evidence checks passed, not Google approval.
    Default exit status is 2 when blocked. Candidate builds can use
    `--allow-incomplete`, but retain the `BLOCKED` status and blocker list.
+
+## Exact embedded sources for JSR305 1.3.9
+
+The original Maven Central `com.google.code.findbugs:jsr305:1.3.9` JAR contains
+31 Java source files alongside 35 class files. Its missing `-sources.jar` does
+not mean those original sources are unavailable. The supported
+`embedded-binary-svn-source` mapping is restricted to this coordinate and these
+primary evidence hashes:
+
+| Evidence | SHA-256 |
+| --- | --- |
+| [Original Maven JAR](https://repo.maven.apache.org/maven2/com/google/code/findbugs/jsr305/1.3.9/jsr305-1.3.9.jar) | `905721a0eea90a81534abb7ee6ef4ea2e5e645fa1def0a5cd88402df1b46c9ed` |
+| [Google-preserved SVN repository dump](https://storage.googleapis.com/google-code-archive-source/v2/code.google.com/jsr-305/repo.svndump.gz) | `4f0debcffb11dab2986dbf1bc9e1375fec2eae0fa837f0ece21f375262a4be4b` |
+
+Use `--source-mappings` with a component entry containing the exact coordinate,
+`type: "embedded-binary-svn-source"`, `revision: 49`, the binary hash in
+`binaryArtifactSha256`, and local `sourceArchive` / `upstreamArchive` records.
+Each record contains `path`, `sha256` and the corresponding primary URL above.
+An optional `metadataPom` record retains the original Maven POM offline. Paths
+are relative to the mapping file; arbitrary coordinates, revisions and hashes
+are rejected. This is an explicit evidence mapping, not a license approval.
+
+The collector reconstructs SVN revision 49 (March 19, 2009) in memory and
+requires **all 31 embedded Java files to match byte for byte**. It retains the
+entire original JAR, original SVN dump, a deterministic snapshot of `trunk/ri`
+plus the parent POM, per-member hashes and class-to-source path coverage. Empty
+source/resource directories and original build files are preserved. The
+snapshot is identified as a reconstruction from the retained dump, not a
+separately published upstream ZIP. No source recipes are executed. The original
+Ant script specifies Java 1.5; modern Java compilers may require an appropriate
+historical toolchain to reproduce that build.
+
+Google's HEAD source archive is not used as an exact version substitute:
+revision 50 changes `Syntax.java` from `String` to `CharSequence`, and revision
+51 changes the build script. The selected revision has every source byte from
+the actual 1.3.9 JAR and its contemporaneous build files. A binary-identical
+rebuild has not been established by this collection.
+
+The original POM declares Apache-2.0, whereas the preserved implementation
+`LICENSE` contains BSD-3-Clause terms. Three unchanged source files retain
+Brian Goetz's CC-BY-2.5 headers: `GuardedBy.java`, `Immutable.java` and
+`NotThreadSafe.java`. Generated notices preserve the POM declaration separately,
+include the full BSD license and each of those original attribution headers,
+and identify this component as a resolved Maven build input. Its presence in
+the dependency graph does not establish presence of class definitions after
+R8 shrinking. Conversely, an APK class-absence report does not itself waive
+source or notice obligations.
+
+Successful verification changes the missing-source finding to
+`EMBEDDED_SOURCE_WITH_PINNED_UPSTREAM`. It does **not** set
+`sourceClosureReviewed`, approve the release or alter any older release's
+immutable evidence. Full source closure, per-file terms and the combined work
+still need review. Regenerate notices, source package and candidate for a new
+release before relying on the new evidence.
+
+## Debian source indexes and retained Ubuntu evidence
+
+For the Debian guest, the collector reads the installed `var/lib/dpkg/status`
+from the exact normalized ZIP and uses each package's `Source` name/version.
+Epochs and binary-only rebuild suffixes are preserved correctly; an unmatched
+source version remains unresolved. Debian URLs are derived only from the
+image lock's pinned `snapshot.debian.org` Debian or Debian-security archive.
+They never fall back to an Ubuntu mirror or a newer source version.
+
+`runtime/guest/image.lock.json` records the exact snapshot and three original
+`Sources.xz` indexes with URL, SHA-256 and byte length. The generated image
+manifest must agree with that lock before collection. `--fetch` retrieves
+those bounded inputs; an offline run requires the same verified cached bytes.
+Every source payload is checked against its index's SHA-256 and declared size.
+The raw indexes are retained in `package-sources.json` and the public source ZIP,
+so the exact name/version-to-payload mapping can be rechecked independently.
+The packager, notice generator and final verifier reject changed indexes or
+component mappings. This proves the pinned bytes, **not** an InRelease/GPG
+signature check; `signatureVerified` remains false.
+
+Original package copyright/common-license files, source notices, `.dsc` files,
+upstream archives and Debian packaging patches/build files are preserved.
+The inventory covers the image actually bundled in the app. Packages later
+installed by the user during environment preparation are a separate download
+flow; their possible future versions are not misrepresented as bundled inputs.
+`legalCompletenessReviewed` remains false after successful technical collection.
+
+The default guest is now Debian, but published Ubuntu candidates are immutable.
+Their exact original lock is retained at
+`runtime/guest/legacy/ubuntu-24.04.5.lock.json`. Historical managed-source
+validation selects only the current or this fixed legacy lock by exact source
+identity; it never accepts an arbitrary manifest-supplied lock path or URL.
+Reconstruction of an old Ubuntu image must explicitly select that lock:
+
+```sh
+python3 tools/prepare-guest.py --build \
+  --lock runtime/guest/legacy/ubuntu-24.04.5.lock.json \
+  --historical-managed-inputs /absolute/retained-ubuntu/manifest.json
+```
+
+Do not combine retained Ubuntu package evidence with a Debian guest hash. A new
+guest needs its own package inventory, notices, source package, app candidate
+and device QA before release review.
 
 ## Human review record
 

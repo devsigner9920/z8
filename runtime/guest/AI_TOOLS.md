@@ -38,9 +38,9 @@ This repository document is not injected into user prompts or `AGENTS.md`.
 | Tool | Pinned version | Native artifact | Integrity evidence |
 | --- | --- | --- | --- |
 | Codex | 0.160.0 | `codex-package-aarch64-unknown-linux-musl.tar.gz`, 150,934,664 bytes | SHA-256 from the official OpenAI GitHub release asset digest and package checksum list |
-| Claude Code | 2.1.285 | `linux-arm64/claude`, 239,722,488 bytes | Exact SHA-256 and size from the pinned official release manifest; the manifest itself is also hash-pinned |
+| Claude Code | 2.1.285 | `linux-arm64/claude`, 239,722,488 bytes | Exact SHA-256 and size from the pinned official release manifest; isolated guest `gpgv` verifies its pinned detached signature and primary signing key |
 
-All URLs and full hashes are in `ai-tools.lock.json`. They were read from public official sources on 2026-10-04. They are a reproducible pin, not a promise to track `latest` automatically.
+All URLs and full hashes are in `ai-tools.lock.json`. Artifact pins were read from public official sources on 2026-10-04; Claude's detached signature and key were additionally pinned and verified on 2026-11-14. These are reproducible pins, not a promise to track `latest` automatically.
 
 OpenAI's [CLI documentation](https://learn.chatgpt.com/docs/codex/cli) describes standalone installation and interactive sign-in. The pinned release's [official README](https://github.com/openai/codex/blob/rust-v0.160.0/README.md) also documents direct Linux ARM64 native downloads; the exact asset is in [release 0.160.0](https://github.com/openai/codex/releases/tag/rust-v0.160.0). Codex is Apache-2.0; that does not change z8's inherited Termux licensing.
 
@@ -60,7 +60,23 @@ Anthropic documents native Linux ARM64 binaries, direct binary integrity verific
 
 The inspected `https://claude.ai/install.sh` first downloads a current bootstrap binary even when an exact target version is supplied. To keep the bootstrap pinned too, this recipe uses the verified native binary directly in an app-managed version directory. It does not execute the downloaded shell installer. The inspected installer hash is recorded as provenance only.
 
-This recipe verifies the Claude manifest's pinned HTTPS-delivered SHA-256. It does **not** claim to verify the detached GPG signature. Anthropic's setup guide documents that additional verification separately.
+Before Claude download or execution, including an explicit reinstall, this
+recipe checks the manifest, detached signature and public key against their
+pinned byte counts and SHA-256 hashes, then verifies the signature using the
+existing guest `/usr/bin/gpgv`. A private temporary home and an explicit keyring
+exclude user keyrings and configuration. The hash-pinned public key's ASCII
+armor is decoded as base64; all OpenPGP parsing and cryptography are performed
+by `gpgv`. Successful verification must identify primary key
+`31DDDE24DDFAB679F42D7BD2BAA929FF1A7ECACE`, as documented by Anthropic. Missing
+tools, invalid signatures, ambiguous statuses, a wrong key or mismatching
+manifest metadata stop installation before the binary is run or published.
+
+The pinned key is a release trust anchor, not a live keyserver or revocation
+check. As the [GnuPG manual](https://www.gnupg.org/documentation/manuals/gnupg/gpgv.html)
+explains, `gpgv` trusts the supplied keyring and does not independently check key
+expiration or revocation. Maintainers must review publisher key changes when
+updating pins. Successful signature verification does not establish Android
+support or authenticated Claude workflow compatibility.
 
 ## Installation behavior
 
@@ -77,7 +93,10 @@ expected Codex executables, and every bundled ELF encountered, must have a
 
 Each version is prepared in a fresh staging directory and must report its pinned
 version under a bounded `--version` probe before publication. A receipt records
-the source artifact hash, installed binary hash and actual version output. Codex
+the source artifact hash, installed binary hash and actual version output. New
+Claude receipts also record the verified manifest/signature/key hashes and
+fingerprints. Existing managed Claude receipts remain intact on reinstall,
+but the signed metadata and exact binary pin are checked again. Codex
 also records the complete member inventory, package manifest and executable
 list. The directory is then renamed into place and an owned launcher symlink is
 atomically updated:
@@ -232,9 +251,18 @@ made on the user's behalf. This does not establish standard-sandbox support,
 all approval paths, or Claude Code task compatibility. See the
 authenticated test report (비공개 내부 검증 기록: `reports/compatibility/2026-10-17-authenticated-flow/index.html`).
 
+On 2026-11-14, the actual guest `gpgv` 2.4.4 accepted the pinned Claude 2.1.285
+release metadata, including a fresh official HTTPS metadata download. Altered
+manifest bytes, an altered signature and a wrong expected primary fingerprint
+were rejected. This check ran via an ADB-root-started PRoot metadata harness;
+it did not execute Claude, authenticate, or establish an ordinary app-session
+installation result. The final app candidate still needs its own installation
+and compatibility evidence.
+
 `tests/test_ai_install.py` covers the no-change default, host guard, pin/URL
 validation, size/hash failures, complete tar graph/ELF handling, managed
 publication, raw-binary migration, changed companions, preservation of unowned
-files, path symlinks and the version-probe command. Tests use temporary synthetic
+files, path symlinks, signature-verifier isolation, fail-closed Claude metadata
+verification, safe reinstall behavior and the version-probe command. Tests use temporary synthetic
 artifacts and a mocked version probe; they do not claim execution of the official
 AI tools.

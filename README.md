@@ -56,4 +56,4 @@ These commands produce a diagnostic APK without a Linux environment. `--allow-in
 
 The Z8 application is based on Termux app code. Its default license is **GPL-3.0-only**; the [full license text](LICENSE) is included. Portions with separate file or module licenses and exceptions, including Apache-2.0 and MIT, retain their original terms. Read the [third-party notices](THIRD_PARTY_NOTICES.md) and individual file notices.
 
-Optional CLIs, Ubuntu packages, and other dependencies have their own licenses and terms. Publishing a source repository alone does not fulfill every binary distribution obligation. See the [release licensing guide](docs/RELEASE_LICENSES.md) for preparing corresponding source and notices when distributing binaries.
+Optional CLIs, Linux distribution packages, and other dependencies have their own licenses and terms. Publishing a source repository alone does not fulfill every binary distribution obligation. See the [release licensing guide](docs/RELEASE_LICENSES.md) for preparing corresponding source and notices when distributing binaries.

@@ -12,13 +12,43 @@ or settle contracts. The maintainer already confirmed rights to the Z8 logo and
 Prism artwork on 2026-11-02; that question is not being reopened. See
 [license scope](../LICENSES/README.md) and [release status](RELEASE_STATUS.md).
 
+## Current Debian delivery decision
+
+The maintainer explicitly selected a fresh Debian base for new installations
+on November 14. The current image lock uses Debian 13.7 ARM64 from the official
+[Debian Docker build artifacts](https://docker.debian.net/), pinned to artifact
+commit `3b26c3995c7fae47d95ba678632a3520e97054f7` and source-layer SHA-256
+`23b69c48ce5c2a6fb0681d959fa700427ad2a7cf7e6be5d25249170a1853d7ad`.
+The image is normalized for Z8 and carries separately licensed packages; the
+artifact repository's license does not replace those package licenses.
+Current package source collection is distribution-aware and must match this
+image's exact package versions and retained source indexes.
+
+The new candidate replaces the bundled Ubuntu image rather than renaming it.
+Existing Ubuntu projects and prepared bases on upgraded installations remain
+intact. New projects on those installations can continue using their existing
+base; the app does not silently convert or delete environments. Fresh installs
+prepare Debian. Keep emulator fresh-install evidence separate from physical
+upgrade tests that retain an Ubuntu environment.
+
+Z8 identifies the environment truthfully and uses its own product name and
+artwork. Debian's registered trademark belongs to Software in the Public
+Interest, Inc. Z8 has no affiliation with or endorsement from the Debian
+project. This follows the factual-reference route in the
+[Debian trademark policy](https://www.debian.org/trademark), while preserving
+package copyright notices and source obligations. This removes the modified
+Ubuntu image from the new distributed binary; it does not erase historical
+Ubuntu obligations or constitute universal legal clearance.
+
 ## Exact reviewed version
 
-The runtime-specific findings below concern the retained **rc3** candidate. The
-subsequent rc4 submission-preparation work adds first-run disclosure links,
-updates operator attribution, and prepares store assets; it does not resolve the
-distribution questions below. Each rc4 artifact requires fresh integrity and QA
-evidence. See [current release status](RELEASE_STATUS.md).
+The historical runtime findings below concern the retained **rc3** candidate.
+The subsequent rc4 submission-preparation work adds first-run disclosure links,
+updates operator attribution, and prepares store assets. The November 14
+follow-up below also records a current, evidence-based Play submission route;
+it is not a store approval or a contractual attestation. Each changed artifact
+requires its own integrity and QA evidence. See
+[current release status](RELEASE_STATUS.md).
 
 | Item | Reviewed identity |
 | --- | --- |
@@ -42,8 +72,9 @@ reproduced the historical guest ZIP and manifest hashes exactly. Maven source
 JAR collection and version-matched upstream archives still require a review of
 resource/build-script completeness; unresolved records must remain visible.
 
-The November 14 follow-up changes documentation, not these retained binaries or
-their published source archive. Each new candidate needs its own source/notices
+The November 14 follow-up leaves these retained binaries and their published
+source archive unchanged. It updates the review basis and adds signature
+verification to the next candidate's installer. Each new candidate needs its own source/notices
 integrity checks and relevant validation.
 Follow the [release licensing procedure](RELEASE_LICENSES.md); an older report
 must not be reused as clearance for a changed build.
@@ -59,9 +90,9 @@ the exact build and detailed results still belong in the release QA record.
 | Topic | Evidence established | Remaining action |
 | --- | --- | --- |
 | Product scope | Local development terminal; official user-authenticated CLIs; no model proxy, shared account, ads or IAP | Preserve this description in the listing and review notes |
-| Play executable downloads | apt packages, Node and optional CLI downloads contain native code; PRoot uses the host kernel | Obtain a documented basis for the exception or change delivery/execution; a factual support inquiry is prepared below |
-| Ubuntu | The bundled image is modified, while upstream executables and notices are preserved | Establish the applicable aggregate/trademark basis; a narrowly scoped Canonical inquiry is prepared below |
-| Claude Code | Official binary is hash-checked and not patched; the launcher does not force an authentication method or proxy usage | Confirm the operator's Commercial Terms basis; an end user's personal subscription alone does not establish it |
+| Play executable downloads | Native downloads and PRoot architecture are disclosed; current Play Termux provides a relevant implementation comparator | Use the reasoned submission basis below for ordinary Play review; do not claim a confirmed exception or require a separate inquiry |
+| Guest distribution | Current source selects a fresh Debian image; historical Ubuntu images and existing user environments are separately retained | Validate the new image, exact package sources and preservation behavior; do not transfer rc4 QA automatically |
+| Claude Code | Operator assent through Anthropic's standard Commercial Terms flow was recorded on November 14; official binary remains unchanged and the next installer verifies its signed manifest | Preserve the technical conditions and terms evidence; this is not provider endorsement or an authenticated-workflow compatibility result |
 
 The maintainer requested registration and release preparation instead of sending
 inquiries; the prepared inquiries remain **unsent**. Resolve the distribution
@@ -71,7 +102,7 @@ change the underlying facts. Do not mark release-policy decisions complete
 merely because this document or an inquiry exists. A vendor inquiry is an
 evidence route, not a universally required advance-approval procedure.
 
-## Decisions that remain
+## Current submission basis and remaining decisions
 
 **Google Play execution policy.** Google's
 [Device and Network Abuse policy](https://support.google.com/googleplay/android-developer/answer/16559646?hl=en)
@@ -83,9 +114,31 @@ downloader does not make its native payload interpreted code. The official
 policy does not explicitly resolve this particular execution model or define a
 separate-kernel/CPU-emulation test. Their absence alone is not a rejection. This is a
 material Play review risk, not a finding that all terminal apps are prohibited.
-The concrete question is whether these disclosed flows qualify for the stated
-exception. User consent, hashes, successful execution tests, or removing only a
-CLI installation shortcut do not answer it.
+The concrete question is how Google applies the exception to these disclosed
+flows. User consent, hashes, successful execution tests, or removing only a CLI
+installation shortcut do not answer it. A documented ordinary submission is
+the selected review route; a separate advance support inquiry is not stated as
+a policy prerequisite.
+
+The November 14 follow-up found a current implementation comparator, beyond an
+old terminal-app anecdote. The [Termux Play listing](https://play.google.com/store/apps/details?id=com.termux&hl=en)
+was publicly available, showed an October 9, 2026 update, and described apt
+package installation. The [Play-specific maintainer repository](https://github.com/termux-play-store)
+documents its target-SDK, permission and sharedUserId changes. Its
+[launcher at commit `fea9fe2`](https://github.com/termux-play-store/termux-apps/blob/fea9fe2cfc484c621e5bf7e42875dab3277b8f90/termux-app/src/main/java/com/termux/app/TermuxShellUtils.java)
+routes app-private ELF execution through the Android system linker. The Play
+package repository also contains [PRoot](https://github.com/termux-play-store/termux-packages/blob/master/packages/proot/build.sh)
+and [PRoot-Distro](https://github.com/termux-play-store/termux-packages/blob/master/packages/proot-distro/build.sh)
+recipes; recipe presence alone does not prove a currently served, working or
+individually approved package. The [upstream installation guide](https://github.com/termux/termux-app#google-play-store-experimental-branch)
+identifies this as a separate experimental Play branch.
+
+This is evidence supporting a reasoned submission attempt with Z8's local
+terminal design. It is not a Google-issued interpretation, transferable
+approval, or proof that every Z8 flow matches Termux. No categorical rewrite
+into a remote terminal or separate-kernel VM follows from the public policy.
+Retain the factual native-download disclosure and address the actual review
+outcome rather than recording an unsent inquiry as the only way forward.
 
 The relevant flows are the apt stage in
 [`provision.sh`](../runtime/guest/provision.sh), the separate native Node download
@@ -97,6 +150,14 @@ and a bundled PRoot loader through
 [`Z8Guest`](../overlay/app/src/main/java/com/termux/app/Z8Guest.java).
 All these paths, including user/provider CLI updates, belong in the disclosure.
 The absence of DEX loading does not alone exempt native Linux executables.
+The ordinary guest-to-app browser and notification paths use the app-owned,
+token-checked message bridges in `Z8AttentionBridge` and `Z8BrowserBridge`.
+That is useful evidence about indirect integration, not a claim that PRoot
+prevents arbitrary same-UID guest code from reaching Android resources. The
+[AOSP architecture](https://source.android.com/docs/core/architecture)
+distinguishes framework APIs, native libraries and kernel access; neither
+equating every Linux syscall with a Java API call nor claiming that all native
+code is isolated would accurately describe this design.
 
 If the exception does not cover this design, the real alternatives are a
 different local execution architecture, delivery of all relevant native code
@@ -123,11 +184,42 @@ A comparison with the pinned official Base archive found that 2,561 of its
 `etc/bash.bashrc` changes. Packaging also removes 12 setuid/setgid modes,
 materializes two hard links and records 194 symlinks separately. Added Z8 files
 and the visible Ubuntu identification still make the delivered image modified.
-Delivering the original archive plus a separate on-device overlay is a possible
-engineering option, not an already confirmed interpretation of Canonical's
-policy. A fresh Debian base would remove this particular Ubuntu-image dependency
-but needs new image, package/source, installer and CLI validation; changing a
-name or deleting attribution is not that migration.
+The app currently distributes the modified ZIP itself; later on-device apt,
+Node and optional-tool downloads are separate flows. This finding does not
+declare all modified Ubuntu redistribution unlawful, or negate rights granted
+by the individual component licenses.
+
+Delivering only the byte-identical official Base archive, with Z8-owned files
+and patch instructions separate and applied during the user's installation,
+is a reasonable interpretation to assess against the policy's unmodified
+redistribution and personal/internal modification provisions. It is more closely
+aligned with that wording than shipping the already modified ZIP, but this
+review does not certify Canonical's interpretation or a trademark licence.
+Merely adding an original tar next to the current modified ZIP would not make
+that modified image unmodified. Preserve notices, identify the customized
+environment accurately and avoid an endorsement claim.
+
+The host core already contains tar and gzip. This alternative can preserve the
+Ubuntu package/runtime versions, prepared-base identity and existing projects;
+it nevertheless needs a verified original-archive installer, staged overlay
+application and final-tree equivalence/security tests. The current Android
+guest installer accepts only the normalized ZIP, so no original-archive path
+is claimed to be implemented yet.
+
+A fresh Debian base is the other concrete option. Debian's
+[derivatives guidance](https://www.debian.org/derivatives/) expressly supports
+independently branded modifications, subject to component licences and
+[trademark conditions](https://www.debian.org/trademark). A read-only assessment
+verified the November 4 Debian 13.7 ARM64 input identified by
+[Debian's Docker provenance page](https://docker.debian.net/), and matched all
+78 embedded packages to exact source versions. No Debian migration has been
+made. It would change the guest runtime and source inventory and require fresh
+setup/CLI tests. Existing Ubuntu project HOME/source/rootfs must remain intact.
+The current prepared-base cache does not compare its distribution to the
+bundled image; a lock-only change would therefore retain Ubuntu for existing
+templates. Changing the cache identity also needs care to avoid blocking old
+projects behind the global setup screen. Select and test that compatibility
+behavior explicitly rather than relabeling an Ubuntu filesystem as Debian.
 
 **Claude Code operator terms.** Current
 [Claude Code legal documentation](https://code.claude.com/docs/en/legal-and-compliance)
@@ -135,9 +227,14 @@ expressly covers products that preinstall **or run** Claude Code. Its standard
 route requires [Commercial Terms](https://www.anthropic.com/legal/commercial-terms),
 an unmodified binary with authentication methods intact, and users who
 authenticate and pay directly. It also permits users to sign into the unmodified
-CLI with their own Claude subscriptions. Identify the legal person operating Z8
-and its applicable terms basis. Non-bundling alone does not establish that
-basis. This does not imply that Z8 is an AI service, that subscription login must
+CLI with their own Claude subscriptions. On November 14, the operator explicitly
+authorized and completed Anthropic's standard Platform onboarding assent to the
+Commercial Terms and Usage Policy. The actual assent and completed dashboard
+flow were recorded privately, without publishing personal identity or account
+details. This supplies the previously missing operator-assent evidence; it is
+not an Anthropic endorsement, negotiated exception, or confirmation of every
+deployment condition. Non-bundling alone was not the terms basis. This does not
+imply that Z8 is an AI service, that subscription login must
 be replaced with an API gateway, or that every deployment needs a separately
 negotiated agreement. Plain-text compatibility descriptions must not imply
 provider endorsement.
@@ -146,20 +243,26 @@ The source and retained rc3 guest were checked for these technical conditions:
 the installer checks the official manifest and binary hashes, publishes a
 symlink to the unchanged binary, and the UI launches `command claude` without
 authentication-forcing flags. It does not install a Z8 account gateway or a
-provider-credential collector. This code review does not prove the operator has
-accepted a contract. Record the actual contracting person/entity, applicable
-terms or agreement, effective date and evidence privately; do not infer a legal
-identity from the public display name `romi` or accept terms automatically.
+provider-credential collector. These technical conditions remain separate from
+the newly recorded operator assent and must stay true in each release. The
+operator-assent record contains the applicable account/terms evidence privately;
+the public developer display name is not used as proof of legal identity.
 
-One concrete tooling improvement is available without changing the product:
-verify Claude's exact release-manifest signature and signing-key fingerprint
-when updating the pins. The current recipe verifies pinned HTTPS manifest and
-binary hashes but records that detached-signature verification was not done.
+The next candidate's installer now verifies Claude's exact release-manifest
+signature and signing-key fingerprint before binary download or execution,
+including explicit reinstalls. The earlier rc3/rc4 recipes only checked pinned
+manifest/binary hashes; those historical artifacts have not been relabeled.
 [Claude setup documentation](https://code.claude.com/docs/en/setup) describes that
-verification. On November 14 the public manifest, detached signature and key
-were available for the pinned version; the manifest matches the existing lock
-and the key fingerprint matches the documentation. This is not a successful
-cryptographic signature-verification result. Keep the distinction between
+verification. On November 14, the existing ARM64 guest `gpgv` 2.4.4 successfully
+verified the pinned 2.1.285 manifest, including a fresh official HTTPS metadata
+download, against primary fingerprint
+`31DDDE24DDFAB679F42D7BD2BAA929FF1A7ECACE`. Altered manifest bytes, an altered
+signature and a wrong expected identity were rejected. The verifier uses a
+private temporary home and explicit hash-pinned keyring; no provider executable,
+authentication or model call was part of this check. This ADB-root-started PRoot
+metadata test is not ordinary app-session installation QA. The pinned key is
+not a live revocation service; the publisher's key changes still require
+maintainer review. Keep the distinction between
 installer pins and subsequent vendor/user updates, and do not claim official Android support from Linux ARM64
 compatibility tests.
 

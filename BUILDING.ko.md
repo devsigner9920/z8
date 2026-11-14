@@ -111,7 +111,7 @@ Claude Code·Codex는 필요한 CLI를 명시적으로 설치한 뒤 터미널�
 bash tools/build-runtime.sh --build --profile core --jobs 4
 # 생성된 검증 manifest 경로를 사용한다.
 python3 tools/build-app.py --mode runtime --runtime-manifest /absolute/path/runtime-manifest.json
-# 고정된 Ubuntu Base를 검사하고 guest 아티팩트를 생성한다.
+# 고정된 Linux 기본 이미지를 검사하고 guest 아티팩트를 생성한다.
 python3 tools/prepare-guest.py --build
 # 프로젝트 Linux 이미지를 함께 넣으려면 --guest-manifest를 추가한다.
 python3 tools/build-app.py --mode runtime --runtime-manifest /absolute/path/runtime-manifest.json --guest-manifest /absolute/path/guest/manifest.json

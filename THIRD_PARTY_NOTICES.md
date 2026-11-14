@@ -87,12 +87,19 @@ specified redistribution conditions; copying these notices does not imply
 that every listed toolchain component is part of Z8. Official NDK distribution
 information is at <https://developer.android.com/ndk/downloads>.
 
-The optional guest image is normalized from the pinned official Ubuntu Base
-ARM64 archive. Original package copyright/license files remain in the image,
+The current guest image is normalized from a pinned ARM64 archive published by
+Debian's official Docker image build project. Earlier candidates used Ubuntu
+Base; their image locks and reconstruction inputs remain separately identified.
+Original package copyright/license files remain in each image,
 and its manifest records the upstream URL and SHA-256. Runtime builds also embed
 packages compiled for Z8's own prefix from the pinned Termux package recipes,
 preserving installed notices and build provenance. Diagnostic builds contain no
 native bootstrap; they may include the verified guest image for installer testing.
+
+Debian's registered trademark belongs to Software in the Public Interest, Inc.
+Z8 is independently developed and is not endorsed by or affiliated with the
+Debian project. The distribution name identifies the underlying environment;
+each package retains its own license. See the [Debian trademark policy](https://www.debian.org/trademark).
 
 ## Independently installed CLI tools
 

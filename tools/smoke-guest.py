@@ -59,7 +59,14 @@ alias ll > "$out/alias-ll"
 ll /workspace > "$out/ll-output"
 cat /etc/os-release > "$out/os-release"
 printf 'Z8_SOURCE_BIND_OK\\n' > /workspace/''' + name + '''.proof
-getent ahostsv4 ports.ubuntu.com > "$out/dns"
+z8_probe_distribution=$(sed -n 's/^ID=//p' /etc/os-release | tr -d '\"')
+case "$z8_probe_distribution" in
+    debian) z8_probe_dns=deb.debian.org ;;
+    ubuntu) z8_probe_dns=ports.ubuntu.com ;;
+    *) printf 'Unsupported probe distribution\\n' >&2; exit 2 ;;
+esac
+printf '%s\\n' "$z8_probe_dns" > "$out/dns-host"
+getent ahostsv4 "$z8_probe_dns" > "$out/dns"
 echo Z8_LINUX_OK > "$out/result"
 ''')
     source = "files/z8/projects/" + args.project + "/source"

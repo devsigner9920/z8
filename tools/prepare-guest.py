@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Verify and normalize a pinned Ubuntu Base guest; default is a read-only plan.
+"""Verify a pinned Debian guest (or retained Ubuntu input); default is a plan.
 
 No package install or guest code is executed. Rootfs ZIPs contain ordinary files
 and directories plus a deferred SYMLINKS.txt; Android must install into a new,
 private staging directory and publish only after complete validation.
 """
 import argparse
+import base64
 from collections import deque
+import gzip
 import hashlib
 import json
 import os
@@ -27,7 +29,7 @@ MAX_EXPANDED = 1024 * 1024 * 1024
 MAX_ENTRIES = 30_000
 NORMALIZATION_VERSION = 1
 
-# Retained inputs can replace only these Z8-owned sources, never Ubuntu files.
+# Retained inputs can replace only these Z8-owned sources, never distribution files.
 HISTORICAL_MANAGED_FILES = frozenset((
     "etc/profile.d/z8.sh", "etc/z8/guest-target", "etc/z8/shellrc", "etc/z8/welcome.sh",
     *("opt/z8/hooks/" + name for name in ("claude.hooks.json", "codex.hooks.json", "enable.py", "z8_event.py")),
@@ -109,7 +111,7 @@ def read_historical_managed_inputs(path, lock):
         if not isinstance(data.get(key), str) or not re.fullmatch(r"[a-f0-9]{64}", data[key]):
             raise GuestError("Historical input digest is not a full SHA-256")
     if data.get("guestSource") != lock["source"]:
-        raise GuestError("Historical inputs do not match the pinned Ubuntu source")
+        raise GuestError("Historical inputs do not match the selected source; use the retained Ubuntu lock for old releases")
     records = data.get("files")
     absent = data.get("absentFromHistoricalGuest")
     if (not isinstance(records, list) or len(records) != len(HISTORICAL_MANAGED_FILES)
@@ -228,21 +230,69 @@ def validate_links(links, entries):
                 raise GuestError("Missing or non-directory archive parent")
 
 
-def read_lock():
-    lock = json.loads(LOCK_PATH.read_text())
-    if lock.get("schemaVersion") != 1 or lock.get("architecture") != "aarch64" or lock.get("distribution") != "ubuntu":
+def read_lock(path=None):
+    lock = json.loads(Path(path if path is not None else LOCK_PATH).read_text())
+    if type(lock.get("schemaVersion")) is not int or lock["schemaVersion"] != 1 or lock.get("architecture") != "aarch64" or lock.get("distribution") not in ("ubuntu", "debian"):
         raise GuestError("Unsupported guest lock")
-    for key in ("sha256", "sha256SumsSha256"):
+    if not isinstance(lock.get("release"), str) or not re.fullmatch(r"[0-9]+(?:\.[0-9]+)+", lock["release"]):
+        raise GuestError("Guest release must be pinned")
+    source = lock["source"]
+    hash_keys = ("sha256", "sha256SumsSha256") if lock["distribution"] == "ubuntu" else (
+        "sha256", "ociIndexSha256", "ociManifestSha256", "ociConfigSha256", "ociRootfsDiffId")
+    for key in hash_keys:
         if not re.fullmatch(r"[a-f0-9]{64}", lock["source"].get(key, "")):
             raise GuestError("Guest source hash must be pinned")
-    for key in ("url", "sha256SumsUrl"):
-        url = urllib.parse.urlparse(lock["source"][key])
-        if url.scheme != "https" or url.netloc != "cdimage.ubuntu.com":
-            raise GuestError("Expected an official Ubuntu HTTPS source")
+    if lock["distribution"] == "ubuntu":
+        for key in ("url", "sha256SumsUrl"):
+            url = urllib.parse.urlparse(source[key])
+            if url.scheme != "https" or url.netloc != "cdimage.ubuntu.com" or url.params or url.query or url.fragment:
+                raise GuestError("Expected an official Ubuntu HTTPS source")
+    else:
+        suite, snapshot = lock.get("suite", ""), lock.get("snapshot", "")
+        commit = lock.get("provenance", {}).get("artifactCommit", "")
+        if not re.fullmatch(r"[a-z]+", suite) or not re.fullmatch(r"[0-9]{8}T[0-9]{6}Z", snapshot) or not re.fullmatch(r"[a-f0-9]{40}", commit):
+            raise GuestError("Debian suite, snapshot and artifact revision must be pinned")
+        base = "https://raw.githubusercontent.com/debuerreotype/docker-debian-artifacts/" + commit + "/" + suite + "/oci/"
+        if source.get("url") != base + "blobs/rootfs.tar.gz" or source.get("ociIndexUrl") != base + "index.json":
+            raise GuestError("Expected the immutable official Debian artifact paths")
+        for size, limit in ((source.get("bytes"), MAX_ARCHIVE), (source.get("ociIndexBytes"), 64 * 1024)):
+            if type(size) is not int or not 0 < size <= limit:
+                raise GuestError("Debian input size must be bounded and pinned")
+        indexes = lock.get("sourceIndexes")
+        if not isinstance(indexes, list) or len(indexes) != 3:
+            raise GuestError("Debian requires three pinned source indexes")
+        expected = {(suite, "debian"), (suite + "-updates", "debian"), (suite + "-security", "debian-security")}
+        seen = set()
+        for index in indexes:
+            pair = (index.get("suite"), index.get("archive"))
+            if pair not in expected or pair in seen:
+                raise GuestError("Unexpected or duplicate Debian source index")
+            seen.add(pair)
+            url = "https://snapshot.debian.org/archive/" + pair[1] + "/" + snapshot + "/dists/" + pair[0] + "/main/source/Sources.xz"
+            if index.get("url") != url or not re.fullmatch(r"[a-f0-9]{64}", index.get("sha256", "")) \
+                    or type(index.get("bytes")) is not int or not 0 < index["bytes"] <= 64 * 1024 * 1024:
+                raise GuestError("Debian source indexes must have exact snapshot URLs, hashes and sizes")
     return lock
 
 
+def allowed_download_url(url):
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme != "https" or parsed.params or parsed.query or parsed.fragment:
+        return False
+    return parsed.netloc == "cdimage.ubuntu.com" or (parsed.netloc == "raw.githubusercontent.com" and
+        re.fullmatch(r"/debuerreotype/docker-debian-artifacts/[a-f0-9]{40}/[a-z]+/oci/(?:index.json|blobs/rootfs.tar.gz)", parsed.path) is not None)
+
+
+class OfficialGuestRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, request, fp, code, message, headers, new_url):
+        if not allowed_download_url(new_url):
+            raise GuestError("Unexpected download redirect")
+        return super().redirect_request(request, fp, code, message, headers, new_url)
+
+
 def download(url, destination, digest, maximum):
+    if not allowed_download_url(url):
+        raise GuestError("Unexpected guest input URL")
     if destination.is_symlink():
         raise GuestError("Cache path is a symlink")
     if destination.is_file():
@@ -251,9 +301,9 @@ def download(url, destination, digest, maximum):
         raise GuestError("Cached download differs from its pinned hash; preserve it for review")
     descriptor, temporary = tempfile.mkstemp(prefix=".download-", dir=destination.parent)
     try:
-        with os.fdopen(descriptor, "wb") as output, urllib.request.urlopen(url, timeout=60) as response:
-            redirected = urllib.parse.urlparse(response.geturl())
-            if redirected.scheme != "https" or redirected.netloc != "cdimage.ubuntu.com":
+        opener = urllib.request.build_opener(OfficialGuestRedirect())
+        with os.fdopen(descriptor, "wb") as output, opener.open(url, timeout=60) as response:
+            if not allowed_download_url(response.geturl()):
                 raise GuestError("Unexpected download redirect")
             total = 0
             while True:
@@ -270,6 +320,44 @@ def download(url, destination, digest, maximum):
     finally:
         if os.path.exists(temporary):
             os.unlink(temporary)
+
+
+def verify_debian_oci(index_path, source_path, lock):
+    """Check the pinned OCI descriptor graph and compressed/uncompressed layer."""
+    source = lock["source"]
+    if Path(index_path).stat().st_size != source["ociIndexBytes"] or sha256(index_path) != source["ociIndexSha256"] \
+            or Path(source_path).stat().st_size != source["bytes"] or sha256(source_path) != source["sha256"]:
+        raise GuestError("Debian OCI input hash or size mismatch")
+    index = json.loads(Path(index_path).read_text())
+    if index.get("schemaVersion") != 2 or index.get("mediaType") != "application/vnd.oci.image.index.v1+json" or len(index.get("manifests", [])) != 1:
+        raise GuestError("Expected one pinned Debian OCI image")
+    descriptor = index["manifests"][0]
+    if descriptor.get("platform") != {"os": "linux", "architecture": "arm64", "variant": "v8"} \
+            or descriptor.get("mediaType") != "application/vnd.oci.image.manifest.v1+json":
+        raise GuestError("Debian OCI platform mismatch")
+    def embedded(record, expected):
+        data = base64.b64decode(record["data"], validate=True)
+        if type(record.get("size")) is not int or len(data) != record["size"] or record.get("digest") != "sha256:" + expected or hashlib.sha256(data).hexdigest() != expected:
+            raise GuestError("Debian OCI embedded descriptor mismatch")
+        return json.loads(data)
+    manifest = embedded(descriptor, source["ociManifestSha256"])
+    expected_layer = {"mediaType": "application/vnd.oci.image.layer.v1.tar+gzip", "digest": "sha256:" + source["sha256"], "size": source["bytes"]}
+    if manifest.get("schemaVersion") != 2 or manifest.get("mediaType") != "application/vnd.oci.image.manifest.v1+json" or manifest.get("layers") != [expected_layer] \
+            or manifest.get("config", {}).get("mediaType") != "application/vnd.oci.image.config.v1+json":
+        raise GuestError("Debian OCI layer mismatch")
+    config = embedded(manifest["config"], source["ociConfigSha256"])
+    if any(config.get(key) != value for key, value in {"os": "linux", "architecture": "arm64", "variant": "v8"}.items()) \
+            or config.get("rootfs") != {"type": "layers", "diff_ids": ["sha256:" + source["ociRootfsDiffId"]]}:
+        raise GuestError("Debian OCI config mismatch")
+    digest, total = hashlib.sha256(), 0
+    with gzip.open(source_path, "rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            total += len(chunk)
+            if total > MAX_EXPANDED:
+                raise GuestError("Debian uncompressed layer exceeds limit")
+            digest.update(chunk)
+    if digest.hexdigest() != source["ociRootfsDiffId"]:
+        raise GuestError("Debian OCI uncompressed layer digest mismatch")
 
 
 def normalize(source_archive):
@@ -343,7 +431,7 @@ def add_managed_files(files, links):
     bashrc = files.get("etc/bash.bashrc")
     if bashrc is not None:
         if bashrc["type"] != "file":
-            raise GuestError("Ubuntu global bashrc is not a regular file")
+            raise GuestError("Guest global bashrc is not a regular file")
         bashrc["data"] = normalize_ubuntu_sudo_hint(bashrc["data"])
         bashrc["data"] += b"\n# z8 interactive defaults, including nested shells.\n" + profile
     managed = {
@@ -366,17 +454,17 @@ def add_managed_files(files, links):
         files[name] = {"type": "file", "mode": 0o755 if name.endswith("/browser/bin/xdg-open") else 0o644, "data": data}
 
 
-def verify_manifest(manifest_path):
+def verify_manifest(manifest_path, lock_path=None):
     """Read-only artifact validation for APK embedding; returns (archive Path, data)."""
     path = Path(manifest_path)
     if path.is_symlink() or not path.is_file() or path.stat().st_size > 16 * 1024 * 1024:
         raise GuestError("Invalid guest manifest")
     manifest = json.loads(path.read_text())
-    lock = read_lock()
+    lock = read_lock(lock_path)
     for key, value in (("schemaVersion", 1), ("type", "z8-guest-rootfs"), ("normalizationVersion", NORMALIZATION_VERSION), ("archive", "rootfs.zip")):
         if type(manifest.get(key)) is not type(value) or manifest.get(key) != value:
             raise GuestError("Unsupported guest manifest field: " + key)
-    for key in ("distribution", "release", "architecture", "source"):
+    for key in lock:
         if manifest.get(key) != lock[key]:
             raise GuestError("Guest manifest does not match pinned image: " + key)
     archive_path = path.parent / "rootfs.zip"
@@ -440,25 +528,45 @@ def verify_manifest(manifest_path):
                 raise GuestError("Required guest file missing: " + required)
         if archive.read("etc/z8/guest-target") != b"z8-guest-v1\n":
             raise GuestError("Guest image marker mismatch")
+        if lock["distribution"] == "debian":
+            os_release = archive.read("usr/lib/os-release").decode("utf-8").splitlines()
+            expected_os = {"ID=debian", "VERSION_ID=\"" + lock["release"].split(".")[0] + "\"",
+                "VERSION_CODENAME=" + lock["suite"], "DEBIAN_VERSION_FULL=" + lock["release"]}
+            if not expected_os.issubset(set(os_release)) or archive.read("etc/debian_version") != (lock["release"] + "\n").encode():
+                raise GuestError("Debian release identity differs from the pinned image")
     return archive_path.resolve(), manifest
 
 
-def build(historical_managed_inputs=None):
-    lock = read_lock()
+def build(historical_managed_inputs=None, lock_path=None):
+    lock = read_lock(lock_path)
+    if historical_managed_inputs and lock["distribution"] != "ubuntu":
+        raise GuestError("Historical Ubuntu reconstruction requires --lock runtime/guest/legacy/ubuntu-24.04.5.lock.json")
     historical = read_historical_managed_inputs(historical_managed_inputs, lock) if historical_managed_inputs else None
     cache = ROOT / ".local/guest-cache"
-    output_root = ROOT / "artifacts/guest" / ("ubuntu-" + lock["release"] + "-arm64")
+    output_root = ROOT / "artifacts/guest" / (lock["distribution"] + "-" + lock["release"] + "-arm64")
     for directory in (ROOT / ".local", cache, ROOT / "artifacts", ROOT / "artifacts/guest", output_root):
         if directory.is_symlink():
             raise GuestError("Build directory is a symlink")
         directory.mkdir(exist_ok=True)
-    sums = cache / "SHA256SUMS"
-    source = cache / Path(urllib.parse.urlparse(lock["source"]["url"]).path).name
-    download(lock["source"]["sha256SumsUrl"], sums, lock["source"]["sha256SumsSha256"], 64 * 1024)
-    expected_line = lock["source"]["sha256"] + " *" + source.name
-    if expected_line not in sums.read_text().splitlines():
-        raise GuestError("Pinned checksum list does not contain expected image")
-    download(lock["source"]["url"], source, lock["source"]["sha256"], MAX_ARCHIVE)
+    if lock["distribution"] == "ubuntu":
+        sums = cache / "SHA256SUMS"
+        source = cache / Path(urllib.parse.urlparse(lock["source"]["url"]).path).name
+        download(lock["source"]["sha256SumsUrl"], sums, lock["source"]["sha256SumsSha256"], 64 * 1024)
+        expected_line = lock["source"]["sha256"] + " *" + source.name
+        if expected_line not in sums.read_text().splitlines():
+            raise GuestError("Pinned checksum list does not contain expected image")
+        download(lock["source"]["url"], source, lock["source"]["sha256"], MAX_ARCHIVE)
+    else:
+        # Separate immutable-input caches prevent collision with old Ubuntu
+        # SHA256SUMS and with future Debian snapshots named rootfs.tar.gz.
+        cache = cache / ("debian-" + lock["source"]["sha256"])
+        if cache.is_symlink():
+            raise GuestError("Debian input cache is a symlink")
+        cache.mkdir(exist_ok=True)
+        source, index = cache / "rootfs.tar.gz", cache / "index.json"
+        download(lock["source"]["ociIndexUrl"], index, lock["source"]["ociIndexSha256"], 64 * 1024)
+        download(lock["source"]["url"], source, lock["source"]["sha256"], MAX_ARCHIVE)
+        verify_debian_oci(index, source, lock)
     files = normalize(source)
     if historical:
         files = apply_historical_managed_inputs(files, historical)
@@ -485,10 +593,10 @@ def build(historical_managed_inputs=None):
         manifest_path.write_text(json.dumps(manifest, indent=2) + "\n")
         if historical and sha256(manifest_path) != historical["manifest"]["guestManifestSha256"]:
             raise GuestError("Historical reconstruction manifest differs from the recorded guest; nothing published")
-        verify_manifest(manifest_path)
+        verify_manifest(manifest_path, lock_path)
         destination = output_root / manifest["archiveSha256"]
         if destination.exists():
-            old_archive, old_manifest = verify_manifest(destination / "manifest.json")
+            old_archive, old_manifest = verify_manifest(destination / "manifest.json", lock_path)
             if old_manifest != manifest:
                 raise GuestError("Existing artifact metadata differs")
         else:
@@ -509,6 +617,7 @@ def main():
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--build", action="store_true")
     group.add_argument("--verify", metavar="MANIFEST")
+    parser.add_argument("--lock", type=Path, metavar="LOCK", help="Select a retained image lock explicitly; defaults to the current Debian image")
     parser.add_argument("--historical-managed-inputs", type=Path, metavar="MANIFEST",
                         help="With --build, reconstruct the exact recorded guest using retained Z8-owned source inputs")
     arguments = parser.parse_args()
@@ -516,12 +625,12 @@ def main():
         parser.error("--historical-managed-inputs requires --build")
     try:
         if arguments.build:
-            result = build(arguments.historical_managed_inputs)
+            result = build(arguments.historical_managed_inputs, arguments.lock)
         elif arguments.verify:
-            archive, manifest = verify_manifest(arguments.verify)
+            archive, manifest = verify_manifest(arguments.verify, arguments.lock)
             result = {"state": "VERIFIED_ARTIFACT", "archive": str(archive), "archiveSha256": manifest["archiveSha256"], "deviceExecution": "NOT_TESTED"}
         else:
-            result = {"state": "DRY_RUN", "lock": read_lock(), "action": "Use --build to download, verify and normalize. No guest packages are installed."}
+            result = {"state": "DRY_RUN", "lock": read_lock(arguments.lock), "action": "Use --build to download, verify and normalize. No guest packages are installed."}
         print(json.dumps(result, indent=2))
     except (OSError, ValueError, KeyError, TypeError, tarfile.TarError, zipfile.BadZipFile) as error:
         parser.exit(2, "z8 guest: " + str(error) + "\n")

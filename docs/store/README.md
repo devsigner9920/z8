@@ -77,6 +77,8 @@ The Console may expose additional fields for selected device types.
 ## Review and release
 
 Use `submission-checklist.md` and `review-notes.txt` for the next Console steps.
+The detailed [Data safety and foreground-service worksheet](play-console-data-safety.md)
+separates observed data flows from unanswered provider/Console classifications.
 They distinguish known implementation facts from declarations still requiring
 review. Do not convert an unconfirmed answer into a declaration to advance the
 form. Keep final candidate hashes and QA evidence with the release package.

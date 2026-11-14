@@ -299,7 +299,7 @@ public final class Z8Guest {
             Asset asset = asset(context);
             try (InputStream ignored = context.getAssets().open(ROOTFS_ASSET)) { /* Verify the asset is present. */ }
             inspected(id, new State(available ? Phase.AVAILABLE : Phase.UNAVAILABLE, 0,
-                available ? asset.distribution + " " + asset.release + Z8Text.text(" can be installed in this project.", " 환경을 이 프로젝트에 설치할 수 있습니다.")
+                available ? Z8Text.text("A Linux environment can be prepared for this project.", "이 프로젝트의 Linux 환경을 준비할 수 있습니다.")
                     : Z8Text.text("This APK includes a Linux image but does not yet include Z8's PRoot runtime.", "이 APK에는 Linux 이미지가 있지만 z8 전용 PRoot 실행 기반이 아직 없습니다."), false, available));
         } catch (FileNotFoundException missing) {
             inspected(id, new State(Phase.UNAVAILABLE, 0, Z8Text.text("This APK does not include a verified Linux image.", "이 APK에는 검증된 Linux 이미지가 포함되어 있지 않습니다."), false, available));

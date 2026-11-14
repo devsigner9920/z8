@@ -41,7 +41,7 @@ class HistoricalGuestInputs(unittest.TestCase):
                 member.mode = 0o644
                 member.size = len(data)
                 out.addfile(member, io.BytesIO(data))
-        self.lock = json.loads((self.root / "runtime/guest/image.lock.json").read_text())
+        self.lock = json.loads((self.root / "runtime/guest/legacy/ubuntu-24.04.5.lock.json").read_text())
         self.lock["source"]["sha256"] = guest.sha256(self.archive)
         sums = cache / "SHA256SUMS"
         sums.write_text(self.lock["source"]["sha256"] + " *" + self.archive.name + "\n")

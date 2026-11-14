@@ -86,6 +86,10 @@ class PreparationContracts(unittest.TestCase):
         self.assertTrue(terminal_service.find("property").get(prepare.ANDROID + "value"))
         self.assertEqual(app.get(prepare.ANDROID + "extractNativeLibs"), "true")
         self.assertEqual(app.get(prepare.ANDROID + "enableOnBackInvokedCallback"), "true")
+        metrics = [e for e in app.findall("meta-data")
+                   if e.get(prepare.ANDROID + "name") == "android.webkit.WebView.MetricsOptOut"]
+        self.assertEqual(len(metrics), 1)
+        self.assertEqual(metrics[0].get(prepare.ANDROID + "value"), "true")
         self.assertEqual(activities["com.termux.app.Z8AboutActivity"].get(prepare.ANDROID + "exported"), "false")
 
     def test_language_context_covers_primary_and_auxiliary_screens(self):

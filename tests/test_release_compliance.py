@@ -3,6 +3,7 @@ import hashlib
 import copy
 import importlib.util
 import json
+import lzma
 import os
 from pathlib import Path
 import subprocess
@@ -216,8 +217,42 @@ class ComplianceTests(unittest.TestCase):
         changed = json.loads(lock.read_text())
         changed['source']['sha256'] = 'e' * 64
         lock.write_bytes(json_bytes(changed))
-        with self.assertRaisesRegex(ValueError, 'pinned Ubuntu source'):
+        with self.assertRaisesRegex(ValueError, 'retained, known image lock'):
             historical_guest_inventory(manifest, self.root)
+
+    def test_legacy_ubuntu_sources_remain_valid_after_current_guest_changes_to_debian(self):
+        manifest, payload, data = self.historical_fixture()
+        legacy = self.root / 'runtime/guest/legacy/ubuntu-24.04.5.lock.json'
+        legacy.parent.mkdir()
+        legacy.write_bytes((ROOT / 'runtime/guest/legacy/ubuntu-24.04.5.lock.json').read_bytes())
+        data['guestSource'] = json.loads(legacy.read_text())['source']
+        manifest.write_bytes(json_bytes(data))
+        self.assertEqual(historical_guest_inventory(manifest, self.root)['guestSource'], data['guestSource'])
+        legacy.unlink()
+        with self.assertRaisesRegex(ValueError, 'retained, known image lock'):
+            historical_guest_inventory(manifest, self.root)
+
+    def test_pinned_debian_source_indexes_are_distributed_with_exact_payloads(self):
+        directory = self.root / 'debian-sources'
+        directory.mkdir()
+        payload = directory / 'sample.dsc'
+        payload.write_bytes(b'Original source fixture\n')
+        index = directory / 'Sources.xz'
+        index.write_bytes(lzma.compress(('Package: sample\nVersion: 1\nDirectory: pool/main/s/sample\n'
+            'Checksums-Sha256:\n ' + sha256(payload) + ' ' + str(payload.stat().st_size) + ' sample.dsc\n\n').encode()))
+        pin = {'url': 'https://snapshot.debian.org/archive/debian/20261104T212339Z/dists/trixie/main/source/Sources.xz',
+               'archive': 'debian', 'suite': 'trixie', 'sha256': sha256(index), 'bytes': index.stat().st_size}
+        component = collector.distribution_records([{'Package': 'sample', 'Version': '1'}], [(index, pin['url'])], 'debian')[0]
+        component['sourceFiles'][0].update(path=payload.name, status='VERIFIED')
+        inventory = directory / 'package-sources.json'
+        inventory.write_bytes(json_bytes({'components': [component], 'installedNotices': [],
+            'inputs': {'guestDistribution': 'debian', 'guestSourceIndexes': [pin]},
+            'sourceIndexes': [dict(pin, path=index.name, role='guest-source-index', status='VERIFIED', signatureVerified=False)]}))
+        result = sources.package(self.root, self.root / 'out', package_sources=inventory)
+        with zipfile.ZipFile(self.root / 'out' / result['archive']) as archive:
+            self.assertEqual(archive.read('third-party-sources/Sources.xz'), index.read_bytes())
+            self.assertEqual(archive.read('third-party-sources/sample.dsc'), payload.read_bytes())
+        self.assertIs(result['claims']['completeCorrespondingSource'], False)
 
     def test_known_historical_guest_cannot_omit_retained_sources_from_both_manifests(self):
         package_path = self.root / 'packages.json'

@@ -1,8 +1,10 @@
 """Release evidence helpers. Source recipes are data, never executed by this module."""
 import hashlib
+import gzip
 import importlib.util
 from collections import Counter
 import json
+import lzma
 import os
 from pathlib import Path, PurePosixPath
 import re
@@ -10,6 +12,7 @@ import tempfile
 import urllib.parse
 import urllib.request
 import zipfile
+import embedded_maven_source
 
 ROOT = Path(__file__).resolve().parents[1]
 GENERATED_NOTICES = {'third-party-notices.txt', 'release-notices.json'}
@@ -100,7 +103,8 @@ def maven_source_inventory(path, gradle_artifacts=None):
 
     unresolved, components = [], {}
     source_roles = {'PUBLISHED_SOURCE_JAR': 'published-source-jar',
-                    'PINNED_UPSTREAM_SOURCE_ARCHIVE': 'upstream-source-archive'}
+                    'PINNED_UPSTREAM_SOURCE_ARCHIVE': 'upstream-source-archive',
+                    embedded_maven_source.DISPOSITION: 'embedded-source-binary'}
     for component in report['components']:
         coordinate = ':'.join(component[key] for key in ('group', 'name', 'version'))
         if coordinate in components or not component.get('binaryArtifacts'):
@@ -136,6 +140,18 @@ def maven_source_inventory(path, gradle_artifacts=None):
                     or sum(member['path'].endswith(('.java', '.kt', '.kts', '.c', '.h', '.cpp', '.scala'))
                            for member in content.get('members', [])) != component['sourceFileCount']):
                 raise ValueError('Maven source content inventory does not match component')
+            if disposition == embedded_maven_source.DISPOSITION:
+                build_files = component.get('buildEvidenceFiles', [])
+                if (len(build_files) != 2 or not component.get('embeddedSourceEvidence')
+                        or tuple(component[key] for key in ('group', 'name', 'version')) != embedded_maven_source.COORDINATE
+                        or {binary['sha256'] for binary in component['binaryArtifacts']} != {embedded_maven_source.BINARY_SHA256}):
+                    raise ValueError('Embedded Maven source requires exact binary and build evidence')
+                dump_path = reference(build_files[0], 'upstream-svn-dump')
+                snapshot_path = reference(build_files[1], 'upstream-svn-snapshot')
+                evidence_path = reference(component['embeddedSourceEvidence'], 'embedded-source-evidence')
+                snapshot, evidence = embedded_maven_source.evidence(reference(sources[0]).read_bytes(), dump_path.read_bytes())
+                if snapshot_path.read_bytes() != snapshot or read_json(evidence_path) != evidence:
+                    raise ValueError('Embedded Maven source evidence does not match original inputs')
         elif disposition == 'MISSING':
             if sources or index or component.get('sourceFileCount', 0) or 'MAVEN_SOURCE_UNAVAILABLE' not in codes:
                 raise ValueError('Missing Maven source must remain unresolved')
@@ -168,23 +184,33 @@ def maven_source_inventory(path, gradle_artifacts=None):
         for mapping in mappings['components']:
             coordinate = ':'.join(mapping[key] for key in ('group', 'name', 'version'))
             component = components.get(coordinate)
+            embedded = mapping.get('type') == embedded_maven_source.MAPPING_TYPE
+            expected_disposition = embedded_maven_source.DISPOSITION if embedded else 'PINNED_UPSTREAM_SOURCE_ARCHIVE'
             if (not component or coordinate in mapped
-                    or component['sourceDisposition'] != 'PINNED_UPSTREAM_SOURCE_ARCHIVE'
+                    or component['sourceDisposition'] != expected_disposition
                     or not mapping.get('sourceArchive')
-                    or any(mapping.get(key) != component.get('upstreamMapping', {}).get(key)
+                    or (not embedded and any(mapping.get(key) != component.get('upstreamMapping', {}).get(key)
                            for key in ('repository', 'tag', 'commit', 'versionEvidence'))
+                       )
                     or sorted(set(mapping['binaryArtifactSha256'])) != sorted({b['sha256'] for b in component['binaryArtifacts']})):
                 raise ValueError('Portable Maven mapping does not match component')
+            if embedded:
+                embedded_maven_source.validate_mapping(mapping,
+                    tuple(component[key] for key in ('group', 'name', 'version')), mapping['binaryArtifactSha256'])
             mapped.add(coordinate)
-            for key, candidates in [('sourceArchive', component['sourceFiles']), ('metadataPom', component['metadataFiles'])]:
+            for key, candidates in [('sourceArchive', component['sourceFiles']), ('metadataPom', component['metadataFiles']),
+                                    ('upstreamArchive', component.get('buildEvidenceFiles', []))]:
                 if key not in mapping:
                     continue
                 item = mapping[key]
                 if not any(item['path'] == c['path'] and item['sha256'] == c['sha256'] for c in candidates):
                     raise ValueError('Portable Maven mapping references unavailable source evidence')
         if any(coordinate not in mapped for coordinate, component in components.items()
-               if component['sourceDisposition'] == 'PINNED_UPSTREAM_SOURCE_ARCHIVE' and not component['unresolved']):
+               if component['sourceDisposition'] in ('PINNED_UPSTREAM_SOURCE_ARCHIVE', embedded_maven_source.DISPOSITION)
+               and not component['unresolved']):
             raise ValueError('Portable Maven mapping is missing for a collected upstream source')
+    elif any(component['sourceDisposition'] == embedded_maven_source.DISPOSITION for component in components.values()):
+        raise ValueError('Embedded Maven source requires explicit mapping provenance')
     return report
 
 
@@ -195,8 +221,112 @@ def historical_guest_inventory(path, root=ROOT):
     spec = importlib.util.spec_from_file_location('z8_historical_guest', ROOT / 'tools/prepare-guest.py')
     preparer = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(preparer)
-    preparer.LOCK_PATH = Path(root) / 'runtime/guest/image.lock.json'
+    current = Path(root) / 'runtime/guest/image.lock.json'
+    legacy = Path(root) / 'runtime/guest/legacy/ubuntu-24.04.5.lock.json'
+    source = read_json(path).get('guestSource')
+    candidates = [candidate for candidate in (current, legacy) if candidate.is_file()
+                  and not candidate.is_symlink() and read_json(candidate).get('source') == source]
+    if len(candidates) != 1:
+        raise ValueError('Historical guest source must match one retained, known image lock')
+    preparer.LOCK_PATH = candidates[0]
     return preparer.read_historical_managed_inputs(path, preparer.read_lock())['manifest']
+
+
+def read_source_index(path):
+    path = Path(path)
+    maximum = 256 * 1024 * 1024
+    if path.suffix == '.xz':
+        if path.stat().st_size > 64 * 1024 * 1024:
+            raise ValueError('Compressed source index exceeds limit')
+        decoder = lzma.LZMADecompressor(memlimit=128 * 1024 * 1024)
+        data = decoder.decompress(path.read_bytes(), max_length=maximum + 1)
+        if not decoder.eof or decoder.unused_data.strip(b'\0'):
+            raise ValueError('Truncated, oversized or concatenated source index')
+    else:
+        opener = gzip.open if path.suffix == '.gz' else open
+        with opener(path, 'rb') as stream:
+            data = stream.read(maximum + 1)
+    if len(data) > maximum:
+        raise ValueError('Distribution source index exceeds limit')
+    return deb822(data.decode())
+
+
+def debian_snapshot_base(record):
+    match = re.fullmatch(r'https://snapshot\.debian\.org/archive/(debian|debian-security)/(\d{8}T\d{6}Z)/dists/(trixie|trixie-updates|trixie-security)/main/source/Sources\.xz', record.get('url', ''))
+    if (not match or record.get('archive') != match[1] or record.get('suite') != match[3]
+            or (match[1] == 'debian-security') != (match[3] == 'trixie-security')
+            or not re.fullmatch('[0-9a-f]{64}', record.get('sha256', ''))
+            or type(record.get('bytes')) is not int or not 0 < record['bytes'] <= 64 * 1024 * 1024):
+        raise ValueError('Invalid pinned Debian source index identity')
+    return 'https://snapshot.debian.org/archive/' + match[1] + '/' + match[2] + '/'
+
+
+def source_payload_table(item, base):
+    directory = item.get('Directory', '')
+    if not directory.startswith('pool/') or safe_relative(directory) != directory:
+        raise ValueError('Invalid distribution source directory')
+    files, names = [], set()
+    for line in item.get('Checksums-Sha256', '').splitlines():
+        if not line.strip():
+            continue
+        checksum, size, name = line.split()
+        if (not re.fullmatch('[a-f0-9]{64}', checksum) or not re.fullmatch('[0-9]+', size)
+                or not 0 < int(size) <= 512 * 1024 * 1024
+                or safe_relative(name) != name or '/' in name or name in names):
+            raise ValueError('Invalid source checksum table')
+        names.add(name)
+        files.append({'url': base + directory + '/' + urllib.parse.quote(name), 'sha256': checksum, 'bytes': int(size)})
+    return files
+
+
+def package_source_indexes(inventory, directory):
+    """Verify retained Debian indexes and every exact source-version reference."""
+    records = inventory.get('sourceIndexes', [])
+    if inventory.get('inputs', {}).get('guestDistribution') != 'debian':
+        if records:
+            raise ValueError('Unexpected source indexes for an unrecognized distribution')
+        return []
+    pins = inventory.get('inputs', {}).get('guestSourceIndexes', [])
+    if not pins or len(records) != len(pins) or len({pin.get('url') for pin in pins}) != len(pins):
+        raise ValueError('Missing or duplicate pinned Debian source indexes')
+    lookup, seen = {}, set()
+    needed = {(component.get('sourceIndex', {}).get('url'), component.get('sourceName'), component.get('sourceVersion'))
+              for component in inventory['components'] if component.get('scope') == 'bundled-guest'}
+    for record in records:
+        base = debian_snapshot_base(record)
+        if (record.get('status') != 'VERIFIED' or record.get('signatureVerified') is not False
+                or record.get('role') != 'guest-source-index' or record['url'] in seen
+                or not any(all(record.get(key) == pin.get(key) for key in ('url', 'sha256', 'bytes', 'suite', 'archive')) for pin in pins)):
+            raise ValueError('Debian source index differs from its image pin')
+        seen.add(record['url'])
+        relative = safe_relative(record['path'])
+        path = Path(directory) / relative
+        if (path.is_symlink() or not path.is_file() or path.stat().st_size != record['bytes']
+                or sha256(path) != record['sha256']):
+            raise ValueError('Pinned Debian source index bytes changed')
+        for item in read_source_index(path):
+            key = (record['url'], item.get('Package'), item.get('Version'))
+            if key not in needed:
+                continue
+            table = source_payload_table(item, base)
+            if key in lookup and lookup[key] != table:
+                raise ValueError('Conflicting exact Debian source records')
+            lookup[key] = table
+    for component in inventory['components']:
+        if component.get('scope') != 'bundled-guest':
+            continue
+        index = component.get('sourceIndex', {})
+        if 'Exact Debian source version not present in supplied indexes' in component.get('unresolved', []):
+            continue
+        if not any(index.get('url') == record['url'] and index.get('sha256') == record['sha256'] for record in records):
+            raise ValueError('Debian component names an unretained source index')
+        if index.get('signatureVerified') is not False:
+            raise ValueError('Pinned HTTPS evidence cannot claim repository signature verification')
+        key = (index.get('url'), component.get('sourceName'), component.get('sourceVersion'))
+        actual = [{key: source[key] for key in ('url', 'sha256', 'bytes')} for source in component['sourceFiles']]
+        if key not in lookup or actual != lookup[key] or not actual:
+            raise ValueError('Debian component does not match its exact source package/version table')
+    return records
 
 
 def safe_relative(name):

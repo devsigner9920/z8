@@ -7,6 +7,7 @@ import urllib.parse
 import zipfile
 from release_compliance import ROOT, atomic_write, bytes_sha, checked_asset, download, issue, json_bytes, read_json, safe_relative, secret_path, sha256, maven_source_inventory, historical_guest_inventory
 from release_compliance import HISTORICAL_GUEST_ARCHIVES_REQUIRING_SOURCES
+from release_compliance import package_source_indexes
 
 
 def verify_source(manifest_path, root):
@@ -65,9 +66,13 @@ def verify(args):
     links['noticesSha256'] = sha256(args.notices)
     links['noticeTextSha256'] = sha256(notice_text)
     packages = read_json(args.package_sources)
+    index_records = package_source_indexes(packages, args.package_sources.parent)
     if source.get('packageSourcesSha256') != sha256(args.package_sources):
         blockers.append(issue('SOURCE_PACKAGE_PAYLOADS_NOT_INCLUDED', 'packages', 'Regenerate source ZIP with --package-sources so downloaded sources are actually distributed'))
     archive_records = {x['path']: x for x in source['files']}
+    for item in index_records:
+        if archive_records.get('third-party-sources/' + item['path'], {}).get('sha256') != item['sha256']:
+            blockers.append(issue('SOURCE_INDEX_NOT_DISTRIBUTED', 'guest', item['path']))
     if notices['inputs'].get('packageSourcesSha256') != sha256(args.package_sources):
         blockers.append(issue('PACKAGE_INVENTORY_MISMATCH', 'packages', 'Notices describe a different package inventory'))
     for component in packages['components']:
@@ -94,7 +99,7 @@ def verify(args):
             if archive_records.get('third-party-sources/maven/' + item['path'], {}).get('sha256') != item['sha256']:
                 blockers.append(issue('MAVEN_SOURCE_PAYLOAD_NOT_DISTRIBUTED', 'application', item['path']))
         blockers += maven.get('unresolved', [])
-    elif any(c.get('scope') == 'bundled-maven' for c in notices.get('components', [])):
+    elif any(c.get('scope') in ('bundled-maven', 'resolved-maven-runtime-input') for c in notices.get('components', [])):
         blockers.append(issue('MAVEN_SOURCES_MISSING', 'application', 'Supply the source inventory for actual bundled runtime libraries'))
     if getattr(args, 'historical_guest_inputs', None):
         historical = historical_guest_inventory(args.historical_guest_inputs, args.root)
@@ -115,6 +120,11 @@ def verify(args):
         path = getattr(args, option, None)
         if path and sha256(path) != packages['inputs'].get(key):
             blockers.append(issue('BUNDLED_IMAGE_MISMATCH', key, 'Selected image manifest differs from source inventory'))
+    if packages['inputs'].get('guestDistribution') == 'debian':
+        guest_path = getattr(args, 'guest_manifest', None)
+        guest = read_json(guest_path) if guest_path else {}
+        if guest.get('distribution') != 'debian' or guest.get('sourceIndexes') != packages['inputs'].get('guestSourceIndexes'):
+            blockers.append(issue('SOURCE_INDEX_IMAGE_MISMATCH', 'guest', 'Pinned source indexes must match the actual Debian guest manifest'))
     if args.gradle_artifacts:
         if sha256(args.gradle_artifacts) != notices['inputs'].get('gradleArtifactsSha256'):
             blockers.append(issue('GRADLE_INVENTORY_MISMATCH', 'application', 'Resolved dependencies differ from notices'))

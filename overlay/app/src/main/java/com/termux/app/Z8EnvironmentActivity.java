@@ -108,7 +108,7 @@ public final class Z8EnvironmentActivity extends Activity {
                 add(content, text(state.progress + Z8Text.text("% · 1/2 Installing Linux\nNext, this terminal will prepare development tools and open a shell. Keep the app open during installation.", "% · 1/2 Linux 설치 중\n완료하면 같은 터미널에서 개발 도구를 준비하고 셸을 엽니다. 설치 중에는 앱을 열어두세요."), 14, palette.secondary), 10);
         }
         if (state.phase == Z8Guest.Phase.AVAILABLE) {
-            add(content, text(Z8Text.text("1. Install Ubuntu → 2. Prepare development tools\nPython · pip · venv · Node LTS · npm · Git · GitHub CLI · build tools · tmux", "1. Ubuntu 설치 → 2. 표준 개발 도구 준비\nPython · pip · venv · Node LTS · npm · Git · GitHub CLI · 빌드 도구 · tmux"), 15, palette.foreground), 20);
+            add(content, text(Z8Text.text("1. Install Linux → 2. Prepare development tools\nPython · pip · venv · Node LTS · npm · Git · GitHub CLI · build tools · tmux", "1. Linux 설치 → 2. 표준 개발 도구 준비\nPython · pip · venv · Node LTS · npm · Git · GitHub CLI · 빌드 도구 · tmux"), 15, palette.foreground), 20);
             add(content, text(Z8Text.text("Tools are installed in this project's app storage and downloaded over the internet. Allow about 2 GB or more of free space per project. The actual size depends on package versions.", "앱 저장소에 프로젝트 전용으로 설치합니다. 개발 도구는 인터넷으로 다운로드하며 프로젝트당 약 2 GB 이상의 여유 공간을 권장합니다. 실제 용량은 패키지 버전에 따라 달라집니다."), 14, palette.secondary), 12);
             add(content, Z8Ui.primary(this, palette, Z8Text.text("Set up environment", "개발 환경 준비"), this::openTerminal), 24);
         }
@@ -153,7 +153,7 @@ public final class Z8EnvironmentActivity extends Activity {
         }
         if (state.phase != Z8Guest.Phase.INSTALLING && state.phase != Z8Guest.Phase.CHECKING)
             add(content, Z8Ui.quiet(this, palette, Z8Text.text("Check installation again", "설치 상태 다시 확인"), () -> { Z8Guest.refresh(getApplicationContext(), projectId, true); renderIfChanged(); }), 20);
-        add(content, text(Z8Text.text("Source files and HOME are stored separately from the Linux image. App updates refresh managed scripts without overwriting your settings or source files.", "소스와 HOME은 Linux 이미지와 따로 보관됩니다. 앱 업데이트는 앱 관리 스크립트를 갱신하며 사용자 설정과 소스를 덮어쓰지 않습니다."), 14, palette.secondary), 24);
+        add(content, text(Z8Text.text("Source files and HOME are stored separately from the Linux image. App updates keep your existing Linux distribution and refresh managed scripts without overwriting your settings or source files.", "소스와 HOME은 Linux 이미지와 따로 보관됩니다. 앱 업데이트는 기존 Linux 배포판을 유지하고 앱 관리 스크립트를 갱신하며 사용자 설정과 소스를 덮어쓰지 않습니다."), 14, palette.secondary), 24);
         setContentView(scroll);
         scroll.post(() -> scroll.scrollTo(0, position));
     }

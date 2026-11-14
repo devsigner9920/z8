@@ -237,6 +237,12 @@ def patch_manifest(tree):
     application.set(ANDROID + "extractNativeLibs", "true")
     application.set(ANDROID + "enableOnBackInvokedCallback", "true")
     application.set(ANDROID + "networkSecurityConfig", "@xml/z8_network_security")
+    # Disable WebView usage metrics for this app. Platform crash reporting is
+    # separate; this flag does not imply that every WebView report is disabled.
+    ET.SubElement(application, "meta-data", {
+        ANDROID + "name": "android.webkit.WebView.MetricsOptOut",
+        ANDROID + "value": "true",
+    })
     # Every class stays in the existing Java namespace. Explicit names prevent
     # applicationId substitution from accidentally changing component lookups.
     for node in application:
