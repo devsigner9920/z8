@@ -43,6 +43,8 @@ class ProjectListingTests(unittest.TestCase):
     def test_malformed_properties_raise_checked_error_for_recovery_callers(self): self.scenario('malformed')
     def test_manual_repair_reappears_only_after_validating_preserved_files(self): self.scenario('repair')
     def test_invalid_records_count_toward_bounded_scan_limit(self): self.scenario('limit')
+    def test_interrupted_delete_keeps_record_and_explicit_retry_removes_owned_files_only(self): self.scenario('cancel-delete')
+    def test_preexisting_partial_deletion_remains_addressable_after_cancel_and_retry(self): self.scenario('partial-delete')
 
 
 PROBE = r'''
@@ -59,6 +61,17 @@ Z8Projects projects=new Z8Projects(storage.toFile());
 Z8Projects.Project healthy=projects.create("건강한 프로젝트");
 Path code=healthy.source.toPath().resolve("preserve.py");Files.writeString(code,"print('preserve')\n");
 switch(args[1]){
+case "cancel-delete":case "partial-delete":{
+ Z8Projects.Project own=projects.create("Disposable deletion");Path file=own.source.toPath().resolve("a.txt");Files.writeString(file,"own");
+ Path environment=root.resolve("environments").resolve(own.id),home=root.resolve("homes").resolve(own.id);
+ Files.createDirectories(environment.resolve("bin"));Files.writeString(environment.resolve("bin/tool"),"test");Files.createDirectories(home);Files.writeString(home.resolve("settings"),"test");
+ if(args[1].equals("partial-delete")){Files.delete(environment.resolve("bin/tool"));Files.delete(file);}
+ Thread.currentThread().interrupt();try{denied(()->projects.delete(own.id));check(Thread.currentThread().isInterrupted(),"Delete must preserve cancellation for caller");}finally{Thread.interrupted();}
+ check(projects.open(own.id).id.equals(own.id)&&Files.exists(home.resolve("settings")),"Cancellation leaves a valid retryable project record");
+ if(args[1].equals("cancel-delete"))check(Files.exists(file)&&Files.exists(environment.resolve("bin/tool")),"Early interruption removes no project files");
+ check(Files.readString(code).contains("preserve"),"Other project untouched");
+ projects.delete(own.id);check(!Files.exists(storage.resolve(own.id))&&!Files.exists(environment)&&!Files.exists(home),"Explicit retry deletes only remaining owned files");
+ check(Files.readString(code).contains("preserve")&&projects.open(healthy.id).id.equals(healthy.id),"Other project remains usable");break;}
 case "partial":{
  Z8Projects.Project missingSource=projects.create("소스 복구 필요");Files.delete(missingSource.source.toPath());
  String incomplete=UUID.randomUUID().toString();Files.createDirectory(storage.resolve(incomplete));

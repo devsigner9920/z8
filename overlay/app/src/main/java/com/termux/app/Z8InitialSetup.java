@@ -94,12 +94,12 @@ public final class Z8InitialSetup {
     private static void start(TermuxService service) {
         Job job=new Job(service); active=job; latest=null;
         try {
-            service.z8AcquireExecution();
             Z8PreparationNotification.begin(service,job.id,NOTIFICATION_ID,"z8");
+            Z8PreparationService.begin(service,job.id,()->WORKER.execute(()->run(job)),message->interrupted(job,message));
         } catch(RuntimeException failure) {
             finish(job,new IOException(Z8Text.text("Could not start foreground preparation. Reopen Z8 and retry.","백그라운드 준비를 시작하지 못했습니다. Z8를 다시 열고 시도해 주세요."),failure)); return;
         }
-        changed(); WORKER.execute(()->run(job));
+        changed();
     }
     private static void run(Job job) {
         job.thread=Thread.currentThread(); Exception failure=null;
@@ -126,6 +126,7 @@ public final class Z8InitialSetup {
         Exception result=failure; MAIN.post(()->finish(job,result));
     }
     private static void finish(Job job,Exception error) {
+        Z8PreparationService.finish(job.service,job.id);
         mainThread(); if(active!=job||job.abandoned)return;
         boolean success=error==null;
         if(!success)preferences(job.service).edit().putString("status","failed").commit();
@@ -133,10 +134,20 @@ public final class Z8InitialSetup {
             success?Z8Text.text("Terminal ready","터미널 준비 완료"):error.getMessage()==null?Z8Text.text("Could not prepare the local terminal.","로컬 터미널을 준비하지 못했습니다."):error.getMessage(),false);
         active=null; Z8PreparationNotification.finish(job.service,job.id,success,null); job.service.updateNotification(); changed();
     }
+    private static void interrupted(Job job,String message) {
+        mainThread(); if(active!=job)return;
+        job.abandoned=true; active=null;
+        if(job.thread!=null)job.thread.interrupt();
+        preferences(job.service).edit().putString("status","failed").commit();
+        latest=new State(Phase.FAILED,"error",-1,message,false);
+        Z8PreparationNotification.finish(job.service,job.id,false,null);
+        job.service.updateNotification(); changed();
+    }
     public static void stop(TermuxService service) {
         mainThread(); Job job=active; if(job==null||job.service!=service)return;
         job.abandoned=true; active=null; latest=null;
         if(job.thread!=null)job.thread.interrupt();
+        Z8PreparationService.finish(service,job.id);
         Z8PreparationNotification.releaseOwner(service);
     }
 }

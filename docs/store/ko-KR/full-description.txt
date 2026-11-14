@@ -30,3 +30,4 @@ Z8는 GPL-3.0-only 조건으로 공개된 오픈소스 앱이며, 별도 라이�
 지원: ethsy2462@gmail.com
 웹사이트: https://devsigner9920.github.io/z8/
 소스: https://github.com/devsigner9920/z8
+이 버전의 대응 소스: https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/z8-source.zip

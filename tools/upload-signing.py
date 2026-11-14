@@ -105,17 +105,18 @@ def create(identity=IDENTITY, jdk=None):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=('create', 'verify', 'promote'))
+    parser.add_argument('action', choices=('create', 'verify', 'promote', 'internal-test'))
     args, promotion_args = parser.parse_known_args()
-    if args.action != 'promote' and promotion_args:
-        parser.error('Additional arguments are only accepted for promote')
+    if args.action not in ('promote', 'internal-test') and promotion_args:
+        parser.error('Additional arguments are only accepted for promote or internal-test')
     if args.action == 'create':
         metadata = create()
     else:
         env, metadata = signing_environment()
-        if args.action == 'promote':
-            # This never bypasses source, QA, operator-decision, or certificate checks.
-            raise SystemExit(subprocess.run([sys.executable, str(ROOT / 'tools/promote-release.py'),
+        if args.action in ('promote', 'internal-test'):
+            # Internal-test signing is separate; it never grants production approval.
+            script = 'promote-release.py' if args.action == 'promote' else 'sign-internal-test.py'
+            raise SystemExit(subprocess.run([sys.executable, str(ROOT / 'tools' / script),
                                              *promotion_args], env=env).returncode)
     print(json.dumps(metadata, indent=2))
 

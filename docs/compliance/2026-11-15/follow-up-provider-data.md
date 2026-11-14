@@ -139,7 +139,13 @@ every default data flow has been measured. A future optional diagnostics switch
 must explain its scope and side effects, preserve user settings and be tested
 against each managed version. No such switch is claimed for rc6.
 
-## Gmail: established facts and remaining decision
+## Gmail: established facts and remaining evidence
+
+Final update: [support and Data safety assessment](support-and-data-safety-final.md)
+records a bounded legitimate-interest basis for ordinary support collection/use
+and concrete draft form answers. Country particulars for the actual consumer
+mailbox remain unestablished; that issue is not solved by a user guessing a
+country or accepting a generic checkbox.
 
 The user confirms ordinary **free Gmail** and **no automatic forwarding** for
 `ethsy2462@gmail.com`. Do not invent Workspace enrollment, a signed processor
@@ -172,7 +178,7 @@ not make it the operator's consumer Gmail contract.
 | Timing/method | Email delivery and reply over network services, with continuing mailbox storage; no automatic forwarding |
 | Operator retention | Handling plus 90 days after resolution, then manual permanent deletion of controlled mail/working copies; earlier requests handled through the support contact |
 | Provider retention | Separate Google deletion/backup procedures; not a promise that all provider copies disappear at the operator's deadline |
-| Country scope / transfer basis | Not established for this actual mailbox by the reviewed public documents; do not fill “US only” or an inferred global data-center list |
+| Country scope / transfer basis | The distinct Article 28-8 country/route evidence remains unestablished for this actual mailbox; do not fill “US only” or an inferred global data-center list. The limited Article 15 collection/use basis is recorded in the final assessment. |
 
 This table can support accurate privacy text, but it is **not a completed
 statutory overseas-transfer notice**. The existing [support procedure](support-retention.md)
@@ -196,27 +202,29 @@ obligations merely because the user sends mail directly to Gmail. Conversely,
 do not automatically call every user's own CLI-provider relationship a Z8
 operator-to-processor transfer.
 
-1. Record the operator's actual support-processing legal basis and controller/
-   responsible contact. The public display name alone is not proof of all
-   legally necessary identity particulars. No private registration data should
-   be published by inference.
-2. Complete the applicable Gmail recipient/country/processing particulars from
+1. **Completed in the final assessment:** record the purpose/necessity/balancing
+   analysis supporting Article 15(1)(6) for minimal requested support; identify
+   the operator's privacy/support contact. No private registration data or
+   fictional separate department is published.
+2. Complete the applicable Gmail country/overseas-route evidence from
    evidence that actually applies to this service, if available. No vendor
    inquiry is required by this review, and none was sent. Until established,
    keep the unresolved fields visible in the internal checklist rather than
    claiming the Google policy link completed them.
-3. If those particulars cannot be established for consumer Gmail, a practical
-   alternative is a dedicated support provider with documented contractual
-   processing locations, subprocessors, deletion and access terms. A verified
-   domestic-storage arrangement can reduce the overseas path, but must include
-   backups and foreign access. Do not forward that intake back to Gmail or
-   migrate existing messages without a separately assessed transition.
+3. This review does not mandate purchasing or migrating to another provider.
+   The user has excluded new inquiries, purchases and migration from the
+   current work. Public evidence did not establish this consumer service's
+   actual country scope, so do not claim complete overseas-storage compliance.
+   Any later alternative must be assessed on its own facts before adoption;
+   do not move or forward existing messages automatically.
 4. Meanwhile minimize support intake: do not request passwords, tokens, full
    private repositories or unnecessary sensitive attachments. Offer redacted
-   examples. This reduces exposure; it does not replace the missing legal basis
-   or make public issue posting a suitable private-support substitute.
+   examples. This reduces exposure; it does not replace the remaining
+   overseas-route evidence or make public issue posting a suitable private-
+   support substitute.
 
-No all-country launch clearance follows from these changes. Remaining unknowns
-are the actual support legal/contractual arrangement and country scope, plus
-bounded provider/version settings or traffic evidence—not every hypothetical
-program a terminal user might execute.
+No all-country launch clearance follows from these changes. The final
+assessment closes the generic support collection/use basis and turns the
+supported-provider evidence into specific draft choices. The remaining Gmail
+country/overseas-route issue is finite; a universal traffic inventory of every
+hypothetical terminal program is not required to complete this review.

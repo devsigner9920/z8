@@ -34,6 +34,7 @@ class GuestSessionLauncherTests(unittest.TestCase):
 
 
 STUBS = {
+    'com/termux/app/Z8PreparationService.java': 'package com.termux.app; public class Z8PreparationService {public interface Interrupted{void stopped(String message);}public static Interrupted cancelled;public static Runnable ready;public static boolean defer;public static void begin(TermuxService s,String id,Runnable r,Interrupted c){ cancelled=c;ready=r;if(!defer)r.run();}public static void finish(TermuxService s,String id){}public static void refresh(TermuxService s){}public static void releaseOwner(TermuxService s){}}',
     'com/termux/app/Z8ToolManager.java': '''package com.termux.app;public class Z8ToolManager {public static boolean hasWork(TermuxService s){return false;}}''',
     'com/termux/app/Z8InitialSetup.java': 'package com.termux.app; public class Z8InitialSetup {public static boolean hasWork(TermuxService service){return false;}}',
     'com/termux/app/Z8Projects.java': '''package com.termux.app;import android.content.Context;import java.io.IOException;
@@ -365,6 +366,25 @@ STUBS = {
             check(queueRecovery.created==2,"both accepted installers recover after service/process loss");
             check(journal.getAll().isEmpty(),"every completed queued installer clears its journal");
             Z8GuestSessionLauncher.stop(queueRecovery);
+            // dataSync rejection before worker start cannot strand QUEUED or create a PTY.
+            TermuxService pendingFgs=new TermuxService();Z8GuestSessionLauncher.start(pendingFgs);Z8PreparationService.defer=true;Z8Guest.profilePrepared=false;
+            int beforeFgs=Z8ProjectPreparation.calls;
+            Z8GuestSessionLauncher.request(pendingFgs,Z8GuestSessionLauncher.newRequest(pendingFgs),"pending-fgs",null,"Pending",null);
+            check(Z8ProjectPreparation.calls==beforeFgs&&pendingFgs.created==0,"no worker or PTY before promotion");
+            Z8PreparationService.cancelled.stopped("Foreground service rejected");
+            check(!Z8GuestSessionLauncher.hasPending(pendingFgs)&&Z8GuestSessionLauncher.preparation(pendingFgs,"pending-fgs").failed,"rejection consumes pending request without hanging");
+            Z8GuestSessionLauncher.stop(pendingFgs);Z8PreparationService.defer=false;
+            // Timeout interrupts only pending preparation; an existing interactive session survives.
+            TermuxService timed=new TermuxService();Z8GuestSessionLauncher.start(timed);Z8Guest.profilePrepared=false;
+            timed.createTermuxSession("owned",new String[0],null,"/",false,"existing terminal");
+            Z8ProjectPreparation.entered=new CountDownLatch(1);Z8ProjectPreparation.release=new CountDownLatch(1);
+            Z8GuestSessionLauncher.request(timed,Z8GuestSessionLauncher.newRequest(timed),"timed-project",null,"Timed",null);
+            check(Z8ProjectPreparation.entered.await(2,TimeUnit.SECONDS),"timeout fixture entered extraction/preparation");
+            Z8PreparationService.cancelled.stopped("Android preparation time limit");
+            check(Z8GuestSessionLauncher.hasPending(timed),"deletion guard retained until worker completion");Handler.next();
+            check(!Z8GuestSessionLauncher.hasPending(timed)&&timed.created==1&&timed.sessions.get(0).getTerminalSession().running,"timeout preserves unrelated PTY and cannot launch late result");
+            check(timed.getSharedPreferences("z8.project-preparation",0).getString("timed-project","").equals("failed"),"timeout requires explicit retry");
+            Z8GuestSessionLauncher.stop(timed);
             System.out.println("PASS: service-owned launch lifecycle");
         }
     }''',

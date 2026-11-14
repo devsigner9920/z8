@@ -409,7 +409,7 @@ Do not combine retained Ubuntu package evidence with a Debian guest hash. A new
 guest needs its own package inventory, notices, source package, app candidate
 and device QA before release review.
 
-## Human review record
+## Recorded review of exact inputs
 
 Since the November 4 review, `prepare-app.py` marks changed upstream text files
 with a dated Z8 modification notice while preserving existing license and
@@ -423,14 +423,19 @@ The notice generator accepts `--review` only for a real, recorded review of exac
 inputs. It must contain `schemaVersion: 1`, `noticesInputs` exactly matching the
 generated notice report's `inputs`, a nonempty `reviewedBy`, `reviewedAt` in
 YYYY-MM-DD format, and true `sourceClosureReviewed` / `noticeCompletenessReviewed`.
-This record is never generated or filled with an invented reviewer. It addresses
+This record must follow an actual assessment and must identify its real reviewer
+and method; collecting metadata does not constitute that assessment. A delegated
+Codex technical review must be identified as such, not attributed to the operator
+or presented as a human lawyer's approval. See the
+[bounded source-delivery assessment](compliance/2026-11-15/source-closure-assessment.md)
+for the evidence and exact next-release checks. The record addresses
 the release review requirement only; it does not waive missing source payloads,
 unknown licenses, incorrect hashes or inaccessible source URLs. Supply the same
 record to the final verifier.
 
 Review the actual license text, source/header attributions, static linking,
 Maven/native dependencies, modification notices and any per-file exceptions.
-Recorded human review is evidence of a process, not a replacement for the license
+Recorded review is evidence of a process, not a replacement for the license
 obligations. Keep operator/Anthropic terms and Canonical distribution decisions
 separate; a user's app checkbox cannot resolve the operator's contract obligations.
 

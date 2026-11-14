@@ -131,8 +131,29 @@ class ProjectRemovalTests(unittest.TestCase):
     def test_selected_tool_queue_and_failed_cleanup_preserve_files_across_service_replacement(self):
         self.probe('tool-owned')
 
+    def test_file_deletion_waits_for_data_sync_promotion_and_requires_explicit_retry(self): self.probe('deferred-foreground')
+    def test_file_deletion_promotion_failure_releases_registration_without_side_effects(self): self.probe('foreground-rejection')
+    def test_cancelled_deletion_keeps_guard_through_verifier_cleanup(self): self.probe('deletion-cancel-verify')
+    def test_cancelled_partial_deletion_reports_truthfully_then_allows_explicit_retry(self): self.probe('deletion-cancel-files')
+    def test_cancel_between_verified_exit_and_main_handoff_cannot_delete_files(self): self.probe('deletion-handoff')
+    def test_last_terminal_shutdown_stays_on_its_interactive_owner_until_complete(self): self.probe('terminal-lease')
+
 
 STUBS = {
+    'com/termux/app/Z8PreparationService.java': '''package com.termux.app;import java.util.*;
+        public class Z8PreparationService {interface Interrupted {void stopped(String message);}
+            static final Map<String,Runnable> ready=new HashMap<>();static final Map<String,Interrupted> cancel=new HashMap<>();
+            static boolean defer,fail;static int begins,finishes;static String latest;
+            static void beginFileTask(TermuxService owner,String id,String title,String detail,Runnable task,Interrupted interrupted) {
+                if(!Z8ProjectRemoval.hasWork())throw new AssertionError("No removal registration before dataSync");
+                if(!title.contains("Deleting")||!detail.contains("cannot be restored"))throw new AssertionError("Truthful deletion notice missing");
+                if(fail)throw new IllegalStateException("Android denied dataSync");
+                begins++;owner.finiteAcquisitions++;owner.acquisitionCount++;latest=id;ready.put(id,task);cancel.put(id,interrupted);if(!defer)task.run();
+            }
+            static void finish(TermuxService owner,String id){if(cancel.remove(id)!=null)finishes++;ready.remove(id);}
+            static void stop(){String id=latest;Interrupted callback=cancel.remove(id);ready.remove(id);if(callback!=null)callback.stopped("Generic preparation wording must not be reused for deletion");}
+            static void promote(){Runnable task=ready.get(latest);if(task!=null)task.run();}
+        }''',
     'com/termux/app/Z8ToolManager.java': 'package com.termux.app;public class Z8ToolManager {static String owned;public static boolean busy(String id){return id!=null&&id.equals(owned);}}',
     'com/termux/app/Z8PreparationProcess.java': 'package com.termux.app;public class Z8PreparationProcess {static String owned;static boolean hasOutstanding(String id){return id!=null&&id.equals(owned);}}',
     'android/content/Context.java': '''package android.content;import java.nio.file.*;import java.util.concurrent.*;
@@ -174,7 +195,7 @@ STUBS = {
             public void finishIfRunning(){if(android.os.Looper.myLooper()==android.os.Looper.getMainLooper())throw new AssertionError("Stop was not offloaded");if(running)signals++;}}''',
     'com/termux/app/TermuxService.java': '''package com.termux.app;import android.content.*;import java.nio.file.*;import java.util.*;
         import com.termux.terminal.TerminalSession;
-        public class TermuxService extends Context {public boolean stopped,stopRequested;public int removed,notifications,acquisitionCount,removalLeaseChecks;
+        public class TermuxService extends Context {public boolean stopped,stopRequested;public int removed,notifications,acquisitionCount,removalLeaseChecks,finiteAcquisitions,specialAcquisitions;
             public final List<TerminalSession> sessions=new ArrayList<>();public TermuxService(Path root){super(root);}
             public boolean wantsToStop(){return stopped;}
             public boolean z8IsStopRequested(){return stopRequested;}
@@ -182,7 +203,7 @@ STUBS = {
                 if(!Z8ProjectRemoval.hasWork())throw new AssertionError("Session removed after execution lease released");removalLeaseChecks++;
                 if(sessions.remove(session))removed++;}
             public void updateNotification(){notifications++;}
-            public void z8AcquireExecution(){if(!Z8ProjectRemoval.hasWork())throw new AssertionError("Execution acquired before lease registration");acquisitionCount++;}
+            public void z8AcquireExecution(){if(!Z8ProjectRemoval.hasWork())throw new AssertionError("Execution acquired before lease registration");acquisitionCount++;specialAcquisitions++;}
         }''',
     'com/termux/app/Z8SessionCatalog.java': '''package com.termux.app;import com.termux.terminal.TerminalSession;import java.util.*;
         public class Z8SessionCatalog {public static class Entry {public final String projectId;public final TerminalSession session;
@@ -215,7 +236,7 @@ STUBS = {
             }}''',
     'com/termux/app/Z8Guest.java': '''package com.termux.app;import android.content.Context;import java.io.*;import java.nio.file.*;
         import java.nio.file.attribute.BasicFileAttributes;import java.util.concurrent.*;
-        public class Z8Guest {public static volatile int calls;public static boolean fail;
+        public class Z8Guest {public static volatile int calls;public static boolean fail,partial;public static CountDownLatch interrupted=new CountDownLatch(0),cleanup=new CountDownLatch(0);
             public static CountDownLatch entered=new CountDownLatch(0),release=new CountDownLatch(0);
             public static void deleteProject(Context context,String id)throws Exception {
                 if(android.os.Looper.myLooper()==android.os.Looper.getMainLooper())throw new AssertionError("Filesystem ran on main thread");
@@ -223,7 +244,8 @@ STUBS = {
                 TermuxService service=(TermuxService)context;
                 for(com.termux.terminal.TerminalSession session:service.sessions)
                     if(id.equals(session.project))throw new AssertionError("Files touched before every target PTY was removed");
-                calls++;entered.countDown();release.await();if(fail)throw new IOException("owned fixture deletion failed");
+                calls++;if(partial)Files.delete(context.fixture.resolve(id).resolve("source/main.py"));entered.countDown();
+                try {release.await();}catch(InterruptedException stop){interrupted.countDown();cleanup.await();throw stop;}if(fail)throw new IOException("owned fixture deletion failed");
                 Path target=context.fixture.resolve(id).normalize();
                 if(!target.getParent().equals(context.fixture)||!id.startsWith("owned-"))throw new AssertionError("Non-owned fixture path");
                 Files.walkFileTree(target,new SimpleFileVisitor<Path>() {
@@ -249,6 +271,54 @@ STUBS = {
                 String scenario=args[1];Result result=new Result();
                 try {
                     switch(scenario) {
+                        case "deferred-foreground": {
+                            Z8PreparationService.defer=true;TerminalSession own=session(service,"owned-target");
+                            Z8ProjectRemoval.begin(service,"owned-target",result);
+                            check(Z8ProjectRemoval.isDeleting("owned-target")&&Z8PreparationService.begins==1&&Z8ProjectProcesses.calls==0&&Z8Guest.calls==0&&own.signals==0,"No worker before Android dataSync accepts");
+                            check(service.specialAcquisitions==0&&service.finiteAcquisitions==1,"Deletion does not claim an interactive lease");
+                            Z8PreparationService.stop();check(result.calls==1&&result.error.contains("before deleting")&&!Z8ProjectRemoval.hasWork(),"Cancellation before promotion releases registered job");
+                            Z8PreparationService.promote();check(Z8ProjectProcesses.calls==0&&exists(service,"owned-target"),"Late start cannot replay cancelled deletion");
+                            own.running=false;Z8PreparationService.defer=false;Result retry=new Result();Z8ProjectRemoval.begin(service,"owned-target",retry);Handler.next();Handler.next();
+                            check(retry.calls==1&&retry.error==null&&!exists(service,"owned-target")&&exists(service,"owned-other"),"Explicit retry can complete after cancellation");break;
+                        }
+                        case "foreground-rejection": {
+                            TerminalSession own=session(service,"owned-target");Z8PreparationService.fail=true;Z8ProjectRemoval.begin(service,"owned-target",result);
+                            check(result.calls==1&&result.error!=null&&!Z8ProjectRemoval.hasWork()&&Z8ProjectProcesses.calls==0&&own.signals==0,"Failed promotion cannot strand deletion or start worker");
+                            check(exists(service,"owned-target")&&exists(service,"owned-other")&&service.specialAcquisitions==0,"Android rejection preserves files without specialUse fallback");break;
+                        }
+                        case "deletion-cancel-verify": {
+                            TerminalSession own=session(service,"owned-target"),other=session(service,"owned-other");
+                            Z8ProjectProcesses.entered=new CountDownLatch(1);Z8ProjectProcesses.release=new CountDownLatch(1);
+                            Z8ProjectRemoval.begin(service,"owned-target",result);check(Z8ProjectProcesses.entered.await(3,TimeUnit.SECONDS),"Verifier entered");
+                            Z8PreparationService.stop();check(Z8ProjectRemoval.isDeleting("owned-target")&&result.calls==0,"Keep guard until worker cleanup and main handoff");Handler.next();
+                            check(result.calls==1&&result.error.contains("before deleting")&&Z8Guest.calls==0&&exists(service,"owned-target"),"Cancelled verifier cannot delete");
+                            check(other.running&&other.signals==0&&Z8ProjectRemoval.protects(own)&&!service.stopped,"Other terminal remains live, unverified target retained");break;
+                        }
+                        case "deletion-cancel-files": {
+                            TerminalSession other=session(service,"owned-other");Z8Guest.partial=true;
+                            Z8Guest.entered=new CountDownLatch(1);Z8Guest.release=new CountDownLatch(1);Z8Guest.interrupted=new CountDownLatch(1);Z8Guest.cleanup=new CountDownLatch(1);
+                            Z8ProjectRemoval.begin(service,"owned-target",result);Handler.next();check(Z8Guest.entered.await(3,TimeUnit.SECONDS),"Deletion entered");
+                            check(!exists(service,"owned-target")&&Files.exists(root.resolve("owned-target/home/settings")),"Some files actually removed before interruption");
+                            Z8PreparationService.stop();check(Z8Guest.interrupted.await(3,TimeUnit.SECONDS),"Worker interrupted");
+                            Result duplicate=new Result();Z8ProjectRemoval.begin(service,"owned-target",duplicate);check(duplicate.calls==1&&Z8ProjectRemoval.isDeleting("owned-target")&&result.calls==0,"Cleanup must finish before retry can mutate");
+                            Z8Guest.cleanup.countDown();Handler.next();
+                            check(result.calls==1&&result.error.contains("may be incomplete")&&result.error.contains("cannot be restored")&&!result.error.contains("preserved"),"Partial deletion must never claim all files preserved");
+                            check(other.running&&other.signals==0&&exists(service,"owned-other")&&!service.stopped,"Unrelated terminal/source preserved");
+                            Z8Guest.partial=false;Z8Guest.release.countDown();Result retry=new Result();Z8ProjectRemoval.begin(service,"owned-target",retry);Handler.next();Handler.next();
+                            check(retry.calls==1&&retry.error==null&&!Files.exists(root.resolve("owned-target"))&&exists(service,"owned-other"),"Explicit retry removes remaining owned files only");break;
+                        }
+                        case "deletion-handoff": {
+                            Z8ProjectRemoval.begin(service,"owned-target",result);Runnable handoff=Handler.take();Z8PreparationService.stop();handoff.run();
+                            check(result.calls==1&&result.error.contains("before deleting")&&Z8Guest.calls==0&&exists(service,"owned-target")&&!Z8ProjectRemoval.hasWork(),"Cancelled handoff cannot begin file deletion");break;
+                        }
+                        case "terminal-lease": {
+                            TerminalSession own=session(service,"owned-target");TermuxService different=new TermuxService(root);
+                            Z8ProjectRemoval.stopSession(service,own,result);Handler.next();own.running=false;
+                            check(Z8ProjectRemoval.hasTerminalCleanup(service)&&!Z8ProjectRemoval.hasTerminalCleanup(different),"Last PTY acknowledgement keeps only exact interactive owner alive");
+                            check(service.specialAcquisitions==1&&Z8PreparationService.begins==0,"Terminal shutdown is not a dataSync job");Handler.advance(100);
+                            check(result.calls==1&&result.error==null&&!Z8ProjectRemoval.hasTerminalCleanup(service),"Cleanup release demotes interactive service");
+                            Result empty=new Result();Z8ProjectRemoval.stopAllSessions(service,empty);check(!Z8ProjectRemoval.hasTerminalCleanup(service),"Empty wrapper list does not invent an interactive session");Handler.next();break;
+                        }
                         case "tool-owned": {
                             TerminalSession target=session(service,"owned-target");Z8ToolManager.owned="owned-target";
                             Z8ProjectRemoval.begin(service,"owned-target",result);
@@ -316,6 +386,7 @@ STUBS = {
                             check(Z8Guest.entered.await(3,TimeUnit.SECONDS),"Worker reached owned fixture");
                             check(Z8ProjectRemoval.isDeleting("owned-target")&&Z8ProjectRemoval.hasWork()&&result.calls==0,"Lease held while IO blocks after screen leaves");
                             check(exists(service,"owned-target"),"Blocked IO has not removed files");
+                            check(Z8PreparationService.cancel.size()==1&&service.specialAcquisitions==0,"No terminal required: dataSync lease retains runtime through file IO");
                             Z8Guest.release.countDown();Handler.next();
                             check(!result.screenAttached&&result.calls==1&&result.error==null&&!exists(service,"owned-target"),"Completion does not require Activity");
                             check(!Z8ProjectRemoval.hasWork()&&service.notifications==1,"IO completion releases foreground lease");
@@ -597,7 +668,7 @@ STUBS = {
                     }
                     System.out.println("PASS removal "+scenario);
                 } finally {
-                    Z8Guest.release.countDown();Z8ProjectProcesses.release.countDown();
+                    Z8Guest.release.countDown();Z8Guest.cleanup.countDown();Z8ProjectProcesses.release.countDown();
                     java.lang.reflect.Field field=Z8ProjectRemoval.class.getDeclaredField("IO");field.setAccessible(true);
                     ((ExecutorService)field.get(null)).shutdownNow();
                 }

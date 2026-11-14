@@ -84,6 +84,10 @@ class PreparationContracts(unittest.TestCase):
         terminal_service = [e for e in app.findall("service") if e.get(prepare.ANDROID + "name") == "com.termux.app.TermuxService"][0]
         self.assertEqual(terminal_service.get(prepare.ANDROID + "foregroundServiceType"), "specialUse")
         self.assertTrue(terminal_service.find("property").get(prepare.ANDROID + "value"))
+        finite = [e for e in app.findall("service") if e.get(prepare.ANDROID + "name") == "com.termux.app.Z8PreparationService"][0]
+        self.assertEqual(finite.get(prepare.ANDROID + "foregroundServiceType"), "dataSync")
+        self.assertEqual(finite.get(prepare.ANDROID + "exported"), "false")
+        self.assertIn("android.permission.FOREGROUND_SERVICE_DATA_SYNC", prepare.PERMISSIONS)
         self.assertEqual(app.get(prepare.ANDROID + "extractNativeLibs"), "true")
         self.assertEqual(app.get(prepare.ANDROID + "enableOnBackInvokedCallback"), "true")
         metrics = [e for e in app.findall("meta-data")
@@ -313,9 +317,15 @@ class PreparationContracts(unittest.TestCase):
         self.assertNotIn('Z8GuestSessionLauncher.stop', idle)
         self.assertNotIn('mWantsToStop =', idle)
         resume = service.split('public synchronized void z8AcquireExecution() {', 1)[1].split('\n    }', 1)[0]
-        self.assertIn('if (mWantsToStop || !mZ8Idle) return;', resume)
+        self.assertIn('if (mWantsToStop || !z8HasInteractiveSessions() || !mZ8Idle) return;', resume)
+        self.assertIn('if (Z8ProjectRemoval.hasTerminalCleanup(this)) return true;', service)
         self.assertLess(resume.index('mZ8Idle = false;'), resume.index('startService('))
         self.assertIn('runStartForeground();', resume)
+        for client_name in ('TermuxTerminalSessionServiceClient', 'TermuxTerminalSessionActivityClient'):
+            pid_client = self.read('app/src/main/java/com/termux/app/terminal/' + client_name + '.java')
+            pid_callback = pid_client.split('public void setTerminalShellPid(', 1)[1].split('\n    }', 1)[0]
+            self.assertIn('if (pid > 0)', pid_callback)
+            self.assertIn('.updateNotification();', pid_callback)
         notification = service.split('public synchronized void updateNotification() {', 1)[1].split('\n    }', 1)[0]
         self.assertIn('if (mWantsToStop) return;', notification)
         self.assertIn('z8IdleService();', notification)
@@ -346,8 +356,14 @@ class PreparationContracts(unittest.TestCase):
     def test_first_preparation_uses_service_card_without_new_terminal_intent(self):
         service = self.read('app/src/main/java/com/termux/app/TermuxService.java')
         notification = service.split('private Notification buildNotification() {', 1)[1].split('private void setupNotificationChannel()', 1)[0]
-        self.assertIn('if (Z8PreparationNotification.decorate(builder, this)) return builder.build();', notification)
-        self.assertLess(notification.index('Z8PreparationNotification.decorate'), notification.index('builder.addAction('))
+        self.assertNotIn('Z8PreparationNotification.decorate', notification)
+        finite = self.read('app/src/main/java/com/termux/app/Z8PreparationService.java')
+        self.assertIn('FOREGROUND_SERVICE_TYPE_DATA_SYNC', finite)
+        self.assertNotIn('FOREGROUND_SERVICE_TYPE_SPECIAL_USE', finite)
+        self.assertIn('Z8PreparationNotification.decorate(builder,lease.owner)', finite)
+        self.assertIn('stopForeground(STOP_FOREGROUND_REMOVE); stopSelf();', finite)
+        foreground = service.split('private void runStartForeground() {', 1)[1].split('\n    }', 1)[0]
+        self.assertTrue(foreground.lstrip().startswith('if (!z8HasInteractiveSessions()) return;'))
         helper = self.read('app/src/main/java/com/termux/app/Z8PreparationNotification.java')
         route = helper.split('private static PendingIntent projectIntent(', 1)[1].split('private static void postResult(', 1)[0]
         self.assertIn('Z8WorkspaceActivity.EXTRA_FOCUS_PROJECT_ID', route)

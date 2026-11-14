@@ -36,6 +36,7 @@ PERMISSIONS = {
     "android.permission.WAKE_LOCK", "android.permission.VIBRATE",
     "android.permission.FOREGROUND_SERVICE", "android.permission.POST_NOTIFICATIONS",
     "android.permission.FOREGROUND_SERVICE_SPECIAL_USE",
+    "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
 }
 
 
@@ -271,11 +272,16 @@ def patch_manifest(tree):
             node.set(ANDROID + "foregroundServiceType", "specialUse")
             ET.SubElement(node, "property", {
                 ANDROID + "name": "android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE",
-                ANDROID + "value": "User-started local terminal sessions, Linux development environment preparation and selected development tool installation. "
+                ANDROID + "value": "User-started interactive local terminal sessions. "
                     "Commands and child processes continue while the user switches apps with an ongoing notification. "
-                    "Users can stop terminals in the app or notification and stop preparation using Android app controls. "
+                    "Users can stop terminals in the app or notification. Finite environment and tool preparation uses a separate dataSync service. "
                     "The service stops when idle.",
             })
+    ET.SubElement(application, "service", {
+        ANDROID + "name": "com.termux.app.Z8PreparationService",
+        ANDROID + "exported": "false",
+        ANDROID + "foregroundServiceType": "dataSync",
+    })
     application.set(ANDROID + "name", "com.termux.app.TermuxApplication")
     terminals = [e for e in application.findall("activity") if e.get(ANDROID + "name") == "com.termux.app.TermuxActivity"]
     if len(terminals) != 1:
@@ -664,17 +670,34 @@ def patch_sessions(tree):
             startForeground(TermuxConstants.TERMUX_APP_NOTIFICATION_ID, buildNotification(),
                 android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE);
         } else startForeground(TermuxConstants.TERMUX_APP_NOTIFICATION_ID, buildNotification());''')
+    edit(service, '    private void runStartForeground() {',
+        '    private void runStartForeground() {\n        if (!z8HasInteractiveSessions()) return;')
+    # PTYs are started lazily on their first size update. Both client variants
+    # must promote after a real PID exists, including the diagnostic/native path.
+    for client, owner in (("TermuxTerminalSessionServiceClient", "mService"),
+                          ("TermuxTerminalSessionActivityClient", "service")):
+        edit(tree / f"app/src/main/java/com/termux/app/terminal/{client}.java",
+             "            termuxSession.getExecutionCommand().mPid = pid;",
+             "            termuxSession.getExecutionCommand().mPid = pid;\n"
+             f"        if (pid > 0) {owner}.updateNotification();")
     edit(service, "    private synchronized void updateNotification() {", "    public synchronized void updateNotification() {")
     edit(service, '    boolean mWantsToStop = false;',
-        '    boolean mWantsToStop = false;\n    private boolean mZ8Idle;\n    private volatile boolean mZ8StopRequested;\n    private String mZ8StopMessage;\n    public boolean z8IsStopRequested() { return mZ8StopRequested; }')
+        '    boolean mWantsToStop = false;\n    private boolean mZ8Idle = true;\n    private volatile boolean mZ8StopRequested;\n    private String mZ8StopMessage;\n    public boolean z8IsStopRequested() { return mZ8StopRequested; }')
     edit(service, "        SystemEventReceiver.registerPackageUpdateEvents(this);",
         "        Z8AttentionBridge.start(this);\n        Z8GuestSessionLauncher.start(this);\n        SystemEventReceiver.registerPackageUpdateEvents(this);")
     edit(service, '    public void onDestroy() {\n        Logger.logVerbose(LOG_TAG, "onDestroy");',
-        '    public void onDestroy() {\n        Z8InitialSetup.stop(this);\n        Z8ToolManager.stop(this);\n        Z8GuestSessionLauncher.stop(this);\n        Z8AttentionBridge.stop();\n        Logger.logVerbose(LOG_TAG, "onDestroy");')
+        '    public void onDestroy() {\n        Z8InitialSetup.stop(this);\n        Z8ToolManager.stop(this);\n        Z8GuestSessionLauncher.stop(this);\n        Z8PreparationService.releaseOwner(this);\n        Z8AttentionBridge.stop();\n        Logger.logVerbose(LOG_TAG, "onDestroy");')
     edit(service, '    private void requestStopService() {',
-        '''    /** Hold started/foreground lifetime only while execution owns work. */
+        '''    private boolean z8HasInteractiveSessions() {
+        if (Z8ProjectRemoval.hasTerminalCleanup(this)) return true;
+        for (TermuxSession session : mShellManager.mTermuxSessions)
+            if (session.getTerminalSession().getPid() > 0 && session.getTerminalSession().isRunning()) return true;
+        return false;
+    }
+
+    /** Only an actual interactive child owns the specialUse service. */
     public synchronized void z8AcquireExecution() {
-        if (mWantsToStop || !mZ8Idle) return;
+        if (mWantsToStop || !z8HasInteractiveSessions() || !mZ8Idle) return;
         mZ8Idle = false;
         startService(new Intent(this, TermuxService.class));
         runStartForeground();
@@ -695,7 +718,15 @@ def patch_sessions(tree):
     edit(service, 'if (mWakeLock == null && mShellManager.mTermuxSessions.isEmpty() && mShellManager.mTermuxTasks.isEmpty()) {',
         'if (mWakeLock == null && mShellManager.mTermuxSessions.isEmpty() && mShellManager.mTermuxTasks.isEmpty()\n            && !Z8GuestSessionLauncher.hasServiceWork(this) && !Z8ProjectRemoval.hasWork()) {')
     edit(service, '    public synchronized void updateNotification() {',
-        '    public synchronized void updateNotification() {\n        if (mWantsToStop) return;')
+        '''    public synchronized void updateNotification() {
+        if (mWantsToStop) return;
+        if (!z8HasInteractiveSessions()) {
+            runStopForeground();
+            mZ8Idle = true;
+            actionReleaseWakeLock(false);
+            if (!Z8GuestSessionLauncher.hasServiceWork(this) && !Z8ProjectRemoval.hasWork()) z8IdleService();
+            return;
+        }''')
     edit(service, '''            // Exit if we are updating after the user disabled all locks with no sessions or tasks running.
             requestStopService();
         } else {
@@ -736,12 +767,7 @@ def patch_sessions(tree):
         '    public synchronized TermuxSession createTermuxSession(ExecutionCommand executionCommand) {\n        if (mWantsToStop || mZ8StopRequested) return null;')
     edit(service, '        final boolean wakeLockHeld = mWakeLock != null;',
         '        if (mZ8StopMessage != null) notificationText = mZ8StopMessage;\n        final boolean wakeLockHeld = mWakeLock != null;')
-    edit(service, '        builder.setOngoing(true);',
-        '''        builder.setOngoing(true);
-
-        // First preparation owns the existing foreground card and its scoped
-        // CPU lock. Avoid unrelated Exit/Wake lock controls during installation.
-        if (Z8PreparationNotification.decorate(builder, this)) return builder.build();''')
+    # Finite work has its own dataSync notification; never hide the unrelated terminal card.
     edit(service, '        if (newTermuxSession == null) {\n            Logger.logError',
         '        if (newTermuxSession == null) {\n            Z8AttentionBridge.discardLaunch(executionCommand);\n            Logger.logError')
     edit(service, '        mShellManager.mTermuxSessions.add(newTermuxSession);',

@@ -49,6 +49,7 @@ class PreparationNotificationTests(unittest.TestCase):
     def test_project_and_tool_queue_keep_their_own_navigation(self): self.probe('tool-queue')
 
 STUBS = {
+    'com/termux/app/Z8PreparationService.java': 'package com.termux.app; public class Z8PreparationService {public interface Interrupted{void stopped(String message);}public static Interrupted cancelled;public static Runnable ready;public static boolean defer;public static void begin(TermuxService s,String id,Runnable r,Interrupted c){ cancelled=c;ready=r;if(!defer)r.run();}public static void finish(TermuxService s,String id){}public static void refresh(TermuxService s){}public static void releaseOwner(TermuxService s){}}',
 'android/os/Looper.java': r'''package android.os; public class Looper {
 static final Looper MAIN = new Looper(); public static Looper getMainLooper(){return MAIN;} public static Looper myLooper(){return MAIN;}}
 ''',

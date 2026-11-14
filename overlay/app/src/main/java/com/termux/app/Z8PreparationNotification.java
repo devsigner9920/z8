@@ -111,6 +111,7 @@ public final class Z8PreparationNotification {
         if (notifications != null) notifications.cancel(entry.projectId, RESULT_ID);
         publish(owner);
         if (owner.wakeLock == null) renewWakeLock(owner);
+        Z8PreparationService.refresh(service);
         service.updateNotification();
     }
 
@@ -132,7 +133,7 @@ public final class Z8PreparationNotification {
         }
         publish(owner);
         TermuxService service = owner.service.get();
-        if (service != null) service.updateNotification();
+        if (service != null) { Z8PreparationService.refresh(service); service.updateNotification(); }
     }
 
     public static void finish(TermuxService service, String requestId, boolean success, String detail) {
@@ -154,6 +155,7 @@ public final class Z8PreparationNotification {
         if (owner.entries.isEmpty()) release(owner);
         else publish(owner);
         postResult(service, entry, success, waiting);
+        Z8PreparationService.refresh(service);
         service.updateNotification();
     }
 

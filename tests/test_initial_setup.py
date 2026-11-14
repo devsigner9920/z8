@@ -37,6 +37,9 @@ class InitialSetupTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(result.stdout.strip(), 'PASS ' + case)
 
+    def test_preparation_promotion_is_required_before_worker_and_rejection_is_retryable(self): self.probe('promotion_wait')
+    def test_data_sync_timeout_interrupts_setup_and_retry_waits_for_cleanup(self): self.probe('timeout')
+
     def test_foreground_start_failure_does_not_leave_queued_setup(self): self.probe('foreground_failure')
 
     def test_no_consent_never_resumes_and_binding_does_not_install(self): self.probe('consent')
@@ -53,6 +56,7 @@ class InitialSetupTests(unittest.TestCase):
 
 
 STUBS = {
+    'com/termux/app/Z8PreparationService.java': 'package com.termux.app; public class Z8PreparationService {public interface Interrupted{void stopped(String message);}public static Interrupted cancelled;public static Runnable ready;public static boolean defer;public static void begin(TermuxService s,String id,Runnable r,Interrupted c){if(s.failAcquire)throw new IllegalStateException("FGS rejected");s.acquired++; cancelled=c;ready=r;if(!defer)r.run();}public static void finish(TermuxService s,String id){}public static void refresh(TermuxService s){}public static void releaseOwner(TermuxService s){}}',
 'android/os/Looper.java': r'''package android.os; public class Looper {
 static final Looper MAIN=new Looper(); static final Thread OWNER=Thread.currentThread();
 public static Looper getMainLooper(){return MAIN;} public static Looper myLooper(){return Thread.currentThread()==OWNER?MAIN:null;}}
@@ -151,6 +155,18 @@ public static void main(String[] args){try{run(args);}catch(Throwable failure){f
 static void run(String[] args)throws Exception{
 TermuxService service=new TermuxService();ConnectivityManager network=Context.NETWORK;SharedPreferences journal=Context.PREFS;
 switch(args[0]){
+case "promotion_wait":{
+ Z8PreparationService.defer=true;Z8InitialSetup.request(service,false);eq(0,Z8ProjectPreparation.calls.get());
+ Z8PreparationService.cancelled.stopped("Foreground setup rejected");eq(false,Z8InitialSetup.hasWork(service));eq(Z8InitialSetup.Phase.FAILED,Z8InitialSetup.state(service).phase);
+ Z8InitialSetup.resume(service);eq(0,Z8ProjectPreparation.calls.get());Z8PreparationService.defer=false;
+ Z8InitialSetup.request(service,false);await(Z8ProjectPreparation.entered);complete(service);eq(1,Z8ProjectPreparation.calls.get());break;}
+case "timeout":{
+ Z8ProjectPreparation.cleanupRelease=new CountDownLatch(1);Z8InitialSetup.request(service,false);await(Z8ProjectPreparation.entered);
+ Z8PreparationService.cancelled.stopped("Android preparation time limit");await(Z8ProjectPreparation.cleanupEntered);
+ eq("failed",journal.getString("status",""));eq(Z8InitialSetup.Phase.FAILED,Z8InitialSetup.state(service).phase);eq(false,service.stopping);
+ Z8InitialSetup.resume(service);eq(1,Z8ProjectPreparation.calls.get());
+ Z8ProjectPreparation.entered=new CountDownLatch(1);Z8ProjectPreparation.release=new CountDownLatch(1);Z8InitialSetup.request(service,false);
+ eq(1,Z8ProjectPreparation.calls.get());Z8ProjectPreparation.cleanupRelease.countDown();await(Z8ProjectPreparation.entered);complete(service);eq(2,Z8ProjectPreparation.calls.get());break;}
 case "foreground_failure":{
  service.failAcquire=true;Z8InitialSetup.request(service,false);eq(false,Z8InitialSetup.hasWork(service));eq(0,Z8ProjectPreparation.calls.get());eq(Z8InitialSetup.Phase.FAILED,Z8InitialSetup.state(service).phase);break;}
 case "consent":{

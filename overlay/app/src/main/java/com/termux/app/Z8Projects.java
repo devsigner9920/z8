@@ -168,6 +168,7 @@ public final class Z8Projects {
 
     /** Explicit whole-project deletion; caller must exclude live sessions and setup workers. */
     public void delete(String projectId) throws IOException {
+        checkDeleteInterrupted();
         String key = id(projectId);
         Project project = open(key);
         Path folder = project.source.getParentFile().toPath();
@@ -191,6 +192,7 @@ public final class Z8Projects {
         try (DirectoryStream<Path> children = Files.newDirectoryStream(source)) {
             for (Path child : children) removeTree(child);
         }
+        checkDeleteInterrupted();
         try {
             Files.delete(source);
             Files.delete(folder.resolve("project.properties"));
@@ -235,23 +237,33 @@ public final class Z8Projects {
     }
 
     private static void removeTree(Path root) throws IOException {
+        checkDeleteInterrupted();
         Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
             @Override public FileVisitResult preVisitDirectory(Path directory, BasicFileAttributes attributes) throws IOException {
+                checkDeleteInterrupted();
                 // Package archives can contain read-only directories. Only the
                 // app-owned visited directory is made writable, never a symlink.
                 writableDirectory(directory);
                 return FileVisitResult.CONTINUE;
             }
             @Override public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
+                checkDeleteInterrupted();
                 Files.delete(file);
                 return FileVisitResult.CONTINUE;
             }
             @Override public FileVisitResult postVisitDirectory(Path directory, IOException failure) throws IOException {
                 if (failure != null) throw failure;
+                checkDeleteInterrupted();
                 Files.delete(directory);
                 return FileVisitResult.CONTINUE;
             }
         });
+    }
+
+    private static void checkDeleteInterrupted() throws IOException {
+        if (Thread.currentThread().isInterrupted())
+            throw new IOException(Z8Text.text("Project deletion stopped and may be incomplete. Retry deletion to remove the remaining files.",
+                "프로젝트 삭제가 중단되어 일부 파일이 남아 있을 수 있습니다. 다시 삭제하여 남은 파일을 지워 주세요."));
     }
 
     private static void write(File folder, String name, long opened) throws IOException {

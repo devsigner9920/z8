@@ -234,7 +234,7 @@ def main():
     p.add_argument('--gradle-artifacts', type=Path)
     p.add_argument('--maven-sources', type=Path)
     p.add_argument('--historical-guest-inputs', type=Path)
-    p.add_argument('--review', type=Path, help='Maintainer review of exact input hashes; never generated automatically')
+    p.add_argument('--review', type=Path, help='Actual recorded assessment of exact inputs; identify the real reviewer and method')
     p.add_argument('--gradle-cache', type=Path, default=ROOT / '.local/gradle/caches/modules-2/files-2.1')
     p.add_argument('--allow-incomplete', action='store_true')
     args = p.parse_args()

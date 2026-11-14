@@ -23,6 +23,13 @@ working copies, not the user's project files or external provider records.
 5. If a specific legal preservation duty arises, record the actual legal basis,
    affected information and required duration, and update the applicable notice.
    Do not invent a standing legal-retention exception for ordinary support.
+6. Use a reply address and minimal technical details. Do not request a legal
+   name, phone number, credentials, government ID, sensitive data or a whole
+   private repository for ordinary technical support. If unrelated personal
+   material arrives, do not reproduce it in working notes; remove unnecessary
+   attachments/copies. Do not use support correspondence for marketing,
+   profiling or model training. A different necessary purpose requires its
+   own assessment before use.
 
 This is a manual operating procedure, not a running Gmail automation. No mailbox
 was read, changed or purged during this review. The operator must carry out the
@@ -39,7 +46,9 @@ user's deletion action. The public policy therefore distinguishes deletion of
 operator-controlled support records from provider-held backups and the sender's
 copies. See [Google retention](https://policies.google.com/technologies/retention?hl=en).
 
-This procedure closes the previously unspecified operator retention period. It
-does not establish the appropriate legal basis, country/recipient disclosures
-or safeguards for every cross-border processing arrangement; see the
-[privacy assessment](privacy-review.md).
+This procedure closes the previously unspecified operator retention period.
+The [final assessment](support-and-data-safety-final.md) records the limited
+Article 15(1)(6) collection/use basis and the remaining actual-country and
+Article 28-8 evidence for consumer Gmail. Those overseas-storage requirements
+are not satisfied merely by selecting a retention period or by the sender's
+choice to email the operator.

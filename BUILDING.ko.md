@@ -76,6 +76,26 @@ python3 tools/promote-release.py \
 
 성공 결과는 `artifacts/releases/<versionCode>/`에 저장한다. 서명 전후 앱 payload가 같고 bundletool 검사가 통과했는지 확인하며 기존 릴리스 디렉터리는 덮어쓰지 않는다. 개발자 정보 누락, 개발용 서명, 변경된 후보, 미완료 시험·정책 검토·대응 소스 검증이 있으면 중단한다. Play App Signing 등록, 콘솔 신고, 계정에 적용되는 테스트 요건, Play가 생성한 APK 설치·업데이트와 심사는 별도 운영 단계다. 출시 앱 서명이 기존 개발 APK와 다르면 기존 설치에 덮어쓸 수 없으므로 사용자의 프로젝트 삭제를 요구하지 말고 별도 시험 기기를 사용한다.
 
+미완료 시험을 사실대로 남긴 **비공개 내부 시험용 사본**은 다음 별도 명령으로
+서명한다. 로컬 전용 업로드 키를 불러오며 비밀번호를 명령 기록에 복사하지 않는다.
+후보·설정·증거가 정확히 일치하고, 공개 다운로드까지 확인한 대응 소스 보고서가
+`VERIFIED`여야 한다. 필수 QA 항목의 `NOT_TESTED`·`BLOCKED`와 미해결 사항을
+그대로 유지하며, 미실행 시험을 통과로 바꾸지 않는다.
+
+```sh
+python3 tools/upload-signing.py internal-test \
+  --candidate-metadata /absolute/path/frozen-candidate.json \
+  --compliance-report /absolute/path/verified-compliance.json \
+  --qa-report /absolute/path/actual-qa.json
+```
+
+재빌드나 앱 payload 변경 없이 사본을 `artifacts/internal-tests/<versionCode>/`에
+서명하며 기존 결과를 덮어쓰지 않는다. 보존된 비공개 증거를 포함하므로 이 폴더는
+공개하지 않는다. 결과는 `productionReady=false`, `readyForConsoleUpload=false`,
+`submission=NOT_SUBMITTED`를 명시한다. 내부 시험은 정책·라이선스 의무를 면제하지
+않으며 Play 키 등록이나 업로드를 수행하지 않는다. 프로덕션 승격에는 원래의
+미서명 후보와 위의 완료된 증거 검증 절차를 그대로 사용한다.
+
 ## 기본 경로와 셸 편의 기능
 
 첫 실행 시 Prism·Midnight·Graphite·Ember·Paper 중 터미널 테마를 미리 보고 선택한다. 선택과 초기 설정 완료 상태를 함께 저장하며, 이후 상단 톱니바퀴 → `설정` → `테마`에서 다시 바꿀 수 있다. 미리보기만 보고 뒤로 가면 기존 선택을 유지한다. 테마 변경은 터미널의 배경·글자·커서·ANSI 16색에 적용되며 실행 중인 셸을 재시작하지 않는다. 사용자 `colors.properties`·셸 설정 파일은 덮어쓰지 않는다.

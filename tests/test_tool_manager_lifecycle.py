@@ -33,6 +33,9 @@ class ToolManagerLifecycleTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(result.stdout.strip(), 'PASS ' + case)
 
+    def test_worker_and_network_wait_for_accepted_data_sync_service(self): self.probe('promotion_wait')
+    def test_preparation_timeout_closes_proxy_and_preserves_busy_until_cleanup(self): self.probe('timeout')
+
     def test_exact_selected_argv_and_invalid_versions_rejected(self): self.probe('argv')
     def test_bind_failure_releases_pending_operation(self): self.probe('bind')
     def test_foreground_acquisition_failure_releases_pending_operation(self): self.probe('fgs')
@@ -50,6 +53,7 @@ class ToolManagerLifecycleTests(unittest.TestCase):
 
 
 STUBS = {
+    'com/termux/app/Z8PreparationService.java': 'package com.termux.app; public class Z8PreparationService {public interface Interrupted{void stopped(String message);}public static Interrupted cancelled;public static Runnable ready;public static boolean defer;public static void begin(TermuxService s,String id,Runnable r,Interrupted c){if(s.failAcquire)throw new IllegalStateException("FGS rejected");s.acquired++; cancelled=c;ready=r;if(!defer)r.run();}public static void finish(TermuxService s,String id){}public static void refresh(TermuxService s){}public static void releaseOwner(TermuxService s){}}',
 'android/os/Looper.java': '''package android.os;public class Looper{static final Thread OWNER=Thread.currentThread();static final Looper MAIN=new Looper();public static Looper getMainLooper(){return MAIN;}public static Looper myLooper(){return Thread.currentThread()==OWNER?MAIN:null;}}''',
 'android/os/Handler.java': '''package android.os;import java.util.*;import java.util.concurrent.*;public class Handler{
 public static final BlockingQueue<Runnable> posted=new LinkedBlockingQueue<>();public static final List<Runnable> delayed=Collections.synchronizedList(new ArrayList<>());
@@ -132,6 +136,17 @@ public static void main(String[]args){try{run(args[0]);System.out.println("PASS 
 static void run(String which)throws Exception{
 Context app=new Context();TermuxService service=new TermuxService();ConnectivityManager network=Context.NETWORK;
 switch(which){
+case "promotion_wait":{
+Z8PreparationService.defer=true;start(app,service);eq(0,Z8ProjectPreparation.calls.get());eq(null,network.callback);eq(null,Z8SetupDownloadProxy.last);
+Z8PreparationService.cancelled.stopped("Foreground preparation rejected");check(!Z8ToolManager.busy(ID),"No stranded pending worker");eq(Z8ToolManager.Phase.FAILED,Z8ToolManager.state(app,ID).phase);
+Handler.flush();eq(0,Z8ProjectPreparation.calls.get());Z8PreparationService.defer=false;start(app,service);await(Z8ProjectPreparation.entered);finish();break;}
+case "timeout":{
+Z8ProjectPreparation.cleanupRelease=new CountDownLatch(1);start(app,service);await(Z8ProjectPreparation.entered);Z8PreparationService.cancelled.stopped("Android preparation time limit");await(Z8ProjectPreparation.cleanupEntered);
+check(Z8ToolManager.busy(ID),"Timed-out worker still protects files until verified cleanup");check(!Z8ToolManager.hasWork(service),"Foreground lease released");
+List<String> events=Z8SetupDownloadProxy.events;check(events.indexOf("close")>=0&&events.indexOf("close")<events.indexOf("interrupt"),"Download proxy closed before interruption");
+Z8ToolManager.start(app,ID,"git",false,null,false);eq(1,Z8ProjectPreparation.calls.get());
+Z8ProjectPreparation.cleanupRelease.countDown();while(Z8ToolManager.busy(ID))Handler.next();eq(Z8ToolManager.Phase.FAILED,Z8ToolManager.state(app,ID).phase);Handler.flush();eq(1,Z8ProjectPreparation.calls.get());
+resetOperation();start(app,service);await(Z8ProjectPreparation.entered);finish();eq(2,Z8ProjectPreparation.calls.get());break;}
 case "argv":{
 eq(Arrays.asList(Z8ToolManager.command("codex",true,"0.169.0")),Arrays.asList("/bin/bash","/usr/local/lib/z8/tool-manager.sh","--update","codex","--version","0.169.0"));
 eq(4,Z8ToolManager.command("git",false,null).length);

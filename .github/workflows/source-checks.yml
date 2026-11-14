@@ -31,6 +31,7 @@ jobs:
           python3 -m unittest discover -s tests -p test_native_alignment.py -v
           python3 -m unittest discover -s tests -p test_signing_identity.py -v
           python3 -m unittest discover -s tests -p test_upload_signing.py -v
+          python3 -m unittest discover -s tests -p test_internal_signing.py -v
       - name: Prepare public source set without publishing
         run: python3 tools/prepare-public-repo.py
       - name: Language preferences and CLI consent
@@ -47,6 +48,14 @@ jobs:
           python3 -m unittest discover -s tests -p test_guest_session_launcher.py -v
           python3 -m unittest discover -s tests -p test_prepare_app.py -v
           python3 -m unittest discover -s tests -p test_setup_download_proxy.py -v
+      - name: Foreground service ownership and scoped cleanup
+        run: |
+          python3 -m unittest discover -s tests -p test_preparation_service.py -v
+          python3 -m unittest discover -s tests -p test_preparation_notification.py -v
+          python3 -m unittest discover -s tests -p test_initial_setup.py -v
+          python3 -m unittest discover -s tests -p test_project_preparation.py -v
+          python3 -m unittest discover -s tests -p test_preparation_process.py -v
+          python3 -m unittest discover -s tests -p test_project_removal.py -v
       - name: Source reconstruction and attribution
         run: |
           python3 -m unittest discover -s tests -p test_source_archive.py -v

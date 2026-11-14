@@ -30,7 +30,7 @@ successful CI run alone does not approve an app binary for Play distribution.
 | Privacy policy | Public URL in `README.md` | Recheck reachable, current and consistent with final build |
 | Z8 account creation | None | External CLI sign-in does not create a Z8 account |
 | Access | Core local terminal works without a Z8 account; external clients may require provider accounts | Do not answer “all functionality unrestricted” without disclosing external restrictions |
-| Foreground service | `specialUse` | `tools/prepare-app.py`; final AAB manifest and device behavior still govern |
+| Foreground services | `specialUse` for active interactive terminals; separate `dataSync` for finite preparation/download work | rc8 implementation; final AAB manifest, timeout/stop behavior and matching videos still govern |
 
 ## Data safety — review required before answering
 

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "kind": "publisher-original-build-control-input",
+  "coordinate": "androidx.annotation:annotation-jvm:1.9.0",
+  "publisherUrl": "https://dl.google.com/dl/android/maven2/androidx/annotation/annotation-jvm/1.9.0/annotation-jvm-1.9.0.jar",
+  "publisherJarSha256": "3236e1e44c41da378c1ac9b515bee0501d8dc512991465100acb4dfe64059a4e",
+  "publisherJarBytes": 60273,
+  "freshCredentialFreeHttpsDownloadMatched": true,
+  "rule": {
+    "file": "androidx-annotation-jvm-1.9.0.pro",
+    "originalJarMember": "META-INF/proguard/androidx-annotations.pro",
+    "sha256": "64fb2b6036d3bfab479f615c38c29dfce48071cc357b2d062a71020d645e5c9d",
+    "bytes": 433,
+    "modified": false
+  },
+  "license": {
+    "file": "androidx-annotation-LICENSE.txt",
+    "originalJarMember": "META-INF/androidx/annotation/annotation/LICENSE.txt",
+    "sha256": "809fa1ed21450f59827d1e9aec720bbc4b687434fa22283c6cb5dd82a47ab9c0",
+    "bytes": 10175,
+    "modified": false
+  },
+  "preferredForm": "Original human-readable R8/ProGuard control rules, copied verbatim; not a decompilation or reconstructed upstream source file.",
+  "reconstruction": "Package the unchanged .pro file as META-INF/proguard/androidx-annotations.pro in a reconstructed annotation-jvm JAR. Android Gradle/R8 consumes this original control input. Preserve the adjacent original Apache license.",
+  "scope": "One missing control input in the reviewed source handoff. Not a new library version, source-JAR replacement, upstream release-commit assertion, or approval of other obligations."
+}

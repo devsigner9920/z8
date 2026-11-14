@@ -125,7 +125,7 @@ public final class Z8EnvironmentActivity extends Activity {
         LinearLayout content = column(); content.setPadding(dp(20), dp(16), dp(20), dp(32));
         int width = getResources().getConfiguration().screenWidthDp > 760 ? dp(760) : -1;
         frame.addView(content, new LinearLayout.LayoutParams(width, -2));
-        add(content, Z8Ui.quiet(this, palette, Z8Text.text("‹ Back to project", "‹ 프로젝트로"), this::finish), 0);
+        add(content, Z8Ui.quiet(this, palette, Z8Text.text("‹ Back", "‹ 뒤로"), this::finish), 0);
         add(content, heading(Z8Text.text("Tools", "도구"), 28), 14);
         add(content, text(Z8Text.text("This project · ", "현재 프로젝트 · ") + projectName, 15, style.accent), 6);
         add(content, text(Z8Text.text("Choose what you need for this project's Linux environment.", "이 프로젝트의 Linux 환경에 필요한 도구를 선택하세요."), 14, style.muted), 10);

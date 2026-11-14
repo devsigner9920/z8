@@ -52,6 +52,10 @@ public final class Z8GuestSessionLauncher {
         boolean preparesShell;
         boolean autoPreparation;
         boolean recovering;
+        volatile boolean interrupted;
+        boolean enqueued;
+        volatile Thread thread;
+        String interruption;
         volatile Preparation preparation;
         Ticket(Generation owner) { this.owner = owner; }
     }
@@ -102,8 +106,10 @@ public final class Z8GuestSessionLauncher {
         if (service != null) Z8PreparationNotification.releaseOwner(service);
         generation.worker.shutdownNow();
         for (Ticket ticket : TICKETS.values())
-            if (ticket.owner == generation && (ticket.phase == Phase.PREPARED || ticket.phase == Phase.QUEUED))
+            if (ticket.owner == generation && (ticket.phase == Phase.PREPARED || ticket.phase == Phase.QUEUED)) {
                 ticket.phase = Phase.CANCELLED;
+                if (service != null) Z8PreparationService.finish(service,ticket.id);
+            }
     }
 
     private static Ticket newTicket(Generation owner) {
@@ -329,7 +335,6 @@ public final class Z8GuestSessionLauncher {
             ticket.recovering ? Z8Text.text("Check completed steps", "완료된 단계 확인") : Z8Text.text("Prepare project", "프로젝트 준비"), false, ticket.recovering);
         ticket.phase = Phase.QUEUED;
         generation.pending = true;
-        service.z8AcquireExecution();
         int pending = 0;
         for (Ticket item : TICKETS.values()) if (item.owner == generation && item.phase == Phase.QUEUED) pending++;
         if (service.getTermuxSessionsSize() + pending > MAX_SESSIONS) {
@@ -352,14 +357,17 @@ public final class Z8GuestSessionLauncher {
         }
         if (ticket.preparesShell)
             Z8PreparationNotification.begin(service, ticket.id, projectId, name);
-        generation.worker.execute(() -> {
+        try { Z8PreparationService.begin(service,ticket.id,()->enqueue(generation,ticket,() -> {
+            ticket.thread=Thread.currentThread();
             try {
+                if(ticket.interrupted) throw new InterruptedException();
                 if (ticket.autoPreparation) {
                     if (ticket.preparesShell && !context.getSharedPreferences(PREPARATION_PREFS, android.content.Context.MODE_PRIVATE)
                             .edit().putString(projectId, "running:bootstrap").commit())
                         throw new java.io.IOException(Z8Text.text("Could not save setup progress.", "설치 상태를 저장하지 못했습니다."));
                     final String[] persistedStage = {"bootstrap"};
                     Z8ProjectPreparation.run(context, projectId, (stage, percent, message) -> {
+                        if(ticket.interrupted || Thread.currentThread().isInterrupted()) throw new java.util.concurrent.CancellationException("Preparation stopped");
                         if (ticket.preparesShell && !stage.equals(persistedStage[0])) {
                             if (!context.getSharedPreferences(PREPARATION_PREFS, android.content.Context.MODE_PRIVATE)
                                     .edit().putString(projectId, "running:" + stage).commit())
@@ -373,7 +381,10 @@ public final class Z8GuestSessionLauncher {
                     if (Thread.currentThread().isInterrupted()) throw new InterruptedException();
                     if (ticket.preparesShell && !context.getSharedPreferences(PREPARATION_PREFS, android.content.Context.MODE_PRIVATE).edit().remove(projectId).commit())
                         throw new java.io.IOException(Z8Text.text("Could not save setup completion. Please try again.", "설치 완료 상태를 저장하지 못했습니다. 다시 시도해 주세요."));
-                } else Z8Bootstrap.ensure(context, (percent, message) -> {});
+                } else Z8Bootstrap.ensure(context, (percent, message) -> {
+                    if(ticket.interrupted || Thread.currentThread().isInterrupted()) throw new java.util.concurrent.CancellationException("Preparation stopped");
+                });
+                if(ticket.interrupted || Thread.currentThread().isInterrupted()) throw new InterruptedException();
                 Z8Guest.Launch launch = action == null ? Z8Guest.command(context, projectId, directory)
                     : Z8Guest.actionCommand(context, projectId, directory, action);
                 MAIN.post(() -> complete(generation, ticket, launch, projectId, name, action, null));
@@ -386,15 +397,43 @@ public final class Z8GuestSessionLauncher {
                         .edit().putString(projectId, "failed").commit();
                 String message = error.getMessage() == null ? Z8Text.text("Could not prepare the Linux session.", "Linux 세션을 준비하지 못했습니다.") : error.getMessage();
                 MAIN.post(() -> complete(generation, ticket, null, projectId, name, action, message));
-            }
-        });
+            } finally { ticket.thread=null; Thread.interrupted(); }
+        }),message->interruptPreparation(generation,ticket,message)); }
+        catch(RuntimeException failure) {
+            complete(generation,ticket,null,projectId,name,action,
+                Z8Text.text("Could not start foreground preparation. Reopen Z8 and retry.","백그라운드 준비를 시작하지 못했습니다. Z8를 다시 열고 시도해 주세요."));
+        }
+    }
+
+    private static void enqueue(Generation generation,Ticket ticket,Runnable work) {
+        generation.worker.execute(work); ticket.enqueued=true;
+    }
+
+    private static void interruptPreparation(Generation generation,Ticket ticket,String message) {
+        mainThread();
+        if(ticket.phase!=Phase.QUEUED)return;
+        ticket.interrupted=true;ticket.interruption=message;
+        if(ticket.thread!=null)ticket.thread.interrupt();
+        TermuxService service=generation.service.get();
+        if(service!=null && ticket.preparesShell)
+            service.getSharedPreferences(PREPARATION_PREFS,android.content.Context.MODE_PRIVATE).edit().putString(ticket.projectId,"failed").commit();
+        if(ticket.autoPreparation)ticket.preparation=new Preparation("error",-1,message,true);
+        else generation.failure=message;
+        // Keep QUEUED until worker cleanup ends so deletion cannot race extraction.
+        if(service!=null)Z8PreparationNotification.finish(service,ticket.id,false,null);
+        if(!ticket.enqueued){ticket.phase=Phase.FAILED;updatePending(generation);}
+        deliver(generation);
     }
 
     private static void complete(Generation generation, Ticket ticket, Z8Guest.Launch launch,
                                  String projectId, String name, String action, String error) {
         mainThread();
         TermuxService service = generation.service.get();
-        if (!alive(generation, service) || ticket.phase != Phase.QUEUED) return;
+        if (!alive(generation, service) || ticket.phase != Phase.QUEUED) {
+            if(service!=null)Z8PreparationService.finish(service,ticket.id);
+            return;
+        }
+        if(ticket.interrupted)error=ticket.interruption;
         ticket.phase = Phase.FAILED;
         if (error == null && service.z8IsStopRequested()) error = Z8Text.text("Waiting for the app's terminals to close.", "앱의 터미널 종료를 확인하는 중입니다.");
         if (error == null && service.getTermuxSessionsSize() >= MAX_SESSIONS) error = Z8Text.text("You can open up to 8 terminals.", "터미널은 최대 8개까지 열 수 있습니다.");
@@ -422,6 +461,8 @@ public final class Z8GuestSessionLauncher {
         if (ticket.preparesShell)
             Z8PreparationNotification.finish(service, ticket.id, error == null, error);
         updatePending(generation);
+        // Transfer lifetime only after the PTY exists and its specialUse card is active.
+        Z8PreparationService.finish(service,ticket.id);
         deliver(generation);
     }
 

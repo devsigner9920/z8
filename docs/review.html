@@ -24,7 +24,7 @@
 <body>
 <main>
   <nav aria-label="Main"><a href="index.html">About Z8</a> · <a href="privacy.html">Privacy</a> · <a href="https://github.com/devsigner9920/z8">Open source</a></nav>
-  <p class="label">REVIEW INFORMATION · 0.1.0-rc6</p>
+  <p class="label">REVIEW INFORMATION · 0.1.0-rc8</p>
   <h1>A local development terminal for Android</h1>
   <p>Z8 provides project Linux environments, multiple terminal sessions and local web previews. Z8 has no account system, model server, shared provider accounts, advertising or in-app purchases.</p>
   <p class="notice">This page provides review materials. The source preview and demonstrations do not represent a Play Store approval or a publicly released app binary.</p>
@@ -38,7 +38,12 @@
   </ol>
   <p>These core functions require no Z8 or AI-provider login. Optional official CLI clients require the user's own provider authentication and any applicable subscription or usage fees. The videos below do not demonstrate provider sign-in or a model request.</p>
 
-  <h2>Terminal foreground service</h2>
+  <h2>Current foreground-service behavior</h2>
+  <p>Interactive terminal sessions use a dedicated special-use foreground service. Finite environment preparation, selected tool installation and project-file deletion use a separate data-sync service. Each task starts from a visible user action. The two service types are not enabled together for every operation.</p>
+  <p>The Project tasks notification provides <strong>Stop tasks</strong>. Android data-sync timeouts and this action cancel the finite tasks, preserving unrelated interactive terminals. Interrupted setup or installation requires an explicit retry; completed stages and project files are checked again. Interrupted deletion can leave a partly deleted project and offers an explicit retry. Android's Stop action for the entire app terminates all its processes.</p>
+  <p class="notice">The recordings below are historical rc6 evidence, not demonstrations of rc8's separated services. The rc8 release record must include recordings and device evidence from its exact final candidate before these materials are used for submission.</p>
+
+  <h2>Historical rc6 terminal demonstration</h2>
   <p>A user opens a terminal and starts a command. The ongoing notification makes the active session visible while switching apps. Stopping the service terminates its sessions and child processes; reopening the app does not silently replay commands.</p>
   <video controls playsinline preload="none" aria-label="Z8 terminal foreground service demonstration">
     <source src="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc6/foreground-service-terminal-0.1.0-rc6.mp4" type="video/mp4">
@@ -46,7 +51,7 @@
   </video>
   <p><a href="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc6/foreground-service-terminal-0.1.0-rc6.mp4">Download the terminal demonstration</a>. Silent screen recording; the visible actions demonstrate session start, background operation and stop.</p>
 
-  <h2>Environment preparation foreground service</h2>
+  <h2>Historical rc6 environment preparation demonstration</h2>
   <p>Preparation starts after the user presses Start setup. Progress remains visible in the app and through Android's foreground-service controls. It unpacks the included runtime and Linux image and prepares shell defaults. Additional package downloads are separate user-selected tool operations. Android can stop preparation; reopening Z8 can validate completed stages and continue.</p>
   <video controls playsinline preload="none" aria-label="Z8 environment preparation foreground service demonstration">
     <source src="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc6/foreground-service-setup-0.1.0-rc6.mp4" type="video/mp4">
@@ -54,7 +59,7 @@
   </video>
   <p><a href="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc6/foreground-service-setup-0.1.0-rc6.mp4">Download the preparation demonstration</a>. Silent screen recording; it shows user initiation and local preparation; durations depend on the device.</p>
 
-  <h2>Selected tool installation foreground service</h2>
+  <h2>Historical rc6 selected-tool demonstration</h2>
   <p>Users choose a tool for the current project, review dependencies and network usage, and confirm the download. Installation can continue while switching apps. Android's active-app controls can stop it; an interrupted tool operation requires an explicit Retry and does not replay terminal commands.</p>
   <video controls playsinline preload="none" aria-label="Z8 selected tool installation foreground service demonstration">
     <source src="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc6/foreground-service-tools-0.1.0-rc6.mp4" type="video/mp4">
@@ -64,7 +69,7 @@
 
   <h2>Executable delivery and source</h2>
   <p>The app bundles a host runtime, PRoot and a Linux filesystem. The initial base is included. Selecting tools downloads native Linux packages, Node.js or official CLI binaries. Optional daily version checks retrieve public metadata only; they do not install code. PRoot uses Android's kernel and app UID; it is not a separate security virtual machine. This description does not claim a policy exception has been approved.</p>
-  <p>Z8 is GPL-3.0-only software with separately licensed components. <a href="https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc6">Matching source and release evidence</a>. <strong>Debian</strong>'s registered trademark belongs to Software in the Public Interest, Inc.; Z8 has no affiliation with or endorsement from the Debian project.</p>
+  <p>Z8 is GPL-3.0-only software with separately licensed components. <a href="https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc8">Matching source and release evidence</a>. <strong>Debian</strong>'s registered trademark belongs to Software in the Public Interest, Inc.; Z8 has no affiliation with or endorsement from the Debian project.</p>
   <footer>Romi Ethsy · <a href="mailto:ethsy2462@gmail.com">ethsy2462@gmail.com</a> · <a href="privacy.html">Privacy and deletion instructions</a></footer>
 </main>
 </body>

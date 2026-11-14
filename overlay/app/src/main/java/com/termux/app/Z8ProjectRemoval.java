@@ -24,6 +24,12 @@ public final class Z8ProjectRemoval {
     private Z8ProjectRemoval() {}
     public static boolean isDeleting(String id) { return id != null && ACTIVE.contains(id); }
     public static boolean hasWork() { return !ACTIVE.isEmpty() || !STOPPING.isEmpty() || !STOPPING_ALL.isEmpty(); }
+    /** Existing terminal lifetime includes its explicitly requested shutdown verification. */
+    public static boolean hasTerminalCleanup(TermuxService service) {
+        for (TerminalSession terminal : STOPPING.keySet())
+            if (Z8SessionCatalog.contains(service,terminal)) return true;
+        return false;
+    }
     public static boolean isStopping(TerminalSession terminal) { return terminal != null && STOPPING.containsKey(terminal); }
     /** Upstream auto-close/Enter must not discard the evidence of an unverified stop. */
     public static boolean protects(TerminalSession terminal) {
@@ -34,32 +40,81 @@ public final class Z8ProjectRemoval {
     }
     public static long revision() { return revision; }
 
-    public static void begin(TermuxService service, String id, Result result) {
-        if (Looper.myLooper() != Looper.getMainLooper()) throw new IllegalStateException("Removal must start on the main thread");
-        if (service == null || service.wantsToStop()) { result.complete(Z8Text.text("Reconnect to the runtime service.", "실행 서비스를 다시 연결해 주세요.")); return; }
-        if (service.z8IsStopRequested()) { result.complete(Z8Text.text("Checking that the app's terminals have stopped.", "앱의 터미널 종료를 확인하는 중입니다.")); return; }
-        if (Z8ToolManager.busy(id) || Z8PreparationProcess.hasOutstanding(id)) {
-            result.complete(Z8Text.text("A tool installation or its shutdown check is still active. Your files are preserved.", "도구 설치 또는 종료 확인이 진행 중입니다. 파일은 보존됩니다.")); return;
+    /** Keeps cleanup alive after the last PTY exits; cancellation never stops another project. */
+    private static final class Operation implements Result {
+        final TermuxService service;
+        final Result callback;
+        final String leaseId = "cleanup-" + java.util.UUID.randomUUID();
+        volatile boolean cancelled, filesStarted;
+        volatile Thread worker;
+        boolean enqueued, completed;
+        Operation(TermuxService service, Result callback) {
+            this.service=service; this.callback=callback;
         }
-        if (Z8GuestSessionLauncher.hasPending(service)) { result.complete(Z8Text.text("Wait for environment setup to finish, then try again.", "환경 준비가 끝난 뒤 다시 시도해 주세요.")); return; }
-        if (id != null && STOPPING.containsValue(id)) { result.complete(Z8Text.text("Wait for the terminal shutdown check to finish, then try again.", "터미널 종료 확인이 끝난 뒤 다시 시도해 주세요.")); return; }
-        if (id == null || id.isEmpty() || !ACTIVE.add(id)) { result.complete(Z8Text.text("This project is already being deleted.", "이미 삭제 중인 프로젝트입니다.")); return; }
-        service.z8AcquireExecution();
+        boolean stopped() { return cancelled || service.wantsToStop() || Thread.currentThread().isInterrupted(); }
+        String stoppedMessage() {
+            return filesStarted ? Z8Text.text("Project deletion stopped and may be incomplete. Files already deleted cannot be restored. Retry deletion to remove the remaining files.",
+                "프로젝트 삭제가 중단되어 일부 파일이 남아 있을 수 있습니다. 이미 삭제한 파일은 복구할 수 없습니다. 다시 삭제하여 남은 파일을 지워 주세요.")
+                : Z8Text.text("Project deletion stopped before deleting files. Your files were kept. Try again.",
+                    "파일 삭제 전에 프로젝트 삭제가 중단되었습니다. 파일은 보존됩니다. 다시 시도해 주세요.");
+        }
+        void start(Runnable task, Runnable cancelledBeforeStart) {
+            try {
+                Z8PreparationService.beginFileTask(service,leaseId,
+                    Z8Text.text("z8 · Deleting project","z8 · 프로젝트 삭제 중"),
+                    Z8Text.text("Stopping cancels remaining deletion; already deleted files cannot be restored.","중지하면 남은 삭제 작업을 취소합니다. 이미 삭제한 파일은 복구할 수 없습니다."),
+                    task, message -> {
+                        synchronized (this) { cancelled=true; if(worker!=null)worker.interrupt(); }
+                        if(!enqueued)cancelledBeforeStart.run();
+                    });
+            } catch (RuntimeException denied) { cancelled=true; cancelledBeforeStart.run(); }
+        }
+        void execute(Runnable task) {
+            enqueued=true;
+            try {
+                IO.execute(() -> {
+                    synchronized (this) { worker=Thread.currentThread(); }
+                    try { task.run(); }
+                    finally { synchronized (this) { worker=null; Thread.interrupted(); } }
+                });
+            } catch (RuntimeException failure) { enqueued=false; throw failure; }
+        }
+        @Override public void complete(String error) {
+            if(completed)return;
+            completed=true;
+            Z8PreparationService.finish(service,leaseId);
+            callback.complete(error);
+        }
+    }
+
+    public static void begin(TermuxService service, String id, Result callback) {
+        if (Looper.myLooper() != Looper.getMainLooper()) throw new IllegalStateException("Removal must start on the main thread");
+        if (service == null || service.wantsToStop()) { callback.complete(Z8Text.text("Reconnect to the runtime service.", "실행 서비스를 다시 연결해 주세요.")); return; }
+        if (service.z8IsStopRequested()) { callback.complete(Z8Text.text("Checking that the app's terminals have stopped.", "앱의 터미널 종료를 확인하는 중입니다.")); return; }
+        if (Z8ToolManager.busy(id) || Z8PreparationProcess.hasOutstanding(id)) {
+            callback.complete(Z8Text.text("A tool installation or its shutdown check is still active. Your files are preserved.", "도구 설치 또는 종료 확인이 진행 중입니다. 파일은 보존됩니다.")); return;
+        }
+        if (Z8GuestSessionLauncher.hasPending(service)) { callback.complete(Z8Text.text("Wait for environment setup to finish, then try again.", "환경 준비가 끝난 뒤 다시 시도해 주세요.")); return; }
+        if (id != null && STOPPING.containsValue(id)) { callback.complete(Z8Text.text("Wait for the terminal shutdown check to finish, then try again.", "터미널 종료 확인이 끝난 뒤 다시 시도해 주세요.")); return; }
+        if (id == null || id.isEmpty() || !ACTIVE.add(id)) { callback.complete(Z8Text.text("This project is already being deleted.", "이미 삭제 중인 프로젝트입니다.")); return; }
+        Operation operation=new Operation(service,callback);
+        Result result=operation;
         List<TerminalSession> targets = new ArrayList<>();
         for (Z8SessionCatalog.Entry entry : Z8SessionCatalog.snapshot(service, null))
             if (id.equals(entry.projectId)) targets.add(entry.session);
         List<Z8ProjectProcesses.Target> processes = new ArrayList<>();
         for (TerminalSession terminal : targets) processes.add(Z8ProjectProcesses.capture(terminal));
-        IO.execute(() -> {
+        operation.start(() -> operation.execute(() -> {
             try {
-                Z8ProjectProcesses.stopAndVerify(processes, service::wantsToStop);
+                if(operation.stopped())throw new java.io.IOException(operation.stoppedMessage());
+                Z8ProjectProcesses.stopAndVerify(processes, operation::stopped);
                 MAIN.post(() -> awaitExit(service, id, targets, SystemClock.elapsedRealtime() + 10000, result));
             } catch (Exception failure) {
-                String detail = failure.getMessage();
+                String detail = operation.cancelled ? operation.stoppedMessage() : failure.getMessage();
                 MAIN.post(() -> finish(service, id, detail == null
                     ? Z8Text.text("Could not confirm that the project stopped. Your files were kept. Try again.", "프로젝트 종료를 확인하지 못해 파일을 보존했습니다. 다시 시도해 주세요.") : detail, result));
             }
-        });
+        }), () -> finish(service, id, operation.stoppedMessage(), result));
     }
 
     /** End a single PTY using the same tracee verification as project removal. */
@@ -160,23 +215,25 @@ public final class Z8ProjectRemoval {
     }
 
     private static void awaitExit(TermuxService service, String id, List<TerminalSession> targets, long deadline, Result result) {
-        if (service.wantsToStop()) {
-            finish(service, id, Z8Text.text("The runtime service stopped. Your files were kept. Try again.", "실행 서비스가 중단되어 파일을 보존했습니다. 다시 시도해 주세요."), result); return;
+        Operation operation=(Operation)result;
+        if (operation.stopped()) {
+            finish(service, id, operation.stoppedMessage(), result); return;
         }
         for (TerminalSession terminal : targets) {
             if (!terminal.isRunning()) continue;
-            if (SystemClock.elapsedRealtime() >= deadline || service.wantsToStop()) {
+            if (SystemClock.elapsedRealtime() >= deadline || operation.stopped()) {
                 finish(service, id, Z8Text.text("Could not confirm that the terminal stopped. Your files were kept. Try again.", "터미널 종료를 확인하지 못해 파일을 보존했습니다. 다시 시도해 주세요."), result); return;
             }
             MAIN.postDelayed(() -> awaitExit(service, id, targets, deadline, result), 100); return;
         }
         for (TerminalSession terminal : targets)
             if (Z8SessionCatalog.contains(service, terminal)) service.removeTermuxSession(terminal);
-        IO.execute(() -> {
+        operation.execute(() -> {
             String error = null;
             try {
-                if (Thread.currentThread().isInterrupted() || service.wantsToStop())
-                    throw new java.io.IOException(Z8Text.text("The runtime service stopped. Your files were kept. Try again.", "실행 서비스가 중단되어 파일을 보존했습니다. 다시 시도해 주세요."));
+                if (operation.stopped())
+                    throw new java.io.IOException(operation.stoppedMessage());
+                operation.filesStarted=true;
                 Z8Guest.deleteProject(service.getApplicationContext(), id);
                 android.content.SharedPreferences navigation = service.getSharedPreferences("z8.terminal-navigation", 0);
                 android.content.SharedPreferences.Editor edit = navigation.edit();
@@ -185,7 +242,7 @@ public final class Z8ProjectRemoval {
                 edit.apply();
                 service.getSharedPreferences("z8.project-preparation", 0).edit().remove(id).apply();
             } catch (Exception failure) {
-                error = failure.getMessage() == null ? Z8Text.text("Could not delete the project. Try again.", "프로젝트를 삭제하지 못했습니다. 다시 시도해 주세요.") : failure.getMessage();
+                error = operation.cancelled ? operation.stoppedMessage() : failure.getMessage() == null ? Z8Text.text("Could not delete the project. Try again.", "프로젝트를 삭제하지 못했습니다. 다시 시도해 주세요.") : failure.getMessage();
             }
             final String message = error;
             MAIN.post(() -> finish(service, id, message, result));

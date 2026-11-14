@@ -28,6 +28,7 @@ class StorePreparation(unittest.TestCase):
             'policyDate': '2026-11-14',
         }
         self.write_config()
+        self.write('docs/index.html', '<a href="' + self.config['sourceUrl'] + '">Source archive</a>')
         for name in ('privacy.html', 'privacy.ko.html'):
             self.write('docs/' + name,
                        '<link rel="canonical" href="https://devsigner9920.github.io/z8/' + name + '">'
@@ -35,7 +36,10 @@ class StorePreparation(unittest.TestCase):
                        '<p>Store fixture fixture@example.com</p>')
         for locale in ('en-US', 'ko-KR'):
             for name in ('title.txt', 'short-description.txt', 'full-description.txt', 'release-notes.txt'):
-                self.write('docs/store/' + locale + '/' + name, 'Z8 fixture\n')
+                value = 'Z8 fixture\n'
+                if name == 'full-description.txt':
+                    value += 'Corresponding source: ' + self.config['sourceUrl'] + '\n'
+                self.write('docs/store/' + locale + '/' + name, value)
 
     def write(self, name, text):
         path = self.root / name
@@ -58,6 +62,17 @@ class StorePreparation(unittest.TestCase):
         self.config['sourceUrl'] = self.config['sourceUrl'].replace('rc4', 'rc3')
         self.write_config()
         with self.assertRaisesRegex(ValueError, 'source asset URL'):
+            store.verify(self.root)
+
+    def test_website_with_previous_source_archive_is_rejected(self):
+        path = self.root / 'docs/index.html'
+        path.write_text(path.read_text().replace('rc4', 'rc3'))
+        with self.assertRaisesRegex(ValueError, 'website must link'):
+            store.verify(self.root)
+
+    def test_localized_listing_cannot_replace_source_archive_with_repository(self):
+        self.write('docs/store/ko-KR/full-description.txt', 'Source: https://github.com/devsigner9920/z8\n')
+        with self.assertRaisesRegex(ValueError, 'source archive: ko-KR'):
             store.verify(self.root)
 
     def test_localized_policy_with_stale_operator_is_rejected(self):

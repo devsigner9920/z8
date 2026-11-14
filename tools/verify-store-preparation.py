@@ -27,6 +27,7 @@ class PolicyMetadata(HTMLParser):
         self.canonical = []
         self.dates = []
         self.text = []
+        self.links = []
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
@@ -34,6 +35,8 @@ class PolicyMetadata(HTMLParser):
             self.canonical.append(attrs.get('href'))
         if tag == 'time' and 'datetime' in attrs:
             self.dates.append(attrs['datetime'])
+        if tag == 'a' and 'href' in attrs:
+            self.links.append(attrs['href'])
 
     def handle_data(self, data):
         self.text.append(data)
@@ -51,6 +54,11 @@ def verify(root=ROOT, tag=None):
         raise ValueError('The GitHub source asset URL must match the configured release version.')
     if tag is not None and tag != expected_tag:
         raise ValueError('The release tag does not match release/config.json.')
+
+    homepage = PolicyMetadata()
+    homepage.feed((root / 'docs/index.html').read_text(encoding='utf-8'))
+    if config['sourceUrl'] not in homepage.links:
+        raise ValueError('The website must link to this version\'s corresponding source archive.')
 
     for name in ('privacy.html', 'privacy.ko.html'):
         policy = PolicyMetadata()
@@ -74,6 +82,8 @@ def verify(root=ROOT, tag=None):
                 raise ValueError('Store text exceeds its character limit: ' + locale + '/' + name)
             if name in ('title.txt', 'short-description.txt') and '\n' in value:
                 raise ValueError('Store title and short description must be single-line text.')
+            if name == 'full-description.txt' and config['sourceUrl'] not in value.split():
+                raise ValueError('Store listing must identify this version\'s corresponding source archive: ' + locale)
             counts[locale][name] = {'characters': len(value), 'limit': limit}
 
     return {

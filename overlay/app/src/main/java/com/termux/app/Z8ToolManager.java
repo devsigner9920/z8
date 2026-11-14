@@ -126,10 +126,12 @@ public final class Z8ToolManager {
         job.connectivity=service.getSystemService(ConnectivityManager.class);
         job.network=allowedNetwork(job.connectivity,job.allowMetered);
         if(job.network==null){job.networkStopped=true;finish(job,new IOException("Network consent required"));return;}
-        try{service.z8AcquireExecution();Z8PreparationNotification.beginTool(service,job.id,job.projectId,Z8ToolCatalog.get(job.toolId).name(),job.update);
-            job.connectivity.registerDefaultNetworkCallback(job.callback);job.registered=true;}
+        try{Z8PreparationNotification.beginTool(service,job.id,job.projectId,Z8ToolCatalog.get(job.toolId).name(),job.update);
+            Z8PreparationService.begin(service,job.id,()->{
+                job.connectivity.registerDefaultNetworkCallback(job.callback);job.registered=true;
+                job.enqueued=true;WORKER.execute(()->run(job));
+            },message->interrupted(job,message));}
         catch(RuntimeException failure){finish(job,new IOException("Could not start foreground installation or monitor the selected connection",failure));return;}
-        job.enqueued=true;WORKER.execute(()->run(job));
     }
     private static boolean allowed(NetworkCapabilities caps,boolean metered){return caps!=null&&caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
         &&caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)&&(metered||caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_NOT_METERED));}
@@ -162,6 +164,7 @@ public final class Z8ToolManager {
         STATES.put(job.projectId,new State(phase,job.toolId,job.update,job.version,stage,percent,message,job.allowMetered));changed();
     }
     private static void finish(Job job,Exception error){
+        if(job.service!=null)Z8PreparationService.finish(job.service,job.id);
         mainThread();unregister(job);
         if(JOBS.get(job.projectId)!=job){release(job);return;}
         if(job.abandoned){JOBS.remove(job.projectId,job);STATES.remove(job.projectId);release(job);changed();return;}
@@ -179,8 +182,16 @@ public final class Z8ToolManager {
     }
     private static void unregister(Job job){if(job.registered){try{job.connectivity.unregisterNetworkCallback(job.callback);}catch(IllegalArgumentException ignored){}job.registered=false;}}
     private static void release(Job job){unregister(job);if(job.bound){job.bound=false;try{job.context.unbindService(job);}catch(IllegalArgumentException ignored){}}}
+    private static void interrupted(Job job,String message){
+        mainThread();if(JOBS.get(job.projectId)!=job)return;
+        job.abandoned=true;pause(job);if(!job.enqueued)JOBS.remove(job.projectId,job);
+        save(job,Phase.FAILED,message);STATES.remove(job.projectId);
+        if(job.service!=null){Z8PreparationNotification.finish(job.service,job.id,false,null);job.service.updateNotification();}
+        release(job);changed();
+    }
     public static void stop(TermuxService service){
         mainThread();for(Job job:JOBS.values())if(job.service==service){job.abandoned=true;pause(job);if(!job.enqueued)JOBS.remove(job.projectId,job);
+            Z8PreparationService.finish(service,job.id);
             save(job,Phase.FAILED,Z8Text.text("Installation stopped. Retry to validate completed steps.","설치가 중단되었습니다. 다시 시도하면 완료된 단계를 확인합니다."));STATES.remove(job.projectId);release(job);}
         changed();
     }

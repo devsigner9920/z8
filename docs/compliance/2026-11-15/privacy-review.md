@@ -5,6 +5,13 @@ notices; [provider-data evidence](follow-up-provider-data.md) records actual
 source/defaults and the operator's ordinary-Gmail/no-forwarding confirmation.
 The original rc6 observations below are not retroactively changed.
 
+**Final follow-up:** the [bounded support/Data safety assessment](support-and-data-safety-final.md)
+now records the limited support collection/use basis, separates external email
+composition from app collection, and prepares concrete Console answers. The
+remaining Gmail item is the actual country/overseas-route evidence, not a
+generic absence of a support purpose, retention rule or processing basis.
+References to unresolved classification below describe this earlier review.
+
 Reviewed November 15, 2026 against the [rc6 source and artifacts](README.md).
 This assessment separates local app behavior, external-provider behavior and
 operator-held support mail. It is not a completed Data safety declaration or

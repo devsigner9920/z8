@@ -100,6 +100,28 @@ python3 tools/promote-release.py \
 
 Successful output is saved under `artifacts/releases/<versionCode>/`. The process verifies that the app payload is unchanged by signing and passes bundletool validation; it does not overwrite an existing release directory. Missing developer information, a development signing identity, a changed candidate, or incomplete testing, policy review, or corresponding source verification stops the process. Play App Signing enrollment, Console declarations, account-specific testing requirements, installation/update tests with Play-generated APKs, and review are separate operational steps. If the release signature differs from an installed development APK, it cannot update that installation. Use a separate test device rather than asking users to delete their projects.
 
+For a **private internal-test copy** with honestly recorded incomplete QA, use
+the separate command below. It still requires exact artifact/configuration
+binding and a `VERIFIED` corresponding-source report whose public download was
+checked. Retain every required QA row, including `NOT_TESTED`/`BLOCKED` results
+and unresolved findings; do not mark unfinished tests as passed.
+
+```sh
+python3 tools/upload-signing.py internal-test \
+  --candidate-metadata /absolute/path/frozen-candidate.json \
+  --compliance-report /absolute/path/verified-compliance.json \
+  --qa-report /absolute/path/actual-qa.json
+```
+
+This signs a copy without rebuilding or changing payloads, under
+`artifacts/internal-tests/<versionCode>/`; it refuses to overwrite existing
+output. The directory contains retained private evidence and must not be
+published. The result explicitly keeps `productionReady=false`,
+`readyForConsoleUpload=false` and `submission=NOT_SUBMITTED`. Internal testing
+does not waive policy/license requirements, enroll a Play signing key or upload
+anything. Production promotion still uses the original unsigned candidate and
+the unchanged complete evidence checks above.
+
 ## Default paths and shell conveniences
 
 On first launch, preview and choose a terminal theme: Prism, Midnight, Graphite, Ember, or Paper. The selection and initial setup completion state are saved together. Change the theme later using the top gear menu, Settings, and Theme. Going back after only previewing a theme keeps the previous selection. Theme changes apply to the terminal background, text, cursor, and 16 ANSI colors without restarting the shell. User `colors.properties` and shell configuration files are not overwritten.

@@ -6,8 +6,66 @@ As of November 15, 2026, Z8 is a development project that has not reached a stab
 
 The [November 15 policy and license review](compliance/2026-11-15/README.md)
 is the current review entry point. Its findings supplement the immutable rc6
-release and the historical records below; they do not change a tested binary
+releases and the historical records below; they do not change a tested binary
 or establish Google Play approval.
+
+## rc8 implementation and pre-freeze validation
+
+The current configuration targets **0.1.0-rc8**, version code **9**. This section
+records implementation progress before final source/artifact binding. It does
+not claim a published rc8 release, a final signed binary, or completed rc8 device
+QA. The immutable rc7 and earlier results below remain attached to their own
+artifacts.
+
+Interactive PTYs now use `TermuxService` with `specialUse`; finite setup, project
+preparation, selected tool installation/update and confirmed project deletion
+use a separate `dataSync` service. Workers wait for foreground promotion and
+their runtime binding. **Stop tasks**, owner destruction and Android timeout
+cancel finite work without stopping unrelated terminals; retry is explicit.
+Terminal shutdown verification retains its interactive lifetime. File deletion
+can be partial when interrupted, and the app explains that deleted files cannot
+be restored while retaining the remaining project for retry. The Tools return
+label now follows its actual entry screen.
+
+The focused lifecycle/generated-source/filesystem suite passed **134 host
+tests**; private evidence is `reports/compliance/2026-11-15/rc8/fgs-host-tests.json`.
+An independent 57-test service/deletion/filesystem subset also passed after the
+deletion lifetime correction. The earlier rc8 preflight build passed 145
+terminal-engine tests and exercised the new service boundary on a dedicated
+emulator. Preflight evidence predates the final source snapshot and is not
+substituted for final-candidate or physical-device results.
+
+The [bounded source-delivery assessment](compliance/2026-11-15/source-closure-assessment.md)
+retains the last identified missing build-control input: the original 433-byte
+AndroidX annotation ProGuard rule with its license and provenance. It found no
+further specific missing input in the examined combined-work scope. Dependency
+source proofs are reused only where their exact identities remain unchanged;
+the final rc8 source, notices, optimized artifact and public download still need
+their own matching verification. This is an attributed technical assessment,
+not a fabricated human sign-off or a claim that every dependency was rebuilt.
+
+The [final privacy assessment](compliance/2026-11-15/support-and-data-safety-final.md)
+and [Data safety worksheet](store/play-console-data-safety.md) now provide
+concrete draft form choices. Ordinary Gmail support processing still lacks
+complete country/overseas-route particulars. Changing to another consumer mail
+brand has not been established as resolving that evidence gap.
+
+A separate private internal-test signing path preserves the exact candidate,
+verified corresponding source and honest incomplete QA. Its 34 focused tests
+passed, including an inert-key signature check; this is not evidence that a
+real candidate was signed. Output remains `productionReady=false` and
+`readyForConsoleUpload=false`; the production promotion checks are unchanged.
+See [building and signing](../BUILDING.md).
+
+Final evidence is planned under `reports/compliance/2026-11-15/rc8/`: frozen
+source/artifact verification, final host/build checks, emulator and physical
+QA, and service demonstration manifests. These are required release-specific
+records, not links to reports presumed complete. Capture/publication materials
+must identify the actual tested candidate. Console identity verification remains
+in progress, phone verification awaits identity approval, and Create app was
+disabled in the read-only check. No app/release has been submitted.
+
+## Published rc7 source and exact candidate evidence
 
 The **[0.1.0-rc7 source prerelease](https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc7)**
 is published, using version code 8 and source commit
@@ -49,13 +107,12 @@ passed within the recorded scopes. Explicit relaunch did not replay commands.
 Daily version checking defaulted to off. One minor wording issue remains:
 Tools opened from Settings says “Back to project” although it returns to Settings.
 
-**Production preparation remains incomplete.** Standalone setup/download jobs
-still use the interactive terminal's `specialUse` foreground-service type; the
-final assessment recommends aligning finite jobs with their actual service
-type/lifecycle before production (see below). Final license/source-closure
-assessment, Gmail overseas-processing particulars and legal basis,
-supported-provider Data safety, Play declarations and upload signing also
-remain open. The actual Console check showed identity verification in progress,
+**At the rc7 final review, production preparation remained incomplete.** That
+binary used the interactive terminal's `specialUse` type for standalone
+setup/download jobs. Source-closure assessment, Gmail overseas-processing
+particulars, supported-provider Data safety, Play declarations and upload signing
+were recorded as open. The rc8 work above updates those findings without
+changing rc7. The actual Console check showed identity verification in progress,
 phone verification pending and **Create app disabled**. No app or release was
 submitted. The rc6 publication and QA identities below remain historical.
 New rc7 captures are QA evidence; older store screenshots/videos have not been

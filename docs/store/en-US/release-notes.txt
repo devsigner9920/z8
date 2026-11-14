@@ -1,4 +1,4 @@
-Start with the included terminal and add development tools when needed.
-Review external-client data, terms and licenses before installing or opening a client.
-Source distribution and build instructions have been improved.
+Start with the included terminal and install development tools when needed.
+Preparation and download work now runs separately from interactive terminals, with scoped timeout and stop handling.
+Review external-client data, terms and licenses before use.
 English is the default, with Korean available in Settings.
