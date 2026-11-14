@@ -279,6 +279,19 @@ exemption or violation. [GPLv3 section 6](https://www.gnu.org/licenses/gpl-3.0.h
 
 ## Completion criteria and limits
 
+Unpublished follow-up implementation: after this rc6 audit, the collector was
+extended with the exact coroutines archive, missing probe source/build inputs
+and three rules. A separate explicit compilation with pinned Kotlin 1.6.21
+recreated all 1,738 probe bytes and the SHA-256 recorded above. Eight Kotlin,
+coroutines and CommonMark coordinates now have supplementary mappings in a new
+inventory; Kotlin's bounded build mapping preserves its generator/templates,
+Unicode inputs and the one exact release-version substitution separately.
+CommonMark's original BSD notice is also retained and matched to both runtime
+JARs. See [the follow-up evidence and reproduction command](../../RELEASE_LICENSES.md#coroutines-and-kotlin-jvm-source-follow-up).
+This closes the identified probe/resource collection gap for a future source
+package. It does not retroactively change the published rc6 archive or establish
+a complete stdlib/coroutines/app rebuild. No closure or reviewer flag was set.
+
 Close the concrete coroutines omission, establish the scoped reconstruction
 path with justified exclusions, preserve original notice exceptions, and bind
 the resulting source/notices to the final distributed candidate. If those
@@ -297,6 +310,7 @@ This audit did not rebuild every dependency, perform a worldwide trademark
 search, evaluate provider service contracts, or decide Play policy eligibility.
 It reused prior public/hash verification, inspected retained archives and
 POMs, checked actual final APK class/resource contents, and consulted exact
-upstream source and primary license guidance. It added this review and corrected
-the three documentation issues identified above. Published artifacts, collector
-code and collected source inputs were not altered.
+upstream source and primary license guidance. The original audit added this
+review and corrected the three documentation issues identified above. The
+subsequent source-collection changes are identified separately in the follow-up
+paragraph. Published rc6 artifacts were not altered.

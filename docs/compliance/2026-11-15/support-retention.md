@@ -30,6 +30,10 @@ procedure. A later automation needs its own narrowly scoped implementation and
 authorization; adopting the retention rule does not authorize bulk deletion of
 unrelated mail.
 
+The operator separately confirmed on November 15 that this is ordinary free
+Gmail and that there is no automatic forwarding to another address. This does
+not establish a Workspace processing contract or a restricted storage region.
+
 Google describes separate deletion and backup processing that can outlast a
 user's deletion action. The public policy therefore distinguishes deletion of
 operator-controlled support records from provider-held backups and the sender's

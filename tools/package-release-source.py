@@ -151,7 +151,7 @@ def package(root, output, package_sources=None, maven_sources=None, historical_g
                            'completeCorrespondingSource': False},
                 'limitations': ['Package source payloads and runtime dependency licenses are verified separately.',
                     'No local Git configuration, private keys, caches or credentials are included.',
-                    'To run the current exact-HEAD preparers, restore the pinned upstream checkouts with Git; the source exports contain no .git metadata.',
+                    'Android app preparation accepts manifest-verified exported app sources without Git metadata; native build/package tools still require their documented pinned checkouts.',
                     'Private signing material is intentionally omitted; use your own signing key.']}
     output.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(prefix='.source-', suffix='.zip', dir=output)

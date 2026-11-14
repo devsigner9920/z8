@@ -215,8 +215,11 @@ public final class Z8EnvironmentActivity extends Activity {
             Z8Guest.refreshTool(getApplicationContext(), projectId, tool.id, true); renderIfChanged();
         }, baseReady && !state.checking && !busy(task)));
         add(card, actions, 12);
-        if (tool.isProviderClient())
+        if (tool.isProviderClient()) {
             add(card, text(Z8Text.text("Sign-in and provider usage are separate. PRoot may limit the client's sandbox features.", "로그인과 제공자 사용 요금은 별도입니다. PRoot에서 클라이언트의 sandbox 기능이 제한될 수 있습니다."), 12, style.muted), 10);
+            add(card, Z8Ui.quiet(this, palette, Z8Text.text("Data, terms and licenses", "데이터·약관·라이선스"),
+                () -> Z8ProviderDisclosure.showInfo(this, tool.id, state.version)), 6);
+        }
     }
 
     private void updatesCard(LinearLayout parent, Z8ToolUpdates.Snapshot releases) {
@@ -251,7 +254,12 @@ public final class Z8EnvironmentActivity extends Activity {
         if (update && tool.releaseMetadata) add(details, text(Z8Text.text("Updates apply to installations managed by Z8. Custom or modified installations are preserved and may need a manual update.", "업데이트는 Z8에서 관리하는 설치에 적용됩니다. 직접 설치하거나 수정한 파일은 보존되며, 수동 업데이트가 필요할 수 있습니다."), 13, style.muted), 10);
         add(details, text(Z8Text.text("Required packages · ", "필요한 패키지 · ") + String.join(", ", tool.packages()), 13, style.muted), 12);
         add(details, text(Z8Text.text("Missing dependencies are installed with this tool. Download and storage size depend on the packages needed.", "없는 의존성은 이 도구와 함께 설치됩니다. 다운로드와 저장 공간 사용량은 필요한 패키지에 따라 달라집니다."), 13, style.muted), 10);
-        if (tool.isProviderClient()) add(details, text(Z8Text.text("The official client has separate terms and account requirements. Sign in from your terminal after installation.", "공식 클라이언트에는 별도 약관과 계정 조건이 적용됩니다. 설치 후 터미널에서 로그인하세요."), 13, style.muted), 10);
+        if (tool.isProviderClient()) {
+            add(details, text(Z8Text.text("This optional official client has its own account, charges, terms and privacy settings. Z8 does not operate the model service. Download and version validation can contact the publisher and may send connection or diagnostic information before sign-in. Installing does not sign you in or accept provider contracts.", "이 선택 설치 공식 클라이언트에는 별도 계정·요금·약관·개인정보 설정이 적용됩니다. Z8는 모델 서비스를 운영하지 않습니다. 다운로드와 버전 확인 과정에서 로그인 전에도 배포자에 접속하여 연결·진단 정보를 보낼 수 있습니다. 설치해도 로그인되거나 제공자 계약에 동의하지 않습니다."), 13, style.muted), 10);
+            String noticeVersion = request.version.isEmpty() ? Z8Guest.configuredToolVersion(this, tool.id) : request.version;
+            add(details, Z8Ui.quiet(this, palette, Z8Text.text("Provider terms, privacy and licenses", "제공자 약관·개인정보·라이선스"),
+                () -> Z8ProviderDisclosure.showInfo(this, tool.id, noticeVersion)), 8);
+        }
         CheckBox metered = new CheckBox(this); metered.setText(Z8Text.text("Allow metered downloads", "데이터 요금이 부과될 수 있는 네트워크 허용")); metered.setTextColor(style.text); metered.setChecked(false); metered.setMinHeight(dp(48));
         add(details, metered, 12);
         ScrollView dialogScroll = new ScrollView(this); dialogScroll.addView(details);

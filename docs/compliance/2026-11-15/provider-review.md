@@ -1,5 +1,10 @@
 # Provider review: Codex and Claude Code in Z8 rc6
 
+Later work: [rc7 implementation](implementation.md) adds the recommended app
+disclosures and links; [provider-data evidence](follow-up-provider-data.md)
+examines version-specific diagnostic controls. The original rc6 assessment below
+retains its artifact scope.
+
 Reviewed November 15, 2026 (Asia/Seoul). This is a source, artifact and current
 provider-document review for the local-terminal product, not a provider approval
 or a completed Google Play declaration. No provider inquiry, account change,

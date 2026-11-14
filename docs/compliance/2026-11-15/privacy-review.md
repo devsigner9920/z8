@@ -1,5 +1,10 @@
 # Privacy review — rc6 and support retention
 
+Follow-up: [rc7 implementation](implementation.md) adds normal-flow client
+notices; [provider-data evidence](follow-up-provider-data.md) records actual
+source/defaults and the operator's ordinary-Gmail/no-forwarding confirmation.
+The original rc6 observations below are not retroactively changed.
+
 Reviewed November 15, 2026 against the [rc6 source and artifacts](README.md).
 This assessment separates local app behavior, external-provider behavior and
 operator-held support mail. It is not a completed Data safety declaration or

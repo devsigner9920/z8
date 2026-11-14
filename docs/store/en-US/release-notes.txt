@@ -1,4 +1,4 @@
-Start with the included terminal and install development tools when needed.
-Choose required, recommended and optional tools per project.
-Optionally check official tool versions once a day when opening Z8; install updates yourself.
+Start with the included terminal and add development tools when needed.
+Review external-client data, terms and licenses before installing or opening a client.
+Source distribution and build instructions have been improved.
 English is the default, with Korean available in Settings.

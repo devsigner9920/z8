@@ -1,5 +1,13 @@
 # Play Console worksheet — rc6
 
+**rc7 follow-up:** [implemented client notices](../compliance/2026-11-15/implementation.md)
+add project-local acknowledgment records, install-time data/terms links and a
+notice before app-created client sessions. Provider binaries/authentication and
+telemetry settings are unchanged. The [new provider evidence](../compliance/2026-11-15/follow-up-provider-data.md)
+narrows the data-control assessment and confirms ordinary Gmail without automatic
+forwarding. Artifact/video identities below remain rc6; bind final answers to
+the actual rc7 candidate before submission.
+
 Updated **November 15, 2026**. This is an evidence-based preparation worksheet,
 not submitted answers or Google approval. No Console setting changed.
 Use the [review summary](../compliance/2026-11-15/README.md),

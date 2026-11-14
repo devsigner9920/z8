@@ -9,13 +9,20 @@ is the current review entry point. Its findings supplement the immutable rc6
 release and the historical records below; they do not change a tested binary
 or establish Google Play approval.
 
+The current source configuration advances to **0.1.0-rc7, version code 8** for
+the [implementation follow-up](compliance/2026-11-15/implementation.md): external
+client notices and terms access, source supplements, and app building from
+verified source exports. It uses a separate source URL. The rc6 publication
+and QA identities below remain historical; consult the matching prerelease's
+evidence for exact rc7 artifacts and checks.
+
 ## Current scope
 
 Z8 provides project Linux environments with separate HOME and source directories, multiple terminal sessions, local web previews, and public privacy, retention/deletion, environment, and license information. Users explicitly install and authenticate official AI CLIs. Z8 does not supply accounts, model services, or usage. SSH host management and remote session connections are not yet provided by the app.
 
 The current build configuration uses `dev.devsigner.z8`, ARM64, minSdk 28, and target/compile SDK 36. Declaring Android 9 or later does not mean every Android version, manufacturer, or user profile has been tested.
 
-The published source release is `0.1.0-rc6`, versionCode `7`, with English as the initial app language and an explicit Korean option. See [app language](LOCALIZATION.md). This release separates included offline terminal preparation from optional tool installation. The Tools catalog groups included, recommended and optional tools per project. Opted-in on-open version checks retrieve public metadata at most once per 24 hours; Check now is a separate explicit request. Downloads and updates remain explicit user actions. The matching source archive and store materials have been published and independently downloaded without credentials; the exact validation scope is recorded below.
+The published rc6 baseline uses versionCode `7`, with English as the initial app language and an explicit Korean option. See [app language](LOCALIZATION.md). This release separates included offline terminal preparation from optional tool installation. The Tools catalog groups included, recommended and optional tools per project. Opted-in on-open version checks retrieve public metadata at most once per 24 hours; Check now is a separate explicit request. Downloads and updates remain explicit user actions. The matching source archive and store materials have been published and independently downloaded without credentials; the exact validation scope is recorded below.
 
 The rc5 source work opts out of Android WebView usage statistics, clarifies
 platform diagnostic reporting separately from Z8-operated telemetry, and adds

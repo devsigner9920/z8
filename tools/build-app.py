@@ -19,6 +19,7 @@ import bundletool
 import release_config
 import native_alignment
 import signing_identity
+import source_archive
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCAL = ROOT / '.local'
@@ -92,11 +93,17 @@ def main():
         run([git, '-C', source, 'remote', 'add', 'origin', lock['termuxApp']['url']])
         run([git, '-C', source, 'fetch', '--depth=1', 'origin', lock['termuxApp']['commit']])
         run([git, '-C', source, 'checkout', '--detach', 'FETCH_HEAD'])
-    actual = subprocess.check_output([git, '-C', str(source), 'rev-parse', 'HEAD'], text=True).strip()
-    if actual != lock['termuxApp']['commit']:
-        sys.exit('Upstream HEAD does not match tools/sources.lock.json; checkout the pinned source explicitly.')
-    if subprocess.check_output([git, '-C', str(source), 'status', '--porcelain'], text=True).strip():
-        sys.exit('Upstream has local modifications. Preserve them before building; patches belong in overlay/preparer.')
+    if not (source / '.git').exists() and (ROOT / 'SOURCE_MANIFEST.json').exists():
+        try:
+            source_archive.exported_app_files(source, lock['termuxApp']['commit'])
+        except (ValueError, OSError, TypeError) as exc:
+            sys.exit('Source export verification failed: ' + str(exc))
+    else:
+        actual = subprocess.check_output([git, '-C', str(source), 'rev-parse', 'HEAD'], text=True).strip()
+        if actual != lock['termuxApp']['commit']:
+            sys.exit('Upstream HEAD does not match tools/sources.lock.json; checkout the pinned source explicitly.')
+        if subprocess.check_output([git, '-C', str(source), 'status', '--porcelain'], text=True).strip():
+            sys.exit('Upstream has local modifications. Preserve them before building; patches belong in overlay/preparer.')
     keys = LOCAL / 'keys'
     keys.mkdir(parents=True, exist_ok=True, mode=0o700)
     keystore = Path(env.get('Z8_KEYSTORE', keys / 'z8-debug.jks')).resolve()

@@ -165,7 +165,7 @@ def upstream_file(spec, output, fetch, caches):
     """Retain exact original inputs, reusing cache bytes before any network request."""
     supplements.validate_spec(spec)
     extension = {'zip': '.zip', 'tar.gz': '.tar.gz', 'gitiles-base64': '.base64', 'gitiles-file': '.txt',
-                 'gitiles-tree': '.json'}[spec['format']]
+                 'gitiles-tree': '.json', 'github-file': '.txt'}[spec['format']]
     relative = 'downloads/' + spec['sha256'] + '/' + spec['id'] + extension
     target = output / relative
     def valid(path):
@@ -211,7 +211,7 @@ def collect(args):
     output = args.output.resolve()
     previous_file = output / 'maven-sources.json'
     previous = read_json(previous_file).get('files', []) if previous_file.is_file() else []
-    groups = {}
+    groups, binary_paths = {}, {}
     for item in evidence['components']:
         parts = coordinate_parts(item)
         path = Path(item['file'])
@@ -223,6 +223,7 @@ def collect(args):
         inventory.pop('members')
         groups.setdefault(parts, []).append(dict(inventory, fileName=path.name,
             type=item.get('type', path.suffix.lstrip('.')), sha256=item['sha256'], bytes=path.stat().st_size))
+        binary_paths[item['sha256']] = path
     mappings = {}
     supplement_path = getattr(args, 'upstream_lock', None)
     supplement_specs, supplement_components = {}, {}
@@ -368,14 +369,25 @@ def collect(args):
                     raise ValueError('Upstream supplement must match exact published-source runtime artifacts')
                 used = {x['archiveId'] for x in supplement['sourceMatches'] + supplement['requiredInputs']}
                 used.update(supplement.get('commonSupportArchiveIds', []))
+                used.update(x['archiveId'] for x in supplement.get('binaryMemberMatches', []))
+                used.update(x['archiveId'] for x in supplement.get('sourceTransforms', []))
                 used.update(x[key] for x in supplement.get('rootBlobBindings', []) for key in ('archiveId', 'treeArchiveId'))
                 for key in sorted(used):
                     if key not in upstream_records:
                         upstream_records[key] = retain(upstream_file(supplement_specs[key], output, args.fetch,
                             getattr(args, 'upstream_cache', []) or []), supplements.ROLE)
+                binary_inputs, binary_records = {}, []
+                for binary_sha in sorted({x['binaryArtifactSha256'] for x in supplement.get('binaryMemberMatches', [])}):
+                    binary_path = binary_paths[binary_sha]
+                    raw = binary_path.read_bytes()
+                    relative = 'verification-binaries/' + binary_sha + '/' + binary_path.name
+                    atomic_write(output / relative, raw)
+                    binary_inputs[binary_sha] = raw
+                    binary_records.append(retain({'path': relative, 'sha256': binary_sha,
+                        'bytes': len(raw), 'status': 'VERIFIED'}, 'maven-binary-correspondence-input'))
                 proof = supplements.evidence(supplement, supplement_specs,
                     (output / component['sourceFiles'][0]['path']).read_bytes(),
-                    {key: (output / upstream_records[key]['path']).read_bytes() for key in used})
+                    {key: (output / upstream_records[key]['path']).read_bytes() for key in used}, binary_inputs)
                 proof_bytes = json_bytes(proof)
                 relative = 'inventories/' + hashlib.sha256(proof_bytes).hexdigest() + '-upstream.json'
                 atomic_write(output / relative, proof_bytes)
@@ -384,6 +396,8 @@ def collect(args):
                 component['upstreamSnapshot'] = {'lockSha256': supplement_record['sha256'],
                     'inputs': [{'archiveId': key, **upstream_records[key]} for key in sorted(used)],
                     'evidence': proof_record, 'sourceClosureReviewed': False}
+                if binary_records:
+                    component['upstreamSnapshot']['binaryInputs'] = binary_records
                 component['reviewRequired'].append('Original upstream build, resource and license inputs are retained with recomputed published-source byte correspondence. Complete build closure and binary-identical rebuilding remain unconfirmed.')
             except (ValueError, OSError, zipfile.BadZipFile) as error:
                 component['unresolved'].append(issue('MAVEN_UPSTREAM_SUPPLEMENT_UNAVAILABLE', coordinate, str(error)))

@@ -124,6 +124,15 @@ public final class Z8GuestSessionLauncher {
         return ticket == null ? null : ticket.id;
     }
 
+    /** Cancelling an information dialog consumes only its unaccepted launch ticket. */
+    public static void cancelRequest(TermuxService service, String requestId) {
+        mainThread();
+        Ticket ticket = TICKETS.get(requestId);
+        if (ticket != null && ticket.owner == active && active != null
+                && active.service.get() == service && ticket.phase == Phase.PREPARED)
+            ticket.phase = Phase.CANCELLED;
+    }
+
     /**
      * Whether this live service has accepted work that has not completed yet.
      * PREPARED tickets are excluded: bootstrap may fail or be abandoned without

@@ -3,7 +3,7 @@ import hashlib
 import json
 from pathlib import Path
 
-NOTICE_DATE = '2026-11-04'
+NOTICE_DATE = '2026-11-15'
 NOTICE = ('Z8 modification notice recorded ' + NOTICE_DATE + ': this file has been changed for Z8. '
           'See Z8-MODIFICATIONS.json in the prepared source root. Original notices and license terms remain applicable.')
 

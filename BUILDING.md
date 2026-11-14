@@ -21,6 +21,21 @@ Tools are installed under `.local/` without replacing the global JDK or SDK. Dow
 
 Termux sources are fetched at the commit in `tools/sources.lock.json`. Do not modify `upstream/termux-app`. `tools/prepare-app.py` applies exact patches and `overlay/` to a separate `.local/build-src` tree, stopping if the original commit or expected code differs. The Gradle cache is kept in `.local/gradle`.
 
+The attached release `z8-source.zip` also builds without restoring Git history
+for `upstream/termux-app`. Verify the downloaded ZIP against the separately
+published checksum, extract it into a fresh directory, and keep
+`SOURCE_MANIFEST.json`. The Android builder and preparer verify every exported
+app-source file against that manifest and the pinned revision, rejecting changed,
+missing, extra or symlinked upstream files. ZIP utilities may drop executable
+bits; the preparer restores the recorded modes on its generated copy. Edit
+`overlay/` or the preparer to make your own changes, leaving the upstream tree
+intact. A manifest consistency check alone does not authenticate a download.
+Native runtime reconstruction and source repackaging retain their separate
+pinned-checkout procedures in [release sources](docs/RELEASE_LICENSES.md).
+The [four-library reconstruction recipe](docs/source-reconstruction-jars.md)
+and the source procedure's explicit Coroutines probe check demonstrate bounded
+reconstruction from retained third-party inputs independently of the app build.
+
 After creating an APK, the default build command runs terminal-emulator unit tests and checks APK signing, app ID, ABI, SDK, and 16 KiB ZIP alignment. Depending on the mode, outputs are `artifacts/z8-g0-diagnostic-arm64.apk` or `artifacts/z8-g0-runtime-arm64.apk`, with matching JSON, signing, and manifest reports. `.local/keys/z8-debug.jks` is generated on the first build for this development environment. It does not use the public Termux test key. Losing the key prevents updates signed with the same identity as existing installations. Play candidates and upload signing use the separate process below.
 
 ## APK identity and SDK

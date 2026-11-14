@@ -5,6 +5,11 @@ Updated on 2026-11-15. English (`en-US`) is the primary listing language;
 they do not submit or publish it. Recheck the copy against the final candidate
 and the current Console form before submission.
 
+The current release notes describe the rc7 disclosure/source follow-up. The
+published screenshots and three videos described below are immutable rc6
+evidence. Do not relabel them as new rc7 captures or as a completed rc7 submission
+package; add candidate-specific captures/checks when preparing that submission.
+
 ## Copy and account settings
 
 Use each locale's `title.txt`, `short-description.txt`, `full-description.txt`

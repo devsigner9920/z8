@@ -256,6 +256,8 @@ def maven_source_inventory(path, gradle_artifacts=None):
                 raise ValueError('Upstream supplement does not match actual runtime inputs')
             used = {x['archiveId'] for x in mapping['sourceMatches'] + mapping['requiredInputs']}
             used.update(mapping.get('commonSupportArchiveIds', []))
+            used.update(x['archiveId'] for x in mapping.get('binaryMemberMatches', []))
+            used.update(x['archiveId'] for x in mapping.get('sourceTransforms', []))
             used.update(x[key] for x in mapping.get('rootBlobBindings', []) for key in ('archiveId', 'treeArchiveId'))
             retained = snapshot.get('inputs', [])
             if len(retained) != len(used) or {x.get('archiveId') for x in retained} != used:
@@ -267,7 +269,15 @@ def maven_source_inventory(path, gradle_artifacts=None):
                         or records.get(item.get('path'), {}).get('url') != spec['url']):
                     raise ValueError('Upstream payload reference differs from pinned original')
                 payloads[item['archiveId']] = reference(item, supplements.ROLE).read_bytes()
-            proof = supplements.evidence(mapping, specs, reference(component['sourceFiles'][0]).read_bytes(), payloads)
+            binary_refs = snapshot.get('binaryInputs', [])
+            expected_binary_shas = {x['binaryArtifactSha256'] for x in mapping.get('binaryMemberMatches', [])}
+            if (len(binary_refs) != len(expected_binary_shas)
+                    or {x.get('sha256') for x in binary_refs} != expected_binary_shas):
+                raise ValueError('Missing or duplicate retained binary correspondence input')
+            binary_inputs = {item['sha256']: reference(item, 'maven-binary-correspondence-input').read_bytes()
+                             for item in binary_refs}
+            proof = supplements.evidence(mapping, specs, reference(component['sourceFiles'][0]).read_bytes(),
+                                         payloads, binary_inputs)
             if read_json(reference(snapshot['evidence'], supplements.EVIDENCE_ROLE)) != proof:
                 raise ValueError('Upstream correspondence differs from original source bytes')
     elif any(component.get('upstreamSnapshot') for component in components.values()):

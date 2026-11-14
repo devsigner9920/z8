@@ -21,6 +21,7 @@ import zipfile
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import release_config
 import source_modifications
+import source_archive
 
 ROOT = Path(__file__).resolve().parents[1]
 ANDROID = "{http://schemas.android.com/apk/res/android}"
@@ -91,6 +92,11 @@ def git_output(git, source, *args):
 def verify_source(source, commit, git):
     if source.is_symlink() or not source.is_dir():
         raise PrepareError("Pinned upstream source is missing or is a symlink")
+    if not (source / '.git').exists() and (source.parent.parent / 'SOURCE_MANIFEST.json').exists():
+        try:
+            return source_archive.exported_app_files(source, commit)[0]
+        except (ValueError, OSError, TypeError) as exc:
+            raise PrepareError(str(exc)) from exc
     if git_output(git, source, "rev-parse", "HEAD").strip() != commit:
         raise PrepareError("Upstream HEAD differs from tools/sources.lock.json")
     if git_output(git, source, "status", "--porcelain", "--untracked-files=all").strip():
@@ -100,6 +106,11 @@ def verify_source(source, commit, git):
 
 
 def copy_tracked(source, destination, names):
+    exported_modes = None
+    if not (source / '.git').exists() and (source.parent.parent / 'SOURCE_MANIFEST.json').exists():
+        manifest = json.loads((source.parent.parent / 'SOURCE_MANIFEST.json').read_text())
+        exported_modes = {r['path'].removeprefix('upstream/termux-app/'): r['mode']
+                          for r in manifest['files'] if r['path'].startswith('upstream/termux-app/')}
     for name in names:
         parts = PurePosixPath(name).parts
         if not parts or PurePosixPath(name).is_absolute() or ".." in parts:
@@ -112,6 +123,8 @@ def copy_tracked(source, destination, names):
         target = destination / name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(original, target)
+        if exported_modes is not None:
+            target.chmod(exported_modes[name])
 
 
 def patch_gradle(tree, lock, mode, bootstrap_sha, config=None):
@@ -881,8 +894,11 @@ def patch_sessions(tree):
         final TermuxService service = mActivity.getTermuxService();
         if (service == null || requestId == null) return;
         com.termux.app.Z8GuestSessionLauncher.observe(mActivity);
-        // Bootstrap, environment and tool preparation belong to the service worker.
-        com.termux.app.Z8GuestSessionLauncher.request(service, requestId, projectId, directory, name, action);
+        // Information acknowledgment precedes app-created external client sessions.
+        // Offline shells and other tools pass through without a provider dialog.
+        com.termux.app.Z8ProviderDisclosure.beforeLaunch(mActivity, projectId, action, requestId,
+            () -> com.termux.app.Z8GuestSessionLauncher.request(service, requestId, projectId, directory, name, action),
+            () -> com.termux.app.Z8GuestSessionLauncher.cancelRequest(service, requestId));
     }
 
     private void addNewSessionInDirectoryChecked(boolean isFailSafe, String sessionName, String directory) {

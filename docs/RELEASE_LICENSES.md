@@ -202,13 +202,14 @@ is retained unchanged (1,536 bytes, SHA-256
 `368cca1106be99d39ecd32a38d8305585d802a475effb66380b91ffc9bcf709b`).
 
 These are source and notice checks, not a complete dependency rebuild. The
-remaining **23 published JAR source collections** have not received this full
-upstream-input supplement. Original release environments, complete upstream
-project graphs, external prebuilts and SDK/NDK inputs still require appropriate
-scope review. A matching source member does not prove the original binary's
-build commit or a byte-identical rebuilt binary. `sourceClosureReviewed` stays
-false; final human review of the combined work and exact release inputs remains
-separate. The previous inventories and released assets are preserved unchanged.
+**23 published JAR source collections** did not receive that initial AAR-focused
+supplement. The follow-up below adds eight of them. A matching source member does
+not prove the original binary's build commit or a byte-identical rebuilt binary.
+Scope review must distinguish necessary build inputs from general-purpose tools,
+System Libraries and unrelated upstream projects; it does not require every
+upstream build machine or repository. `sourceClosureReviewed` stays false while
+actual scoped reconstruction work remains. A reviewer field does not substitute
+for that evidence. Previous inventories and released assets remain unchanged.
 
 For a follow-up release, collect into a new output directory, regenerate the
 source package and offline notices from its exact inputs, and build a new
@@ -216,7 +217,101 @@ candidate. The source-level process-exit and prepared-base alias corrections
 described in [release status](RELEASE_STATUS.md) also require device checks on
 that new candidate; source collection does not validate their Android behavior.
 
+## Coroutines and Kotlin JVM source follow-up
+
+The November 15 source-closure follow-up uses a new collection directory and
+does not overwrite the published rc6 source package. It adds eight coordinates:
+`kotlinx-coroutines-core-jvm` and `kotlinx-coroutines-android` 1.6.4, plus Kotlin
+`kotlin-stdlib`, `kotlin-stdlib-common`, `kotlin-stdlib-jdk7` and
+`kotlin-stdlib-jdk8` 1.8.22, and CommonMark core/GFM strikethrough 0.13.0.
+The selected 85-coordinate inventory now has
+**65 supplemented coordinates**, **2,252 direct source-member matches**, one
+explicit Kotlin release-version substitution and the existing narrow
+HiddenApiBypass generated-source case. The remaining 15 unsupplemented source
+JARs are a scope-review category, not 15 proven missing-source violations.
+
+Coroutines is pinned to commit
+`81e17dd37003a7105e542eb725f51ee0dc353354`. Its 5,033,865-byte original archive
+has SHA-256 `2d025618b7f9d4dba27be0bd1698a5c69e05d0cee2a3b9d15b81bab99ba4cdb1`.
+All 166 published Java/Kotlin members match original bytes. The lock explicitly
+preserves module/root/build-support inputs, the Android service/consumer rules,
+and the source and generation/check procedure for `DebugProbesKt.bin`.
+Four core binary members—the probe and three consumer-rule files—are compared
+byte for byte with the actual resolved runtime JAR. That JAR is retained only as
+verification evidence under `verification-binaries/`, bound to its existing
+runtime digest. The standalone inventory verifier rechecks those comparisons
+without a private Gradle cache or network. Merely changing a stored proof digest
+cannot bypass this recomputation.
+
+Kotlin is pinned to commit `fe0156151da01b3cecee587bf43e845766bdbfdf`. A bounded
+set of **503 original files** (5,197,991 bytes), rather than the entire compiler
+repository, preserves the published source mappings, 142 build/generator-support
+files and five license files. This includes the actual stdlib templates and
+their generator, plus the copyright profile its build references. Each raw
+GitHub URL contains the exact commit and path and
+is independently size/SHA-256 pinned. There are 356 direct source matches.
+The only source transformation accepted is the `kotlin-stdlib-common:1.8.22`
+`kotlin/util/KotlinVersion.kt` change from `KotlinVersion(1, 8, 255)` to
+`KotlinVersion(1, 8, 22)`. Both originals are retained; the verifier requires a
+single occurrence and exact equality of every other byte. It does not claim to
+identify the publisher's release automation. This mapping preserves the stdlib
+source sets and builtins serialization configuration but does not establish a
+complete stdlib/compiler rebuild or make a System Library legal determination.
+
+The generator's five Unicode 13.0.0 data inputs and the official Unicode license
+are also retained (3,110,391 bytes total), from the Unicode project's pinned
+`unicodetools` revision `ccc86e576dcadf94ef9f86969e7b5cb51e432ddc`. Each data file
+was compared byte for byte with its versioned `unicode.org/Public/13.0.0/ucd/`
+counterpart. Original file headers and the separate Unicode license are retained;
+these data inputs are not relabeled Apache. No generator is run during collection,
+and no unrelated Kotlin platform build is required by this evidence.
+
+CommonMark is pinned to revision `f7716897f9e37f03d023cf713e92a5b1ced59bc1`.
+Its 430,556-byte archive preserves all 103 published source members, module/root
+POMs, the entities resource and the original `LICENSE.txt`. The BSD notice is
+1,305 bytes, SHA-256
+`4c1ea7a8104cd00a7e62b794cc317aedca2e68c647048b5f546fc7388dddd306`;
+it is independently matched against both runtime JARs. The core entities file
+is likewise matched. These three checks, plus four coroutines resource checks,
+produce **seven retained binary-member comparisons**. Retaining this license
+inside the source inventory supplements the existing offline release notice;
+it does not claim the earlier app lacked that notice altogether.
+
+The collector reads inputs only. To explicitly rebuild the single compiled
+coroutines probe in a separate, new output directory:
+
+```sh
+python3 tools/verify-coroutines-probe.py \
+  --maven-sources artifacts/compliance/maven-sources-20261115-closure/maven-sources.json \
+  --java-home /path/to/jdk \
+  --toolchain-dir /path/to/probe-compiler-cache \
+  --fetch-toolchain \
+  --output /path/to/new-probe-verification
+```
+
+Omit `--fetch-toolchain` when the exact compiler inputs are already present.
+Downloads are limited to fixed, size/hash-pinned Maven Central URLs. The helper
+uses unmodified Kotlin 1.6.21, JVM target 1.8, the upstream integration-test
+module name and the retained source; it does not execute upstream Gradle scripts.
+It refuses an existing output path, altered toolchain bytes or a changed probe.
+The November 15 run reconstructed **all 1,738 bytes exactly**, SHA-256
+`158a19eb94aa2f3e2f459db69ee10276c73b945dd6c5f8fc223cf2d85e2b5e33`.
+Its report records source, compiler, runtime JAR and output digests and the JDK
+version. This demonstrates this resource's reconstruction only; it is not a
+full coroutines or Android rebuild, a release approval, or a reason to set
+`sourceClosureReviewed` automatically. The compiler inputs are general-purpose
+verification tools, not additional libraries bundled into Z8.
+
+## Guava, Commons IO and CommonMark reconstruction
+
+For the separate Guava, Commons IO and CommonMark main-library reconstruction,
+see [the tested four-JAR recipe](source-reconstruction-jars.md). It compiles
+788 retained Java files, packages original resources/notices and runs functional
+checks without using the target libraries' original binaries on the classpath.
+Its explicit compiler/target adaptations are not an exact historical rebuild.
+
 ## Exact embedded sources for JSR305 1.3.9
+
 
 The original Maven Central `com.google.code.findbugs:jsr305:1.3.9` JAR contains
 31 Java source files alongside 35 class files. Its missing `-sources.jar` does

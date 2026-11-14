@@ -123,6 +123,38 @@ class MavenUpstreamTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Unreviewed'):
             self.proof()
 
+    def test_exact_kotlin_release_substitution_preserves_both_inputs(self):
+        original = b'// original header\nfun version() = KotlinVersion(1, 8, 255)\n'
+        published = original.replace(b'1, 8, 255', b'1, 8, 22')
+        self.jar = zipped({'example/Library.java': self.java, upstream.KOTLIN_VERSION_SOURCE: published})
+        entries = {'project/source/example/Library.java': self.java,
+                   'project/' + upstream.KOTLIN_VERSION_ORIGINAL: original,
+                   'project/build.gradle': b'build', 'project/LICENSE': b'license',
+                   'project/res/values.xml': b'<resources/>'}
+        self.original = zipped(entries)
+        self.spec.update(sha256=upstream.digest(self.original), bytes=len(self.original))
+        self.component.update(group='org.jetbrains.kotlin', name='kotlin-stdlib-common', version='1.8.22',
+                              sourceJarSha256=upstream.digest(self.jar))
+        self.component['sourceTransforms'] = [{'sourceJarMember': upstream.KOTLIN_VERSION_SOURCE,
+            'archiveId': 'library', 'upstreamMember': upstream.KOTLIN_VERSION_ORIGINAL,
+            'transform': 'kotlin-release-version-1.8.22'}]
+        specs, _ = upstream.validate_lock(self.lock())
+        def proof():
+            return upstream.evidence(self.component, specs, self.jar, {'library': self.original})
+        value = proof()['sourceTransforms'][0]
+        self.assertEqual(value['upstreamSha256'], upstream.digest(original))
+        self.assertEqual(value['sha256'], upstream.digest(published))
+        self.assertIs(proof()['sourceClosureReviewed'], False)
+        # Even a newly pinned publisher JAR cannot hide another source change.
+        self.jar = zipped({'example/Library.java': self.java,
+                           upstream.KOTLIN_VERSION_SOURCE: published + b'// unrelated change'})
+        self.component['sourceJarSha256'] = upstream.digest(self.jar)
+        with self.assertRaisesRegex(ValueError, 'beyond the exact version substitution'):
+            proof()
+        self.component['version'] = '1.8.23'
+        with self.assertRaisesRegex(ValueError, 'Unreviewed source transformation'):
+            upstream.validate_lock(self.lock())
+
     def test_unsafe_archive_paths_are_rejected_without_extracting(self):
         self.original = zipped({'project/../../escaped.java': b'never extract'})
         self.spec.update(sha256=upstream.digest(self.original), bytes=len(self.original))
@@ -155,6 +187,59 @@ class MavenUpstreamTests(unittest.TestCase):
             members, ignored = upstream.read_members(spec, payload)
             self.assertEqual(members, {'build.gradle': original})
             self.assertFalse(ignored)
+
+    def test_github_original_file_is_bound_to_commit_path_and_bytes(self):
+        raw = b'// original build configuration\n'
+        spec = {'id': 'kotlin-build', 'format': 'github-file',
+                'repository': 'https://github.com/JetBrains/kotlin', 'commit': 'c' * 40,
+                'repositoryPath': 'libraries/stdlib/jvm/build.gradle',
+                'url': 'https://raw.githubusercontent.com/JetBrains/kotlin/' + 'c' * 40 + '/libraries/stdlib/jvm/build.gradle',
+                'sha256': upstream.digest(raw), 'bytes': len(raw)}
+        members, ignored = upstream.read_members(spec, raw)
+        self.assertEqual(members, {spec['repositoryPath']: raw})
+        self.assertFalse(ignored)
+        for update in ({'url': spec['url'].replace('c' * 40, 'main')},
+                       {'repositoryPath': '../outside'}, {'rootPrefix': 'invented/'},
+                       {'repositoryPath': 'build.gradle?raw=1'}, {'repositoryPath': '%2e%2e/outside'},
+                       {'payloadEncoding': 'transformed'}, {'url': spec['url'] + '?token=private'}):
+            with self.assertRaises(ValueError):
+                upstream.validate_spec(dict(spec, **update))
+        with self.assertRaisesRegex(ValueError, 'hash or size'):
+            upstream.read_members(spec, raw + b'changed')
+
+    def test_binary_resource_correspondence_requires_original_binary_and_payload(self):
+        binary = zipped({'META-INF/rules.pro': b'<resources/>'})
+        binary_sha = upstream.digest(binary)
+        self.component['binaryArtifactSha256'] = [binary_sha]
+        match = {'binaryArtifactSha256': binary_sha, 'binaryMember': 'META-INF/rules.pro',
+                 'archiveId': 'library', 'upstreamMember': 'res/values.xml'}
+        self.component['binaryMemberMatches'] = [match]
+        specs, _ = upstream.validate_lock(self.lock())
+        def proof(inputs):
+            return upstream.evidence(self.component, specs, self.jar, {'library': self.original}, inputs)
+        self.assertEqual(proof({binary_sha: binary})['binaryMemberMatches'][0]['sha256'],
+                         upstream.digest(b'<resources/>'))
+        for inputs in ({}, {binary_sha: binary + b'tampered'}):
+            with self.assertRaisesRegex(ValueError, 'exact retained runtime artifact'):
+                proof(inputs)
+        match['upstreamMember'] = 'build.gradle'
+        with self.assertRaisesRegex(ValueError, 'binary member differs'):
+            proof({binary_sha: binary})
+        match['upstreamMember'] = 'res/values.xml'
+        match['binaryMember'] = 'missing/resource'
+        with self.assertRaisesRegex(ValueError, 'binary member differs'):
+            proof({binary_sha: binary})
+
+    def test_binary_resource_reference_cannot_name_unrelated_or_duplicate_artifact(self):
+        match = {'binaryArtifactSha256': 'f' * 64, 'binaryMember': 'META-INF/rules.pro',
+                 'archiveId': 'library', 'upstreamMember': 'res/values.xml'}
+        self.component['binaryMemberMatches'] = [match]
+        with self.assertRaisesRegex(ValueError, 'Unknown or duplicate'):
+            upstream.validate_lock(self.lock())
+        match['binaryArtifactSha256'] = 'b' * 64
+        self.component['binaryMemberMatches'].append(dict(match))
+        with self.assertRaisesRegex(ValueError, 'Unknown or duplicate'):
+            upstream.validate_lock(self.lock())
 
     def test_gitiles_tar_rejects_selected_links_and_preserves_source(self):
         stream = io.BytesIO()
@@ -212,11 +297,14 @@ class MavenUpstreamTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'source commit'):
             upstream.evidence(self.component, specs, self.jar, payloads)
 
-    def collect(self, duplicate_binary=False):
+    def collect(self, duplicate_binary=False, match_binary=False):
         binary = self.root / 'library.aar'
         binary.write_bytes(zipped({'classes.jar': zipped({'example/Library.class': b'fixture'}),
                                   'res/values.xml': b'<resources/>'}))
         self.component['binaryArtifactSha256'] = [collector.sha256(binary)]
+        if match_binary:
+            self.component['binaryMemberMatches'] = [{'binaryArtifactSha256': collector.sha256(binary),
+                'binaryMember': 'res/values.xml', 'archiveId': 'library', 'upstreamMember': 'res/values.xml'}]
         lock = self.root / 'lock.json'; lock.write_text(json.dumps(self.lock()))
         cache = self.root / 'cache'; cache.mkdir(); (cache / 'upstream.zip').write_bytes(self.original)
         dependencies = self.root / 'dependencies.json'
@@ -264,6 +352,35 @@ class MavenUpstreamTests(unittest.TestCase):
         (args.output / 'maven-sources.json').write_bytes(collector.json_bytes(report))
         with self.assertRaisesRegex(ValueError, 'remain unresolved'):
             maven_source_inventory(args.output / 'maven-sources.json', args.gradle_artifacts)
+
+    def test_binary_correspondence_is_portable_and_missing_input_is_not_approved(self):
+        args, report = self.collect(match_binary=True)
+        self.assertFalse(report['unresolved'])
+        component = report['components'][0]
+        snapshot = component['upstreamSnapshot']
+        self.assertEqual(len(snapshot['binaryInputs']), 1)
+        # Verification does not depend on a private Gradle cache or network.
+        (self.root / 'library.aar').unlink()
+        with mock.patch('urllib.request.OpenerDirector.open', side_effect=AssertionError('offline')):
+            maven_source_inventory(args.output / 'maven-sources.json')
+        snapshot['binaryInputs'] = []
+        (args.output / 'maven-sources.json').write_bytes(collector.json_bytes(report))
+        with self.assertRaisesRegex(ValueError, 'retained binary correspondence'):
+            maven_source_inventory(args.output / 'maven-sources.json')
+
+    def test_altered_binary_proof_is_rederived_not_trusted(self):
+        args, report = self.collect(match_binary=True)
+        component = report['components'][0]
+        proof_ref = component['upstreamSnapshot']['evidence']
+        path = args.output / proof_ref['path']
+        proof = json.loads(path.read_text()); proof['binaryMemberMatches'][0]['sha256'] = 'f' * 64
+        path.write_bytes(collector.json_bytes(proof))
+        for record in report['files'] + [proof_ref]:
+            if record['path'] == proof_ref['path']:
+                record.update(sha256=collector.sha256(path), bytes=path.stat().st_size)
+        (args.output / 'maven-sources.json').write_bytes(collector.json_bytes(report))
+        with self.assertRaisesRegex(ValueError, 'differs from original'):
+            maven_source_inventory(args.output / 'maven-sources.json')
 
     def test_repeated_gradle_records_preserve_exact_binary_set(self):
         args, report = self.collect(duplicate_binary=True)

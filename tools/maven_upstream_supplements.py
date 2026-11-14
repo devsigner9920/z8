@@ -21,6 +21,9 @@ MAX_EXPANDED = 512 * 1024 * 1024
 SOURCE_SUFFIXES = ('.java', '.kt', '.kts', '.scala', '.c', '.h', '.cpp', '.aidl')
 HIDDEN_COORDINATE = ('org.lsposed.hiddenapibypass', 'hiddenapibypass', '6.1')
 HIDDEN_GENERATED = 'org/lsposed/hiddenapibypass/library/BuildConfig.java'
+KOTLIN_VERSION_COORDINATE = ('org.jetbrains.kotlin', 'kotlin-stdlib-common', '1.8.22')
+KOTLIN_VERSION_SOURCE = 'kotlin/util/KotlinVersion.kt'
+KOTLIN_VERSION_ORIGINAL = 'libraries/stdlib/src/kotlin/util/KotlinVersion.kt'
 
 
 def digest(data):
@@ -50,14 +53,22 @@ def validate_spec(spec):
             or not re.fullmatch(r'[A-Za-z0-9_.-]+', spec.get('id', ''))):
         raise ValueError('Upstream input requires an exact commit, digest and bounded size')
     format_name = spec.get('format')
-    if format_name == 'zip':
+    if format_name in ('zip', 'github-file'):
         if not re.fullmatch(r'https://github\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+', repository):
             raise ValueError('Unsupported upstream GitHub repository')
-        expected = 'https://codeload.github.com/' + repository[len('https://github.com/'):] + '/zip/' + commit
-        prefix = spec.get('rootPrefix', '')
-        if not prefix.endswith('/'):
-            raise ValueError('GitHub input requires its exact archive root')
-        safe_name(prefix[:-1])
+        if format_name == 'zip':
+            expected = 'https://codeload.github.com/' + repository[len('https://github.com/'):] + '/zip/' + commit
+            prefix = spec.get('rootPrefix', '')
+            if not prefix.endswith('/'):
+                raise ValueError('GitHub input requires its exact archive root')
+            safe_name(prefix[:-1])
+        else:
+            path = safe_name(spec.get('repositoryPath', ''))
+            if any(character in path for character in ('?', '#', '%')):
+                raise ValueError('GitHub path may not contain URL query, fragment or escaped separators')
+            expected = 'https://raw.githubusercontent.com/' + repository[len('https://github.com/'):] + '/' + commit + '/' + path
+            if spec.get('rootPrefix', '') or spec.get('transportEncoding') or spec.get('payloadEncoding'):
+                raise ValueError('Original GitHub file may not declare an archive root or transformation')
     elif format_name in ('tar.gz', 'gitiles-base64', 'gitiles-file', 'gitiles-tree'):
         if not re.fullmatch(r'https://(?:android|chromium)\.googlesource\.com/[A-Za-z0-9_./-]+', repository):
             raise ValueError('Unsupported official Gitiles repository')
@@ -100,7 +111,7 @@ def validate_lock(lock):
     for component in lock.get('components', []):
         fields(component, ('group', 'name', 'version', 'binaryArtifactSha256', 'sourceJarSha256',
             'sourceMatches', 'requiredInputs', 'generatedSources', 'commonSupportArchiveIds',
-            'rootBlobBindings', 'buildCommitClaim', 'releaseEvidenceUrl', 'reviewLimitations'), 'upstream component')
+            'rootBlobBindings', 'binaryMemberMatches', 'sourceTransforms', 'buildCommitClaim', 'releaseEvidenceUrl', 'reviewLimitations'), 'upstream component')
         if component.get('buildCommitClaim', False) is not False:
             raise ValueError('Source-byte correspondence cannot certify the original build commit')
         parts = tuple(component.get(key, '') for key in ('group', 'name', 'version'))
@@ -120,8 +131,28 @@ def validate_lock(lock):
         for item in matches:
             fields(item, ('sourceJarMember', 'archiveId', 'upstreamMember'), 'source correspondence')
             safe_name(item['sourceJarMember'])
+        transforms = component.get('sourceTransforms', [])
+        for item in transforms:
+            fields(item, ('sourceJarMember', 'archiveId', 'upstreamMember', 'transform'), 'source transformation')
+            if (parts != KOTLIN_VERSION_COORDINATE or len(transforms) != 1
+                    or item.get('sourceJarMember') != KOTLIN_VERSION_SOURCE
+                    or item.get('upstreamMember') != KOTLIN_VERSION_ORIGINAL
+                    or item.get('transform') != 'kotlin-release-version-1.8.22'
+                    or item.get('archiveId') not in archives):
+                raise ValueError('Unreviewed source transformation')
         for item in component.get('requiredInputs', []):
             fields(item, ('archiveId', 'member', 'category'), 'required upstream input')
+        binary_matches = component.get('binaryMemberMatches', [])
+        seen_binary_members = set()
+        for item in binary_matches:
+            fields(item, ('binaryArtifactSha256', 'binaryMember', 'archiveId', 'upstreamMember'), 'binary member correspondence')
+            key = (item.get('binaryArtifactSha256'), item.get('binaryMember'))
+            if (key[0] not in component['binaryArtifactSha256'] or key in seen_binary_members
+                    or item.get('archiveId') not in archives):
+                raise ValueError('Unknown or duplicate binary member correspondence')
+            safe_name(item.get('binaryMember', ''))
+            safe_name(item.get('upstreamMember', ''))
+            seen_binary_members.add(key)
         categories = {x.get('category') for x in component.get('requiredInputs', [])}
         if not {'build', 'license'} <= categories or not categories <= {'build', 'license', 'resource', 'source'}:
             raise ValueError('Supplement requires original build and license inputs')
@@ -193,14 +224,14 @@ def read_members(spec, data):
     elif spec['format'] == 'gitiles-base64':
         payload = base64.b64decode(b''.join(data.split()), validate=True)
         visit(spec['repositoryPath'], len(payload), lambda: payload)
-    elif spec['format'] == 'gitiles-file':
+    elif spec['format'] in ('gitiles-file', 'github-file'):
         visit(spec['repositoryPath'], len(data), lambda: data)
     else:
         visit('.gitiles-root.json', len(data), lambda: data)
     return members, sorted(skipped)
 
 
-def source_members(data):
+def source_members(data, source_only=True):
     members, total = {}, 0
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
         seen = set()
@@ -215,17 +246,19 @@ def source_members(data):
             total += item.file_size
             if item.file_size > 64 * 1024 * 1024 or total > MAX_EXPANDED:
                 raise ValueError('Publisher source archive exceeds inspection limit')
-            if name.endswith(SOURCE_SUFFIXES):
+            if not source_only or name.endswith(SOURCE_SUFFIXES):
                 members[name] = archive.read(item)
     return members
 
 
-def evidence(component, specs, source_jar, payloads):
+def evidence(component, specs, source_jar, payloads, binary_inputs=None):
     if digest(source_jar) != component['sourceJarSha256']:
         raise ValueError('Supplement does not match the exact publisher source JAR')
     source = source_members(source_jar)
     used = {x['archiveId'] for x in component['sourceMatches'] + component['requiredInputs']}
     used.update(component.get('commonSupportArchiveIds', []))
+    used.update(x['archiveId'] for x in component.get('binaryMemberMatches', []))
+    used.update(x['archiveId'] for x in component.get('sourceTransforms', []))
     used.update(x[key] for x in component.get('rootBlobBindings', []) for key in ('archiveId', 'treeArchiveId'))
     trees, ignored = {}, {}
     for key in sorted(used):
@@ -262,6 +295,7 @@ def evidence(component, specs, source_jar, payloads):
         root_bindings.append(dict(binding, sourceCommit=tree_spec['commit'], sha256=digest(original)))
     expected = {x['sourceJarMember'] for x in component['sourceMatches']}
     expected.update(x['sourceJarMember'] for x in component.get('generatedSources', []))
+    expected.update(x['sourceJarMember'] for x in component.get('sourceTransforms', []))
     if expected != set(source):
         raise ValueError('Supplement must account for every published source member')
     matches = []
@@ -276,6 +310,22 @@ def evidence(component, specs, source_jar, payloads):
         if payload is None:
             raise ValueError('Required upstream build, resource or license input is missing or a link')
         required.append(dict(item, bytes=len(payload), sha256=digest(payload)))
+    transformed = []
+    for item in component.get('sourceTransforms', []):
+        # This release changes one development placeholder. Preserve both inputs;
+        # no arbitrary source rewrite or unsupported generated exception is accepted.
+        original = trees[item['archiveId']].get(item['upstreamMember'])
+        before, after = b'KotlinVersion(1, 8, 255)', b'KotlinVersion(1, 8, 22)'
+        if (tuple(component[key] for key in ('group', 'name', 'version')) != KOTLIN_VERSION_COORDINATE
+                or item['sourceJarMember'] != KOTLIN_VERSION_SOURCE
+                or item['upstreamMember'] != KOTLIN_VERSION_ORIGINAL
+                or item['transform'] != 'kotlin-release-version-1.8.22'
+                or original is None or original.count(before) != 1):
+            raise ValueError('Unsupported Kotlin release version input')
+        output = original.replace(before, after)
+        if output != source[item['sourceJarMember']]:
+            raise ValueError('Kotlin release source differs beyond the exact version substitution')
+        transformed.append(dict(item, upstreamSha256=digest(original), bytes=len(output), sha256=digest(output)))
     generated = []
     for item in component.get('generatedSources', []):
         # This exact original AGP output is the sole reviewed exception.
@@ -293,7 +343,21 @@ def evidence(component, specs, source_jar, payloads):
         if b'buildConfig = true' not in raw or b'namespace = "org.lsposed.hiddenapibypass.library"' not in raw:
             raise ValueError('Original BuildConfig generator declarations are missing')
         generated.append(dict(item, bytes=len(expected_bytes), sha256=digest(expected_bytes), recipe=recipe[0]))
-    return {'schemaVersion': 1, 'kind': 'z8-maven-upstream-correspondence',
+    binary_matches = []
+    binary_trees = {}
+    for item in component.get('binaryMemberMatches', []):
+        binary_sha = item['binaryArtifactSha256']
+        if binary_sha not in binary_trees:
+            raw = (binary_inputs or {}).get(binary_sha)
+            if raw is None or digest(raw) != binary_sha:
+                raise ValueError('Binary correspondence requires the exact retained runtime artifact')
+            binary_trees[binary_sha] = source_members(raw, source_only=False)
+        binary_payload = binary_trees[binary_sha].get(item['binaryMember'])
+        original = trees[item['archiveId']].get(item['upstreamMember'])
+        if binary_payload is None or original is None or binary_payload != original:
+            raise ValueError('Runtime binary member differs from pinned upstream input')
+        binary_matches.append(dict(item, bytes=len(original), sha256=digest(original)))
+    result = {'schemaVersion': 1, 'kind': 'z8-maven-upstream-correspondence',
             'coordinate': ':'.join(component[key] for key in ('group', 'name', 'version')),
             'sourceJarSha256': component['sourceJarSha256'],
             'binaryArtifactSha256': sorted(set(component['binaryArtifactSha256'])),
@@ -301,3 +365,9 @@ def evidence(component, specs, source_jar, payloads):
             'rootBlobBindings': root_bindings,
             'upstreamInputs': [specs[key] for key in sorted(used)], 'ignoredNonRegularMembers': ignored,
             'reviewLimitations': component['reviewLimitations'], 'sourceClosureReviewed': False}
+    # Preserve the proof schema of old, immutable supplements with no binary mappings.
+    if component.get('binaryMemberMatches'):
+        result['binaryMemberMatches'] = binary_matches
+    if component.get('sourceTransforms'):
+        result['sourceTransforms'] = transformed
+    return result

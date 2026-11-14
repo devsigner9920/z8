@@ -186,6 +186,9 @@ STUBS = {
             check(replacement.created==0 && android.app.AlertDialog.shown==1,"failure reported without starting a PTY");
             String abandoned=Z8GuestSessionLauncher.newRequest(replacement);
             check(abandoned!=null && !Z8GuestSessionLauncher.hasPending(replacement),"abandoned bootstrap ticket cannot permanently block later launches");
+            Z8GuestSessionLauncher.cancelRequest(replacement,abandoned);
+            submit(replacement,abandoned);
+            check(!Z8GuestSessionLauncher.hasPending(replacement) && replacement.created==0,"cancelled provider disclosure ticket cannot later launch or replay");
             Z8Guest.fail=false;String finalId=Z8GuestSessionLauncher.newRequest(replacement);submit(replacement,finalId);Handler.next();
             check(replacement.created==1 && Z8SessionOrigin.remembered==4,"new explicit request succeeds with provenance");
             // The query does not change deliberate callers or the queued-work capacity limit.
