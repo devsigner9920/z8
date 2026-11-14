@@ -9,12 +9,28 @@ is the current review entry point. Its findings supplement the immutable rc6
 release and the historical records below; they do not change a tested binary
 or establish Google Play approval.
 
-The current source configuration advances to **0.1.0-rc7, version code 8** for
-the [implementation follow-up](compliance/2026-11-15/implementation.md): external
+The **[0.1.0-rc7 source prerelease](https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc7)**
+is published, using version code 8 and source commit
+`9b13ee5998305c2985f998e805bf524adf33b5af`. Its
+[implementation follow-up](compliance/2026-11-15/implementation.md) adds external
 client notices and terms access, source supplements, and app building from
-verified source exports. It uses a separate source URL. The rc6 publication
-and QA identities below remain historical; consult the matching prerelease's
-evidence for exact rc7 artifacts and checks.
+verified source exports. No installable APK or AAB is published.
+
+The [validation summary](https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc7/release-validation.json)
+records the exact candidate, source and check scope. All 13,008 source records
+were independently verified; the exported source built an Android candidate
+without Git metadata and passed 145 terminal tests. Separate artifact checks
+matched notices, runtime, guest, dependencies and 16KiB alignment. Focused
+English/Korean emulator testing passed cancellation, rotation, terms-browser
+return and remembered reopening, using a retained official Claude test fixture.
+It did not test provider installation, authentication or model requests.
+
+Final-candidate physical-device testing is pending because the phone was
+unavailable. Final license/source-closure review, Gmail overseas-processing
+particulars and legal basis, supported-provider Data safety, Play declarations,
+Console requirements and upload signing remain production gates. The rc6
+publication and QA identities below remain historical. New rc7 captures are QA
+evidence; the older store screenshot/video package has not been relabeled rc7.
 
 ## Current scope
 
