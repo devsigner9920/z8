@@ -2,7 +2,7 @@
 
 Documentation: [English](../README.md) | [한국어](../README.ko.md)
 
-As of November 4, 2026, Z8 is a development project that has not reached a stable app release or Play Store launch. Source publication and app submission or approval are separate procedures. This document is a public summary of validation, not a compatibility guarantee for every build from current sources or every device.
+As of November 14, 2026, Z8 is a development project that has not reached a stable app release or Play Store launch. Source publication and app submission or approval are separate procedures. This document is a public summary of validation, not a compatibility guarantee for every build from current sources or every device.
 
 ## Current scope
 
@@ -10,7 +10,13 @@ Z8 provides project Linux environments with separate HOME and source directories
 
 The current build configuration uses `dev.devsigner.z8`, ARM64, minSdk 28, and target/compile SDK 36. Declaring Android 9 or later does not mean every Android version, manufacturer, or user profile has been tested.
 
-The current source revision is configured as `0.1.0-rc3`, versionCode `4`, with English as the initial app language and an explicit Korean option. See [app language](LOCALIZATION.md). Its source URL targets the `v0.1.0-rc3` source preview. This version setting does not establish that an app binary has been released or that the earlier device checks below have been repeated for rc3.
+The current source revision is configured as `0.1.0-rc4`, versionCode `5`, with English as the initial app language and an explicit Korean option. See [app language](LOCALIZATION.md). Its source URL targets the `v0.1.0-rc4` source preview. This version setting does not establish that an app binary has been released or that earlier device checks have been repeated for rc4. The exact candidate hashes and current test results belong to its release evidence.
+
+## November 14 submission preparation
+
+The public developer display name is **Romi Ethsy**. First-run preparation now exposes offline privacy, environment/external-tool, and open-source notices before downloading development tools. The setup screen identifies Z8 as GPL-3.0-only software with separately licensed components. The existing explicit download action and optional metered-network choice remain in place; reading a notice does not accept external provider contracts.
+
+The [English-primary store preparation](store/README.md) includes localized descriptions, review instructions, an asset plan, and a checklist. GitHub source checks validate release-tag/configuration consistency, current privacy attribution, and listing limits. Source previews preserve corresponding-source evidence; only a separately validated and upload-signed artifact can be submitted to Play. A source tag, screenshot, or passing CI run is not store approval.
 
 ## November 4 source-distribution review
 
@@ -20,7 +26,7 @@ The rc3 source collection covers 85 resolved Maven coordinates with 265 evidence
 
 Nineteen retained Z8 guest source files allow reconstruction of the exact historical guest ZIP and manifest. Current guest defaults produce a different image and must not be substituted silently. The source package and verifier now bind these retained inputs explicitly. See [the reconstruction procedure](RELEASE_LICENSES.md).
 
-The [distribution review](DISTRIBUTION_REVIEW.md) records remaining Play execution-policy, Ubuntu redistribution and Claude Code operator-terms questions, with unsent inquiry drafts. This source work is not a completed human license review or an authorization to distribute app binaries.
+The [distribution review](DISTRIBUTION_REVIEW.md), updated on November 14 against the retained rc3 candidate, maps the actual apt, Node and CLI download paths to the Play execution-policy question, compares the modified Ubuntu image with its original archive, and checks the official Claude Code host conditions. It includes precise, unsent Play and Canonical inquiry drafts and the official contact routes. The operator's contract basis and distribution decisions remain separate from the technical findings. The follow-up updates documentation only; it does not replace rc3 binaries or source assets, complete license review, or establish store approval.
 
 ## English-default update
 

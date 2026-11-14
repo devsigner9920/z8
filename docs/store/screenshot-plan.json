@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "preparedDate": "2026-11-14",
+  "status": "capture-plan-only",
+  "primaryLocale": "en-US",
+  "preferredPhoneSize": {"width": 1080, "height": 1920},
+  "format": "RGB PNG without alpha",
+  "screens": [
+    {
+      "order": 1,
+      "suggestedFilename": "01-terminal.png",
+      "screen": "Project terminal running harmless local development commands",
+      "altText": "Z8 terminal displaying local development commands in a project workspace.",
+      "captureRule": "Use actual command output from the tested candidate. Do not simulate an AI response or hide an error as success."
+    },
+    {
+      "order": 2,
+      "suggestedFilename": "02-projects-and-sessions.png",
+      "screen": "Project and session navigation with clearly named demo projects",
+      "altText": "Project and terminal session navigation in Z8.",
+      "captureRule": "Use clean demo names and files. Show only sessions that actually exist."
+    },
+    {
+      "order": 3,
+      "suggestedFilename": "03-local-preview.png",
+      "screen": "A harmless sample web page served by a local development server in the built-in preview",
+      "altText": "A local development website open in Z8's built-in preview.",
+      "captureRule": "Serve the sample inside the app's project environment; no external private data or fake screenshot composition."
+    },
+    {
+      "order": 4,
+      "suggestedFilename": "04-settings.png",
+      "screen": "English Settings showing language and app information entries",
+      "altText": "Z8 Settings with language, privacy, data deletion and open-source information.",
+      "captureRule": "Capture the final app. Confirm the developer information uses Romi Ethsy before finalizing the pack."
+    }
+  ],
+  "optionalCaptures": [
+    "Theme selection showing the app's real preview",
+    "Korean versions of the same screens for the ko-KR listing",
+    "A verified tablet layout in the matching tablet asset category"
+  ],
+  "source": "https://support.google.com/googleplay/android-developer/answer/9866151?hl=en"
+}

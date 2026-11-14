@@ -1,0 +1,27 @@
+Z8 review information — factual draft; attach only to the matching tested build
+
+Z8 is a local Android terminal and Linux development environment. It provides project workspaces, multiple terminal sessions and a preview for local development servers. It does not provide its own user accounts, AI model service, model-request proxy, shared provider accounts or included AI usage.
+
+Core access
+No Z8 account is required. Start the app and complete its environment preparation using an internet connection and available device storage. Create or open a project and launch a terminal. The shell, project navigation and local preview can be reviewed without signing into an AI provider. Verify the exact first-run button labels against the final candidate before submitting these instructions.
+
+Suggested local workflow
+1. Prepare the local development environment and open a demo project.
+2. Run pwd and a harmless Python command in its terminal.
+3. Open another terminal session and switch between the sessions.
+4. Start a sample local web server inside the project and open its localhost address in Z8's preview.
+5. Open Settings to inspect App language, Privacy policy, Data storage and deletion, Environment and external tools, and Open-source licenses and source.
+
+Optional external clients
+Users explicitly choose whether to install official CLI clients such as Codex and Claude Code and sign in directly with their own provider accounts. Authentication, service eligibility, subscriptions or charges are controlled by the external provider. Do not mark every feature as unrestricted merely because Z8 itself has no login. The final App access response must disclose any external account or payment requirement and supply a review path acceptable to Google. No reviewer credentials have been supplied in this draft.
+
+Executable delivery
+The application includes the Android host runtime, PRoot loader and a Linux filesystem. Environment preparation downloads additional packages and Node.js. Optional CLI installation downloads official binaries. These include native ARM64 code executed under PRoot using the Android kernel and app UID. PRoot is not a separate-kernel virtual machine or a security boundary between projects. The app does not download APK or DEX self-updates. Users and third-party tools can download or update additional Linux executables. This description does not assert that these flows qualify for a Google Play execution-policy exception.
+
+Foreground service draft
+The manifest uses specialUse for user-started terminal sessions and development-environment preparation. The service preserves active commands and child processes while users switch apps and shows an ongoing notification. Users can stop terminals through the app or notification and stop preparation through Android app controls. The service is designed to stop when idle. Confirm these behaviors on the exact candidate and provide the required demonstration video. No demonstration-video URL has been supplied in this draft.
+
+Contact
+Romi Ethsy
+ethsy2462@gmail.com
+https://devsigner9920.github.io/z8/privacy.html

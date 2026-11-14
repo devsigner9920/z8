@@ -6,7 +6,7 @@
 
 적용일: {{Z8_POLICY_DATE}}
 
-운영자: romi
+운영자: Romi Ethsy
 
 개인정보 문의: ethsy2462@gmail.com
 

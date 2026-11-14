@@ -19,6 +19,10 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: '3.12'
+      - name: Release metadata and store text
+        run: |
+          python3 -m unittest discover -s tests -p test_store_preparation.py -v
+          python3 tools/verify-store-preparation.py
       - name: Source and signing boundaries
         run: |
           python3 -m unittest discover -s tests -p test_release_compliance.py -v

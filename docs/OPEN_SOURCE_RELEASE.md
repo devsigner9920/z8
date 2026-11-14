@@ -2,7 +2,7 @@
 
 Documentation: [English](../README.md) | [한국어](../README.ko.md)
 
-November 2, 2026. This procedure distinguishes publishing a source repository from releasing app binaries. The operator's display name is **romi**, and the public contact is **ethsy2462@gmail.com**. The designated GitHub account is `devsigner9920`. Before remote operations, verify the actual login and repository owner returned by the connected tool. An account name alone does not establish that a repository exists or that access has been granted.
+November 14, 2026. This procedure distinguishes publishing a source repository from releasing app binaries. The operator's display name is **Romi Ethsy**, and the public contact is **ethsy2462@gmail.com**. The designated GitHub account is `devsigner9920`. Before remote operations, verify the actual login and repository owner returned by the connected tool. An account name alone does not establish that a repository exists or that access has been granted.
 
 ## What to publish
 
@@ -55,7 +55,7 @@ The privacy policy is maintained in [privacy.html](privacy.html), with a [Korean
 
 The app's `sourceUrl` must directly download the complete corresponding source ZIP for that version. Once the real repository and tag are fixed, choose a filename such as `releases/download/<tag>/z8-source.zip` in advance. Putting the source ZIP's own hash in the source configuration creates a circular dependency. Attach the locally generated ZIP, whose filename contains a hash, to the Release under the fixed name `z8-source.zip`.
 
-The current configuration targets `v0.1.0-rc3` and the source asset `z8-source.zip`. Verify the public download after publishing it. Publishing a source preview does not mean an APK/AAB has been distributed or that final corresponding source review is complete. The earlier `v0.1.0-rc1` source preview and its device validation records remain historical references.
+The current configuration targets `v0.1.0-rc4` and the source asset `z8-source.zip`. The source asset at this version-specific URL must be published and its download verified before distributing that candidate. Publish the source preview from the same GitHub revision used to prepare the candidate, retain its hashes and provenance, and verify the website download link after publication. Publishing a source preview does not mean an APK/AAB has been distributed or that final corresponding source review is complete. Earlier source previews and their device validation records remain historical references.
 
 ## Before publishing app binaries
 

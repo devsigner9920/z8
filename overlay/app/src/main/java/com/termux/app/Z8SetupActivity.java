@@ -152,6 +152,8 @@ public final class Z8SetupActivity extends Activity implements ServiceConnection
         TextView tools = text("Python · Node.js · Git · GitHub CLI", 14, style.text, true); consent.addView(tools);
         TextView downloads = text(Z8Text.text("Set up Linux and download development tools.\nThis may use hundreds of MB or more.\nWi-Fi is recommended to avoid data charges.", "Linux 환경을 구성하고 개발 도구를 내려받아요.\n수백 MB 이상의 데이터가 사용될 수 있어요.\n데이터 요금이 발생할 수 있으니 Wi-Fi를 권장해요."), 13, style.muted, false);
         downloads.setLineSpacing(dp(4), 1); add(consent, downloads, 10);
+        TextView openSource = text(Z8Text.text("Z8 is open-source software under GPL-3.0-only, with separately licensed components.", "Z8는 GPL-3.0-only 오픈소스 앱이며, 포함된 구성요소에는 별도 라이선스가 적용됩니다."), 13, style.muted, false);
+        openSource.setLineSpacing(dp(4), 1); add(consent, openSource, 10);
         networkStatus = text("", 13, style.text, false); add(consent, networkStatus, 18);
         meteredConsent = new CheckBox(this);
         meteredConsent.setText(Z8Text.text("I agree to use mobile data or a metered network.", "모바일 데이터 또는 유료 네트워크 사용에 동의합니다."));
@@ -161,6 +163,18 @@ public final class Z8SetupActivity extends Activity implements ServiceConnection
         meteredConsent.setChecked(false);
         meteredConsent.setOnCheckedChangeListener((view, checked) -> updateInstallEnabled());
         add(consent, meteredConsent, 10);
+        Button privacy = button(Z8Text.text("Privacy policy", "개인정보처리방침"), false);
+        privacy.setTextColor(style.accent);
+        privacy.setOnClickListener(view -> startActivity(Z8AboutActivity.intent(this, Z8AboutActivity.Page.PRIVACY)));
+        add(consent, privacy, 8);
+        Button environment = button(Z8Text.text("Environment and external tools", "환경·외부 도구 안내"), false);
+        environment.setTextColor(style.accent);
+        environment.setOnClickListener(view -> startActivity(Z8AboutActivity.intent(this, Z8AboutActivity.Page.ENVIRONMENT)));
+        add(consent, environment, 0);
+        Button licenses = button(Z8Text.text("Open-source licenses and source", "오픈소스 라이선스·소스"), false);
+        licenses.setTextColor(style.accent);
+        licenses.setOnClickListener(view -> startActivity(Z8AboutActivity.intent(this, Z8AboutActivity.Page.LICENSES)));
+        add(consent, licenses, 0);
         add(content, consent, 24);
 
         progressArea = column();

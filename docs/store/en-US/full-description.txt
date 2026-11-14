@@ -1,0 +1,30 @@
+Bring your command-line workflow to Android with Z8, a local development terminal for Linux tools and project workspaces.
+
+Keep your work organized
+Create separate project workspaces for source files, home directories and development environments. Open multiple terminal sessions and move between projects without mixing their working folders.
+
+Use familiar development tools
+Prepare a Linux environment and work with Python, Node.js, Git, GitHub CLI, tmux and build tools. Run commands, edit files with terminal tools and work on your repositories from your Android device.
+
+Preview local web projects
+Open a development server running on your device in the built-in preview. External websites and sign-in pages open in your device browser.
+
+Run the command-line clients you choose
+Z8 helps you install and launch supported official CLIs, including Codex and Claude Code, in the local environment. Sign in directly with your own provider account. Tool compatibility depends on the installed version and device.
+
+Z8 provides the terminal and development environment. It does not provide an AI model service, shared accounts or included AI usage. External services apply their own account requirements, charges and terms. These tools may send your inputs and source code to their providers.
+
+Make the workspace yours
+Choose a theme and switch the app interface between English and Korean. English is the default language. Settings includes privacy information, local data deletion guidance and open-source notices.
+
+Before you start
+- An ARM64 Android device is required. Android 9 and later is the configured minimum; tool compatibility varies.
+- Preparing the environment downloads additional tools and uses device storage. External services require a network connection.
+- Root access and a separate Termux installation are not required.
+- Project folders are separate, but they are not security sandboxes. Run only code and tools you trust.
+
+Z8 is open source under GPL-3.0-only, with separately licensed components retaining their own terms. External tools and services have their own licenses and terms. Z8 is not an official product of Termux, OpenAI or Anthropic.
+
+Support: ethsy2462@gmail.com
+Website: https://devsigner9920.github.io/z8/
+Source: https://github.com/devsigner9920/z8

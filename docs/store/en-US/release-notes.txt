@@ -1,0 +1,7 @@
+Initial test release of Z8.
+
+- Project workspaces and multiple terminal sessions
+- Local Linux development tools and web previews
+- Optional official CLI installation
+- English and Korean interfaces
+- Privacy, data deletion and open-source information in Settings
