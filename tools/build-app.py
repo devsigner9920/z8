@@ -96,6 +96,7 @@ def main():
     if not (source / '.git').exists() and (ROOT / 'SOURCE_MANIFEST.json').exists():
         try:
             source_archive.exported_app_files(source, lock['termuxApp']['commit'])
+            actual = lock['termuxApp']['commit']
         except (ValueError, OSError, TypeError) as exc:
             sys.exit('Source export verification failed: ' + str(exc))
     else:
