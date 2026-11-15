@@ -9,6 +9,24 @@ is the current review entry point. Its findings supplement the immutable rc6
 releases and the historical records below; they do not change a tested binary
 or establish Google Play approval.
 
+## Subsequent operator preparation
+
+On November 15, the maintainer explicitly deferred the authenticated Claude
+workload test. It remains unverified; the immutable release QA report is not
+changed to PASS. The [consumer Gmail follow-up](compliance/2026-11-15/support-mail-transfer-follow-up.md)
+adds service-specific contract/country findings. Public documents still do not
+establish the required processing scope, and no fictional country or consent
+has been inserted into the policy.
+
+An AES-256 encrypted upload-key image was stored in the maintainer's restricted
+private Google Drive and downloaded again. Its exact bytes, all four restored
+identity files, certificate and actual restored-key signing/strict verification
+passed. The temporary volume was ejected and the original identity was preserved.
+Independent recovery-password custody is still awaiting the maintainer's
+confirmation; complete disaster recovery is not yet declared. No private cloud
+location, secret or key artifact is published. See [the backup procedure](UPLOAD_KEY_BACKUP.md).
+The release-specific report below retains the state observed at its creation.
+
 ## Published rc8 source and final-candidate validation
 
 The **[0.1.0-rc8 source prerelease](https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc8)**

@@ -81,7 +81,8 @@ to replace an existing identity. `verify` checks owner-only file permissions and
 the actual certificate fingerprint. The encrypted PKCS#12 key and its password
 are stored together locally; the password file is not an independent protection
 against someone who can read that directory. Keep the directory private and
-make a separate encrypted backup under the maintainer's control. The tool does
+make a separate encrypted backup under the maintainer's control. See the
+[private backup and real restoration procedure](docs/UPLOAD_KEY_BACKUP.md). The tool does
 not claim a backup has been made or register the key with Google. This upload
 key is distinct from the eventual Play App Signing key.
 
