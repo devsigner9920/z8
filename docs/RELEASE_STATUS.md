@@ -14,17 +14,25 @@ or establish Google Play approval.
 On November 15, the maintainer explicitly deferred the authenticated Claude
 workload test. It remains unverified; the immutable release QA report is not
 changed to PASS. The [consumer Gmail follow-up](compliance/2026-11-15/support-mail-transfer-follow-up.md)
-adds service-specific contract/country findings. Public documents still do not
-establish the required processing scope, and no fictional country or consent
-has been inserted into the policy.
+adds service-specific contract/country findings. The maintainer chose to proceed
+without contacting Google; no question was sent and no reply is awaited. The
+reviewed public documents do not establish all particulars for this support-mail
+workflow. This is a bounded operational uncertainty, not a finding that the app
+cannot be submitted or that advance Google permission is required. Preparation
+continues without claiming complete support-processing compliance or inserting
+fictional countries or consent into the policy.
 
 An AES-256 encrypted upload-key image was stored in the maintainer's restricted
 private Google Drive and downloaded again. Its exact bytes, all four restored
 identity files, certificate and actual restored-key signing/strict verification
 passed. The temporary volume was ejected and the original identity was preserved.
-Independent recovery-password custody is still awaiting the maintainer's
-confirmation; complete disaster recovery is not yet declared. No private cloud
-location, secret or key artifact is published. See [the backup procedure](UPLOAD_KEY_BACKUP.md).
+The maintainer has now confirmed independent recovery-password custody. Together
+with the verified external download and restoration, this completes the external
+backup check; private identity metadata records `externalBackupVerified=true`.
+The custody confirmation is the maintainer's statement, not an inspection of
+their password manager or paper copy. Play key registration remains unverified.
+No private cloud location, secret or key artifact is published. See
+[the backup procedure](UPLOAD_KEY_BACKUP.md).
 The release-specific report below retains the state observed at its creation.
 
 ## Published rc8 source and final-candidate validation
@@ -112,7 +120,10 @@ retained. Its SHA-256 is
 This file is not published or uploaded. `productionReady=false` and
 `readyForConsoleUpload=false` remain explicit: signing does not complete the
 untested provider case, operator decisions or Console requirements. Upload-key
-registration and an external backup are not verified. See [building and signing](../BUILDING.md).
+registration and an external backup were not verified when that record was
+created. The subsequent backup completion above supersedes only the operational
+backup item; it does not alter the signed candidate or historical evidence. See
+[building and signing](../BUILDING.md).
 
 The [public store preparation ZIP](https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/z8-play-store-preparation.zip)
 contains five actual English listing screenshots, English/Korean text, four

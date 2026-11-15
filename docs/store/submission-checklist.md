@@ -55,7 +55,10 @@ the proposed data types, collection/sharing purposes, optional status, scoped
 transport-encryption answer and deletion responses. Apply those concrete draft
 answers to the actual Console form and final supported client flows; the table
 above is not a claim that this classification is still entirely unprepared.
-Operator Gmail overseas-processing particulars remain unresolved. Do not claim
+Operator Gmail overseas-processing particulars remain unresolved within the
+[bounded support-mail review](../compliance/2026-11-15/support-mail-transfer-follow-up.md).
+The maintainer declined an inquiry; no response is awaited and this is not a
+separate advance-approval requirement for preparing or submitting the app. Do not claim
 all user-run commands use encrypted transport or that local project deletion
 deletes an external provider account.
 
@@ -97,8 +100,11 @@ deletes an external provider account.
   not grant policy approval; retain the [`license procedure`](../RELEASE_LICENSES.md).
 - [x] Sign and verify a private rc8 internal-test AAB with exact source/QA
   evidence retained. This is not production promotion or Console readiness.
-- [ ] Verify external upload-key backup and Play key registration when app
-  creation becomes available.
+- [x] Verify an encrypted external upload-key copy through actual download,
+  restoration and restored-key signing. The maintainer confirmed separate
+  recovery-password custody; private completion evidence is retained.
+- [ ] Complete and verify Play key registration when app creation becomes
+  available. External backup does not register the key with Google.
 - [ ] Produce a properly signed upload AAB through the release procedure. An
   unsigned candidate or development-signed test APK is not an upload-ready release.
 - [ ] Create the Console app, select the primary language and fill in the listing.

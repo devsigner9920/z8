@@ -12,6 +12,12 @@ checks, actual Codex work, scoped cleanup, private internal signing and publishe
 store materials; its production/submission gates remain open.
 Operator Gmail overseas-processing particulars, actual Console declarations
 and Play review remain separate from these technical checks.
+The [support-mail follow-up](support-mail-transfer-follow-up.md) records the
+maintainer's decision to proceed without an inquiry; no response is awaited.
+The [current operator preparation status](../../RELEASE_STATUS.md#subsequent-operator-preparation)
+also records verified encrypted external key backup and confirmed independent
+recovery-password custody. These later observations preserve the original rc8
+records and do not turn deferred tests or remaining review uncertainty into PASS.
 
 Implementation follow-up: [rc7 changes](implementation.md) address concrete
 source and external-client disclosure findings. The original baseline below
