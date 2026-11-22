@@ -24,10 +24,11 @@
 <body>
 <main>
   <nav aria-label="Main"><a href="index.html">About Z8</a> · <a href="privacy.html">Privacy</a> · <a href="https://github.com/devsigner9920/z8">Open source</a></nav>
-  <p class="label">REVIEW INFORMATION · 0.1.0-rc8</p>
+  <p class="label">REVIEW INFORMATION · 0.1.0-rc9 PREPARATION · RC8 RECORDINGS</p>
   <h1>A local development terminal for Android</h1>
   <p>Z8 provides project Linux environments, multiple terminal sessions and local web previews. Z8 has no account system, model server, shared provider accounts, advertising or in-app purchases.</p>
   <p class="notice">This page provides review materials. The source preview and demonstrations do not represent a Play Store approval or a publicly released app binary.</p>
+  <p>Version 0.1.0-rc9 (version code 10) removes HiddenApiBypass, retains public PackageManager UID-name lookup and omits unsupported optional diagnostics. Native UI and foreground-service workflows are unchanged by this fix. Publication and exact rc9 candidate validation are pending; no rc9 test pass is claimed here.</p>
 
   <h2>Access the core app</h2>
   <ol>
@@ -43,7 +44,7 @@
   <h2>Current foreground-service behavior</h2>
   <p>Interactive terminal sessions use a dedicated special-use foreground service. Finite environment preparation, selected tool installation and project-file deletion use a separate data-sync service. Each task starts from a visible user action. The two service types are not enabled together for every operation.</p>
   <p>The Project tasks notification provides <strong>Stop tasks</strong>. Android data-sync timeouts and this action cancel the finite tasks, preserving unrelated interactive terminals. Interrupted setup or installation requires an explicit retry; completed stages and project files are checked again. Interrupted deletion can leave a partly deleted project and offers an explicit retry. Android's Stop action for the entire app terminates all its processes.</p>
-  <p class="notice">The four silent recordings below show the exact final rc8 candidate on dedicated Android emulators. Their captions distinguish actions visible in each clip from separately recorded checks. They do not establish that every device or provider sign-in flow has been tested.</p>
+  <p class="notice">The four silent recordings below show the exact final rc8 candidate on dedicated Android emulators. They demonstrate the unchanged workflows but are not rc9 recordings or proof of rc9 validation. Their captions distinguish actions visible in each clip from separately recorded checks. They do not establish that every device or provider sign-in flow has been tested.</p>
 
   <h2>Included environment preparation · about 27 seconds</h2>
   <p>On a fresh installation, the user reviews the included-base disclosure and presses <strong>Start setup</strong>. The app unpacks the bundled environment while offline and completes naturally. This clip does not demonstrate cancellation or retry.</p>
@@ -79,8 +80,8 @@
 
   <h2>Executable delivery and source</h2>
   <p>The app bundles a host runtime, PRoot and a Linux filesystem. The initial base is included. Selecting tools downloads native Linux packages, Node.js or official CLI binaries. Optional daily version checks retrieve public metadata only; they do not install code. PRoot uses Android's kernel and app UID; it is not a separate security virtual machine. This description does not claim a policy exception has been approved.</p>
-  <p>Z8 is GPL-3.0-only software with separately licensed components. <a href="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/z8-source.zip">Download the matching rc8 source ZIP</a>, or view the <a href="https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc8">release evidence and checksums</a>. <strong>Debian</strong>'s registered trademark belongs to Software in the Public Interest, Inc.; Z8 has no affiliation with or endorsement from the Debian project.</p>
-  <p class="label">These reviewer instructions and media captions supplement the immutable rc8 source snapshot at commit <code>b180705dc91a321674d697bea6ae9f6cfa95f501</code>. They were updated after that snapshot; the source archive has not been rebuilt to include these later captions. Earlier rc6 recordings remain historical assets in their original release.</p>
+  <p>Z8 is GPL-3.0-only software with separately licensed components. The <a href="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc9/z8-source.zip">rc9 source ZIP location</a> is prepared, with publication pending. The recorded rc8 build has its own <a href="https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/z8-source.zip">published source ZIP</a> and <a href="https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc8">release evidence and checksums</a>. <strong>Debian</strong>'s registered trademark belongs to Software in the Public Interest, Inc.; Z8 has no affiliation with or endorsement from the Debian project.</p>
+  <p class="label">The recordings remain bound to the immutable rc8 source snapshot at commit <code>b180705dc91a321674d697bea6ae9f6cfa95f501</code>. These later instructions do not change or rebuild it, and its QA is not relabeled as rc9. Earlier rc6 recordings remain historical assets in their original release.</p>
   <footer>Romi Ethsy · <a href="mailto:ethsy2462@gmail.com">ethsy2462@gmail.com</a> · <a href="privacy.html">Privacy and deletion instructions</a></footer>
 </main>
 </body>

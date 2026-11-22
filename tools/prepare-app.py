@@ -205,7 +205,92 @@ def patch_gradle(tree, lock, mode, bootstrap_sha, config=None):
             text = replace_exact(text, "abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'", "abiFilters 'arm64-v8a'")
         elif module == "termux-shared":
             text = replace_exact(text, "    defaultConfig {\n", "    defaultConfig {\n        ndk { abiFilters 'arm64-v8a' }\n")
+            text = replace_exact(text, '        implementation "org.lsposed.hiddenapibypass:hiddenapibypass:6.1"\n', '')
         path.write_text(text)
+
+
+def patch_public_android_api(tree):
+    """Remove ART-internal bypasses; optional hidden diagnostics remain unavailable."""
+    shared = tree / "termux-shared/src/main/java/com/termux/shared"
+
+    def method(relative, signature, body, expected):
+        path = shared / relative
+        text = path.read_text()
+        pattern = re.compile(r"^" + re.escape(signature) + r"\n.*?^    }", re.M | re.S)
+        matches = list(pattern.finditer(text))
+        if len(matches) != 1 or expected not in matches[0].group():
+            raise PrepareError(f"Public API patch anchor changed: {relative}: {signature}")
+        match = matches[0]
+        path.write_text(text[:match.start()] + signature + "\n" + body + "\n    }" + text[match.end():])
+
+    reflection = shared / "reflection/ReflectionUtils.java"
+    edit(reflection, "import android.os.Build;\n\n", "")
+    edit(reflection, "import org.lsposed.hiddenapibypass.HiddenApiBypass;\n\n", "")
+    edit(reflection, "    private static boolean HIDDEN_API_REFLECTION_RESTRICTIONS_BYPASSED = Build.VERSION.SDK_INT < Build.VERSION_CODES.P;\n\n", "")
+    edit(reflection, '''     * Bypass android hidden API reflection restrictions.
+     * https://github.com/LSPosed/AndroidHiddenApiBypass
+     * https://developer.android.com/guide/app-compatibility/restrictions-non-sdk-interfaces''',
+         '''     * Compatibility entry point: Z8 does not bypass Android hidden API restrictions.
+     * Optional platform diagnostics must return unavailable instead of changing ART internals.''')
+    method("reflection/ReflectionUtils.java", "    public static void bypassHiddenAPIReflectionRestrictions() {",
+           "        // Intentionally empty. Never exempt hidden APIs or access ART memory layouts.",
+           'HiddenApiBypass.addHiddenApiExemptions("")')
+    method("reflection/ReflectionUtils.java", "    public static boolean areHiddenAPIReflectionRestrictionsBypassed() {",
+           "        return false;", "HIDDEN_API_REFLECTION_RESTRICTIONS_BYPASSED")
+
+    unavailable = "        // Z8: optional non-SDK diagnostic; do not probe hidden platform APIs.\n        return null;"
+    signatures = {
+        "android/SELinuxUtils.java": (
+            "    public static String getContext() {",
+            "    public static String getPidContext(int pid) {",
+            "    public static String getFileContext(@NonNull String path) {",
+        ),
+        "android/FeatureFlagUtils.java": (
+            "    public static Map<String, String> getAllFeatureFlags() {",
+            "    public static Boolean isFeatureEnabled(@NonNull Context context, @NonNull String feature) {",
+        ),
+        "android/PackageUtils.java": (
+            "    public static Integer getApplicationInfoPrivateFlagsForPackage(@NonNull final ApplicationInfo applicationInfo) {",
+            "    public static String getApplicationInfoSeInfoForPackage(@NonNull final ApplicationInfo applicationInfo) {",
+            "    public static String getApplicationInfoSeInfoUserForPackage(@NonNull final ApplicationInfo applicationInfo) {",
+            "    public static Integer getApplicationInfoStaticIntFieldValue(@NonNull String fieldName) {",
+        ),
+    }
+    for relative, entries in signatures.items():
+        for signature in entries:
+            method(relative, signature, unavailable, "ReflectionUtils.bypassHiddenAPIReflectionRestrictions();")
+        edit(shared / relative, "import com.termux.shared.reflection.ReflectionUtils;\n", "")
+    for relative in ("android/SELinuxUtils.java", "android/FeatureFlagUtils.java"):
+        edit(shared / relative, "import android.annotation.SuppressLint;\n", "")
+        edit(shared / relative, "import java.lang.reflect.Method;\n", "")
+
+    user = shared / "android/UserUtils.java"
+    edit(user, "import com.termux.shared.reflection.ReflectionUtils;\n", "")
+    edit(user, "import java.lang.reflect.Method;\n", "")
+    method("android/UserUtils.java", "    public static String getNameForUidFromLibcore(int uid) {",
+           "        // Z8: PackageManager is the public lookup; unknown names retain their numeric uid.\n        return null;",
+           "ReflectionUtils.bypassHiddenAPIReflectionRestrictions();")
+    user_text = user.read_text()
+    start = user_text.index("    /**\n     * Get the user name for user id with a call to `Libcore.os.getpwuid()`.")
+    end = user_text.index("    @Nullable\n    public static String getNameForUidFromLibcore", start)
+    user.write_text(user_text[:start] + '''    /**
+     * Compatibility fallback when PackageManager cannot name a uid.
+     * The Android SDK does not expose Libcore's getpwuid; do not reflect into it.
+     * Returns null so callers can continue displaying the actual numeric uid.
+     */
+''' + user_text[end:])
+
+    # Do not convert unavailable diagnostics into a literal "null" environment/report value.
+    environment = shared / "termux/shell/command/environment/TermuxAppShellEnvironment.java"
+    edit(environment, '''            String seInfoUser = PackageUtils.getApplicationInfoSeInfoUserForPackage(applicationInfo);
+            ShellEnvironmentUtils.putToEnvIfSet(environment, ENV_TERMUX_APP__SE_INFO, PackageUtils.getApplicationInfoSeInfoForPackage(applicationInfo) +
+                (DataUtils.isNullOrEmpty(seInfoUser) ? "" : seInfoUser));''',
+         '''            // Z8: SELinux policy details are optional diagnostics, not shell prerequisites.
+            // No public SDK exposes seInfo; omit it instead of exporting a fabricated value.''')
+    edit(shared / "android/AndroidUtils.java", '''        String seInfoUser = PackageUtils.getApplicationInfoSeInfoUserForPackage(applicationInfo);
+        AndroidUtils.appendPropertyToMarkdown(markdownString,"SE_INFO", PackageUtils.getApplicationInfoSeInfoForPackage(applicationInfo) +
+            (DataUtils.isNullOrEmpty(seInfoUser) ? "" : seInfoUser));''',
+         '''        // Z8: non-SDK SELinux policy details are unavailable; do not fabricate SE_INFO.''')
 
 
 def patch_identity(tree, lock):
@@ -1097,6 +1182,7 @@ def patch_language(tree):
 
 def apply_patches(tree, lock, mode, bootstrap_sha="", bootstrap=None, manifest=None, config=None):
     patch_gradle(tree, lock, mode, bootstrap_sha, config)
+    patch_public_android_api(tree)
     patch_identity(tree, lock)
     patch_manifest(tree)
     patch_sessions(tree)

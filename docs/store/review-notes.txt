@@ -1,9 +1,11 @@
-Z8 review information — rc8 final-candidate media; attach only to the matching build
+Z8 review information — rc9 preparation, with explicitly identified rc8 recordings
+
+Version 0.1.0-rc9 (version code 10) removes the HiddenApiBypass dependency, retains public PackageManager UID-name lookup and omits unsupported optional diagnostics. Native UI and foreground-service workflows are unchanged by this fix. Source publication and exact rc9 candidate validation are pending. The recordings below remain rc8 evidence, not rc9 captures or a claim that rc9 testing passed.
 
 Z8 is a local Android terminal and Linux development environment. It provides project workspaces, multiple terminal sessions and a preview for local development servers. It does not provide its own user accounts, AI model service, model-request proxy, shared provider accounts or included AI usage.
 
 Core access
-Z8 has no native login, single sign-on, subscription, payment or entitlement gate. Its terminal, projects, preview and tool installation/launch controls can be accessed without a Z8 account or purchase. Start the app, review the setup disclosures and choose Start setup to unpack the included base environment using available device storage. This base preparation does not require downloading the development toolset. Create or open a project and launch a terminal. The shell, project navigation and local preview can be reviewed without signing into an AI provider. The Start setup label was verified on the final candidate.
+Z8 has no native login, single sign-on, subscription, payment or entitlement gate. Its terminal, projects, preview and tool installation/launch controls can be accessed without a Z8 account or purchase. Start the app, review the setup disclosures and choose Start setup to unpack the included base environment using available device storage. This base preparation does not require downloading the development toolset. Create or open a project and launch a terminal. The shell, project navigation and local preview can be reviewed without signing into an AI provider. The Start setup label was verified on the final rc8 candidate.
 
 Suggested local workflow
 1. Prepare the local development environment and open a demo project.
@@ -20,7 +22,7 @@ Account-free access does not mean no data is transmitted. Optional clients and s
 Executable delivery
 The application includes the Android host runtime, PRoot loader and a Linux filesystem. The base image is included. User-selected tool installation downloads additional distribution packages, Node.js, or official CLI binaries. Optional daily checks retrieve public version metadata for Codex, Claude Code and the Node.js 24 maintenance line at most once per 24 hours when Z8 is visible; they do not install code. Check now is an explicit one-time metadata request. These include native ARM64 code executed under PRoot using the Android kernel and app UID. PRoot is not a separate-kernel virtual machine or a security boundary between projects. The app does not download APK or DEX self-updates. Users and third-party tools can download or update additional Linux executables. This description does not assert that these flows qualify for a Google Play execution-policy exception.
 
-Foreground services — rc8 implementation and recorded scope
+Foreground services — unchanged workflows, rc8 recorded scope
 Interactive terminals use TermuxService with specialUse while an actual interactive PTY is running or its requested shutdown is being verified. The user creates a terminal and starts work; commands and child processes continue when switching apps, with a dedicated terminal notification. Delay would make interactive command execution unusable, and interruption can terminate a running command or local server. Stopping terminal work ends its sessions; reopening does not silently replay commands.
 
 Finite environment preparation, selected tool installation and confirmed whole-project deletion use the separate Z8PreparationService with dataSync. The user starts setup, creates a project that needs preparation, confirms an install/update, or confirms deletion of a selected project. Work consists of local extraction/copying/file processing or explicit package download, verification and setup. Progress and a Stop tasks action appear in a separate notification. Deferred work postpones the user's requested operation; interruption stops active and queued finite jobs and requires explicit retry. Android timeout and Stop tasks do not stop unrelated interactive terminals. The finite-work service stops when no jobs remain. Android's Active apps Stop ends the whole app, which is a separate control.
@@ -29,8 +31,8 @@ Deletion removes the selected project's source files, HOME and environment. Befo
 
 The service types are not enabled together for every operation: each service runs only for its own active work. If both an interactive terminal and preparation are active, both may have separate notifications. No boot-triggered service or scheduled background tool updater is used. The reviewer page is https://devsigner9920.github.io/z8/review.html. The four rc8 recordings below are from the exact final candidate; older rc6 videos remain historical evidence in their original release and are not relabeled. Service-type eligibility remains subject to ordinary Play review.
 
-Current recordings and limits
-All four are original silent Android screen recordings. The final-candidate APK SHA-256 is 0634cdd49f1c4c4ed64a63e6352327090618c16767bb0d721aed3584040f7395. Recording lengths are approximate and are not performance guarantees. These materials do not assert an overall device, provider authentication or Play approval result.
+Recordings and limits — rc8, not rc9
+All four are original silent Android screen recordings. The recorded rc8 candidate APK SHA-256 is 0634cdd49f1c4c4ed64a63e6352327090618c16767bb0d721aed3584040f7395. Recording lengths are approximate and are not performance guarantees. These materials do not assert an overall device, provider authentication or Play approval result.
 
 1. Included setup, about 27 seconds: the actual Start setup action on a fresh installation, offline bundled-environment preparation and natural completion. No cancellation or retry is shown.
 https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/foreground-service-setup-0.1.0-rc8.mp4
@@ -45,9 +47,10 @@ https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/foreground-serv
 https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/foreground-service-deletion-0.1.0-rc8.mp4
 
 Source and evidence
-Matching rc8 corresponding-source ZIP: https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/z8-source.zip
-Release evidence and checksums: https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc8
-The source snapshot is immutable commit b180705dc91a321674d697bea6ae9f6cfa95f501. These later reviewer captions are supplemental documentation and do not change or rebuild that source archive. The release materials do not mean an installable app has been approved or published on Google Play.
+Prepared rc9 corresponding-source location (publication pending): https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc9/z8-source.zip
+Published rc8 source for the recordings: https://github.com/devsigner9920/z8/releases/download/v0.1.0-rc8/z8-source.zip
+Recorded rc8 release evidence and checksums: https://github.com/devsigner9920/z8/releases/tag/v0.1.0-rc8
+The rc8 source snapshot remains immutable commit b180705dc91a321674d697bea6ae9f6cfa95f501. These later reviewer captions do not change or rebuild it, and its QA is not relabeled as rc9. The release materials do not establish public Play Store availability or approval.
 
 Contact
 Romi Ethsy

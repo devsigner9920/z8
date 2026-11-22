@@ -48,6 +48,16 @@ class PreparationContracts(unittest.TestCase):
         self.assertNotIn("termux-bootstrap-zip.S", self.read("app/src/main/cpp/Android.mk"))
         self.assertIn("Java_com_termux_app_TermuxInstaller_getZip", self.read("app/src/main/cpp/termux-bootstrap.c"))
 
+    def test_generated_app_does_not_link_or_invoke_art_bypass(self):
+        self.assertNotIn('org.lsposed.hiddenapibypass', self.read('termux-shared/build.gradle'))
+        for source in (self.tree / 'termux-shared/src/main/java').rglob('*.java'):
+            text = source.read_text()
+            self.assertNotIn('org.lsposed.hiddenapibypass', text, str(source))
+            self.assertNotIn('HiddenApiBypass.addHiddenApiExemptions', text, str(source))
+            self.assertNotIn('ReflectionUtils.bypassHiddenAPIReflectionRestrictions();', text, str(source))
+        self.assertNotIn('ENV_TERMUX_APP__SE_INFO,', self.read(
+            'termux-shared/src/main/java/com/termux/shared/termux/shell/command/environment/TermuxAppShellEnvironment.java'))
+
     def test_application_identity_does_not_rename_java_or_jni(self):
         gradle = self.read("app/build.gradle")
         self.assertIn('applicationId "dev.devsigner.z8"', gradle)

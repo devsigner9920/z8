@@ -38,6 +38,27 @@ No final review submission has been made, and closed testing has not started.
 The maintainer-only internal track does not count as the required closed test
 with 12 continuously opted-in testers.
 
+### Closed Alpha quick check — November 22, 2026
+
+The closed Alpha release was prepared for South Korea with the maintainer as
+the only tester. Google's quick check of rc8 (version code 9) flagged
+`org.lsposed.hiddenapibypass:hiddenapibypass` for unsupported API use and ART
+compatibility/crash risk. The warning was not ignored or bypassed, and the
+release has not been submitted for review. Remediation is in progress; no rc9
+validation or approval is claimed. Android's official
+[ART internal changes guidance](https://developer.android.com/about/versions/16/behavior-changes-all#art-changes)
+explains that dependencies on ART internals can break on Android 16 and earlier
+versions receiving ART system updates.
+
+The prepared remediation uses **0.1.0-rc9, version code 10**. It removes the
+HiddenApiBypass dependency, retains public PackageManager UID-name lookup, and
+omits unsupported optional diagnostics. Native UI and foreground-service
+workflows are unchanged by this fix. Final source publication, candidate
+build/binding checks, emulator validation and the next Console quick check are
+pending. **rc9 physical-device testing is NOT_TESTED** because the user's device
+is unavailable. Existing rc8 videos remain explicitly labeled rc8; they are
+workflow demonstrations, not evidence that the new candidate passed.
+
 AI labels describe the submitted artwork, not a declaration that Z8 operates
 an AI model service. IARC ratings and the intended audience are distinct.
 The App access assessment concerns Z8's terminal, project, installation and

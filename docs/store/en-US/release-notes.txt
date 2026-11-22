@@ -1,4 +1,4 @@
-Start with the included terminal and install development tools when needed.
-Preparation and download work now runs separately from interactive terminals, with scoped timeout and stop handling.
-Review external-client data, terms and licenses before use.
+Removed a library that relied on unsupported Android runtime internals.
+User-name lookup uses only the public PackageManager API; unsupported optional diagnostics are omitted.
+Terminal, project tools and foreground-service workflows are unchanged.
 English is the default, with Korean available in Settings.
