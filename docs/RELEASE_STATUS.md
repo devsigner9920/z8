@@ -2,7 +2,64 @@
 
 Documentation: [English](../README.md) | [한국어](../README.ko.md)
 
-As of November 15, 2026, Z8 is a development project that has not reached a stable app release or Play Store launch. Source publication and app submission or approval are separate procedures. This document is a public summary of validation, not a compatibility guarantee for every build from current sources or every device.
+As of November 22, 2026, Z8 is available on a maintainer-only Play internal test
+track. It has not reached a stable release or public Play Store launch. Source
+publication, internal testing and production approval are separate results.
+This document is a public summary of validation and recorded Console progress,
+not a compatibility guarantee for every build from current sources or device.
+
+## Play Console progress — November 22, 2026
+
+The Z8 app was created with English (United States) as its default language,
+free pricing and package `dev.devsigner.z8`. The existing signed rc8 AAB,
+version code **9**, was uploaded and its **internal test track is active for
+the maintainer only**. This is not the closed test with 12 testers, a production
+submission or a completed production review. The signed file's SHA-256 remains
+`8cfe4b8a3f629939678c1a50ef2a4f5b5058236d95d7eadef494110cf914dc1e`;
+this Console activity does not rebuild or replace the rc8 source/QA artifacts.
+No installable binary has been added to the public GitHub source release.
+
+| Console item | Recorded state |
+| --- | --- |
+| English store listing | Title, short/full descriptions, icon, feature graphic and five actual screenshots saved and ready for review; not a published store listing |
+| Category and public contact | Tools category, support email `ethsy2462@gmail.com` and website https://devsigner9920.github.io/z8/ saved; Console confirms those settings published, without publishing the store listing |
+| AI asset labels | Applied to the icon, feature graphic and screenshots `01-theme`, `03-optional-tools`, `04-local-preview` and `05-multiple-terminals`, which contain the maintainer-confirmed AI-created artwork; `02-included-terminal` does not contain that artwork and was not labeled for it |
+| Privacy policy | Public privacy URL saved: https://devsigner9920.github.io/z8/privacy.html |
+| Other declarations | Existing trader status Yes; no ads, no Advertising ID use, not a government app, no financial features and no health features recorded |
+| Content rating | IARC questionnaire saved; returned South Korea 3+, ESRB Everyone and PEGI 3 ratings |
+| Foreground services | `dataSync` download/local-processing and `specialUse` interactive-terminal declarations saved with matching rc8 demonstration links; awaiting review |
+| App access | Saved: no restricted native Z8 functionality. Native-code review confirmed no Z8 login, SSO, subscription, payment or entitlement gate; external provider service requirements remain separate as explained below |
+| Target audience | Saved: ages 13–15, 16–17 and 18+, as chosen by the maintainer |
+| Data safety | All nine data types and their purposes completed, with the preview checked against the worksheet; final save confirmed. Console directs the maintainer to Publishing overview to send the changes for review |
+
+All required app-setup items are now complete: the refreshed dashboard no longer
+shows the incomplete setup checklist, and closed-testing tasks are unlocked.
+No final review submission has been made, and closed testing has not started.
+The maintainer-only internal track does not count as the required closed test
+with 12 continuously opted-in testers.
+
+AI labels describe the submitted artwork, not a declaration that Z8 operates
+an AI model service. IARC ratings and the intended audience are distinct.
+The App access assessment concerns Z8's terminal, project, installation and
+launch functionality. Its native controls check environment readiness,
+installation state and active/deletion work, without requiring a Z8 account
+or purchase. Separately downloaded clients handle authentication to their own
+external services. Those providers' account, eligibility and subscription
+requirements remain disclosed; the assessment does not grant access to their
+paid services. No provider account was shared and no unsupported full-access
+credentials assertion was accepted.
+See the [review instructions](store/review-notes.txt),
+[Data safety worksheet](store/play-console-data-safety.md) and
+[submission checklist](store/submission-checklist.md) for prepared materials.
+Their earlier preparation states do not override this dated Console update.
+
+The authenticated Claude workload remains explicitly deferred and unverified.
+The existing support-mail assessment and distribution-policy review limitations
+also remain; Console saves and internal-track activation do not establish legal
+certainty or Google approval of those matters. No private Console identifiers,
+reviewer credentials or upload-key material are included here.
+
+## November 15 review and preparation record
 
 The [November 15 policy and license review](compliance/2026-11-15/README.md)
 is the current review entry point. Its findings supplement the immutable rc6
@@ -117,9 +174,10 @@ Signature/certificate, bundle validity and unchanged payload were verified;
 the original unsigned candidate and exact incomplete QA/source evidence were
 retained. Its SHA-256 is
 `8cfe4b8a3f629939678c1a50ef2a4f5b5058236d95d7eadef494110cf914dc1e`.
-This file is not published or uploaded. `productionReady=false` and
-`readyForConsoleUpload=false` remain explicit: signing does not complete the
-untested provider case, operator decisions or Console requirements. Upload-key
+At that November 15 checkpoint, this file was not published or uploaded. The
+subsequent internal-test upload is recorded above. The historical record retains
+`productionReady=false` and `readyForConsoleUpload=false`: signing alone did not
+complete the untested provider case, operator decisions or Console requirements. Upload-key
 registration and an external backup were not verified when that record was
 created. The subsequent backup completion above supersedes only the operational
 backup item; it does not alter the signed candidate or historical evidence. See
@@ -143,10 +201,11 @@ not been established as resolving that gap. Supported optional clients use the
 user's own accounts and subscriptions. No authenticated Claude task has been
 performed, and no provider purchase was made.
 
-Console identity verification remains in progress, phone verification awaits
-identity approval, and **Create app was disabled** at the recorded read-only
-check. The app has **not been submitted**. Actual Console declarations, Play
-track/pre-launch checks and the applicable personal-account closed test remain.
+At the November 15 read-only check, Console identity verification was in
+progress, phone verification awaited identity approval, and **Create app was
+disabled**. No app had been submitted then. The November 22 update above records
+the later app creation and internal-test upload; production declarations,
+pre-launch checks and the applicable personal-account closed test remain.
 Native Linux-download policy treatment remains a normal Play review question;
 source/QA success does not establish a policy exemption or legal-risk guarantee.
 

@@ -36,7 +36,9 @@
     <li>Add another terminal, switch between sessions, or start a local development server and open its localhost address in the preview.</li>
     <li>Use Settings to read the privacy, data deletion, environment and open-source notices.</li>
   </ol>
-  <p>These core functions require no Z8 or AI-provider login. Optional official CLI clients require the user's own provider authentication and any applicable subscription or usage fees. The videos below do not demonstrate provider sign-in or a model request.</p>
+  <p>Z8 has no native login, single sign-on, subscription, payment or entitlement gate. Its terminal, projects, preview and tool installation/launch controls can be accessed without a Z8 account or purchase. The local review steps above require no AI-provider login.</p>
+  <p>Users choose whether to download official CLI clients such as Codex and Claude Code. Z8 can install and launch them without a Z8 account; those clients handle authentication to their own external providers. Model-service use requires the user's own eligible provider account and any applicable subscription or usage fees. This does not grant free or unrestricted third-party service access. No shared provider account or reviewer credentials are supplied. Authenticated Claude workload testing remains deferred and unverified; the videos below do not demonstrate provider sign-in or a model request.</p>
+  <p>Account-free access does not mean no data is transmitted. The <a href="privacy.html">privacy policy</a> describes optional client and diagnostic data flows separately from app access.</p>
 
   <h2>Current foreground-service behavior</h2>
   <p>Interactive terminal sessions use a dedicated special-use foreground service. Finite environment preparation, selected tool installation and project-file deletion use a separate data-sync service. Each task starts from a visible user action. The two service types are not enabled together for every operation.</p>
